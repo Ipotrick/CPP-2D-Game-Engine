@@ -30,12 +30,14 @@
     <ClInclude Include="src\Timing.h" />
     <ClInclude Include="src\vec3.h" />
     <ClInclude Include="src\Window.h" />
+    <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Spiel.cpp" />
+    <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

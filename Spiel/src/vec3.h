@@ -1,36 +1,9 @@
-//=============================================================================
-//                                                                            
-//   Exercise code for the lecture
-//   "Introduction to Computer Graphics"
-//   by Prof. Dr. Mario Botsch, Bielefeld University
-//
-//   Copyright (C) Computer Graphics Group, Bielefeld University.
-//                                                                            
-//=============================================================================
-
-#ifndef VEC3_H
-#define VEC3_H
-
-//== INCLUDES =================================================================
-
+#pragma once
 #include <iostream>
 #include <assert.h>
 #include <math.h>
 #include <algorithm>
 
-
-//== CLASS DEFINITION =========================================================
-
-
-/// \file vec3.h Implements the vector class and its mathematical operations.
-
-
-/// \class vec3 vec3.h
-/// This class implements a simple 3D vector, that we use to represent
-/// 3D points and 3D color. You can access the individual components either by
-/// x,y,z or by r,g,b. The vec3 class provides all commonly used mathematical
-/// operations.
-/// \sa vec3.h
 class vec3
 {
 private:

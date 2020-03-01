@@ -48,6 +48,9 @@
     <ClInclude Include="src\Collidable.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\World.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -60,6 +63,9 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\Spiel.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\World.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

@@ -9,8 +9,14 @@ public:
 	vec2 scale;
 	vec3 color;
 
-	Drawable(): color(0.2,0.2,0.2)
+	Drawable():
+		Basis{},
+		color(0.2f,0.2f,0.2f)
 	{
 		
+	}
+
+	Drawable getDrawable() {
+		return *this;
 	}
 };

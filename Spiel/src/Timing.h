@@ -1,5 +1,4 @@
-#ifndef _TIMING_H_
-#define _TIMING_H_
+#pragma once
 
 #include <chrono>
 #include <iostream>
@@ -7,7 +6,7 @@
 #include <sstream>
 #include <thread>
 
-double micsecToDouble(std::chrono::microseconds mics) {
+inline double micsecToDouble(std::chrono::microseconds mics) {
 	return mics.count() * 0.000001;
 }
 
@@ -112,5 +111,3 @@ protected:
 	Unit waitingTime;
 	bool was_wait_called;
 };
-
-#endif

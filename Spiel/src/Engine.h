@@ -1,13 +1,17 @@
 #pragma once
 
 #include <chrono>
+#include <iostream>
+#include <sstream>
 
 #include "Timing.h"
 #include "Window.h"
 #include "Camera.h"
 #include "Physics.h"
-
 #include "Entity.h"
+#include "World.h"
+
+#include "Renderer.h"
 
 class Engine
 {
@@ -18,43 +22,57 @@ public:
 	virtual void run() final;
 
 	virtual void create() = 0;
-	virtual void update() = 0;
+	virtual void update(World world, double deltaTime) = 0;
 	virtual void destroy() = 0;
+
+	virtual void physicsUpdate(World world, double deltaTime) final;
 
 					/*-- utility --*/
 	/* returns time difference to last physics dispatch*/
-	double getLastDTime() { return last_dTime; }
+	double getDeltaTime() { return deltaTime; }
 	/* returns time it took to process the last update task*/
-	double getLastUpdateTime() { return last_updateTime; }
+	double getUpdateTime() { return updateTime; }
 	/* returns time it took to process the last physics task */
-	double getLastPhysicsTime() { return last_physicsTime; }
+	double getPhysicsTime() { return physicsTime; }
 	/* returns time it took to render */
-	double getLastRenderTime() { return last_renderTime; }
+	double getRenderTime() { return renderTime; }
 	/* returns the number of past iterations */
 	uint32_t getIteration() { return iteration; }
-
-	/* returns printable performance overview */
-	std::string getPerfInfo(uint32_t grade);
+	/*
+		detail:
+		0: deltaTime, ticks/s
+		1: deltaTime, ticks/s, renderTime
+	*/
+	std::string getPerfInfo(int detail);
 
 public:
+	World world;
 	Physics physics;
-	Window window;
 	Camera camera;
+
+	std::shared_ptr<Window> window;
+
+	std::chrono::microseconds minimunLoopTime;
+private:
+	bool running;
+	uint32_t iteration;
+
+	//RenderBuffer renderBufferA;
+
+	std::chrono::microseconds new_deltaTime;
+	double deltaTime;
+	std::chrono::microseconds new_updateTime;
+	double updateTime;
+	std::chrono::microseconds new_physicsTime;
+	double physicsTime;
+	std::chrono::microseconds new_renderTime;
+	double renderTime;
+
+	std::shared_ptr<RendererSharedData> sharedRenderData;
+	std::thread renderThread;
+	RenderBuffer renderBufferA;
 
 private:
 	void commitTimeMessurements();
-
-	bool running;
-
-	std::chrono::microseconds dTime;
-	double last_dTime;
-	std::chrono::microseconds updateTime;
-	double last_updateTime;
-	std::chrono::microseconds physicsTime;
-	double last_physicsTime;
-	std::chrono::microseconds renderTime;
-	double last_renderTime;
-
-	uint32_t iteration;
 };
 

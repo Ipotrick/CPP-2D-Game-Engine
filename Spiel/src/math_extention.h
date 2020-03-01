@@ -180,13 +180,13 @@ inline const FLOAT distance(const vec2& v0, const vec2& v1)
 /// reflect vector \c v at normal \c n
 inline const vec2 reflect(const vec2& v, const vec2& n)
 {
-	return v - (2.0 * dot(n, v)) * n;
+	return v - (2.0f * dot(n, v)) * n;
 }
 
 /// mirrors vector \c v at normal \c n
 inline const vec2 mirror(const vec2& v, const vec2& n)
 {
-	return (2.0 * dot(n, v)) * n - v;
+	return (2.0f * dot(n, v)) * n - v;
 }
 
 /// read the space-separated components of a vector from a stream
@@ -396,13 +396,13 @@ inline const vec3 cross(const vec3& v0, const vec3& v1)
 /// reflect vector \c v at normal \c n
 inline const vec3 reflect(const vec3& v, const vec3& n)
 {
-	return v - (2.0 * dot(n, v)) * n;
+	return v - (2.0f * dot(n, v)) * n;
 }
 
 /// mirrors vector \c v at normal \c n
 inline const vec3 mirror(const vec3& v, const vec3& n)
 {
-	return (2.0 * dot(n, v)) * n - v;
+	return (2.0f * dot(n, v)) * n - v;
 }
 
 /// read the space-separated components of a vector from a stream
