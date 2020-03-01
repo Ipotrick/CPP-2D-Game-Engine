@@ -9,7 +9,7 @@ class Collidable : virtual public Basis {
 		RECTANGLE
 	};
 protected:
-	static int nextId;
+	inline static int nextId = 0;
 	int id;
 	bool dynamic;
 public:
@@ -26,8 +26,6 @@ public:
 		position = vec3(pos_);
 		rotation = 0;
 	}
-
-	static void initializeId() { nextId = 0; }
 
 	Form hitboxForm;
 	vec2 hitboxSize;

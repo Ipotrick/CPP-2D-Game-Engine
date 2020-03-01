@@ -5,7 +5,6 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	window(windowName_, windowWidth_, windowHeight_),
 	iteration{ 0 }
 {
-	Collidable::initializeId();
 }
 
 Engine::~Engine() {

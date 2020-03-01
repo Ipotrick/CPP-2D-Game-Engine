@@ -10,6 +10,7 @@ ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
 FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
 FPS_BROWSER_USER_PROFILE_STRING = Default
+FugueRepository = C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\TEAM TOOLS\STATIC ANALYSIS TOOLS\FxCop\Repository
 HOMEDRIVE = C:
 HOMEPATH = \Users\Patrick
 IntelliJ IDEA Community Edition = C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;
@@ -21,7 +22,7 @@ NUMBER_OF_PROCESSORS = 6
 OneDrive = C:\Users\Patrick\OneDrive
 OneDriveConsumer = C:\Users\Patrick\OneDrive
 OS = Windows_NT
-Path = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\mingw64\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JDK11\bin;C:\Program Files\Maven\bin;;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;
+Path = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\mingw64\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JDK11\bin;C:\Program Files\Maven\bin;;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 PkgDefApplicationConfigFile = C:\Users\Patrick\AppData\Local\Microsoft\VisualStudio\16.0_2d768764\devenv.exe.config
 PROCESSOR_ARCHITECTURE = x86
@@ -57,9 +58,11 @@ VSSKUEDITION = Community
 windir = C:\WINDOWS
 
   Engine.cpp
-  Physics.cpp
-  Renderer.cpp
-  Spiel.cpp
-  Code wird generiert...
-Engine.obj : error LNK2001: Nicht aufgel÷stes externes Symbol ""public: virtual void __thiscall Engine::end(void)" (?end@Engine@@UAEXXZ)".
-C:\dev\Projekte\SpielMappe\Debug\Spiel.exe : fatal error LNK1120: 1 nicht aufgel÷ste Externe
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\math_extention.h(183,18): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\math_extention.h(189,14): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\math_extention.h(399,18): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\math_extention.h(405,14): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Collidable.h(12,20): error C7525:  Inlinevariablen erfordern mindestens "/std:c++17".
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Collidable.h(12,30): error C2864:  "Collidable::nextId": Eine statische Datenmember mit einem Initialisierer in der Klasse muss einen nicht flüchtigen konstanten integralen Typ aufweisen oder als "inline" spezifiziert sein.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Collidable.h(12,30): message :  Typ ist "int"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Drawable.h(13,1): warning C4305:  "Argument": Verkürzung von "double" in "float"

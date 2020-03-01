@@ -1,0 +1,296 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>glfw</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\WriteBasicConfigVersionFile.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeRCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeSystem.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\cmake_uninstall.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3.pc.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3Config.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\WriteBasicConfigVersionFile.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeRCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeSystem.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\cmake_uninstall.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3.pc.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3Config.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\WriteBasicConfigVersionFile.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeRCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeSystem.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\cmake_uninstall.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3.pc.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3Config.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-3.16\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeDependentOption.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakePackageConfigHelpers.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindDoxygen.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.16\Modules\WriteBasicConfigVersionFile.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeRCCompiler.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\3.16.4\CMakeSystem.cmake;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\cmake_uninstall.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3.pc.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw3Config.cmake.in;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw_config.h.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\ZERO_CHECK.vcxproj">
+      <Project>{44F0AF5F-F9F4-36AD-B95E-5F979A4F5990}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\boing.vcxproj">
+      <Project>{0ED71D3D-CB40-3B50-BF25-A4DF1746C006}</Project>
+      <Name>boing</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\clipboard.vcxproj">
+      <Project>{CA7692DE-D2E9-3A09-BDEF-BB0BF5E6424B}</Project>
+      <Name>clipboard</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\cursor.vcxproj">
+      <Project>{8046296F-5BF3-364C-B537-354B9D85404B}</Project>
+      <Name>cursor</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\empty.vcxproj">
+      <Project>{6E54D792-9B10-3047-9779-95E158BCC169}</Project>
+      <Name>empty</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\events.vcxproj">
+      <Project>{86E6C2CE-A6DC-3889-B73C-310B625B23E9}</Project>
+      <Name>events</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\gamma.vcxproj">
+      <Project>{7BD7ADEB-00F3-3E52-AE0A-965596DDD1BD}</Project>
+      <Name>gamma</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\gears.vcxproj">
+      <Project>{FA9D91B9-1E68-30CF-A99F-30EF351DEC06}</Project>
+      <Name>gears</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw.vcxproj">
+      <Project>{91E3775F-2EAA-3B04-B516-A2C93460611C}</Project>
+      <Name>glfw</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\glfwinfo.vcxproj">
+      <Project>{76ABC007-5DC9-391B-B673-2FBF9996BFE9}</Project>
+      <Name>glfwinfo</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\heightmap.vcxproj">
+      <Project>{C3AB4264-6B02-3E5E-B6EF-A12ED7F35BC3}</Project>
+      <Name>heightmap</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\icon.vcxproj">
+      <Project>{45A3A9C6-F400-33A9-8FCD-548D8179463E}</Project>
+      <Name>icon</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\iconify.vcxproj">
+      <Project>{6084C0A6-2D5E-327E-B291-6E5CED466D97}</Project>
+      <Name>iconify</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\inputlag.vcxproj">
+      <Project>{1B1E3EC2-ECB3-3C6D-A0AE-275A218E8B50}</Project>
+      <Name>inputlag</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\joysticks.vcxproj">
+      <Project>{C75A99B9-BD9F-39DC-80AE-D8A4322AC860}</Project>
+      <Name>joysticks</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\monitors.vcxproj">
+      <Project>{74D1BECC-B050-337A-AB2D-D0EF00765AC4}</Project>
+      <Name>monitors</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\msaa.vcxproj">
+      <Project>{FCA14655-D7D3-301D-8C67-F8B4F69E5FB5}</Project>
+      <Name>msaa</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\offscreen.vcxproj">
+      <Project>{3E9307D1-12EB-35BF-8C06-FAA9F31B3307}</Project>
+      <Name>offscreen</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\opacity.vcxproj">
+      <Project>{45C178A6-1554-305A-8DCC-E74F5E198AD9}</Project>
+      <Name>opacity</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\particles.vcxproj">
+      <Project>{D96B9667-F6D9-3233-BDF6-F95F1F3C89A5}</Project>
+      <Name>particles</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\reopen.vcxproj">
+      <Project>{C10945E9-3C6D-3881-83A2-C9D82D8841C1}</Project>
+      <Name>reopen</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\sharing.vcxproj">
+      <Project>{8D175876-A004-32EA-A432-68880CF10489}</Project>
+      <Name>sharing</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\simple.vcxproj">
+      <Project>{3CA6968F-9045-38BA-A81F-810F38F79E51}</Project>
+      <Name>simple</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\splitview.vcxproj">
+      <Project>{4305C878-0F6A-33D9-8AB7-928649B19A0E}</Project>
+      <Name>splitview</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\tearing.vcxproj">
+      <Project>{6EBBBC7F-DA07-3BFC-9918-6B6E05EB7806}</Project>
+      <Name>tearing</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\threads.vcxproj">
+      <Project>{5D1A69AB-A3A9-3D95-A225-790E0614146B}</Project>
+      <Name>threads</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\timeout.vcxproj">
+      <Project>{11E4F319-9B16-32F8-95C7-0DBDE93FFEC5}</Project>
+      <Name>timeout</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\title.vcxproj">
+      <Project>{3F3EACE3-B477-36ED-A2AC-C904A2E8836C}</Project>
+      <Name>title</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\triangle-vulkan.vcxproj">
+      <Project>{A99DCFC4-ADD4-39D9-9F33-407D00C92691}</Project>
+      <Name>triangle-vulkan</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\examples\wave.vcxproj">
+      <Project>{0BBB0586-DB93-3478-B4EB-D45C4B090887}</Project>
+      <Name>wave</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\windows.vcxproj">
+      <Project>{FAF3F681-E27D-33FC-9221-313D5F8F7AD0}</Project>
+      <Name>windows</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
