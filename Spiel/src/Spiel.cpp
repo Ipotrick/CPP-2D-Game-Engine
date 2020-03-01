@@ -4,7 +4,7 @@
 
 class Spiel : public Engine {
 public:
-	Spiel() : Engine("Test",1,1) {}
+	Spiel() : Engine("Test", 1000, 1000) {}
 	void update(World world, double dTime) override {
 		std::cout << getPerfInfo(1) << std::endl << "iteration: " << getIteration() << std::endl;
 	}
@@ -12,8 +12,7 @@ public:
 	void destroy() override {}
 };
 
-int main()
-{
+int main() {
 	Spiel spiel;
 	spiel.run();
 }

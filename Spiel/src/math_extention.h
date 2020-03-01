@@ -38,7 +38,6 @@ public:
 		return data_[_i];
 	}
 
-
 	/// multiply this vector by a scalar \c s
 	vec2& operator*=(const FLOAT s)
 	{

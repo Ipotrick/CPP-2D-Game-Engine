@@ -3,7 +3,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 1'0000 },//10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 100'0000 },//10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	updateTime{ 0.0 },
 	physicsTime{ 0.0 },
@@ -17,10 +17,14 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	renderThread{ Renderer(window, sharedRenderData) },
 	renderBufferA{}
 {
+	renderThread.detach();
 }
 
 Engine::~Engine() {
-
+	{
+		std::lock_guard<std::mutex> l(sharedRenderData->mut);
+		sharedRenderData->run = false;
+	}
 }
 
 std::string Engine::getPerfInfo(int detail)
@@ -47,30 +51,31 @@ void Engine::commitTimeMessurements() {
 
 void Engine::run() {
 	create();
-
-	while (running) {
+	while (running && !glfwWindowShouldClose(window->glWindow)) {
 		Timer<> loopTimer(new_deltaTime);
 		Waiter<> loopWaiter(minimunLoopTime);
 		commitTimeMessurements();
+		glfwPollEvents();
+		sharedRenderData->cond.notify_one();	//wake up rendering thread
 
 		{
 			Timer<> t(new_updateTime);
 			update(world, getDeltaTime());
 		}
+
 		{
 			Timer<> t(new_physicsTime);
 			physicsUpdate(world, getDeltaTime());
 		}
 
-		renderBufferA.writeBuffer(world, camera);
-		{
+		renderBufferA.writeBuffer(world.getDrawableVec(), camera);
+		{	
 			std::unique_lock<std::mutex> switch_lock(sharedRenderData->mut);
-			sharedRenderData->cond.wait(switch_lock, [&]() { return sharedRenderData->ready == true; });
-			sharedRenderData->ready = false;
-			sharedRenderData->renderBufferB = renderBufferA;
-			new_renderTime = sharedRenderData->new_renderTime;
+			sharedRenderData->cond.wait(switch_lock, [&]() { return sharedRenderData->ready == true; });	//wait for rendering thread to finish
+			sharedRenderData->ready = false;																//reset renderers ready flag
+			sharedRenderData->renderBufferB = renderBufferA;												//push Drawables and camera
+			new_renderTime = sharedRenderData->new_renderTime;												//save render time
 		}
-		sharedRenderData->cond.notify_one();
 
 		iteration++;
 	}
