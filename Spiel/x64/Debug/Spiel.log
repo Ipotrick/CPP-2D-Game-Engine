@@ -5,6 +5,8 @@ APPDATA = C:\Users\Patrick\AppData\Roaming
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
+COMPLUS_InstallRoot = 
+COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -56,5 +58,5 @@ VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  Spiel.cpp
+  Renderer.cpp
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

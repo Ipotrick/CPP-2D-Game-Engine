@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Camera.h">
@@ -24,9 +27,6 @@
     <ClInclude Include="src\Engine.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\math_extention.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Physics.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -34,9 +34,6 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Timing.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vec3.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Window.h">
@@ -49,6 +46,9 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\World.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\glmath.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,5 +68,16 @@
     <ClCompile Include="src\World.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
+    <ClCompile Include="src\glmath.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\Basic.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\Basic.vert">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -3,7 +3,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 100'0000 },//10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10'000 },//10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	updateTime{ 0.0 },
 	physicsTime{ 0.0 },
@@ -33,6 +33,9 @@ std::string Engine::getPerfInfo(int detail)
 	ss << "deltaTime(s): " << getDeltaTime() << " ticks/s: " << (1 / getDeltaTime()) << ' ';
 	if (detail > 0) {
 		ss << "renderTime: " << getRenderTime();
+		if (detail > 1) {
+			ss << "updateTime: " << getUpdateTime() << " physicsTime: " << getPhysicsTime();
+		}
 	}
 	return ss.str();
 }
@@ -55,7 +58,6 @@ void Engine::run() {
 		Timer<> loopTimer(new_deltaTime);
 		Waiter<> loopWaiter(minimunLoopTime);
 		commitTimeMessurements();
-		glfwPollEvents();
 		sharedRenderData->cond.notify_one();	//wake up rendering thread
 
 		{
@@ -74,7 +76,10 @@ void Engine::run() {
 			sharedRenderData->cond.wait(switch_lock, [&]() { return sharedRenderData->ready == true; });	//wait for rendering thread to finish
 			sharedRenderData->ready = false;																//reset renderers ready flag
 			sharedRenderData->renderBufferB = renderBufferA;												//push Drawables and camera
-			new_renderTime = sharedRenderData->new_renderTime;												//save render time
+			new_renderTime = sharedRenderData->new_renderTime;	//save render time
+			if (sharedRenderData->run == false) {
+				running = false;
+			}
 		}
 
 		iteration++;
@@ -83,7 +88,7 @@ void Engine::run() {
 	destroy();
 }
 
-void Engine::physicsUpdate(World world, double deltaTime)
+void Engine::physicsUpdate(World& world, double deltaTime)
 {
 
 }

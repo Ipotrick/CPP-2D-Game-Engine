@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math_extention.h"
+#include "glmath.h"
 
 struct Basis {
 	/* x y world coordinates, z depth*/

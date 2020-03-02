@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math_extention.h"
+#include "glmath.h"
 #include "Basis.h"
 
 class Drawable : virtual public Basis {
@@ -11,7 +11,8 @@ public:
 
 	Drawable():
 		Basis{},
-		color(0.2f,0.2f,0.2f)
+		color(1.0f,0.2f,0.2f),
+		scale{1,1}
 	{
 		
 	}

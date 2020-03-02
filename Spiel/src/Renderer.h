@@ -3,6 +3,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+#include <fstream>
+#include <sstream>
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -13,6 +15,7 @@
 #include "Entity.h"
 #include "World.h"
 #include "Timing.h"
+#include "glmath.h"
 
 static unsigned int compileShader(unsigned int type_, const std::string source_) {
 	unsigned id = glCreateShader(type_);
@@ -53,7 +56,7 @@ static unsigned createShader(const std::string& vertexShader_, const std::string
 
 	return program;
 }
-
+/*
 static std::string vertexShader =
 "#version 410 core\n"
 "\n"
@@ -72,7 +75,7 @@ static std::string fragmentShader =
 "void main() \n"
 "{\n"
 "color = vec4(0.0, 1.0, 1.0, 0.5);\n"
-"}\n";
+"}\n";*/
 
 
 class RenderBuffer {
@@ -84,9 +87,8 @@ public:
 	void writeBuffer(std::vector<Drawable> drawables_, Camera camera_) {
 		drawables.clear();
 		drawables.reserve(drawables_.size());
-		int i = 0;
 		for (auto& el : drawables_) {
-			drawables.emplace_back(drawables_.at(i++));
+			drawables.emplace_back(el);
 		}
 		camera = camera_;
 	}
@@ -124,12 +126,16 @@ public:
 	}
 
 	void initiate();
-
 	void operator()();
+
+	std::string readShader(std::string path_);
 	
 private:
 	std::shared_ptr<Window> window;
 	std::shared_ptr<RendererSharedData> sharedData;
 	unsigned int shader;
+
+	const std::string vertexShaderPath = "shader/Basic.vert";
+	const std::string fragmentShaderPath = "shader/Basic.frag";
 };
 

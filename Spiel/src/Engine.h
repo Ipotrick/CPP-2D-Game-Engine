@@ -25,10 +25,10 @@ public:
 	virtual void run() final;
 
 	virtual void create() = 0;
-	virtual void update(World world, double deltaTime) = 0;
+	virtual void update(World& world, double deltaTime) = 0;
 	virtual void destroy() = 0;
 
-	virtual void physicsUpdate(World world, double deltaTime) final;
+	virtual void physicsUpdate(World& world, double deltaTime) final;
 
 					/*-- utility --*/
 	/* returns time difference to last physics dispatch*/

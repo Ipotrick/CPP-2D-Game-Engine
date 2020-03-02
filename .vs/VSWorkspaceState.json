@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\Spiel",
+    "\\Spiel\\shader",
     "\\Spiel\\src"
   ],
-  "SelectedNode": "\\Spiel\\src\\Physics.h",
+  "SelectedNode": "\\Spiel\\shader",
   "PreviewInSolutionExplorer": false
 }

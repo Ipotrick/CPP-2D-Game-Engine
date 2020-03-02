@@ -8,7 +8,7 @@
 
 class Window {
 public:
-	Window(std::string name_, uint32_t width_, uint32_t height_):
+	Window(std::string name_ = "", uint32_t width_ = 1, uint32_t height_ = 1):
 		mut{  },
 		name{ name_ },
 		height{ height_ },

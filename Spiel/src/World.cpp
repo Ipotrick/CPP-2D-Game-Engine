@@ -5,7 +5,7 @@ std::vector<Drawable> World::getDrawableVec()
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
 	for (auto& el : entities) {
-		res.emplace_back(el.getDrawable());
+		res.push_back(el.getDrawable());
 	}
 	return res;
 }

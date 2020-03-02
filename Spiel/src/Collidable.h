@@ -1,6 +1,7 @@
 #pragma once
 
-#include "math_extention.h"
+#include <algorithm>
+#include "glmath.h"
 #include "Basis.h"
 
 class Collidable : virtual public Basis {
