@@ -33,12 +33,17 @@ public:
 					/*-- utility --*/
 	/* returns time difference to last physics dispatch*/
 	double getDeltaTime() { return deltaTime; }
+	/* returns physics + update + bufferSwapTime */
+	double getMainTime() { return mainTime; }
 	/* returns time it took to process the last update task*/
 	double getUpdateTime() { return updateTime; }
 	/* returns time it took to process the last physics task */
 	double getPhysicsTime() { return physicsTime; }
 	/* returns time it took to render */
 	double getRenderTime() { return renderTime; }
+	/* returns time the main thread had to wait for the renderer thread */
+	double getMainSyncTime() { return mainSyncTime; }
+
 	/* returns the number of past iterations */
 	uint32_t getIteration() { return iteration; }
 	/*
@@ -56,6 +61,10 @@ public:
 	std::shared_ptr<Window> window;
 
 	std::chrono::microseconds minimunLoopTime;
+
+private:
+	void commitTimeMessurements();
+
 private:
 	bool running;
 	uint32_t iteration;
@@ -64,18 +73,25 @@ private:
 
 	std::chrono::microseconds new_deltaTime;
 	double deltaTime;
+	std::chrono::microseconds new_mainTime;
+	double mainTime;
 	std::chrono::microseconds new_updateTime;
 	double updateTime;
 	std::chrono::microseconds new_physicsTime;
 	double physicsTime;
+	std::chrono::microseconds new_mainSyncTime;
+	double mainSyncTime;
+	std::chrono::microseconds new_mainWaitTime;
+	double mainWaitTime;
+	std::chrono::microseconds new_renderBufferPushTime;
+	double renderBufferPushTime;
 	std::chrono::microseconds new_renderTime;
 	double renderTime;
-
+	std::chrono::microseconds new_renderSyncTime;
+	double renderSyncTime;
+	
 	std::shared_ptr<RendererSharedData> sharedRenderData;
 	std::thread renderThread;
 	RenderBuffer renderBufferA;
-
-private:
-	void commitTimeMessurements();
 };
 

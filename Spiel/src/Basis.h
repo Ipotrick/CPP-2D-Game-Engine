@@ -8,8 +8,19 @@ struct Basis {
 	/* in radiants 2pi = one rotation*/
 	float rotation;
 
-	Basis() : position{ 0.f,0.f,0.f }, rotation{ 0.f } {}
+	Basis() :
+		position{ vec3(0.0f, 0.0f, 0.0f) },
+		rotation{ 0.0f }
+	{
+		//std::cout << "Basis Constructor" << std::endl;
+		//std::cout << position << std::endl;
+	}
 
-	inline void setPos(vec3 pos_) { position = pos_; }
-	inline void setPos(vec2 pos_) { position[0] = pos_[0]; position[1] = pos_[1]; }
+	Basis(vec3 position_, float rotation_):
+		position{ position_ },
+		rotation{ rotation_ }
+	{
+		//std::cout << "Basis Constructor" << std::endl;
+		//std::cout << position << std::endl;
+	}
 };

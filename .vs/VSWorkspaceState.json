@@ -5,6 +5,6 @@
     "\\Spiel\\shader",
     "\\Spiel\\src"
   ],
-  "SelectedNode": "\\Spiel\\shader\\Basic.vert",
+  "SelectedNode": "\\Spiel\\src\\Collidable.h",
   "PreviewInSolutionExplorer": false
 }

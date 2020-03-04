@@ -64,7 +64,103 @@ protected:
 template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
 class Waiter {
 public:
-	Waiter(Unit waitingTime_)
+	enum class Type {
+		SLEEPY,
+		BUSY
+	};
+	Waiter(Unit waiting_time_, Type type_ = Type::SLEEPY, Unit* actual_waiting_time_ = nullptr)
+		: waitingTime{ waiting_time_ }, was_wait_called{ false }, actual_waiting_time{ actual_waiting_time_}, type{ type_ }
+	{
+		startTimePoint = Clock::now();
+	}
+
+	virtual void wait() {
+		if (type == Type::SLEEPY) {
+			actualWaitingStartTimePoint = Clock::now();
+			was_wait_called = true;
+			if ((startTimePoint + waitingTime) > Clock::now()) {
+				std::this_thread::sleep_until((startTimePoint + waitingTime));
+			}
+		}
+		else {
+			actualWaitingStartTimePoint = Clock::now();
+			if (!was_wait_called) {
+				while (Clock::now() < waitingTime + startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec*/);
+			}
+			was_wait_called = true;
+		}
+	}
+
+	~Waiter() {
+		if (!was_wait_called) {
+			wait();
+		}
+		if (actual_waiting_time != nullptr) {
+			*actual_waiting_time = std::chrono::duration_cast<Unit>(Clock::now() - actualWaitingStartTimePoint);
+		}
+	}
+
+protected:
+	std::chrono::time_point<Clock> startTimePoint;
+	std::chrono::time_point<Clock> actualWaitingStartTimePoint;
+	Type type;
+	Unit* actual_waiting_time;
+	Unit waitingTime;
+	bool was_wait_called;
+};
+
+/*
+
+template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
+class SleepyWaiter : _Waiter<Clock, Unit> {
+public:
+	SleepyWaiter(Unit waiting_time_, Unit* actual_waiting_time_) : _Waiter<Clock, Unit>(waiting_time_, actual_waiting_time_) {}
+	virtual void wait() {
+		_Waiter<Clock, Unit>::actualWaitingStartTimePoint = Clock::now();
+		_Waiter<Clock, Unit>::was_wait_called = true;
+		if ((_Waiter<Clock, Unit>::startTimePoint + _Waiter<Clock, Unit>::waitingTime) > Clock::now()) {
+			std::this_thread::sleep_until((_Waiter<Clock, Unit>::startTimePoint + _Waiter<Clock, Unit>::waitingTime));
+		}
+	}
+	~SleepyWaiter() {
+		if (!was_wait_called) {
+			wait();
+		}
+		if (actual_waiting_time != nullptr) {
+			*actual_waiting_time = std::chrono::duration_cast<Unit>(Clock::now() - actualWaitingStartTimePoint);
+		}
+	}
+};
+
+template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
+class BusyWaiter : _Waiter<Clock, Unit> {
+public:
+	BusyWaiter(Unit waiting_time_, Unit* actual_waiting_time_) : _Waiter<Clock, Unit>(waiting_time_, actual_waiting_time_) {}
+	virtual void wait() {
+		_Waiter<Clock, Unit>::actualWaitingStartTimePoint = Clock::now();
+		if (!_Waiter<Clock, Unit>::was_wait_called) {
+			while (Clock::now() < _Waiter<Clock, Unit>::waitingTime + _Waiter<Clock, Unit>::startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec);
+		}
+		_Waiter<Clock, Unit>::was_wait_called = true;
+	}
+	~BusyWaiter() {
+		if (!was_wait_called) {
+			wait();
+		}
+		if (actual_waiting_time != nullptr) {
+			*actual_waiting_time = std::chrono::duration_cast<Unit>(Clock::now() - actualWaitingStartTimePoint);
+		}
+	}
+};
+
+*/
+
+/*
+
+template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
+class SleepyWaiter {
+public:
+	SleepyWaiter(Unit waitingTime_)
 		: waitingTime{waitingTime_}, was_wait_called{false}
 	{
 		startTimePoint = Clock::now();
@@ -75,7 +171,7 @@ public:
 			std::this_thread::sleep_until((startTimePoint + waitingTime));
 		}
 	}
-	~Waiter() {
+	~SleepyWaiter() {
 		if (!was_wait_called) {
 			wait();
 		}
@@ -97,7 +193,7 @@ public:
 	void wait() {
 
 		if (!was_wait_called) {
-			while (Clock::now() < waitingTime + startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec*/);
+			while (Clock::now() < waitingTime + startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec);
 		}
 		was_wait_called = true;
 	}
@@ -111,3 +207,5 @@ protected:
 	Unit waitingTime;
 	bool was_wait_called;
 };
+
+*/

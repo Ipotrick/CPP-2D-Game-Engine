@@ -7,14 +7,24 @@ class Drawable : virtual public Basis {
 
 public:
 	vec2 scale;
-	vec3 color;
+	vec4 color;
 
 	Drawable():
 		Basis{},
-		color(1.0f,0.2f,0.2f),
-		scale{1,1}
+		scale{ 1, 1 },
+		color{ 1.0f,0.2f,0.2f, 1.0f }
 	{
-		
+		//std::cout << "Drawable Constructor" << std::endl;
+		//std::cout << position << std::endl;
+	}
+
+	Drawable(vec2 position_, float drawingPrio, vec2 scale_, vec4 color_, float rotation_ = 0.0f) :
+		Basis(vec3(position_.x, position_.y, drawingPrio), rotation_),
+		scale{ scale_ },
+		color{ color_ }
+	{
+		//std::cout << "Drawable Constructor" << std::endl;
+		//std::cout << position << std::endl;
 	}
 
 	Drawable getDrawable() {

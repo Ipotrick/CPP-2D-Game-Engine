@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -56,33 +57,9 @@ static unsigned createShader(const std::string& vertexShader_, const std::string
 
 	return program;
 }
-/*
-static std::string vertexShader =
-"#version 410 core\n"
-"\n"
-"layout(location = 0) in vec4 position;\n"
-"\n"
-"void main() \n"
-"{\n"
-"	gl_Position = position;\n"
-"}\n";
-
-static std::string fragmentShader =
-"#version 410 core\n"
-"\n"
-"layout(location = 0) out vec4 color;\n"
-"\n"
-"void main() \n"
-"{\n"
-"color = vec4(0.0, 1.0, 1.0, 0.5);\n"
-"}\n";*/
-
 
 class RenderBuffer {
 public:
-	RenderBuffer() {
-
-	}
 
 	void writeBuffer(std::vector<Drawable> drawables_, Camera camera_) {
 		drawables.clear();
@@ -102,13 +79,13 @@ struct RendererSharedData {
 		run{ true },
 		ready{ false },
 		new_renderTime{ 0 },
-		renderBufferB{  },
 		mut{  },
 		cond{  }
 	{}
-	/* DO NOT ACCESS THESE WHILE RENDER THREAD IS RUNNING FROM OTHER THREAD */
-	std::chrono::microseconds new_renderTime;
+	/* DO NOT ACCESS THESE, WHILE RENDER THREAD IS RUNNING, FROM OTHER THREAD */
 	RenderBuffer renderBufferB;
+	std::chrono::microseconds new_renderTime;
+	std::chrono::microseconds new_renderSyncTime;
 	bool run;
 	/* ONLY USE THERE WITH A MUTEX LOCK */
 	std::mutex mut;
@@ -119,22 +96,26 @@ struct RendererSharedData {
 class Renderer
 {
 public:
-	Renderer(std::shared_ptr<Window> window_, std::shared_ptr<RendererSharedData> sharedData_) :
-		window{window_},
-		sharedData{ sharedData_ }
+	Renderer(std::shared_ptr<RendererSharedData> sharedData_, std::shared_ptr<Window> window_) :
+		sharedData{ sharedData_ },
+		window{window_}
 	{
 	}
 
 	void initiate();
 	void operator()();
+	void end();
+	int initGLWindow();
+
 
 	std::string readShader(std::string path_);
 	
 private:
-	std::shared_ptr<Window> window;
 	std::shared_ptr<RendererSharedData> sharedData;
-	unsigned int shader;
+	GLFWwindow* glWindow;
+	std::shared_ptr<Window> window;
 
+	unsigned int shader;
 	const std::string vertexShaderPath = "shader/Basic.vert";
 	const std::string fragmentShaderPath = "shader/Basic.frag";
 };

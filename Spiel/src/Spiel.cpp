@@ -6,16 +6,27 @@ class Spiel : public Engine {
 public:
 	Spiel() : Engine("Test", 1000, 1000) {}
 
-	void update(World& world, double dTime) override {
-		std::cout << getPerfInfo(2) << std::endl << "iteration: " << getIteration() << std::endl;
-		world.entities.at(0).position.x = sin(getIteration() / 360.0) /2.0;
-		world.entities.at(0).position.y = cos(getIteration() / 360.0) /2.0;
-		world.entities.at(0).rotation = -(getIteration() / 3.14*0.5);
+	void create() override {
+		world.spawnEntity(Entity(Drawable(vec2(0.0, 1.0), 0.5, vec2(0.2, 0.2), vec4(0.4, 0.4, 0.6, 1.0)), Collidable(vec2(), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f)));
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				vec4 color = ((i+j)%2 == 0)? vec4(1.0,1.0,1.0,1.0) : vec4(0.0,0.0,0.0,1.0);
+				world.spawnEntity(Entity(Drawable(vec2(i, j), 0, vec2(1, 1), color), Collidable(vec2(), Collidable::Form::RECTANGLE, 1.0f, false, 1.0f)));
+			}
+		}
+		
 	}
 
-	void create() override {
-		world.spawnEntity(Entity(Drawable(), Collidable()));
-		world.entities.at(0).scale = (vec2(0.2, 0.2));
+	void update(World& world, double dTime) override {
+		std::cout << getPerfInfo(2) << std::endl << "iteration: " << getIteration() << std::endl;
+
+		for (auto& ent : world.entities) {
+			if (ent.isDynamic()) {
+				ent.position.x = sin((getIteration() + ent.getId()) / 360.0f) / 2.0f;
+				ent.position.y = cos((getIteration() + ent.getId()) / 360.0f) / 2.0f;
+				ent.rotation = -((getIteration() + ent.getId()) / 3.14f * 0.5f);
+			}
+		}
 	}
 
 	void destroy() override {}
