@@ -26,6 +26,7 @@
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\glmath.h" />
+    <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Timing.h" />

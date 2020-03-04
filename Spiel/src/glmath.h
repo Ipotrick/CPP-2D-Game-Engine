@@ -251,7 +251,15 @@ inline std::ostream& operator<<(std::ostream& os, const vec2& v)
 	os << '(' << v.x << ", " << v.y << ')';
 	return os;
 }
-//dwadagewgefgerrjztj#äögfgöü#äfeöfüwe#afdöwae#äü fvdeawöfäawesföwEÄFESÖF*'ÜESÖFE'AÜWSFÖSE'<ÜFÖSEA+üfse<öfüse<#föseüäfs<eöf#üäse<fklseöäflseüpfslpüäef
+
+inline vec2 rotate(vec2 const& vec_, float angle_) {
+	float ca = cosf(angle_ * ((float)M_PI / 180.0f));
+	float sa = sinf(angle_ * ((float)M_PI / 180.0f));
+	vec2 vec;
+	vec.x = ca * vec_.x - sa * vec_.y;
+	vec.y = sa * vec_.x + ca * vec_.y;
+	return vec;
+}
 
 
 /// \class vec3 glmath.h

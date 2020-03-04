@@ -2,38 +2,21 @@
 
 void Renderer::initiate()
 {
+	{
+		std::lock_guard<std::mutex> l(window->mut);
+		glfwMakeContextCurrent(window->glfwWindow);
+
+		if (glewInit() != GLEW_OK) {
+			glfwTerminate();
+		}
+	}
 	
-	int err = initGLWindow();
-	if (err != 0)	std::cerr << "error: terminated cause of error in window creation, error code: " << err << std::endl;
 
 	auto vertexShader = readShader(vertexShaderPath);
 	auto fragmentShader = readShader(fragmentShaderPath);
 
 	shader = createShader(vertexShader, fragmentShader);
 	glUseProgram(shader);
-}
-
-int Renderer::initGLWindow() {
-	std::lock_guard<std::mutex> l(window->mut);
-	if (!glfwInit()) {
-		return -1;
-	}
-	else {
-		glWindow = glfwCreateWindow(window->width, window->height, window->name.c_str(), nullptr, nullptr);
-		if (!glWindow) {
-			glfwTerminate();
-			return -2;
-		}
-		else {
-			glfwMakeContextCurrent(glWindow);
-
-			if (glewInit() != GLEW_OK) {
-				glfwTerminate();
-				return -3;
-			}
-		}
-	}
-	return 0;
 }
 
 void Renderer::operator()()
@@ -47,27 +30,25 @@ void Renderer::operator()()
 		-0.5,-0.5,
 		0.5,-0.5
 	};
-
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	auto& drawables = sharedData->renderBufferB.drawables;
 	auto& camera = sharedData->renderBufferB.camera;
-	while (sharedData->run && !glfwWindowShouldClose(glWindow)) {
-		{	/* process non render inputs */
-			{	/* window */
-				std::lock_guard<std::mutex> l(window->mut);
-				glfwSetWindowSize(glWindow, window->width, window->height);
-				glViewport(0, 0, window->width, window->height);
-			}
+	while (sharedData->run) {
+		{	/* wait for main */
+			Timer<> t(sharedData->new_renderSyncTime);
+			std::unique_lock<std::mutex> switch_lock(sharedData->mut);
+			sharedData->ready = true;
+			sharedData->cond.notify_one();
+			sharedData->cond.wait(switch_lock, [&]() { return sharedData->ready == false; });
 		}
-		
+
 		{	/* process renderdata */
 			Timer<> t(sharedData->new_renderTime);
 
@@ -78,7 +59,7 @@ void Renderer::operator()()
 			);
 
 			/* TODO generate viewProjection matrix from camera */
-			mat4 viewProjectionMatrix = mat4::translate(camera.position) * mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation);
+			mat4 viewProjectionMatrix =  mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
@@ -91,27 +72,25 @@ void Renderer::operator()()
 				glDrawArrays(GL_TRIANGLES, 1, 4);
 			}
 
-			glfwSwapBuffers(glWindow);
+			{
+				std::lock_guard<std::mutex> l(window->mut);
+				glfwSwapBuffers(window->glfwWindow);
+			}
 		}
 		
-		{	/* process render side events events */
+		{	/* process render side events */
 			{	/* window */
 				std::lock_guard<std::mutex> l(window->mut);
-				glfwPollEvents();
 				int width, height;
-				glfwGetWindowSize(glWindow, &width, &height);
+				glfwGetWindowSize(window->glfwWindow, &width, &height);
 				glViewport(0, 0, window->width, window->height);
 				window->width = width;
 				window->height = height;
-			}
-		}
 
-		{	/* wait for main */
-			Timer<> t(sharedData->new_renderSyncTime);
-			std::unique_lock<std::mutex> switch_lock(sharedData->mut);
-			sharedData->ready = true;
-			sharedData->cond.notify_one();
-			sharedData->cond.wait(switch_lock, [&]() { return sharedData->ready == false; });
+				if (glfwWindowShouldClose(window->glfwWindow)) {
+					sharedData->run = false;
+				}
+			}
 		}
 	}
 

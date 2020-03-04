@@ -7,6 +7,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
+#include "input.h"
 #include "Timing.h"
 #include "Window.h"
 #include "Camera.h"
@@ -30,7 +31,7 @@ public:
 
 	virtual void physicsUpdate(World& world, double deltaTime) final;
 
-					/*-- utility --*/
+					/*-- general statistics utility --*/
 	/* returns time difference to last physics dispatch*/
 	double getDeltaTime() { return deltaTime; }
 	/* returns physics + update + bufferSwapTime */
@@ -43,22 +44,30 @@ public:
 	double getRenderTime() { return renderTime; }
 	/* returns time the main thread had to wait for the renderer thread */
 	double getMainSyncTime() { return mainSyncTime; }
-
 	/* returns the number of past iterations */
 	uint32_t getIteration() { return iteration; }
-	/*
-		detail:
-		0: deltaTime, ticks/s
-		1: deltaTime, ticks/s, renderTime
-	*/
 	std::string getPerfInfo(int detail);
+
+					/*-- input utility --*/
+	/* returns the status(KEYSTATUS) of a given key_(KEY)  */
+	KEYSTATUS getKeyStatus(KEY key_);
+	/* returns if a given key_ is pressed */
+	bool keyPressed(KEY key_);
+	/* returns if a given key_ is released */
+	bool keyReleased(KEY key_);
+	/* returns if a given key_ is repeating */
+	bool keyRepeating(KEY key_);
+
+					/*-- window utility --*/
+	/* returns size of window */
+	vec2 getWindowSize();
+	/* returns aspect ration width/height of the window*/
+	float getWindowAspectRatio();
 
 public:
 	World world;
 	Physics physics;
 	Camera camera;
-
-	std::shared_ptr<Window> window;
 
 	std::chrono::microseconds minimunLoopTime;
 
@@ -69,7 +78,7 @@ private:
 	bool running;
 	uint32_t iteration;
 
-	//RenderBuffer renderBufferA;
+	std::shared_ptr<Window> window;
 
 	std::chrono::microseconds new_deltaTime;
 	double deltaTime;

@@ -3,7 +3,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10'000 },//10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 1'00 },//10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -22,9 +22,10 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	new_mainWaitTime{ 0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
-	renderThread{ Renderer(sharedRenderData, window) },
 	renderBufferA{}
 {
+	window->initialize();
+	renderThread = std::thread(Renderer(sharedRenderData, window));
 	renderThread.detach();
 }
 
@@ -47,6 +48,43 @@ std::string Engine::getPerfInfo(int detail)
 	return ss.str();
 }
 
+KEYSTATUS Engine::getKeyStatus(KEY key_)
+{
+	std::lock_guard<std::mutex> l(window->mut);
+	return (KEYSTATUS)glfwGetKey(window->glfwWindow, int(key_));
+}
+
+bool Engine::keyPressed(KEY key_)
+{
+	return getKeyStatus(key_) == KEYSTATUS::PRESS;
+}
+
+bool Engine::keyReleased(KEY key_)
+{
+	return getKeyStatus(key_) == KEYSTATUS::RELEASE;
+}
+
+bool Engine::keyRepeating(KEY key_)
+{
+	return getKeyStatus(key_) == KEYSTATUS::REPEAT;
+}
+
+vec2 Engine::getWindowSize()
+{
+	std::lock_guard<std::mutex> l(window->mut);
+	int width, height;
+	glfwGetWindowSize(window->glfwWindow, &width, &height);
+	return { static_cast<float>(width), static_cast<float>(height) };
+}
+
+float Engine::getWindowAspectRatio()
+{
+	std::lock_guard<std::mutex> l(window->mut);
+	int width, height;
+	glfwGetWindowSize(window->glfwWindow, &width, &height);
+	return static_cast<float>(width)/ static_cast<float>(height);
+}
+
 void Engine::commitTimeMessurements() {
 	deltaTime = micsecToDouble(new_deltaTime);
 	mainTime = micsecToDouble(new_mainTime);
@@ -66,6 +104,7 @@ void Engine::run() {
 		Timer<> loopTimer(new_deltaTime);
 		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY, &new_mainWaitTime);
 		commitTimeMessurements();
+		glfwPollEvents();
 		sharedRenderData->cond.notify_one();	//wake up rendering thread
 
 		{
@@ -74,7 +113,6 @@ void Engine::run() {
 				Timer<> t(new_updateTime);
 				update(world, getDeltaTime());
 			}
-
 			{
 				Timer<> t(new_physicsTime);
 				physicsUpdate(world, getDeltaTime());

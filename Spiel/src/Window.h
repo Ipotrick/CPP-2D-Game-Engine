@@ -17,8 +17,24 @@ public:
 		
 	}
 
+	int initialize() {
+		if (!glfwInit()) {
+			return -1;
+		}
+		else {
+			glfwWindow = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+			if (!glfwWindow) {
+				glfwTerminate();
+				return -2;
+			}
+		}
+		return 0;
+	}
+
 public:
 	std::mutex mut;
+	GLFWwindow* glfwWindow;
+	int status;
 	uint32_t height;
 	uint32_t width;
 	std::string name;

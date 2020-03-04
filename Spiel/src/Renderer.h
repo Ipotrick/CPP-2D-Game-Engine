@@ -105,14 +105,12 @@ public:
 	void initiate();
 	void operator()();
 	void end();
-	int initGLWindow();
 
 
 	std::string readShader(std::string path_);
 	
 private:
 	std::shared_ptr<RendererSharedData> sharedData;
-	GLFWwindow* glWindow;
 	std::shared_ptr<Window> window;
 
 	unsigned int shader;
