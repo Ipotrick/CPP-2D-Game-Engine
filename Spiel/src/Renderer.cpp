@@ -38,7 +38,8 @@ void Renderer::operator()()
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	auto& drawables = sharedData->renderBufferB.drawables;
+	auto& worldDrawables = sharedData->renderBufferB.worldSpaceDrawables;
+	auto& windowDrawables = sharedData->renderBufferB.windowSpaceDrawables;
 	auto& camera = sharedData->renderBufferB.camera;
 	while (sharedData->run) {
 		{	/* wait for main */
@@ -52,18 +53,25 @@ void Renderer::operator()()
 		{	/* process renderdata */
 			Timer<> t(sharedData->new_renderTime);
 
-			std::sort(sharedData->renderBufferB.drawables.begin(), sharedData->renderBufferB.drawables.end(),
+			std::sort(worldDrawables.begin(), worldDrawables.end(),
 				[](Drawable a, Drawable b) {
 					return a.position.z < b.position.z;
 				}
 			);
 
-			/* TODO generate viewProjection matrix from camera */
-			mat4 viewProjectionMatrix =  mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
-
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			for (auto& el : drawables) {
+			for (auto& el : windowDrawables) {
+
+				mat4 modelMatrix = mat4::translate(el.position) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale));
+				glUniformMatrix4fv(1, 1, GL_FALSE, (modelMatrix).data());
+				glUniform4fv(2, 1, el.color.data());
+				glDrawArrays(GL_TRIANGLES, 0, 3);
+				glDrawArrays(GL_TRIANGLES, 1, 4);
+			}
+
+			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
+			for (auto& el : worldDrawables) {
 
 				mat4 modelMatrix = mat4::translate(el.position) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale));
 				glUniformMatrix4fv(1, 1, GL_FALSE, (viewProjectionMatrix * modelMatrix).data());

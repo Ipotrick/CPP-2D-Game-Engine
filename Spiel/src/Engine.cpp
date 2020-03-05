@@ -20,13 +20,16 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	new_renderBufferPushTime{ 0 },
 	new_mainSyncTime{ 0 },
 	new_mainWaitTime{ 0 },
+	collisionInfos{},
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
-	renderBufferA{}
+	renderBufferA{},
+	windowSpaceDrawables{}
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
 	renderThread.detach();
+	windowSpaceDrawables.reserve(50);
 }
 
 Engine::~Engine() {
@@ -112,6 +115,7 @@ void Engine::run() {
 			{
 				Timer<> t(new_updateTime);
 				update(world, getDeltaTime());
+				world.executeDespawns();
 			}
 			{
 				Timer<> t(new_physicsTime);
@@ -119,7 +123,17 @@ void Engine::run() {
 			}
 			{
 				Timer<> t(new_renderBufferPushTime);
-				renderBufferA.writeBuffer(world.getDrawableVec(), camera);
+				renderBufferA.camera = Camera();
+				renderBufferA.windowSpaceDrawables.clear();
+				renderBufferA.worldSpaceDrawables.clear();
+				
+				for (auto& d : windowSpaceDrawables) renderBufferA.windowSpaceDrawables.push_back(d);
+				for (auto& d : worldSpaceDrawables) renderBufferA.worldSpaceDrawables.push_back(d);
+				for (auto& ent : world.entities) renderBufferA.worldSpaceDrawables.push_back(ent);
+				renderBufferA.camera = camera;
+			
+				windowSpaceDrawables.clear();
+				worldSpaceDrawables.clear();
 			}
 		}
 		
@@ -142,7 +156,58 @@ void Engine::run() {
 	destroy();
 }
 
-void Engine::physicsUpdate(World& world, double deltaTime)
+void Engine::physicsUpdate(World& world_, double deltaTime_)
 {
+	collisionInfos.clear();
+	collisionInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
 
+	std::vector<Collidable*> dynCollidables;
+	vec2 maxPos, minPos;
+	if (world_.entities.size() > 0) {
+		maxPos = world_.entities.at(0).getPos();
+		minPos = maxPos;
+	}
+	for (auto & el : world_.entities) {
+		if (el.isDynamic()) {
+			dynCollidables.push_back(&el);							//build dynamic collidable vector
+			el.position = el.position + el.velocity * deltaTime_;	//move collidable 
+		}
+		if (el.position.x < minPos.x) minPos.x = el.position.x;
+		if (el.position.y < minPos.y) minPos.y = el.position.y;
+		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
+		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
+	}
+	Quadtree qtree(minPos-vec2(1,1), maxPos+vec2(1,1), 400);
+	for (auto& el : world_.entities) {
+		qtree.insert(&el);
+	}
+	/* DEBUG */
+	submitDrawableWorldSpace(Drawable(qtree.getPosition(), 0, qtree.getSize(), vec4(1.0, 0.5, 0.5, 1), 0));
+
+	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
+
+	/* check for collisions */
+	std::vector<Collidable*> nearCollidables;	//reuse heap memory for all dyn collidable collisions
+	nearCollidables.reserve(dynCollidables.size());
+	for (int i = 0; i < dynCollidables.size(); i++) {
+		auto& coll = dynCollidables[i];
+		nearCollidables.clear();
+		qtree.querry(nearCollidables, coll->getPos(), coll->getBoundsSize());
+
+		for (auto& other : nearCollidables) {
+			auto newResponse = checkForCollision(coll, other);
+			collisionResponses[i] = collisionResponses[i] + newResponse;
+			if (newResponse.collided) {
+				collisionInfos.emplace_back(CollisionInfo(coll->getId(), other->getId()));
+			}
+		}
+
+	}
+
+	for (int i = 0; i < dynCollidables.size(); i++) {
+		auto& coll = dynCollidables.at(i);
+		coll->velocity += collisionResponses[i].velChange;
+		coll->position += collisionResponses[i].posChange + coll->velocity * deltaTime_;
+		coll->collided = collisionResponses[i].collided;
+	}
 }

@@ -27,7 +27,7 @@ public:
 		//std::cout << position << std::endl;
 	}
 
-	Drawable getDrawable() {
+	Drawable getDrawable() const {
 		return *this;
 	}
 };

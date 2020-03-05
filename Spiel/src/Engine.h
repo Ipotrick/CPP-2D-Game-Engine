@@ -7,6 +7,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
+#include "QuadTree.h"
 #include "input.h"
 #include "Timing.h"
 #include "Window.h"
@@ -33,7 +34,7 @@ public:
 
 					/*-- general statistics utility --*/
 	/* returns time difference to last physics dispatch*/
-	double getDeltaTime() { return deltaTime; }
+	double getDeltaTime() { return std::min(deltaTime, maxDeltaTime); }
 	/* returns physics + update + bufferSwapTime */
 	double getMainTime() { return mainTime; }
 	/* returns time it took to process the last update task*/
@@ -64,9 +65,50 @@ public:
 	/* returns aspect ration width/height of the window*/
 	float getWindowAspectRatio();
 
+					/* graphic utility */
+	void submitDrawableWindowspace(Drawable d_) {
+		windowSpaceDrawables.emplace_back(d_);
+	}
+
+	void submitDrawableWorldSpace(Drawable d_) {
+		worldSpaceDrawables.emplace_back(d_);
+	}
+				
+					/* physics utility */
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(Entity const& ent_) {
+		/* !!!die collision infos müssen geprdent sein, so dass alle idA's einer ent hintereinanderstehen!!! */
+		std::vector<CollisionInfo>::iterator begin = collisionInfos.begin();
+		std::vector<CollisionInfo>::iterator end = collisionInfos.begin();
+		for (auto iter = collisionInfos.begin(); iter != collisionInfos.end(); iter++) {
+			if (end == begin && iter->idA == ent_.getId()) {
+				begin = iter;
+				end = std::next(iter);
+			}
+			else if (end != begin && iter->idA == ent_.getId()) {
+				std::cout << "before" << std::endl;
+				end = std::next(iter);
+				std::cout << "after" << std::endl;
+			}/*
+			else if (end != begin && iter->idA == ent_.getId()) {
+				break;
+			}*/
+		}
+		return { begin, end };
+	}
+
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_) {
+		Entity* ent = world.getEntityPtr(id_);
+
+		if (ent != nullptr) {
+			return getCollisionInfos(*ent);
+		}
+		else {
+			return { collisionInfos.begin(), collisionInfos.end() };
+		}
+	}
+
 public:
 	World world;
-	Physics physics;
 	Camera camera;
 
 	std::chrono::microseconds minimunLoopTime;
@@ -77,6 +119,9 @@ private:
 private:
 	bool running;
 	uint32_t iteration;
+	double maxDeltaTime = 0.016;
+
+	std::vector<CollisionInfo> collisionInfos;
 
 	std::shared_ptr<Window> window;
 
@@ -102,5 +147,8 @@ private:
 	std::shared_ptr<RendererSharedData> sharedRenderData;
 	std::thread renderThread;
 	RenderBuffer renderBufferA;
+
+	std::vector<Drawable> windowSpaceDrawables;
+	std::vector<Drawable> worldSpaceDrawables;
 };
 

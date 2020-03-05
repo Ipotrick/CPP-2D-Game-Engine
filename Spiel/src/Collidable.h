@@ -24,38 +24,57 @@ public:
 		dynamic{ dynamic_ },
 		mass{ mass_ },
 		velocity{ velocity_ },
-		collided{ false }
+		collided{ false },
+		solid{ true }
 	{
-		//std::cout << "Collidable Constructor" << std::endl;
-		//std::cout << position << std::endl;
 	}
 
-	/*Collidable(Collidable const& other) noexcept :
-		Basis{},
-		id{ nextId++ },
-		hitboxScale{ other.hitboxScale },
-		hitboxForm{ other.hitboxForm },
-		elasticity{ other.elasticity },
-		dynamic{ other.dynamic },
-		mass{ other.mass },
-		velocity{ other.velocity },
-		collided{ other.collided }
-	{
-		//std::cout << "Collidable Constructor" << std::endl;
-	}*/
+	inline vec2 getVel() const { return velocity; }
+	inline Form getForm() const { return hitboxForm; }
+	inline vec2 getHitboxSize() const { return hitboxScale; }
+	inline float getRadius() const { assert(hitboxForm == Form::CIRCLE); return hitboxScale.r; }
+	inline float getMass() const { return mass; }
+	inline float getElasticity() const { return elasticity; }
 
-
-
-	Form hitboxForm;
-	vec2 hitboxScale;
-	float mass;
-	float elasticity;
-
-	bool collided;
-	vec2 velocity;
-
-	inline uint32_t getId() { return id; }
-	inline bool isDynamic() { return dynamic; }
+	inline uint32_t getId() const { return id; }
+	inline bool isDynamic() const { return dynamic; }
+	inline bool isSolid() const { return solid; }
 
 	inline Collidable* getCollidablePtr() { return this; }
+	inline Collidable const* getConstCollidablePtr() const { return this; }
+	vec2 getBoundsSize();
+	float getBoundsRadius();
+
+public:
+	Form hitboxForm;
+	vec2 hitboxScale;
+	vec2 velocity;
+	float mass;
+	float elasticity;
+	bool collided;
+	bool solid;
 };
+
+
+
+
+
+inline vec2 Collidable::getBoundsSize() {
+	if (hitboxForm == Form::CIRCLE)
+	{
+		return vec2(getBoundsRadius() * 2, getBoundsRadius() * 2);
+	}
+	else
+	{
+		return vec2(getBoundsRadius(), getBoundsRadius());
+	}
+}
+
+inline float Collidable::getBoundsRadius() {
+	if (hitboxForm == Form::CIRCLE) {
+		return hitboxScale.r;
+	}
+	else {
+		return sqrt(hitboxScale.x * hitboxScale.x + hitboxScale.y * hitboxScale.y);
+	}
+}

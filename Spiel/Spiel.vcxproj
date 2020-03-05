@@ -28,6 +28,7 @@
     <ClInclude Include="src\glmath.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Timing.h" />
     <ClInclude Include="src\Window.h" />
