@@ -17,7 +17,6 @@ public:
 		world.spawnEntity(Entity(Drawable(vec2(4, 4), 0.6, vec2(0.2, 0.2), vec4(1, 0.3, 0.9, 1.0)), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f, vec2(1,1))));
 		controlledEntID = world.entities.at(0).getId();
 
-
 		world.spawnEntity(Entity(Drawable(vec2(4, 3.9), 0.4, vec2(0.2, 0.2), vec4(0.4, 0.4, 0.6, 1.0)), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f, vec2(0, -1))));
 
 		world.spawnEntity(Entity(Drawable(vec2(-5, 0), 0.5, vec2(0.2, 10), vec4(0.5, 0.8, 0.2, 1.0)), 
@@ -48,6 +47,10 @@ public:
 	void update(World& world, float dTime) override {
 
 		std::cout << getPerfInfo(4) << std::endl;
+
+		if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
+			quit();
+		}
 
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 		if (controlledEnt != nullptr) {
