@@ -24,6 +24,9 @@ public:
 	Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
 	~Engine();
 
+	/* ends programm */
+	inline void quit() { running = false; }
+
 	virtual void run() final;
 
 	virtual void create() = 0;
