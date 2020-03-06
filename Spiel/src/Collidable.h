@@ -18,7 +18,7 @@ public:
 	Collidable(vec2 size_ = vec2(1, 1), Form form_ = Form::CIRCLE, float elasticity_ = 1, bool dynamic_ = false, float mass_ = 1, vec2 velocity_ = vec2(0, 0)) :
 		Basis{},
 		id{ nextId++ },
-		hitboxScale{ size_ },
+		hitboxSize{ size_ },
 		hitboxForm{ form_ },
 		elasticity{ elasticity_ },
 		dynamic{ dynamic_ },
@@ -31,8 +31,8 @@ public:
 
 	inline vec2 getVel() const { return velocity; }
 	inline Form getForm() const { return hitboxForm; }
-	inline vec2 getHitboxSize() const { return hitboxScale; }
-	inline float getRadius() const { assert(hitboxForm == Form::CIRCLE); return hitboxScale.r; }
+	inline vec2 getHitboxSize() const { return hitboxSize; }
+	inline float getRadius() const { assert(hitboxForm == Form::CIRCLE); return hitboxSize.r / 2; }
 	inline float getMass() const { return mass; }
 	inline float getElasticity() const { return elasticity; }
 
@@ -47,7 +47,7 @@ public:
 
 public:
 	Form hitboxForm;
-	vec2 hitboxScale;
+	vec2 hitboxSize;
 	vec2 velocity;
 	float mass;
 	float elasticity;
@@ -62,19 +62,20 @@ public:
 inline vec2 Collidable::getBoundsSize() {
 	if (hitboxForm == Form::CIRCLE)
 	{
-		return vec2(getBoundsRadius() * 2, getBoundsRadius() * 2);
+		return vec2(getBoundsRadius() * 2);
 	}
 	else
 	{
-		return vec2(getBoundsRadius(), getBoundsRadius());
+		return vec2(getBoundsRadius() * 2);
 	}
 }
 
 inline float Collidable::getBoundsRadius() {
 	if (hitboxForm == Form::CIRCLE) {
-		return hitboxScale.r;
+		return hitboxSize.r/2.0f;
 	}
 	else {
-		return sqrt(hitboxScale.x * hitboxScale.x + hitboxScale.y * hitboxScale.y);
+
+		return sqrtf((hitboxSize.x * hitboxSize.x + hitboxSize.y * hitboxSize.y)) / 2.0f;
 	}
 }

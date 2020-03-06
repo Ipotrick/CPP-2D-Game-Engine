@@ -59,8 +59,7 @@ VSSKUEDITION = Community
 windir = C:\WINDOWS
 
   Spiel.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(14,21): warning C4244:  "Argument": Konvertierung von "uint32_t" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(14,14): warning C4244:  "Argument": Konvertierung von "uint32_t" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(267,68): warning C4305:  "Argument": Verkürzung von "double" in "float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(11,45): warning C4305:  "Initialisierung": Verkürzung von "__int64" in "const float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(187,59): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(187,38): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
@@ -76,27 +75,19 @@ C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(28,1): warning
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(30,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(38,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(42,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(53,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(56,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(59,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(62,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(88,78): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(91,77): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(94,76): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(97,77): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(100,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(103,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:  "Argument": Konvertierung von "_Ty" in "uint32_t", möglicher Datenverlust
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:         with
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:         [
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:             _Ty=float
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\memory(2066,56): warning C4244:         ]
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(129): message :  Siehe Verweis auf die gerade kompilierte Instanziierung "std::unique_ptr<Quadtree,std::default_delete<_Ty>> std::make_unique<Quadtree,float,float,float,float,uint32_t&,0>(float &&,float &&,float &&,float &&,uint32_t &)" der Funktions-Vorlage.
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(129): message :         with
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(129): message :         [
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(129): message :             _Ty=Quadtree
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(129): message :         ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(591): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<double,std::ratio<1,1>>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(55,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(58,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(61,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(64,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(67,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(70,1): warning C4244:  "-=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(84,25): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(85,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(86,20): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(100,78): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(103,77): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(106,76): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(109,77): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(112,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(115,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

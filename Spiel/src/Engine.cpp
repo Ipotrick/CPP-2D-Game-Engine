@@ -24,7 +24,8 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
-	windowSpaceDrawables{}
+	windowSpaceDrawables{},
+	physicsThreadCount{ 6 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
@@ -42,7 +43,7 @@ Engine::~Engine() {
 std::string Engine::getPerfInfo(int detail)
 {
 	std::stringstream ss;
-	ss << "deltaTime(s): " << getDeltaTime() << " ticks/s: " << (1 / getDeltaTime()) << '\n';
+	ss << "deltaTime(s): " << getDeltaTime() << " ticks/s: " << (1 / getDeltaTime()) << " simspeed: " << getDeltaTimeSafe()/ getDeltaTime() << '\n';
 	if (detail >= 1) ss << "    mainTime(s): "   << getMainTime() << " mainSyncTime(s): " << getMainSyncTime() << " mainWaitTime(s): " << mainWaitTime <<'\n';
 	if (detail >= 2) ss << "        update(s): " << getUpdateTime()    << " physics(s): " << getPhysicsTime() << " renderBufferPush(s): " << renderBufferPushTime << '\n';
 	if (detail >= 1) ss << "    renderTime(s): " << getRenderTime() << " renderSyncTime(s): " << renderSyncTime << '\n';
@@ -119,7 +120,7 @@ void Engine::run() {
 			}
 			{
 				Timer<> t(new_physicsTime);
-				physicsUpdate(world, getDeltaTime());
+				physicsUpdate(world, getDeltaTimeSafe());
 			}
 			{
 				Timer<> t(new_renderBufferPushTime);
@@ -128,8 +129,8 @@ void Engine::run() {
 				renderBufferA.worldSpaceDrawables.clear();
 				
 				for (auto& d : windowSpaceDrawables) renderBufferA.windowSpaceDrawables.push_back(d);
-				for (auto& d : worldSpaceDrawables) renderBufferA.worldSpaceDrawables.push_back(d);
 				for (auto& ent : world.entities) renderBufferA.worldSpaceDrawables.push_back(ent);
+				for (auto& d : worldSpaceDrawables) renderBufferA.worldSpaceDrawables.push_back(d);
 				renderBufferA.camera = camera;
 			
 				windowSpaceDrawables.clear();
@@ -158,6 +159,7 @@ void Engine::run() {
 
 void Engine::physicsUpdate(World& world_, double deltaTime_)
 {
+
 	collisionInfos.clear();
 	collisionInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
 
@@ -177,12 +179,10 @@ void Engine::physicsUpdate(World& world_, double deltaTime_)
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
-	Quadtree qtree(minPos-vec2(1,1), maxPos+vec2(1,1), 400);
+	Quadtree qtree(minPos-vec2(1,1), maxPos+vec2(1,1), 1);
 	for (auto& el : world_.entities) {
 		qtree.insert(&el);
 	}
-	/* DEBUG */
-	submitDrawableWorldSpace(Drawable(qtree.getPosition(), 0, qtree.getSize(), vec4(1.0, 0.5, 0.5, 1), 0));
 
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 
@@ -192,6 +192,7 @@ void Engine::physicsUpdate(World& world_, double deltaTime_)
 	for (int i = 0; i < dynCollidables.size(); i++) {
 		auto& coll = dynCollidables[i];
 		nearCollidables.clear();
+
 		qtree.querry(nearCollidables, coll->getPos(), coll->getBoundsSize());
 
 		for (auto& other : nearCollidables) {

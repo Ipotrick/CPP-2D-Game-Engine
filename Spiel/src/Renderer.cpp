@@ -55,26 +55,26 @@ void Renderer::operator()()
 
 			std::sort(worldDrawables.begin(), worldDrawables.end(),
 				[](Drawable a, Drawable b) {
-					return a.position.z < b.position.z;
+					return a.drawingPrio < b.drawingPrio;
 				}
 			);
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			for (auto& el : windowDrawables) {
+			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
+			for (auto& el : worldDrawables) {
 
-				mat4 modelMatrix = mat4::translate(el.position) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale));
-				glUniformMatrix4fv(1, 1, GL_FALSE, (modelMatrix).data());
+				mat4 modelMatrix = mat4::translate(vec3(el.position.x, el.position.y, 1 - el.drawingPrio)) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale.x, el.scale.y, 1));
+				glUniformMatrix4fv(1, 1, GL_FALSE, (viewProjectionMatrix * modelMatrix).data());
 				glUniform4fv(2, 1, el.color.data());
 				glDrawArrays(GL_TRIANGLES, 0, 3);
 				glDrawArrays(GL_TRIANGLES, 1, 4);
 			}
 
-			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
-			for (auto& el : worldDrawables) {
+			for (auto& el : windowDrawables) {
 
 				mat4 modelMatrix = mat4::translate(el.position) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale));
-				glUniformMatrix4fv(1, 1, GL_FALSE, (viewProjectionMatrix * modelMatrix).data());
+				glUniformMatrix4fv(1, 1, GL_FALSE, (modelMatrix).data());
 				glUniform4fv(2, 1, el.color.data());
 				glDrawArrays(GL_TRIANGLES, 0, 3);
 				glDrawArrays(GL_TRIANGLES, 1, 4);

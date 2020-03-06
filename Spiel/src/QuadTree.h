@@ -10,7 +10,7 @@
 
 class Quadtree {
 public:
-	Quadtree(uint32_t width, uint32_t hight, float xPos, float yPos, uint32_t capacity_)
+	Quadtree(float width, float hight, float xPos, float yPos, uint32_t capacity_)
 		:size(vec2(width, hight)),
 		pos(vec2(xPos, yPos)),
 		collidables(),
@@ -18,6 +18,7 @@ public:
 		hasSubTrees{ false },
 		marked{ false }
 	{
+		collidables.reserve(capacity_ + 1);
 	}
 
 	Quadtree(vec2 minPos_, vec2 maxPos_, uint32_t capacity_):
@@ -27,7 +28,9 @@ public:
 		collidables(),
 		hasSubTrees{ false },
 		marked{ false }
-	{}
+	{
+		collidables.reserve(capacity_ + 1);
+	}
 public:
 
 	void printContcoll(int i = 0) const;
@@ -35,6 +38,8 @@ public:
 	void insert(Collidable* coll);
 
 	void querry(std::vector<Collidable*>& rVec, vec2 const& pos, vec2 const& size) const;
+
+	void querryWithDrawables(std::vector<Collidable*>& rVec, vec2 const& pos, vec2 const& size, std::vector<Drawable>& drawables) const;
 
 	void getDrawables(std::vector<Drawable>& rVec) const {
 	}
@@ -121,31 +126,29 @@ inline void Quadtree::insert(Collidable* coll)
 			collidables.push_back(coll);
 			auto collidablesOld = collidables;
 			collidables.clear();
-
 			hasSubTrees = true;
+
 			ul = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
 				(pos.x - size.x * 0.25f),
 				(pos.y - size.y * 0.25f),
 				capacity);
-			ul->collidables.reserve(capacity);
+
 			ur = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
 				(pos.x + size.x * 0.25f),
 				(pos.y - size.y * 0.25f),
 				capacity);
-			ur->collidables.reserve(capacity);
 			dl = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
 				(pos.x - size.x * 0.25f),
 				(pos.y + size.y * 0.25f),
 				capacity);
-			dl->collidables.reserve(capacity);
 			dr = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
 				(pos.x + size.x * 0.25f),
 				(pos.y + size.y * 0.25f),
 				capacity);
-			dr->collidables.reserve(capacity);
+
 			for (auto& pcoll : collidablesOld)
 			{
-				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(pcoll->getPos(), pcoll->getBoundsSize());
+				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(pcoll->getPos(), pcoll->getBoundsSize()*2);
 				int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 				if (isInCount > 1)
 				{
@@ -169,6 +172,11 @@ inline void Quadtree::insert(Collidable* coll)
 					{
 						dr->insert(pcoll);
 					}
+#ifdef _DEBUG
+					if (isInCount == 0) {
+						std::cout << "FAILURE IN INSERTION" << std::endl;
+					}
+#endif
 				}
 			}
 		}
@@ -203,28 +211,60 @@ inline void Quadtree::insert(Collidable* coll)
 	}
 }
 
-inline void Quadtree::querry(std::vector<Collidable*>& rVec, vec2 const& pos, vec2 const& size) const
+inline void Quadtree::querry(std::vector<Collidable*>& rVec, vec2 const& pos_, vec2 const& size_) const
 {
 	if (hasSubTrees == true)
 	{
-		auto [inUl, inUr, inDl, inDr] = isInSubtree(pos, size);
+		auto [inUl, inUr, inDl, inDr] = isInSubtree(pos_, size_);
 
 		if (inUl)
 		{
-			ul->querry(rVec, pos, size);
+			ul->querry(rVec, pos_, size_);
 		}
 		if (inUr)
 		{
-			ur->querry(rVec, pos, size);
+			ur->querry(rVec, pos_, size_);
 		}
 		if (inDl)
 		{
-			dl->querry(rVec, pos, size);
+			dl->querry(rVec, pos_, size_);
 		}
 		if (inDr)
 		{
-			dr->querry(rVec, pos, size);
+			dr->querry(rVec, pos_, size_);
 		}
+	}
+	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
+}
+
+inline void Quadtree::querryWithDrawables(std::vector<Collidable*>& rVec, vec2 const& pos_, vec2 const& size_, std::vector<Drawable>& drawables) const
+{
+	if (hasSubTrees == true)
+	{
+		auto [inUl, inUr, inDl, inDr] = isInSubtree(pos_, size_);
+
+		if (inUl)
+		{
+			ul->querryWithDrawables(rVec, pos_, size_, drawables);
+		}
+		if (inUr)
+		{
+			ur->querryWithDrawables(rVec, pos_, size_, drawables);
+		}
+		if (inDl)
+		{
+			dl->querryWithDrawables(rVec, pos_, size_, drawables);
+		}
+		if (inDr)
+		{
+			dr->querryWithDrawables(rVec, pos_, size_, drawables);
+		}
+		if (!inUl && !inUr && !inDl && !inDr) {
+			std::cout << "in no subtree! " << std::endl;
+		}
+	}
+	else {
+		drawables.push_back(Drawable(pos, 0.1, size, vec4(1, 1, 1, 1), 0));
 	}
 	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
 }

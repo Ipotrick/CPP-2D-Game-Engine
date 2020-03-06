@@ -34,7 +34,9 @@ public:
 
 					/*-- general statistics utility --*/
 	/* returns time difference to last physics dispatch*/
-	double getDeltaTime() { return std::min(deltaTime, maxDeltaTime); }
+	double getDeltaTime() { return deltaTime; }
+	/* returns deltatime or the lowest allowed sim time difference */
+	double getDeltaTimeSafe() { return std::min(deltaTime, maxDeltaTime); }
 	/* returns physics + update + bufferSwapTime */
 	double getMainTime() { return mainTime; }
 	/* returns time it took to process the last update task*/
@@ -85,13 +87,11 @@ public:
 				end = std::next(iter);
 			}
 			else if (end != begin && iter->idA == ent_.getId()) {
-				std::cout << "before" << std::endl;
 				end = std::next(iter);
-				std::cout << "after" << std::endl;
-			}/*
+			}
 			else if (end != begin && iter->idA == ent_.getId()) {
 				break;
-			}*/
+			}
 		}
 		return { begin, end };
 	}
@@ -120,6 +120,8 @@ private:
 	bool running;
 	uint32_t iteration;
 	double maxDeltaTime = 0.016;
+
+	int physicsThreadCount;
 
 	std::vector<CollisionInfo> collisionInfos;
 

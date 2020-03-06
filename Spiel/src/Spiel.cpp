@@ -14,11 +14,11 @@ public:
 		camera.zoom = 1 / 5.0f;
 
 		Quadtree qtree(vec2(-5, -5), vec2(5, 5), 2);
-		world.spawnEntity(Entity(Drawable(vec2(4, 4), 0.5, vec2(0.2, 0.2), vec4(1, 0.3, 0.9, 1.0)), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f, vec2(1,1))));
-		controlledEntID = world.entities.at(0).getId();;
+		world.spawnEntity(Entity(Drawable(vec2(4, 4), 0.6, vec2(0.2, 0.2), vec4(1, 0.3, 0.9, 1.0)), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f, vec2(1,1))));
+		controlledEntID = world.entities.at(0).getId();
 
 
-		world.spawnEntity(Entity(Drawable(vec2(4, 3.9), 0.5, vec2(0.2, 0.2), vec4(0.4, 0.4, 0.6, 1.0)), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f, vec2(0, -1))));
+		world.spawnEntity(Entity(Drawable(vec2(4, 3.9), 0.4, vec2(0.2, 0.2), vec4(0.4, 0.4, 0.6, 1.0)), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 1.0f, true, 1.0f, vec2(0, -1))));
 
 		world.spawnEntity(Entity(Drawable(vec2(-5, 0), 0.5, vec2(0.2, 10), vec4(0.5, 0.8, 0.2, 1.0)), 
 			Collidable(vec2(0.2, 10), Collidable::Form::RECTANGLE, 1.0f, false)));
@@ -31,21 +31,23 @@ public:
 
 		for (auto el : world.entities) qtree.insert(&el);
 
-		int num = 200;
+		int num = 2000;
 
 		for (int i = 0; i < num; i++) {
 			vec2 pos = { static_cast<float>(rand() % 1000 / 500.0 - 1.0)*5, static_cast<float>(rand() % 1000 / 500.0 - 1.0)*5 };
-			vec2 size = { 0.2,0.2 };
+			vec2 scale = { 0.2,0.2 };
 			vec2 vel = { static_cast<float>(rand() % 1000 / 500.0 - 1.0)*0.1f, static_cast<float>(rand() % 1000 / 500.0 - 1.0) * 0.1f };
 
-			auto newEnt = Entity(Drawable(pos, 0.5, size, vec4(0.4, 0.4, 0.6, 1.0)),
-				Collidable(size, Collidable::Form::RECTANGLE, 1.0f, true, 1, vel));
+			auto newEnt = Entity(Drawable(pos, 0.5, scale, vec4(0.4, 0.4, 0.6, 1.0)),
+			Collidable(scale, Collidable::Form::RECTANGLE, 1.0f, true, 1, vel));
 			world.spawnEntity(newEnt);
 		}
 
 	}
 
 	void update(World& world, double dTime) override {
+
+		std::cout << getPerfInfo(3) << std::endl;
 
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 		if (controlledEnt != nullptr) {
@@ -61,6 +63,12 @@ public:
 			if (keyPressed(KEY::D)) {
 				controlledEnt->velocity.x += -1.0f * getDeltaTime();
 			}
+			if (keyPressed(KEY::Q)) {
+				controlledEnt->rotation += 50.0f * getDeltaTime();
+			}
+			if (keyPressed(KEY::E)) {
+				controlledEnt->rotation -= 50.0f * getDeltaTime();
+			}
 		}
 		
 		if (controlledEnt != nullptr) {
@@ -72,16 +80,16 @@ public:
 
 		
 		for (Entity& ent : world.entities) {
-			if (ent.isDynamic()) {
-				ent.hitboxScale *= 1 + (0.1f * getDeltaTime());
+			if (ent.isDynamic() && ent.getId() != controlledEntID) {
+				ent.hitboxSize *= 1 + (0.1f * getDeltaTime());
 				ent.mass *= 1 + (0.1f * getDeltaTime());
 				ent.scale *= 1 + (0.1f * getDeltaTime());
 
 				auto [begin, end] = getCollisionInfos(ent);
 
-				for (auto iter = begin; iter != end; iter++) {
-					if ((*iter).idA != controlledEntID) {
-						ent.hitboxScale *= 0.75f;
+				if (ent.hitboxSize.x > 0.01 && ent.hitboxSize.y) {
+					for (auto iter = begin; iter != end; iter++) {
+						ent.hitboxSize *= 0.75f;
 						ent.mass *= 0.75;
 						ent.scale *= 0.75;
 						break;
