@@ -8,7 +8,7 @@
 
 namespace Physics {
 	constexpr bool staticCollMaxMass = true;
-	constexpr float maxMass = 1'000'000'000'000;
+	constexpr float maxMass = 1'000'000'000'000.f;
 }
 
 struct CollisionResponse {
@@ -198,10 +198,10 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 					float collPart = coll_->getHitboxSize().x * coll_->getHitboxSize().y / BothSizes;
 					float otherPart = other_->getHitboxSize().x * other_->getHitboxSize().y / BothSizes;
 
-					response.posChange += distVec * otherPart;
+					response.posChange = distVec * otherPart;
 				}
 				else {
-					response.posChange += distVec;
+					response.posChange = distVec;
 				}
 			}
 			//vec change is newVel - oldVel	= v1 - coll_->getVel()

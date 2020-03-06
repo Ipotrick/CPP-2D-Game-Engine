@@ -34,7 +34,6 @@ public:
 public:
 	std::mutex mut;
 	GLFWwindow* glfwWindow;
-	int status;
 	uint32_t height;
 	uint32_t width;
 	std::string name;

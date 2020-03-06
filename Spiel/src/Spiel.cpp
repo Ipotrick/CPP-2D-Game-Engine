@@ -34,9 +34,9 @@ public:
 		int num = 2000;
 
 		for (int i = 0; i < num; i++) {
-			vec2 pos = { static_cast<float>(rand() % 1000 / 500.0 - 1.0)*5, static_cast<float>(rand() % 1000 / 500.0 - 1.0)*5 };
+			vec2 pos = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5 };
 			vec2 scale = { 0.2,0.2 };
-			vec2 vel = { static_cast<float>(rand() % 1000 / 500.0 - 1.0)*0.1f, static_cast<float>(rand() % 1000 / 500.0 - 1.0) * 0.1f };
+			vec2 vel = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*0.1f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 0.1f };
 
 			auto newEnt = Entity(Drawable(pos, 0.5, scale, vec4(0.4, 0.4, 0.6, 1.0)),
 			Collidable(scale, Collidable::Form::RECTANGLE, 1.0f, true, 1, vel));
@@ -45,9 +45,9 @@ public:
 
 	}
 
-	void update(World& world, double dTime) override {
+	void update(World& world, float dTime) override {
 
-		std::cout << getPerfInfo(3) << std::endl;
+		std::cout << getPerfInfo(4) << std::endl;
 
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 		if (controlledEnt != nullptr) {
@@ -87,7 +87,7 @@ public:
 
 				auto [begin, end] = getCollisionInfos(ent);
 
-				if (ent.hitboxSize.x > 0.01 && ent.hitboxSize.y) {
+				if (ent.hitboxSize.x > 0.05 && ent.hitboxSize.y > 0.05) {
 					for (auto iter = begin; iter != end; iter++) {
 						ent.hitboxSize *= 0.75f;
 						ent.mass *= 0.75;
@@ -99,22 +99,22 @@ public:
 		}
 
 		if (keyPressed(KEY::UP)) {
-			camera.position += rotate(vec2(0.0, -5.0), camera.rotation) * getDeltaTime();
+			camera.position += rotate(vec2(0.0f, -5.0f), camera.rotation) * getDeltaTime();
 		}
 		if (keyPressed(KEY::LEFT)) {
-			camera.position += rotate(vec2(5.0, 0.0), camera.rotation) * getDeltaTime();
+			camera.position += rotate(vec2(5.0f, 0.0f), camera.rotation) * getDeltaTime();
 		}
 		if (keyPressed(KEY::DOWN)) {
-			camera.position += rotate(vec2(0.0, 5.0), camera.rotation)* getDeltaTime();
+			camera.position += rotate(vec2(0.0f, 5.0f), camera.rotation)* getDeltaTime();
 		}
 		if (keyPressed(KEY::RIGHT)) {
-			camera.position += rotate(vec2(-5.0, 0.0), camera.rotation)* getDeltaTime();
+			camera.position += rotate(vec2(-5.0f, 0.0f), camera.rotation)* getDeltaTime();
 		}
 		if (keyPressed(KEY::NP_ADD)) {
-			camera.zoom *= 1.0 + (1.0 * getDeltaTime());
+			camera.zoom *= 1.0f + (1.0f * getDeltaTime());
 		}
 		if (keyPressed(KEY::NP_SUBTRACT)) {
-			camera.zoom *= 1.0 - (1.0 * getDeltaTime());
+			camera.zoom *= 1.0f - (1.0f * getDeltaTime());
 		}
 		if (keyPressed(KEY::NP_0)) {
 			camera.rotation = 0.0f;

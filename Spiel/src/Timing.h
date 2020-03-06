@@ -14,14 +14,22 @@ template <typename Clock = std::chrono::high_resolution_clock ,typename Unit = s
 class Timer {
 public:
 	Timer(Unit & p_output) :
-		startTimePoint{Clock::now()}, output{p_output}
+		startTimePoint{Clock::now()}, output{p_output}, stopped{ false }
 	{}
 	~Timer() {
+		if (!stopped) {
+			stop();
+		}
+	}
+
+	void stop() {
 		auto stopTimePoint = Clock::now();
 		Unit difference = std::chrono::duration_cast<Unit>(stopTimePoint - startTimePoint);
 		output = difference;
+		stopped = true;
 	}
 protected:
+	bool stopped;
 	std::chrono::time_point<Clock> startTimePoint;
 	Unit & output;
 };
