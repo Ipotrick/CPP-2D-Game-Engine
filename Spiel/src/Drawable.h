@@ -6,11 +6,13 @@
 class Drawable : virtual public Basis {
 
 public:
-	vec2 scale;
 	vec4 color;
+	vec2 scale;
+	float drawingPrio;
 
-	Drawable():
+	Drawable() :
 		Basis{},
+		drawingPrio{ 0.0f },
 		scale{ 1, 1 },
 		color{ 1.0f,0.2f,0.2f, 1.0f }
 	{
@@ -18,8 +20,9 @@ public:
 		//std::cout << position << std::endl;
 	}
 
-	Drawable(vec2 position_, float drawingPrio, vec2 scale_, vec4 color_, float rotation_ = 0.0f) :
-		Basis(vec3(position_.x, position_.y, drawingPrio), rotation_),
+	Drawable(vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, float rotation_ = 0.0f) :
+		Basis(vec2(position_.x, position_.y), rotation_),
+		drawingPrio{ drawingPrio_ },
 		scale{ scale_ },
 		color{ color_ }
 	{
@@ -27,7 +30,7 @@ public:
 		//std::cout << position << std::endl;
 	}
 
-	Drawable getDrawable() {
+	Drawable getDrawable() const {
 		return *this;
 	}
 };

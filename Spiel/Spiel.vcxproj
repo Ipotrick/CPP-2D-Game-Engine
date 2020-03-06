@@ -28,6 +28,7 @@
     <ClInclude Include="src\glmath.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Timing.h" />
     <ClInclude Include="src\Window.h" />
@@ -163,6 +164,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -186,6 +188,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\src\Release;$(SolutionDir)\Libraries\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

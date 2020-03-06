@@ -17,6 +17,7 @@
 
 #ifdef _WIN32
 #define M_PI 3.14159265
+#define RAD 57.2957795
 #include <algorithm>
 #endif
 

@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Libraries"
+    "\\Spiel",
+    "\\Spiel\\shader",
+    "\\Spiel\\src"
   ],
-  "SelectedNode": "\\Libraries\\glew-2.1.0",
+  "SelectedNode": "\\Spiel\\src\\QuadTree.h",
   "PreviewInSolutionExplorer": false
 }

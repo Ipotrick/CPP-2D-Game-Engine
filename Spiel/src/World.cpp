@@ -25,11 +25,31 @@ void World::spawnEntity(Entity ent_)
 	entities.emplace_back(ent_);
 }
 
-void World::removeEntity(int entitiy_id)
+void World::despawn(int entitiy_id)
 {
-	for (auto iter = entities.begin(); iter < entities.end(); iter++) {
-		if (iter->getId() == entitiy_id) {
-			entities.erase(iter);
+	auto entPtr = getEntityPtr(entitiy_id);
+	if (entPtr != nullptr) {
+		despawn(*entPtr);
+	}
+}
+
+void World::despawn(Entity & entity_)
+{
+	entity_.despawned = true;
+	despawnList.emplace_back(entity_.getId());
+}
+
+
+
+void World::executeDespawns()
+{
+	for (int entitiy_id : despawnList) {
+		for (auto iter = entities.begin(); iter != entities.end(); iter++) {
+			if (iter->getId() == entitiy_id) {
+				entities.erase(iter);
+				break;
+			}
 		}
 	}
+	despawnList.clear();
 }

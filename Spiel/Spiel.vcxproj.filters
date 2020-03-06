@@ -57,6 +57,9 @@
     <ClInclude Include="src\Input.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\QuadTree.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">

@@ -61,16 +61,9 @@ static unsigned createShader(const std::string& vertexShader_, const std::string
 class RenderBuffer {
 public:
 
-	void writeBuffer(std::vector<Drawable> drawables_, Camera camera_) {
-		drawables.clear();
-		drawables.reserve(drawables_.size());
-		for (auto& el : drawables_) {
-			drawables.emplace_back(el);
-		}
-		camera = camera_;
-	}
 public:
-	std::vector<Drawable> drawables;
+	std::vector<Drawable> worldSpaceDrawables;
+	std::vector<Drawable> windowSpaceDrawables;
 	Camera camera;
 };
 
