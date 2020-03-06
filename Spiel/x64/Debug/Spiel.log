@@ -5,8 +5,6 @@ APPDATA = C:\Users\Patrick\AppData\Roaming
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
-COMPLUS_InstallRoot = 
-COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -58,36 +56,31 @@ VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  Spiel.cpp
+  Engine.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(267,68): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(11,45): warning C4305:  "Initialisierung": Verkürzung von "__int64" in "const float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(187,59): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(187,38): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(27,37): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(27,12): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(43,19): warning C4244:  "=": Konvertierung von "double" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(46,19): warning C4244:  "=": Konvertierung von "double" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(17,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(21,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(24,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(26,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(28,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(30,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(38,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(42,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(55,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(58,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(61,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(64,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(67,1): warning C4244:  "+=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(70,1): warning C4244:  "-=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(84,25): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(85,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(86,20): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(100,78): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(103,77): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(106,76): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(109,77): warning C4244:  "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(112,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(115,1): warning C4244:  "*=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.h(93,28): warning C4305:  "Initialisierung": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(119,28): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(120,27): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(121,29): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(122,30): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(123,37): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(124,39): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(125,37): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(126,29): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(127,31): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(128,31): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(129,39): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(130,33): warning C4244:  "=": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(226,24): warning C4244:  "=": Konvertierung von "float" in "_Ty", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(226,24): warning C4244:         with
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(226,24): warning C4244:         [
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(226,24): warning C4244:             _Ty=int
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(226,24): warning C4244:         ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(227,24): warning C4244:  "=": Konvertierung von "float" in "_Ty", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(227,24): warning C4244:         with
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(227,24): warning C4244:         [
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(227,24): warning C4244:             _Ty=int
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(227,24): warning C4244:         ]
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

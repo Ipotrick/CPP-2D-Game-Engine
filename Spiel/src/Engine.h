@@ -16,6 +16,7 @@
 #include "Entity.h"
 #include "World.h"
 
+#include "PhysicsWorker.h"
 #include "Renderer.h"
 
 class Engine

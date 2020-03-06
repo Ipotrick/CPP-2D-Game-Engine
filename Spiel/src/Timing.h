@@ -38,16 +38,23 @@ template <typename Clock = std::chrono::high_resolution_clock, typename Unit = s
 class LogTimer {
 public:
 	LogTimer(std::ostream& os_) :
-		startTimePoint{ Clock::now() }, os{ os_ }
+		startTimePoint{ Clock::now() }, os{ os_ }, stopped{ false }
 	{}
 	~LogTimer() {
+		if (!stopped) {
+			stop();
+		}
+	}
+	void stop() {
 		auto stopTimePoint = Clock::now();
 		Unit difference = std::chrono::duration_cast<Unit>(stopTimePoint - startTimePoint);
 		std::stringstream ss;
 		ss << "time taken: " << difference.count() << "us\n";
 		os << ss.str();
+		stopped = true;
 	}
 protected:
+	bool stopped;
 	std::chrono::time_point<Clock> startTimePoint;
 	std::ostream& os;
 };
