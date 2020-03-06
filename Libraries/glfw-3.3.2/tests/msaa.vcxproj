@@ -22,7 +22,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FCA14655-D7D3-301D-8C67-F8B4F69E5FB5}</ProjectGuid>
+    <ProjectGuid>{BA8D1636-5C72-328B-A02F-A3196922D8A5}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <Keyword>Win32Proj</Keyword>
     <Platform>x64</Platform>
@@ -59,25 +59,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">msaa.dir\Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">msaa</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\Release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">msaa.dir\Release\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">msaa</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\MinSizeRel\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\MinSizeRel\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">msaa.dir\MinSizeRel\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">msaa</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\RelWithDebInfo\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\RelWithDebInfo\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">msaa.dir\RelWithDebInfo\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">msaa</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
@@ -86,7 +86,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>CompileAsC</CompileAs>
@@ -104,10 +104,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -120,8 +120,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/Debug/msaa.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/Debug/msaa.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/Debug/msaa.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/Debug/msaa.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -130,7 +130,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
@@ -148,10 +148,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -164,8 +164,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/Release/msaa.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/Release/msaa.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/Release/msaa.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/Release/msaa.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -174,7 +174,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <ExceptionHandling>
@@ -192,10 +192,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -208,8 +208,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/MinSizeRel/msaa.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/MinSizeRel/msaa.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/MinSizeRel/msaa.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/MinSizeRel/msaa.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -218,7 +218,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAs>CompileAsC</CompileAs>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -235,10 +235,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps;C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps;C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -251,8 +251,8 @@
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/RelWithDebInfo/msaa.lib</ImportLibrary>
-      <ProgramDataBaseFile>C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/RelWithDebInfo/msaa.pdb</ProgramDataBaseFile>
+      <ImportLibrary>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/RelWithDebInfo/msaa.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/RelWithDebInfo/msaa.pdb</ProgramDataBaseFile>
       <SubSystem>Console</SubSystem>
     </Link>
     <ProjectReference>
@@ -260,10 +260,10 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\CMakeLists.txt">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
+    <CustomBuild Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\CMakeLists.txt">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 -BC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -272,11 +272,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 -BC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -285,11 +285,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 -BC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -298,11 +298,11 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
-      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeLists.txt</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
-"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 -BC:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 -BC:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2 --check-stamp-file C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
@@ -311,26 +311,26 @@ exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\CMakeFiles\generate.stamp</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\msaa.c" />
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps\getopt.h" />
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps\getopt.c" />
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps\glad\gl.h" />
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps\glad_gl.c" />
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\msaa.c" />
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps\getopt.h" />
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps\getopt.c" />
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps\glad\gl.h" />
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps\glad_gl.c" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\ZERO_CHECK.vcxproj">
-      <Project>{44F0AF5F-F9F4-36AD-B95E-5F979A4F5990}</Project>
+    <ProjectReference Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\ZERO_CHECK.vcxproj">
+      <Project>{2D295587-D37A-33F6-BC59-9574E5F3663E}</Project>
       <Name>ZERO_CHECK</Name>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </ProjectReference>
-    <ProjectReference Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw.vcxproj">
-      <Project>{91E3775F-2EAA-3B04-B516-A2C93460611C}</Project>
+    <ProjectReference Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\glfw.vcxproj">
+      <Project>{640A54F5-41C9-3996-91D1-6051B774D2C7}</Project>
       <Name>glfw</Name>
     </ProjectReference>
   </ItemGroup>

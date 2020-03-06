@@ -1,10 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Spiel",
-    "\\Spiel\\shader",
-    "\\Spiel\\src"
+    "\\Libraries"
   ],
-  "SelectedNode": "\\Spiel\\Spiel.vcxproj",
+  "SelectedNode": "\\Libraries\\glew-2.1.0",
   "PreviewInSolutionExplorer": false
 }
