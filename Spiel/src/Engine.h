@@ -94,8 +94,10 @@ private:
 	float maxDeltaTime = 0.016;
 
 	int physicsThreadCount;
-
 	std::vector<CollisionInfo> collisionInfos;
+	std::vector<std::shared_ptr<PhysicsSharedData>> sharedPhysicsData;
+	std::shared_ptr<PhysicsSyncData> sharedPhysicsSyncData;
+	std::vector<std::thread> physicsThreads;
 
 	std::shared_ptr<Window> window;
 

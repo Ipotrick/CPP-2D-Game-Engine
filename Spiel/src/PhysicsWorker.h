@@ -1,31 +1,37 @@
 #pragma once
 
+#include <mutex>
+#include <sstream>
+#include <condition_variable>
+
 #include "Physics.h"
 #include "QuadTree.h"
 
-struct sharedPhysicsData {
+struct PhysicsSyncData {
+	PhysicsSyncData() : mut{}, cond{}, run{ true }  {}
+	std::mutex mut;
+	std::condition_variable cond;
+	bool run;
 
+	std::vector<bool> go;
 };
 
-class PhysicsWorker {
-public:
-	PhysicsWorker(std::vector<Collidable*> const& dynCollidables_, int begin_, int end_, Quadtree const& qtree_, std::vector<CollisionResponse>& collisionResponses_, std::vector<CollisionInfo>& collisionInfos_) :
-		dynCollidables{ dynCollidables_ },
-		begin{ begin_ },
-		end{ end_ },
-		qtree{ qtree_ },
-		collisionResponses{ collisionResponses_ },
-		collisionInfos{ collisionInfos_ }
-	{
-
-	}
-
-	std::vector<Collidable*> const& dynCollidables;
+struct PhysicsSharedData {
+	int id = 0;
+	std::vector<Collidable*> * dynCollidables;
 	int begin;
 	int end;
-	Quadtree const& qtree;
-	std::vector<CollisionResponse>& collisionResponses;
-	std::vector<CollisionInfo>& collisionInfos;
+	Quadtree * qtree;
+	std::vector<CollisionResponse> * collisionResponses;
+	std::vector<CollisionInfo> * collisionInfos;
+};
+
+struct PhysicsWorker {
+	PhysicsWorker(std::shared_ptr<PhysicsSharedData> physicsData_, std::shared_ptr<PhysicsSyncData> syncData_) :
+		physicsData{ physicsData_}, syncData{ syncData_ }
+	{}
+	std::shared_ptr<PhysicsSharedData> physicsData;
+	std::shared_ptr<PhysicsSyncData> syncData;
 
 	void operator()(); 
 };

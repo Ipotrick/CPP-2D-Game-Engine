@@ -3,7 +3,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 1'00 },//10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 40'0 },//10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -31,18 +31,35 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ 4 }
+	physicsThreadCount{ 5 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
 	renderThread.detach();
 	windowSpaceDrawables.reserve(50);
+
+	sharedPhysicsData = std::vector<std::shared_ptr<PhysicsSharedData>>(physicsThreadCount);
+	int n = 0;
+	for (auto& el : sharedPhysicsData) {
+		el = std::make_shared<PhysicsSharedData>();
+		el->id = n++;
+	}
+	sharedPhysicsSyncData = std::make_shared<PhysicsSyncData>();
+	sharedPhysicsSyncData->go = std::vector<bool>(physicsThreadCount);
+	for (int i = 0; i < physicsThreadCount; i++) {
+		physicsThreads.push_back(std::thread(PhysicsWorker(sharedPhysicsData.at(i), sharedPhysicsSyncData)));
+		physicsThreads.at(i).detach();
+	}
 }
 
 Engine::~Engine() {
 	{
 		std::lock_guard<std::mutex> l(sharedRenderData->mut);
 		sharedRenderData->run = false;
+	}
+	{
+		//std::lock_guard<std::mutex> l(sharedPhysicsSyncData->mut);
+		//sharedPhysicsSyncData->run = false;
 	}
 }
 
@@ -228,21 +245,43 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 
-	std::vector<std::thread> workerThreads;
-	for (int i = 0; i < physicsThreadCount; i++) {
-		collisionInfosSplit[i] = std::vector<CollisionInfo>();
-		PhysicsWorker worker(dynCollidables, ranges[i][0], ranges[i][1], qtree, collisionResponses, collisionInfosSplit[i]);
-		workerThreads.push_back(std::thread(worker));
-	}
+	/* 
+	1. give physics workers their info
+	*/
 
 	for (int i = 0; i < physicsThreadCount; i++) {
-		workerThreads[i].join();
+		auto& pData = sharedPhysicsData[i];
+		pData->begin = ranges[i][0];
+		pData->end = ranges[i][1];
+		pData->collisionInfos = &collisionInfosSplit[i];
+		pData->collisionResponses = &collisionResponses;
+		pData->qtree = &qtree;
+		pData->dynCollidables = &dynCollidables;
+	}
+
+	{// start physics threads and wait for them to finish
+		std::unique_lock switch_lock(sharedPhysicsSyncData->mut);
+		for (int i = 0; i < physicsThreadCount; i++) {
+			sharedPhysicsSyncData->go.at(i) = true;
+		}
+		sharedPhysicsSyncData->cond.notify_all();
+		sharedPhysicsSyncData->cond.wait(switch_lock, [&]() { 
+			/* wenn alle false sind wird true returned */
+			for (int i = 0; i < physicsThreadCount; i++) {
+				if (sharedPhysicsSyncData->go.at(i) == true) {
+					return false;
+				}
+			}
+			return true; 
+			}
+		);
 	}
 	for (int i = 0; i < physicsThreadCount; i++) {
 		for (auto& collinfo : (collisionInfosSplit[i])) {
 			collisionInfos.push_back(collinfo);
 		}
 	}
+	
 
 	/*std::vector<Collidable*> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 	nearCollidables.reserve(dynCollidables.size());
@@ -264,6 +303,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	Timer<> t3(new_physicsExecuteTime);
 	for (int i = 0; i < dynCollidables.size(); i++) {
 		auto& coll = dynCollidables.at(i);
+		coll->velocity.y -= 0.01 * deltaTime_;
 		coll->velocity += collisionResponses.at(i).velChange;
 		coll->position += collisionResponses.at(i).posChange + coll->velocity * deltaTime_;
 		coll->collided = collisionResponses.at(i).collided;

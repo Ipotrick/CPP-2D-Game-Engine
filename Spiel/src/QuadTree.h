@@ -264,7 +264,7 @@ inline void Quadtree::querryWithDrawables(std::vector<Collidable*>& rVec, vec2 c
 		}
 	}
 	else {
-		drawables.push_back(Drawable(pos, 0.1, size, vec4(1, 1, 1, 1), 0));
+		drawables.push_back(Drawable(pos, 0.1, size, vec4(1, 1, 1, 1)));
 	}
 	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
 }
