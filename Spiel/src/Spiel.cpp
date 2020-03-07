@@ -56,7 +56,7 @@ public:
 
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 
-		//kills entities one contact
+		//kills entities one contact with anything
 		/*for (size_t i = 0; i < world.entities.size(); i++)
 		{
 			if (world.entities[i].isCollided() == true)
