@@ -13,11 +13,11 @@ public:
 		world.entities.reserve(10000);
 		camera.zoom = 1 / 5.0f;
 
-		vec2 scaleEnt = { 0.2,0.2 };
-		world.spawnEntity(Entity(Drawable(vec2(4, 4), 0.6, scaleEnt, vec4(1, 0.3, 0.9, 0.5), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.9f, true, 9.0f, vec2(1.7,1.7))));
+		vec2 scaleEnt = { 0.5,0.5 };
+		world.spawnEntity(Entity(Drawable(vec2(4, 4), 0.6, scaleEnt, vec4(1, 0.3, 0.9, 0.5), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.9f, true, 39.0f, vec2(1.7,1.7))));
 		controlledEntID = world.entities.at(0).getId();
 
-		world.spawnEntity(Entity(Drawable(vec2(4.5, 2.5), 0.4, vec2(0.2, 0.2), vec4(0.4, 0.4, 0.6, 1.0), Drawable::Form::RECTANGLE), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 0.9f, true, 1.0f, vec2(0, 0))));
+		world.spawnEntity(Entity(Drawable(vec2(4.5, 2.5), 0.4, vec2(0.2, 0.2), vec4(0.4, 0.4, 0.6, 1.0), Drawable::Form::RECTANGLE), Collidable(vec2(0.2, 0.2), Collidable::Form::RECTANGLE, 0.9f, true, 9.0f, vec2(0, 0))));
 
 		world.spawnEntity(Entity(Drawable(vec2(-5, 0), 0.5, vec2(0.2, 10), vec4(0.8, 0.8, 0.2, 1.0)), 
 			Collidable(vec2(0.2, 10), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
@@ -29,7 +29,7 @@ public:
 			Collidable(vec2(10, 0.2), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
 
 
-		int num = 8000;
+		int num = 1000;
 
 		for (int i = 0; i < num; i++) {
 			vec2 pos = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5 };
@@ -38,7 +38,7 @@ public:
 			vec2 vel = {0,0};
 
 			auto newEnt = Entity(Drawable(pos, 0.5, scale, vec4(0.4, 0.4, 0.6, 1.0), Drawable::Form::CIRCLE),
-			Collidable(scale, Collidable::Form::CIRCLE, 0.0f, true, 4, vel));
+			Collidable(scale, Collidable::Form::CIRCLE, 0.1f, true, 4, vel));
 			world.spawnEntity(newEnt);
 		}
 
