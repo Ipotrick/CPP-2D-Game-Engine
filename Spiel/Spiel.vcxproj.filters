@@ -60,6 +60,9 @@
     <ClInclude Include="src\QuadTree.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\PhysicsWorker.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -80,7 +83,7 @@
     <ClCompile Include="src\glmath.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="Scripts.cpp">
+    <ClCompile Include="src\PhysicsWorker.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

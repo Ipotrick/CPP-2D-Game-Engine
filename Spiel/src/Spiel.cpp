@@ -30,11 +30,11 @@ public:
 
 		for (auto el : world.entities) qtree.insert(&el);
 
-		int num = 2000;
+		int num = 20;
 
 		for (int i = 0; i < num; i++) {
 			vec2 pos = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5 };
-			vec2 scale = { 0.2,0.2 };
+			vec2 scale = { 0.1,0.1 };
 			vec2 vel = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*0.1f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 0.1f };
 
 			auto newEnt = Entity(Drawable(pos, 0.5, scale, vec4(0.4, 0.4, 0.6, 1.0)),
@@ -45,13 +45,15 @@ public:
 	}
 
 	void update(World& world, float dTime) override {
-
+		
 		std::cout << getPerfInfo(4) << std::endl;
-
+		
 		if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 			quit();
 		}
-
+		
+		
+		
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 		if (controlledEnt != nullptr) {
 			if (keyPressed(KEY::W)) {
@@ -80,9 +82,9 @@ public:
 			for (auto iter = begin; iter != end; iter++) {
 			}
 		}
-
 		
-		for (Entity& ent : world.entities) {
+		
+		/*for (Entity& ent : world.entities) {
 			if (ent.isDynamic() && ent.getId() != controlledEntID) {
 				ent.hitboxSize *= 1 + (0.1f * getDeltaTime());
 				ent.mass *= 1 + (0.1f * getDeltaTime());
@@ -99,7 +101,7 @@ public:
 					}
 				}
 			}
-		}
+		}*/
 
 		if (keyPressed(KEY::UP)) {
 			camera.position += rotate(vec2(0.0f, -5.0f), camera.rotation) * getDeltaTime();
@@ -124,7 +126,7 @@ public:
 			camera.position = { 4.5f, 4.5f };
 			camera.zoom = 1 / 5.0f;
 		}
-
+		
 	}
 
 	void destroy() override {}
