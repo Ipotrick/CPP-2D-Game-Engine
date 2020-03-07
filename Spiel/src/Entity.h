@@ -9,6 +9,7 @@ public:
 		Collidable(collide_),
 		Drawable(draw_),
 		Basis(draw_.position, draw_.rotation),
+		health{ 100 },
 		despawned{false}
 	{}
 
@@ -19,6 +20,7 @@ public:
 		despawned{ false }
 	{}
 public:
+	int health;
 	bool despawned;
 
 };
