@@ -37,6 +37,7 @@ public:
 	inline float getElasticity() const { return elasticity; }
 
 	inline uint32_t getId() const { return id; }
+	inline bool isCollided() const { return collided; }
 	inline bool isDynamic() const { return dynamic; }
 	inline bool isSolid() const { return solid; }
 

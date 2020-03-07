@@ -42,6 +42,8 @@ public:
 			world.spawnEntity(newEnt);
 		}
 
+		world.entities[0].health = 1000;
+
 	}
 
 	void update(World& world, float dTime) override {
@@ -52,7 +54,18 @@ public:
 			quit();
 		}
 		
-		
+		for (size_t i = 0; i < world.entities.size(); ++i)
+		{
+			if (world.entities[i].isCollided() == true)
+			{
+				int hpSave{ world.entities[i].getHealth() };
+				world.entities[i].health = hpSave - 100;
+			}
+			if (world.entities[i].health <= 0)
+			{
+				world.despawn(world.entities[i]);
+			}
+		}
 		
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 		if (controlledEnt != nullptr) {

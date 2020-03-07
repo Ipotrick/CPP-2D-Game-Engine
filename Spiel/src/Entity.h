@@ -20,6 +20,9 @@ public:
 		health{100},
 		despawned{ false }
 	{}
+
+	inline int getHealth() const { return health; }
+
 public:
 	int health;
 	bool despawned;
