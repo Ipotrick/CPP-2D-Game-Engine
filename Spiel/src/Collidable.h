@@ -43,8 +43,8 @@ public:
 
 	inline Collidable* getCollidablePtr() { return this; }
 	inline Collidable const* getConstCollidablePtr() const { return this; }
-	vec2 getBoundsSize();
-	float getBoundsRadius();
+	vec2 getBoundsSize() const;
+	float getBoundsRadius() const;
 
 public:
 	Form hitboxForm;
@@ -60,7 +60,7 @@ public:
 
 
 
-inline vec2 Collidable::getBoundsSize() {
+inline vec2 Collidable::getBoundsSize() const {
 	if (hitboxForm == Form::CIRCLE)
 	{
 		return vec2(getBoundsRadius() * 2);
@@ -71,7 +71,7 @@ inline vec2 Collidable::getBoundsSize() {
 	}
 }
 
-inline float Collidable::getBoundsRadius() {
+inline float Collidable::getBoundsRadius() const {
 	if (hitboxForm == Form::CIRCLE) {
 		return hitboxSize.r/2.0f;
 	}

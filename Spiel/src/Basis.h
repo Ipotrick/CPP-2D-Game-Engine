@@ -2,6 +2,7 @@
 
 #include "glmath.h"
 
+
 struct Basis {
 	/* x y world coordinates, z depth*/
 	vec2 position;

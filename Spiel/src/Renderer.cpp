@@ -17,6 +17,9 @@ void Renderer::initiate()
 
 	shader = createShader(vertexShader, fragmentShader);
 	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Renderer::operator()()
@@ -37,6 +40,19 @@ void Renderer::operator()()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	/*float positions[8] =
+	{
+		0.0f, 0.0f,
+
+	};
+	unsigned int bufferCircle;
+	glGenBuffers(1, &bufferCircle);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferCircle);
+	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 
 	auto& worldDrawables = sharedData->renderBufferB.worldSpaceDrawables;
 	auto& windowDrawables = sharedData->renderBufferB.windowSpaceDrawables;
@@ -61,21 +77,29 @@ void Renderer::operator()()
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(-camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
-			for (auto& el : worldDrawables) {
-
-				mat4 modelMatrix = mat4::translate(vec3(el.position.x, el.position.y, 1 - el.drawingPrio)) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale.x, el.scale.y, 1));
-				glUniformMatrix4fv(1, 1, GL_FALSE, (viewProjectionMatrix * modelMatrix).data());
-				glUniform4fv(2, 1, el.color.data());
-				glDrawArrays(GL_TRIANGLES, 0, 3);
-				glDrawArrays(GL_TRIANGLES, 1, 4);
-			}
-
 			for (auto& el : windowDrawables) {
 
 				mat4 modelMatrix = mat4::translate(el.position) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale));
 				glUniformMatrix4fv(1, 1, GL_FALSE, (modelMatrix).data());
+				glUniformMatrix4fv(6, 1, GL_FALSE, mat4::identity().data());
 				glUniform4fv(2, 1, el.color.data());
+				glUniform1i(3, (el.form == Drawable::Form::CIRCLE ? 1 : 0));
+				glUniform2fv(4, 1, el.position.data());
+				glUniform1f(5, el.scale.r / 2.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 3);
+				glDrawArrays(GL_TRIANGLES, 1, 4);
+			}
+
+			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
+			for (auto& el : worldDrawables) {
+
+				mat4 modelMatrix = mat4::translate(vec3(el.position.x, el.position.y, 1 - el.drawingPrio)) * mat4::rotate_z(el.rotation) * mat4::scale(vec3(el.scale.x, el.scale.y, 1));
+				glUniformMatrix4fv(1, 1, GL_FALSE, modelMatrix.data());
+				glUniformMatrix4fv(6, 1, GL_FALSE, viewProjectionMatrix.data());
+				glUniform4fv(2, 1, el.color.data());
+				glUniform1i(3, (el.form == Drawable::Form::CIRCLE ? 1 : 0));
+				glUniform2fv(4, 1, el.position.data());
+				glUniform1f(5, el.scale.r / 2.0f);
 				glDrawArrays(GL_TRIANGLES, 0, 3);
 				glDrawArrays(GL_TRIANGLES, 1, 4);
 			}
