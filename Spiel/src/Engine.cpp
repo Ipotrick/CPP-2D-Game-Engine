@@ -31,7 +31,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ 5 }
+	physicsThreadCount{ 6 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
@@ -58,8 +58,8 @@ Engine::~Engine() {
 		sharedRenderData->run = false;
 	}
 	{
-		//std::lock_guard<std::mutex> l(sharedPhysicsSyncData->mut);
-		//sharedPhysicsSyncData->run = false;
+		std::lock_guard<std::mutex> l(sharedPhysicsSyncData->mut);
+		sharedPhysicsSyncData->run = false;
 	}
 }
 
@@ -225,10 +225,12 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
-	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), 1);
+	LogTimer<> t(std::cout);
+	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), 10);
 	for (auto& el : world_.entities) {
 		qtree.insert(&el);
 	}
+	t.stop();
 
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 
@@ -303,7 +305,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	Timer<> t3(new_physicsExecuteTime);
 	for (int i = 0; i < dynCollidables.size(); i++) {
 		auto& coll = dynCollidables.at(i);
-		coll->velocity.y -= 0.01 * deltaTime_;
+		//coll->velocity.y -= 0.01 * deltaTime_;
 		coll->velocity += collisionResponses.at(i).velChange;
 		coll->position += collisionResponses.at(i).posChange + coll->velocity * deltaTime_;
 		coll->collided = collisionResponses.at(i).collided;

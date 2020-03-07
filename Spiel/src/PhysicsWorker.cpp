@@ -17,10 +17,6 @@ void PhysicsWorker::operator()()
 		auto& qtree = physicsData->qtree;
 		auto& collisionResponses = physicsData->collisionResponses;
 		auto& collisionInfos = physicsData->collisionInfos;
-
-		std::stringstream ss;
-		//ss << "thread " << physicsData->id << " goes\n";
-		std::cout << ss.str();
 		
 		std::vector<Collidable*> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 		for (int i = begin; i < end; i++) {

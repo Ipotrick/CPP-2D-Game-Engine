@@ -6,6 +6,7 @@
 
 #include "Physics.h"
 #include "QuadTree.h"
+#include "Timing.h"
 
 struct PhysicsSyncData {
 	PhysicsSyncData() : mut{}, cond{}, run{ true }  {}
