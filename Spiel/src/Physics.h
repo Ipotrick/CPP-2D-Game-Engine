@@ -260,10 +260,10 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 	auto rectSpeed = other_->getVel();
 	auto rotation = other_->getRota();
 	/* correct rotation */
-	circlePos = rotate(circlePos, -rotation);
-	circleSpeed = rotate(circleSpeed, -rotation);
-	rectPos = rotate(rectPos, -rotation);
-	rectSpeed = rotate(rectSpeed, -rotation);
+	circlePos = rotate(circlePos, rotation);
+	circleSpeed = rotate(circleSpeed, rotation);
+	rectPos = rotate(rectPos, rotation);
+	rectSpeed = rotate(rectSpeed, rotation);
 	/* clamp the circle position to the rectangle */
 	auto circleProjToRectX = std::max(rectPos.x - rectHalfSize.x, std::min(circlePos.x, rectPos.x + rectHalfSize.x));
 	auto circleProjToRectY = std::max(rectPos.y - rectHalfSize.y, std::min(circlePos.y, rectPos.y + rectHalfSize.y));
@@ -311,7 +311,7 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 		if (coll_->isSolid()) {
 			float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
 			auto[v1, v2] = dynamicCollision2d2(circleSpeed, coll_->getMass(), rectSpeed, other_->getMass(), backRotatedNormDirVec, elasticity);
-			v1 = rotate(v1, rotation); v2 = rotate(v2, rotation);
+			v1 = rotate(v1, -rotation); v2 = rotate(v2, -rotation);
 
 			if (coll_->isDynamic()) {
 				if (other_->isDynamic()) {
