@@ -42,7 +42,7 @@ public:
 			world.spawnEntity(newEnt);
 		}
 
-		world.entities[0].health = 400;
+		world.entities[0].health = 200;
 
 	}
 
