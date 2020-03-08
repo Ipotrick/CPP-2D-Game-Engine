@@ -10,7 +10,7 @@ public:
 	}
 
 	void create() override {
-		world.entities.reserve(10000);//test
+		world.entities.reserve(10000);
 		camera.zoom = 1 / 5.0f;
 
 		vec2 scaleEnt = { 1,1 };
