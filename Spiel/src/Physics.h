@@ -208,40 +208,131 @@ inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll
 
 inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll_, Collidable const* other_)
 {
+	CollisionResponse response = CollisionResponse();
 	auto [partialResult1, rotation1, dist1] = partialSATCollision(coll_, other_);
-	auto [partialResult2, rotation2, dist2] = partialSATCollision(other_, coll_);
+	if (partialResult1 == true) {
+		auto [partialResult2, rotation2, dist2] = partialSATCollision(other_, coll_);
 
+		if (partialResult2)
+		{
+			response.collided = true;
+			if (coll_->isSolid()) {
+				auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
+				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
+				rotation = (float)((int)rotation % 360);
+
+				auto collisionNormalVec = vec2(cos(rotation / RAD), sin(rotation / RAD));
+				auto distVec = collisionNormalVec * minClippingDist;
+
+				float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
+				auto [v1, v2] = dynamicCollision2d2(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
+
+
+				if (coll_->isDynamic()) {
+					if (other_->isDynamic()) {
+						float BothSizes = coll_->getHitboxSize().x * coll_->getHitboxSize().y + other_->getHitboxSize().x * other_->getHitboxSize().y;
+						float collPart = coll_->getHitboxSize().x * coll_->getHitboxSize().y / BothSizes;
+						float otherPart = other_->getHitboxSize().x * other_->getHitboxSize().y / BothSizes;
+
+						response.posChange = distVec * otherPart * 1.001f;
+					}
+					else {
+						response.posChange = distVec * 1.001f;
+					}
+				}
+				//vec change is newVel - oldVel	= v1 - coll_->getVel()
+				response.velChange = (v1 - coll_->getVel());
+			}
+		}
+	}
+	return response;
+}
+
+inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle, Collidable const* rect, bool isCirclePrimary) {
 	CollisionResponse response = CollisionResponse();
 
-	if (partialResult1 && partialResult2)
-	{
+	auto const& rotation = rect->getRota();
+	auto rotCirclePos = rotate(circle->getPos(), -rotation);
+	auto rotRectPos = rotate(rect->getPos(), -rotation);
+
+	auto rectHalfSize = rect->getHitboxSize() * 0.5;
+
+	/* calmp the circle position to the rectangle skin. This is the nbearest point of the circle to the rect. if circle is insided the rectangle, the clamping doesnt work. */
+	auto clampedCirclePos = vec2(
+		std::max(rotRectPos.x - rectHalfSize.x, std::min(rotCirclePos.x, rotRectPos.x + rectHalfSize.x)),
+		std::max(rotRectPos.y - rectHalfSize.y, std::min(rotCirclePos.y, rotRectPos.y + rectHalfSize.y)) );
+
+	/* check if circle center is inside the rectangle, as in this case the nearest point to a rectangle side has tto be computed differently */
+	bool isCircleInsideRect{ false };
+	if (clampedCirclePos.x < rotRectPos.x + rectHalfSize.x && clampedCirclePos.x > rotRectPos.x - rectHalfSize.x &&
+		clampedCirclePos.y < rotRectPos.y + rectHalfSize.y && clampedCirclePos.y > rotRectPos.y - rectHalfSize.y) {
+		/* now we need to find the closest side ot the rectangle relative to the circles center */
+		auto differenceXLeft = fabs(rotCirclePos.x - (rotRectPos.x - rectHalfSize.x));
+		auto differenceXRight = fabs(rotCirclePos.x - (rotRectPos.x + rectHalfSize.x));
+		auto differenceYLeft = fabs(rotCirclePos.y - (rotRectPos.y - rectHalfSize.y));
+		auto differenceYRight = fabs(rotCirclePos.y - (rotRectPos.y + rectHalfSize.y));
+		if (differenceXLeft < differenceXRight && differenceXLeft < differenceYLeft && differenceXLeft < differenceYRight) {
+			clampedCirclePos.x = rotRectPos.x - rectHalfSize.x;
+		}
+		else if (differenceXRight < differenceXLeft && differenceXRight < differenceYLeft && differenceXRight < differenceYRight) {
+			clampedCirclePos.x = rotRectPos.x + rectHalfSize.x;
+		}
+		else if (differenceYLeft < differenceXLeft && differenceYLeft < differenceXRight && differenceYLeft < differenceYRight) {
+			clampedCirclePos.y = rotRectPos.y - rectHalfSize.y;
+		} 
+		else {
+			clampedCirclePos.y = rotRectPos.y + rectHalfSize.y;
+		}
+		isCircleInsideRect = true;
+	}
+
+	vec2 clampedToCircleCenter = rotCirclePos - clampedCirclePos;
+	float clampedToCircleCenterLen = norm(clampedToCircleCenter);
+	vec2 collisionDir;	//allways from rect TO circle
+	float dist;
+	if (isCircleInsideRect) {
+		collisionDir = -normalize(clampedToCircleCenter);
+		dist = -clampedToCircleCenterLen - circle->getRadius();
+	}
+	else {
+		collisionDir = normalize(clampedToCircleCenter);
+		dist = clampedToCircleCenterLen - circle->getRadius();
+	}
+	vec2 backRotatedColDir = rotate(collisionDir, rotation);
+
+	if (dist < 0.0f) {
 		response.collided = true;
-		if (coll_->isSolid()) {
-			auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
-			auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
-			rotation = (float)((int)rotation % 360);
+		if (circle->isSolid()) {
+			float elasticity = std::max(circle->getElasticity(), rect->getElasticity());
+			auto [v1, v2] = dynamicCollision2d2(circle->getVel(), circle->getMass(), rect->getVel(), rect->getMass(), backRotatedColDir, elasticity);
 
-			auto collisionNormalVec = vec2(cos(rotation / RAD), sin(rotation / RAD));
-			auto distVec = collisionNormalVec * minClippingDist;
-
-			float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
-			auto [v1, v2] = dynamicCollision2d2(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
-
-
-			if (coll_->isDynamic()) {
-				if (other_->isDynamic()) {
-					float BothSizes = coll_->getHitboxSize().x * coll_->getHitboxSize().y + other_->getHitboxSize().x * other_->getHitboxSize().y;
-					float collPart = coll_->getHitboxSize().x * coll_->getHitboxSize().y / BothSizes;
-					float otherPart = other_->getHitboxSize().x * other_->getHitboxSize().y / BothSizes;
-
-					response.posChange = distVec * otherPart * 1.001f;
+			/* the primary is allways dynamic */
+			if (isCirclePrimary) {
+				if (rect->isDynamic()) {
+					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
+					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
+					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
+					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
+					response.posChange = -backRotatedColDir * dist * rectPart * 1.001f;
 				}
 				else {
-					response.posChange = distVec * 1.001f;
+					response.posChange = -backRotatedColDir * dist * 1.001f;
 				}
+				response.velChange = (v1 - circle->getVel());
 			}
-			//vec change is newVel - oldVel	= v1 - coll_->getVel()
-			response.velChange = (v1 - coll_->getVel());
+			else {
+				if (circle->isDynamic()) {
+					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
+					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
+					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
+					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
+					response.posChange = backRotatedColDir * dist * circlePart * 1.001f;
+				}
+				else {
+					response.posChange = backRotatedColDir * dist * 1.001f;
+				}
+				response.velChange = (v2 - rect->getVel());
+			}
 		}
 	}
 	return response;
@@ -250,8 +341,8 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Collidable const* other_, bool isCollPrimary_)
 {
 	CollisionResponse response = CollisionResponse();
-	/* check if they really collided */
-	/* rotate circle and rec so that the rect is axis aligned */
+	// check if they really collided 
+	// rotate circle and rec so that the rect is axis aligned 
 	auto circlePos = coll_->getPos();
 	auto circleSpeed = coll_->getVel();
 	auto circleRad = coll_->getRadius();
@@ -259,17 +350,19 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 	auto rectHalfSize = other_->getHitboxSize() * 0.5f;
 	auto rectSpeed = other_->getVel();
 	auto rotation = other_->getRota();
-	/* correct rotation */
-	circlePos = rotate(circlePos, rotation);
-	circleSpeed = rotate(circleSpeed, rotation);
-	rectPos = rotate(rectPos, rotation);
-	rectSpeed = rotate(rectSpeed, rotation);
-	/* clamp the circle position to the rectangle */
+	// correct rotation 
+	circlePos = rotate(circlePos, -rotation);
+	circleSpeed = rotate(circleSpeed, -rotation);
+	rectPos = rotate(rectPos, -rotation);
+	rectSpeed = rotate(rectSpeed, -rotation);
+	// clamp the circle position to the rectangle 
 	auto circleProjToRectX = std::max(rectPos.x - rectHalfSize.x, std::min(circlePos.x, rectPos.x + rectHalfSize.x));
 	auto circleProjToRectY = std::max(rectPos.y - rectHalfSize.y, std::min(circlePos.y, rectPos.y + rectHalfSize.y));
 	auto clampedCirclePos = vec2(circleProjToRectX, circleProjToRectY);
-	/* if the circle is inside the rectangle, the nearest pos of the circle to a wall needs to be calculated differenly */
+
+	// if the circle is inside the rectangle, the nearest pos of the circle to a wall needs to be calculated differenly
 	bool isCircleInsideRect{ false };
+	
 	if (clampedCirclePos.x > rectPos.x - rectHalfSize.x && clampedCirclePos.x < rectPos.x + rectHalfSize.x
 		&& clampedCirclePos.y > rectPos.y - rectHalfSize.y && clampedCirclePos.y < rectPos.y + rectHalfSize.y)
 	{
@@ -297,7 +390,7 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 	}
 
 	auto distanceVec = clampedCirclePos - circlePos;
-	/* seperate the distVec into a distance and a direction */
+	// seperate the distVec into a distance and a direction 
 	auto dist = norm(distanceVec) - circleRad;
 	vec2 normDirVec = distanceVec;
 	normDirVec = normalize(normDirVec);
@@ -315,9 +408,9 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 
 			if (coll_->isDynamic()) {
 				if (other_->isDynamic()) {
-					auto bothSizes = coll_->getBoundsRadius() + other_->getBoundsRadius();
-					auto collPart = coll_->getBoundsRadius() / bothSizes;
-					auto otherPart = other_->getBoundsRadius() / bothSizes;
+					auto bothSizes = coll_->getBoundsRadius() * coll_->getBoundsRadius() + other_->getBoundsRadius() * other_->getBoundsRadius();
+					auto collPart = coll_->getBoundsRadius() * coll_->getBoundsRadius() / bothSizes;
+					auto otherPart = other_->getBoundsRadius() * other_->getBoundsRadius() / bothSizes;
 
 					if (isCollPrimary_) {
 						response.posChange = (normDirVec * (dist + circleRad * 2)) * otherPart * 1.001f;
@@ -348,14 +441,15 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 		response.collided = true;
 		if (coll_->isSolid()) {
 			float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
+			
 			auto [v1, v2] = dynamicCollision2d2(circleSpeed, coll_->getMass(), rectSpeed, other_->getMass(), -backRotatedNormDirVec, elasticity);
 			v1 = rotate(v1, rotation); v2 = rotate(v2, rotation);
 
 			if (coll_->isDynamic()) {
 				if (other_->isDynamic()) {
-					auto bothSizes = coll_->getBoundsRadius() + other_->getBoundsRadius();
-					auto collPart = coll_->getBoundsRadius() / bothSizes;
-					auto otherPart = other_->getBoundsRadius() / bothSizes;
+					auto bothSizes = coll_->getBoundsRadius() * coll_->getBoundsRadius() + other_->getBoundsRadius() * other_->getBoundsRadius();
+					auto collPart = coll_->getBoundsRadius() * coll_->getBoundsRadius() / bothSizes;
+					auto otherPart = other_->getBoundsRadius() * other_->getBoundsRadius() / bothSizes;
 
 					if (isCollPrimary_) {
 						response.posChange = normDirVec * dist * otherPart * 1.001f;
@@ -385,35 +479,6 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 	return response;
 }
 
-
-inline CollisionResponse checkForCollisions(Collidable const* coll_, std::vector<Collidable*> const& others_) {
-	CollisionResponse result = CollisionResponse();
-	for (auto const& other : others_) {
-		if (coll_ == other) continue;
-
-		if (coll_->getForm() == Collidable::Form::CIRCLE) {
-			if (other->getForm() == Collidable::Form::CIRCLE) {
-				result = result + circleCircleCollisionCheck(coll_, other);
-			}
-			else {
-				/* circle, rectangle */
-				result = result + CollisionResponse();
-			}
-		}
-		else {
-			if (other->getForm() == Collidable::Form::CIRCLE) {
-				/* rectangle, circle */
-				result = result + CollisionResponse();
-			}
-			else {
-				/* rectangle, rectangle */
-				result = result + rectangleRectangleCollisionCheck(coll_, other);
-			}
-		}
-	}
-	return result;
-}
-
 inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable const* other_) {
 	if (coll_ == other_) return CollisionResponse();
 
@@ -422,14 +487,12 @@ inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable c
 			return circleCircleCollisionCheck(coll_, other_);
 		}
 		else {
-			return doCircleRectangleCollision(coll_, other_, true);
+			return checkCircleRectangleCollision(coll_, other_, true);
 		}
 	}
 	else {
 		if (other_->getForm() == Collidable::Form::CIRCLE) {
-
-			auto puffer = doCircleRectangleCollision(other_, coll_, false);
-			return puffer;
+			return checkCircleRectangleCollision(other_, coll_, false);
 		}
 		else {
 			return rectangleRectangleCollisionCheck(coll_, other_);

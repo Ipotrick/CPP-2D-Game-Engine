@@ -27,8 +27,20 @@ void PhysicsWorker::operator()()
 
 			for (auto& other : nearCollidables) {
 				auto newResponse = checkForCollision(coll, other);
-				(*collisionResponses)[i] = (*collisionResponses)[i] + newResponse;
 				
+				if (newResponse.collided) {
+					// set weighted average of position changes 
+					auto bothPosChangeLengths = norm((*collisionResponses)[i].posChange) + norm(newResponse.posChange);
+					if (bothPosChangeLengths > 0) {
+						(*collisionResponses)[i].posChange = norm((*collisionResponses)[i].posChange) / bothPosChangeLengths * (*collisionResponses)[i].posChange
+							+ norm(newResponse.posChange) / bothPosChangeLengths * newResponse.posChange;
+					}
+
+					(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange + newResponse.velChange;
+
+					(*collisionResponses)[i].collided = true;
+				}
+				//(*collisionResponses)[i] = (*collisionResponses)[i] + newResponse;
 				if (newResponse.collided) {
 					collisionInfos->push_back(CollisionInfo(coll->getId(), other->getId()));
 				}

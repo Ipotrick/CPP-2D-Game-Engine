@@ -98,6 +98,7 @@ private:
 	std::vector<std::shared_ptr<PhysicsSharedData>> sharedPhysicsData;
 	std::shared_ptr<PhysicsSyncData> sharedPhysicsSyncData;
 	std::vector<std::thread> physicsThreads;
+	uint32_t qtreeCapacity;
 
 	std::shared_ptr<Window> window;
 
