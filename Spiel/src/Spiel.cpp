@@ -42,7 +42,7 @@ public:
 			world.spawnEntity(newEnt);
 		}
 
-		world.entities[0].health = 400;
+		world.entities[0].health = 300;
 
 	}
 
@@ -56,7 +56,7 @@ public:
 
 		auto controlledEnt = world.getEntityPtr(controlledEntID);
 
-		//kills entities one contact
+		//kills entities one contact with anything
 		/*for (size_t i = 0; i < world.entities.size(); i++)
 		{
 			if (world.entities[i].isCollided() == true)
