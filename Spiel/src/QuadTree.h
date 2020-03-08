@@ -41,8 +41,7 @@ public:
 
 	void querryWithDrawables(std::vector<Collidable*>& rVec, vec2 const& pos, vec2 const& size, std::vector<Drawable>& drawables) const;
 
-	void getDrawables(std::vector<Drawable>& rVec) const {
-	}
+	void clear();
 
 	vec2 getPosition() { return pos; }
 	vec2 getSize() { return size; }
@@ -267,4 +266,14 @@ inline void Quadtree::querryWithDrawables(std::vector<Collidable*>& rVec, vec2 c
 		drawables.push_back(Drawable(pos, 0.1, size, vec4(1, 1, 1, 1)));
 	}
 	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
+}
+
+inline void Quadtree::clear() {
+	collidables.clear();
+	if (hasSubTrees) {
+		ul->clear();
+		ur->clear();
+		dl->clear();
+		dr->clear();
+	}
 }

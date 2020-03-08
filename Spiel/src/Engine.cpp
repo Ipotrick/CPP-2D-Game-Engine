@@ -3,7 +3,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 40'0 },//10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 40 },//10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -31,7 +31,8 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ 6 }
+	physicsThreadCount{ 6 },
+	qtreeCapacity{ 10 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
@@ -218,19 +219,17 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	for (auto& el : world_.entities) {
 		if (el.isDynamic()) {
 			dynCollidables.push_back(&el);							//build dynamic collidable vector
-			el.position = el.position + el.velocity * deltaTime_;	//move collidable 
 		}
+		//look if the quadtree has to take uop largera area
 		if (el.position.x < minPos.x) minPos.x = el.position.x;
 		if (el.position.y < minPos.y) minPos.y = el.position.y;
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
-	LogTimer<> t(std::cout);
-	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), 10);
+	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), 30);
 	for (auto& el : world_.entities) {
 		qtree.insert(&el);
 	}
-	t.stop();
 
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 
@@ -305,7 +304,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	Timer<> t3(new_physicsExecuteTime);
 	for (int i = 0; i < dynCollidables.size(); i++) {
 		auto& coll = dynCollidables.at(i);
-		//coll->velocity.y -= 0.01 * deltaTime_;
+		//coll->velocity.y -= 0.02 * deltaTime_;
 		coll->velocity += collisionResponses.at(i).velChange;
 		coll->position += collisionResponses.at(i).posChange + coll->velocity * deltaTime_;
 		coll->collided = collisionResponses.at(i).collided;
