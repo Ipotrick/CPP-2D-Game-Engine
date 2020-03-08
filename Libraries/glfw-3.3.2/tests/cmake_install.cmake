@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/tests
+# Install script for directory: C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/tests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

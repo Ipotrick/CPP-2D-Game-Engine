@@ -36,6 +36,7 @@
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Scripts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\Physics.cpp" />
@@ -182,6 +183,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

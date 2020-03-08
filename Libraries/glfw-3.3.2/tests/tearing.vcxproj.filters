@@ -1,27 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\tearing.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\tearing.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps\glad_gl.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps\glad_gl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\deps\glad\gl.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\deps\glad\gl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\tests\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\tests\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{BE3DE87D-C3C9-3AC5-8DC9-EEB3C8139349}</UniqueIdentifier>
+      <UniqueIdentifier>{B4A18E29-335F-38A4-A0F1-CD7EBE7FAEF9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{380FD5B1-BCD3-3410-B32D-3C5CF2763DDF}</UniqueIdentifier>
+      <UniqueIdentifier>{475D7D79-6055-3ECE-9208-6872B430E636}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
