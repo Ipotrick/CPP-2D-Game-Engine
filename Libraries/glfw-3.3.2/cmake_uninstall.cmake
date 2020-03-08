@@ -1,9 +1,9 @@
 
-if (NOT EXISTS "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: \"C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/install_manifest.txt\"")
+if (NOT EXISTS "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/install_manifest.txt")
+  message(FATAL_ERROR "Cannot find install manifest: \"C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/install_manifest.txt\"")
 endif()
 
-file(READ "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glfw-3.3.2/install_manifest.txt" files)
+file(READ "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glfw-3.3.2/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 
 foreach (file ${files})

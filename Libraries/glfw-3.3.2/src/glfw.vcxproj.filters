@@ -1,93 +1,93 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\context.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\context.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\init.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\init.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\input.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\input.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\monitor.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\monitor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\vulkan.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\vulkan.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\window.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_init.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_init.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_joystick.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_joystick.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_monitor.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_monitor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_time.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_time.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_thread.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_thread.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_window.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\wgl_context.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\wgl_context.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\egl_context.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\egl_context.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\osmesa_context.c">
+    <ClCompile Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\osmesa_context.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\internal.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\mappings.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\mappings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\glfw_config.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\glfw_config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include\GLFW\glfw3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3native.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\include\GLFW\glfw3native.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_platform.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\win32_joystick.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\win32_joystick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\wgl_context.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\wgl_context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\egl_context.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\egl_context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\osmesa_context.h">
+    <ClInclude Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\osmesa_context.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\src\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\kunke\source\repos\Ipotrick\Spiel\Libraries\glfw-3.3.2\src\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{BE3DE87D-C3C9-3AC5-8DC9-EEB3C8139349}</UniqueIdentifier>
+      <UniqueIdentifier>{B4A18E29-335F-38A4-A0F1-CD7EBE7FAEF9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{380FD5B1-BCD3-3410-B32D-3C5CF2763DDF}</UniqueIdentifier>
+      <UniqueIdentifier>{475D7D79-6055-3ECE-9208-6872B430E636}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

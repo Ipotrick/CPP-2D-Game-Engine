@@ -36,6 +36,7 @@
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Scripts.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\Physics.cpp" />
