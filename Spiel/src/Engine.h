@@ -25,58 +25,65 @@ public:
 	Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
 	~Engine();
 
-	/* ends programm */
+	/* ends programm after finisheing the current tick */
 	inline void quit() { running = false; }
 
+	/* call run to start the rpogramm */
 	virtual void run() final;
 
+	/* specify what happenes once for initialisation */
 	virtual void create() = 0;
+	/* specify what happenes every update tick */
 	virtual void update(World& world, float deltaTime) = 0;
+	/* specify what happenes once for destruction */
 	virtual void destroy() = 0;
 
-	virtual void physicsUpdate(World& world, float deltaTime) final;
+	
 
 					/*-- general statistics utility --*/
-	/* returns time difference to last physics dispatch*/
+	/* returns time difference to last physics dispatch, O(1)*/
 	inline float getDeltaTime() { return deltaTime; }
-	/* returns deltatime or the lowest allowed sim time difference */
+	/* returns deltatime or the lowest allowed sim time difference, O(1)*/
 	inline float getDeltaTimeSafe() { return std::min(deltaTime, maxDeltaTime); }
-	/* returns physics + update + bufferSwapTime */
+	/* returns physics + update + bufferSwapTime, O(1) */
 	inline float getMainTime() { return mainTime; }
-	/* returns time it took to process the last update task*/
+	/* returns time it took to process the last update task, O(1)*/
 	inline float getUpdateTime() { return updateTime; }
-	/* returns time it took to process the last physics task */
+	/* returns time it took to process the last physics task, O(1) */
 	inline float getPhysicsTime() { return physicsTime; }
-	/* returns time it took to render */
+	/* returns time it took to render, O(1) */
 	inline float getRenderTime() { return renderTime; }
-	/* returns the number of past iterations */ 
+	/* returns the number of past iterations , O(1)*/ 
 	inline uint32_t getIteration() { return iteration; }
+	/* returnes a string wtih formated performance info. The detail level changes how much information is shown */
 	std::string getPerfInfo(int detail);
 
 					/*-- input utility --*/
-	/* returns the status(KEYSTATUS) of a given key_(KEY)  */
+	/* returns the status(KEYSTATUS) of a given key_(KEY), O(1) (mutex locking) */
 	KEYSTATUS getKeyStatus(KEY key_);
-	/* returns if a given key_ is pressed */
+	/* returns if a given key_ is pressed, O(1) (mutex locking) */
 	bool keyPressed(KEY key_);
-	/* returns if a given key_ is released */
+	/* returns if a given key_ is released, O(1) (mutex locking) */
 	bool keyReleased(KEY key_);
-	/* returns if a given key_ is repeating */
+	/* returns if a given key_ is repeating, O(1) (mutex locking) */
 	bool keyRepeating(KEY key_);
 
 					/*-- window utility --*/
-	/* returns size of window */
+	/* returns size of window in pixel of your desktop resolution, O(1)*/
 	vec2 getWindowSize();
-	/* returns aspect ration width/height of the window*/
+	/* returns aspect ration width/height of the window, O(1)*/
 	float getWindowAspectRatio();
 
-					/* graphic utility */
-	void submitDrawableWindowspace(Drawable d_);
+					/* graphics utility */
+	/* submit a Drawable to be drawn relative to the window, O(1) */
+	void submitDrawableWindowSpace(Drawable d_);
+	/* submit a Drawable to be drawn relative to the world, O(1) */
 	void submitDrawableWorldSpace(Drawable d_);
 				
-					/* physics utility */
-	/* returns a range (iterator to begin and end) of the collision list for the ent */
+					/* physics utility *//**/
+	/* returns a range (iterator to begin and end) of the collision list for the ent, O(log2(n)) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(Entity const& ent_);
-	/* returns a range (iterator to begin and end) of the collision list for the ent with the id */
+	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(log2(n)) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
 
 public:
@@ -87,11 +94,12 @@ public:
 
 private:
 	void commitTimeMessurements();
+	void physicsUpdate(World& world, float deltaTime);
 
 private:
 	bool running;
 	uint32_t iteration;
-	float maxDeltaTime = 0.016;
+	float maxDeltaTime = 0.010;
 
 	int physicsThreadCount;
 	std::vector<CollisionInfo> collisionInfos;
@@ -135,7 +143,7 @@ private:
 	std::vector<Drawable> worldSpaceDrawables;
 };
 
-inline void Engine::submitDrawableWindowspace(Drawable d_) {
+inline void Engine::submitDrawableWindowSpace(Drawable d_) {
 	windowSpaceDrawables.emplace_back(d_);
 }
 
