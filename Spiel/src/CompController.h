@@ -3,7 +3,7 @@
 #include "Entity.h"
 #include "Engine.h"
 
-class CompController {
+/*class CompController {
 public:
 	CompController()
 	{}
@@ -13,4 +13,4 @@ public:
 
 public:
 	vec2 entityIDs;
-};
+};*/
