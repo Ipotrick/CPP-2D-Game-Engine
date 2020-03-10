@@ -10,7 +10,7 @@
 
 class Quadtree {
 public:
-	Quadtree(float width, float hight, float xPos, float yPos, uint32_t capacity_)
+	Quadtree(float width, float hight, float xPos, float yPos, size_t capacity_)
 		:size(vec2(width, hight)),
 		pos(vec2(xPos, yPos)),
 		collidables(),
@@ -18,10 +18,10 @@ public:
 		hasSubTrees{ false },
 		marked{ false }
 	{
-		collidables.reserve(capacity_ + 1);
+		collidables.reserve(capacity_ + 1ll);
 	}
 
-	Quadtree(vec2 minPos_, vec2 maxPos_, uint32_t capacity_):
+	Quadtree(vec2 minPos_, vec2 maxPos_, size_t capacity_):
 		size(maxPos_ - minPos_),
 		pos((maxPos_ - minPos_)/2 + minPos_),
 		capacity{ capacity_ },
@@ -29,7 +29,7 @@ public:
 		hasSubTrees{ false },
 		marked{ false }
 	{
-		collidables.reserve(capacity_ + 1);
+		collidables.reserve(capacity_ + 1ll);
 	}
 public:
 
@@ -68,7 +68,7 @@ public:
 private:
 	bool hasSubTrees;
 	std::vector<Collidable*> collidables;
-	uint32_t capacity;
+	size_t capacity;
 	vec2 size;
 	vec2 pos;
 	std::unique_ptr<Quadtree> ul;	//up left

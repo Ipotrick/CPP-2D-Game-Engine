@@ -134,18 +134,18 @@ std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::ite
 }
 
 void Engine::commitTimeMessurements() {
-	deltaTime = micsecToDouble(new_deltaTime);
-	mainTime = micsecToDouble(new_mainTime);
-	updateTime = micsecToDouble(new_updateTime);
-	physicsTime = micsecToDouble(new_physicsTime);
-	physicsPrepareTime = micsecToDouble(new_physicsPrepareTime);
-	physicsCollisionTime = micsecToDouble(new_physicsCollisionTime);
-	physicsExecuteTime = micsecToDouble(new_physicsExecuteTime);
-	renderTime = micsecToDouble(new_renderTime);
-	mainSyncTime = micsecToDouble(new_mainSyncTime);
-	mainWaitTime = micsecToDouble(new_mainWaitTime);
-	renderBufferPushTime = micsecToDouble(new_renderBufferPushTime);
-	renderSyncTime = micsecToDouble(new_renderSyncTime);
+	deltaTime = micsecToFloat(new_deltaTime);
+	mainTime = micsecToFloat(new_mainTime);
+	updateTime = micsecToFloat(new_updateTime);
+	physicsTime = micsecToFloat(new_physicsTime);
+	physicsPrepareTime = micsecToFloat(new_physicsPrepareTime);
+	physicsCollisionTime = micsecToFloat(new_physicsCollisionTime);
+	physicsExecuteTime = micsecToFloat(new_physicsExecuteTime);
+	renderTime = micsecToFloat(new_renderTime);
+	mainSyncTime = micsecToFloat(new_mainSyncTime);
+	mainWaitTime = micsecToFloat(new_mainWaitTime);
+	renderBufferPushTime = micsecToFloat(new_renderBufferPushTime);
+	renderSyncTime = micsecToFloat(new_renderSyncTime);
 }
 
 void Engine::run() {

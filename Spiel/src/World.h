@@ -17,6 +17,8 @@ public:
 	void despawn(int entitiy_id);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
 	void despawn(Entity & entity_);
+	/* returns const refference to entities that are going to be deleted */
+	std::vector<int> const& getDespawnIDs();
 
 	/* INNER ENGINE FUNCTION */
 	void executeDespawns();

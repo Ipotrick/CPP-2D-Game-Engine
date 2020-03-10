@@ -16,8 +16,8 @@
 
 
 #ifdef _WIN32
-#define M_PI 3.14159265
-#define RAD 57.2957795
+#define M_PI 3.14159265f
+#define RAD 57.2957795f
 #include <algorithm>
 #endif
 
@@ -264,21 +264,21 @@ inline vec2 rotate(vec2 const& vec_, float angle_) {
 
 inline float getAngle(vec2 v)
 {
-	if (v.y == 0)
-		return v.x < 0 ? 180 : 0;
+	if (v.y == 0.0f)
+		return v.x < 0.0f ? 180.0f : 0.0f;
 	else if (v.x == 0)
-		return v.y < 0 ? 270 : 90;
+		return v.y < 0.0f ? 270.0f : 90.0f;
 
-	if (v.y > 0)
-		if (v.x > 0)
+	if (v.y > 0.0f)
+		if (v.x > 0.0f)
 			return atan(v.y / v.x) * 180.f / 3.14159f;
 		else
-			return 180.0 - atan(v.y / -v.x) * 180.f / 3.14159f;
+			return 180.0f - atan(v.y / -v.x) * 180.f / 3.14159f;
 	else
 		if (v.x > 0)
-			return 360.0 - atan(-v.y / v.x) * 180.f / 3.14159f;
+			return 360.0f - atan(-v.y / v.x) * 180.f / 3.14159f;
 		else
-			return 180.0 + atan(-v.y / -v.x) * 180.f / 3.14159f;
+			return 180.0f + atan(-v.y / -v.x) * 180.f / 3.14159f;
 }
 
 

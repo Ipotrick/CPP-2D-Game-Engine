@@ -72,6 +72,7 @@ struct RendererSharedData {
 		run{ true },
 		ready{ false },
 		new_renderTime{ 0 },
+		new_renderSyncTime{ 0 },
 		mut{  },
 		cond{  }
 	{}

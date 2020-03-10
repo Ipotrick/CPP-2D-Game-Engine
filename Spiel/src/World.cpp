@@ -39,6 +39,11 @@ void World::despawn(Entity & entity_)
 	despawnList.emplace_back(entity_.getId());
 }
 
+std::vector<int> const& World::getDespawnIDs()
+{
+	return despawnList;
+}
+
 
 
 void World::executeDespawns()

@@ -234,7 +234,7 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
 				rotation = (float)((int)rotation % 360);
 
-				auto collisionNormalVec = vec2(cos(rotation / RAD), sin(rotation / RAD));
+				auto collisionNormalVec = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
 				auto distVec = collisionNormalVec * minClippingDist;
 
 				float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());

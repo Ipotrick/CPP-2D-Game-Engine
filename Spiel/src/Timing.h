@@ -6,8 +6,8 @@
 #include <sstream>
 #include <thread>
 
-inline double micsecToDouble(std::chrono::microseconds mics) {
-	return mics.count() * 0.000001;
+inline double micsecToFloat(std::chrono::microseconds mics) {
+	return mics.count() * 0.000001f;
 }
 
 template <typename Clock = std::chrono::high_resolution_clock ,typename Unit = std::chrono::microseconds>
