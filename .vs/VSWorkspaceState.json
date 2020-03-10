@@ -1,8 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Libraries",
     "\\Spiel",
+    "\\Spiel\\shader",
     "\\Spiel\\src"
   ],
   "SelectedNode": "\\Spiel\\src\\Spiel.cpp",

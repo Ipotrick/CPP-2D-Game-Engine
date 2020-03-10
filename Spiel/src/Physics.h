@@ -5,25 +5,30 @@
 
 #include "glmath.h"
 #include "Collidable.h"
+#include "Drawable.h"
 
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
+
+	inline std::vector<Drawable> debugDrawables;
 }
 
 struct CollisionResponse {
 	vec2 posChange;
 	vec2 velChange;
 	bool collided;
+	float clippingDist;
 
-	CollisionResponse() : posChange{ 0.0f }, velChange{ 0.0f }, collided{ false } {}
+	CollisionResponse() : posChange{ 0.0f }, velChange{ 0.0f }, collided{ false }, clippingDist{ 0.0f } {}
 };
 
 struct CollisionInfo {
 	uint32_t idA;
 	uint32_t idB;
+	float clippingDist;
 
-	CollisionInfo(uint32_t idA_, uint32_t idB_) :idA{idA_}, idB{idB_} {}
+	CollisionInfo(uint32_t idA_, uint32_t idB_, float clippingDist_) :idA{ idA_ }, idB{ idB_ }, clippingDist{ clippingDist_ } {}
 };
 
 inline CollisionResponse operator+(CollisionResponse a, CollisionResponse b) {
@@ -32,7 +37,7 @@ inline CollisionResponse operator+(CollisionResponse a, CollisionResponse b) {
 	a.velChange += b.velChange;
 	return a;
 }
-
+/*
 inline std::tuple<float, float> dynamicCollision(float u1, float m1, float u2, float m2, float e)
 {
 	float firstFactor = m1 * u1 + m2 * u2;
@@ -41,29 +46,35 @@ inline std::tuple<float, float> dynamicCollision(float u1, float m1, float u2, f
 		(firstFactor + m2 * e * (u2 - u1)) / (secondFactor),
 		(firstFactor + m1 * e * (u1 - u2)) / (secondFactor)
 		);
+}*/
+
+inline std::tuple<float, float> dynamicCollision2(float m1, float u2, float m2, float e)
+{
+	float firstFactor = m2 * u2;
+	float secondFactor = m1 + m2;
+	return std::tuple<float, float>(
+		(firstFactor + m2 * e * u2) / (secondFactor),
+		(firstFactor + m1 * e * -u2) / (secondFactor)
+		);
 }
 
-inline std::tuple<vec2, vec2> dynamicCollision2d2(vec2 const& u1, float const& m1, vec2 const& u2, float const& m2, vec2 const& cNV, float elasticity) {
+/* retruns the change in velocity for the first entered entity in an elastic collision*/
+inline vec2 dynamicCollision2d2(vec2 const& u1, float const& m1, vec2 const& u2, float const& m2, vec2 const& cNV, float elasticity) {
 	vec2 ocNV = rotate(cNV, 90);
 	/* bezugssystem ist u2 */
 	auto a_u2 = u2 - u1;
 	float pu2 = dot(a_u2, cNV);
-	vec2 ru2 = (a_u2 * ocNV) * ocNV;
 
 	bool areTheyGoingIntoEachOther = false;
 	if (pu2 > -Physics::nullDelta) {
 		areTheyGoingIntoEachOther = true;
 	}
 	if (areTheyGoingIntoEachOther) {
-		auto [cu1, cu2] = dynamicCollision(0, m1, pu2, m2, elasticity);
-		return std::tuple<vec2, vec2>(
-			((cu1) * cNV) + u1,
-			((cu2) * cNV) + ru2 + u1);
+		auto [cu1, cu2] = dynamicCollision2(m1, pu2, m2, elasticity);
+		return ((cu1)* cNV);
 	}
 	else {	//die collidables bewegen sich nicht aufeinander zu es ist nur clipping und keine collision
-		return std::tuple<vec2, vec2>(
-			u1, u2
-			);
+		return 0;
 	}
 }
 
@@ -137,13 +148,14 @@ inline CollisionResponse circleCircleCollisionCheck(Collidable const* coll_, Col
 	if (dist < 0.0f)
 	{
 		response.collided = true;
-		if (coll_->isSolid()) {
+		response.clippingDist = dist;
+		if (coll_->isSolid() && other_->isSolid()) {
 			auto collisionNormalVec = normalize(coll_->getPos() - other_->getPos());	/* a vector from b to coll_ */ 
 			auto circleOverlap = -dist;
 			auto distVec = collisionNormalVec * circleOverlap;
 
 			float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
-			auto [v1, v2] = dynamicCollision2d2(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
+			auto velChange = dynamicCollision2d2(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
 
 			
 			if (coll_->isDynamic()) {
@@ -156,8 +168,7 @@ inline CollisionResponse circleCircleCollisionCheck(Collidable const* coll_, Col
 					response.posChange = distVec * 1.001f;
 				}
 			}
-			//vec change is newVel - oldVel	= v1 - coll_->getVel()
-			response.velChange = (v1 - coll_->getVel());
+			response.velChange = velChange;
 		}
 	}
 	return response;
@@ -216,8 +227,10 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 		if (partialResult2)
 		{
 			response.collided = true;
-			if (coll_->isSolid()) {
-				auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
+			auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
+			response.clippingDist = minClippingDist;
+			if (coll_->isSolid() && other_->isSolid()) {
+				
 				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
 				rotation = (float)((int)rotation % 360);
 
@@ -225,7 +238,7 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 				auto distVec = collisionNormalVec * minClippingDist;
 
 				float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
-				auto [v1, v2] = dynamicCollision2d2(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
+				auto velChange = dynamicCollision2d2(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
 
 
 				if (coll_->isDynamic()) {
@@ -240,8 +253,7 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 						response.posChange = distVec * 1.001f;
 					}
 				}
-				//vec change is newVel - oldVel	= v1 - coll_->getVel()
-				response.velChange = (v1 - coll_->getVel());
+				response.velChange = velChange;
 			}
 		}
 	}
@@ -302,12 +314,18 @@ inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle,
 
 	if (dist < 0.0f) {
 		response.collided = true;
-		if (circle->isSolid()) {
+		response.clippingDist = dist;
+
+		if (rect->getId() == 0) {
+			//Physics::debugDrawables.push_back(Drawable(circle->getPos() - backRotatedColDir * 0.5f * dist -backRotatedColDir * circle->getRadius(), 1, vec2(dist, 0.02), vec4(1, 0, 0, 0.9), Drawable::Form::RECTANGLE, getAngle(backRotatedColDir)));
+		}
+
+		if (circle->isSolid() && rect->isSolid()) {
 			float elasticity = std::max(circle->getElasticity(), rect->getElasticity());
-			auto [v1, v2] = dynamicCollision2d2(circle->getVel(), circle->getMass(), rect->getVel(), rect->getMass(), backRotatedColDir, elasticity);
 
 			/* the primary is allways dynamic */
 			if (isCirclePrimary) {
+				auto velChange = dynamicCollision2d2(circle->getVel(), circle->getMass(), rect->getVel(), rect->getMass(), backRotatedColDir, elasticity);
 				if (rect->isDynamic()) {
 					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
 					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
@@ -318,9 +336,10 @@ inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle,
 				else {
 					response.posChange = -backRotatedColDir * dist * 1.001f;
 				}
-				response.velChange = (v1 - circle->getVel());
+				response.velChange = velChange;
 			}
 			else {
+				auto velChange = dynamicCollision2d2(rect->getVel(), rect->getMass(), circle->getVel(), circle->getMass(), -backRotatedColDir, elasticity);
 				if (circle->isDynamic()) {
 					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
 					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
@@ -331,13 +350,14 @@ inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle,
 				else {
 					response.posChange = backRotatedColDir * dist * 1.001f;
 				}
-				response.velChange = (v2 - rect->getVel());
+				response.velChange = velChange;
 			}
 		}
 	}
 	return response;
 }
 
+/*
 inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Collidable const* other_, bool isCollPrimary_)
 {
 	CollisionResponse response = CollisionResponse();
@@ -403,8 +423,8 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 		response.collided = true;
 		if (coll_->isSolid()) {
 			float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
-			auto[v1, v2] = dynamicCollision2d2(circleSpeed, coll_->getMass(), rectSpeed, other_->getMass(), backRotatedNormDirVec, elasticity);
-			v1 = rotate(v1, -rotation); v2 = rotate(v2, -rotation);
+			auto[velChange, v2] = dynamicCollision2d2(circleSpeed, coll_->getMass(), rectSpeed, other_->getMass(), backRotatedNormDirVec, elasticity);
+			velChange = rotate(velChange, -rotation); v2 = rotate(v2, -rotation);
 
 			if (coll_->isDynamic()) {
 				if (other_->isDynamic()) {
@@ -429,7 +449,7 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 				}
 			}
 			if (isCollPrimary_) {
-				response.velChange = (v1 - coll_->getVel());
+				response.velChange = (velChange - coll_->getVel());
 			}
 			else {
 				response.velChange = (v2 - other_->getVel());
@@ -442,8 +462,8 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 		if (coll_->isSolid()) {
 			float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
 			
-			auto [v1, v2] = dynamicCollision2d2(circleSpeed, coll_->getMass(), rectSpeed, other_->getMass(), -backRotatedNormDirVec, elasticity);
-			v1 = rotate(v1, rotation); v2 = rotate(v2, rotation);
+			auto [velChange, v2] = dynamicCollision2d2(circleSpeed, coll_->getMass(), rectSpeed, other_->getMass(), -backRotatedNormDirVec, elasticity);
+			velChange = rotate(velChange, rotation); v2 = rotate(v2, rotation);
 
 			if (coll_->isDynamic()) {
 				if (other_->isDynamic()) {
@@ -469,7 +489,7 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 				
 			}
 			if (isCollPrimary_) {
-				response.velChange = (v1 - coll_->getVel());
+				response.velChange = (velChange - coll_->getVel());
 			}
 			else {
 				response.velChange = (v2 - other_->getVel());
@@ -477,7 +497,7 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 		}
 	}
 	return response;
-}
+}*/
 
 inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable const* other_) {
 	if (coll_ == other_) return CollisionResponse();
