@@ -40,7 +40,7 @@ public:
 		world.spawnEntity(Entity(Drawable(vec2(0, 5), 0.5, vec2(10, 0.4), vec4(0.0, 0.0, 0.0, 1.0)),
 			Collidable(vec2(10, 0.2), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
 
-		int num = 20000;
+		int num = 10000;
 
 		for (int i = 0; i < num; i++) {
 			vec2 pos = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*5 };
