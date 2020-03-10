@@ -80,7 +80,7 @@ public:
 	/* submit a Drawable to be drawn relative to the world, O(1) */
 	void submitDrawableWorldSpace(Drawable d_);
 				
-					/* physics utility */
+					/* physics utility *//**/
 	/* returns a range (iterator to begin and end) of the collision list for the ent, O(log2(n)) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(Entity const& ent_);
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(log2(n)) */
