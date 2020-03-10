@@ -23,6 +23,7 @@ struct PhysicsSharedData {
 	int begin;
 	int end;
 	Quadtree * qtree;
+	float deltaTime;
 	std::vector<CollisionResponse> * collisionResponses;
 	std::vector<CollisionInfo> * collisionInfos;
 };

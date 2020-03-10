@@ -25,6 +25,7 @@ void PhysicsWorker::operator()()
 
 			qtree->querry(nearCollidables, coll->getPos(), coll->getBoundsSize());
 
+			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
 				auto newResponse = checkForCollision(coll, other);
 				
@@ -40,11 +41,13 @@ void PhysicsWorker::operator()()
 
 					(*collisionResponses)[i].collided = true;
 				}
-				//(*collisionResponses)[i] = (*collisionResponses)[i] + newResponse;
 				if (newResponse.collided) {
-					collisionInfos->push_back(CollisionInfo(coll->getId(), other->getId()));
+					collisionInfos->push_back(CollisionInfo(coll->getId(), other->getId(), newResponse.clippingDist));
 				}
 			}
+
+			//add the velocity change through acceleration
+			(*collisionResponses)[i].velChange += coll->acceleration * physicsData->deltaTime;
 		}
 	}
 }
