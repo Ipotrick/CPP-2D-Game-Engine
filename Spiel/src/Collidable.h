@@ -24,12 +24,14 @@ public:
 		dynamic{ dynamic_ },
 		mass{ mass_ },
 		velocity{ velocity_ },
+		acceleration{ 0,0 },
 		collided{ false },
 		solid{ true }
 	{
 	}
 
 	inline vec2 getVel() const { return velocity; }
+	inline vec2 getAcl() const { return acceleration; }
 	inline Form getForm() const { return hitboxForm; }
 	inline vec2 getHitboxSize() const { return hitboxSize; }
 	inline float getRadius() const { assert(hitboxForm == Form::CIRCLE); return hitboxSize.r / 2; }
@@ -50,6 +52,7 @@ public:
 	Form hitboxForm;
 	vec2 hitboxSize;
 	vec2 velocity;
+	vec2 acceleration;
 	float mass;
 	float elasticity;
 	bool collided;

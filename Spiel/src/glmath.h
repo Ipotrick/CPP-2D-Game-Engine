@@ -262,6 +262,25 @@ inline vec2 rotate(vec2 const& vec_, float angle_) {
 	return vec;
 }
 
+inline float getAngle(vec2 v)
+{
+	if (v.y == 0)
+		return v.x < 0 ? 180 : 0;
+	else if (v.x == 0)
+		return v.y < 0 ? 270 : 90;
+
+	if (v.y > 0)
+		if (v.x > 0)
+			return atan(v.y / v.x) * 180.f / 3.14159f;
+		else
+			return 180.0 - atan(v.y / -v.x) * 180.f / 3.14159f;
+	else
+		if (v.x > 0)
+			return 360.0 - atan(-v.y / v.x) * 180.f / 3.14159f;
+		else
+			return 180.0 + atan(-v.y / -v.x) * 180.f / 3.14159f;
+}
+
 
 /// \class vec3 glmath.h
 /// This class implements a simple 3D vector, that we use to represent

@@ -32,7 +32,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	renderBufferA{},
 	windowSpaceDrawables{},
 	physicsThreadCount{ 6 },
-	qtreeCapacity{ 10 }
+	qtreeCapacity{ 60 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
@@ -226,7 +226,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
-	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), 30);
+	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), qtreeCapacity);
 	for (auto& el : world_.entities) {
 		qtree.insert(&el);
 	}
@@ -244,12 +244,14 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		ranges[i][1] = floorf((i + 1) * splitStep);
 	}
 
+	for (auto& el : Physics::debugDrawables) {
+		submitDrawableWorldSpace(el);
+	}
+	Physics::debugDrawables.clear();
+
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 
-	/* 
-	1. give physics workers their info
-	*/
-
+	//give physics workers their info
 	for (int i = 0; i < physicsThreadCount; i++) {
 		auto& pData = sharedPhysicsData[i];
 		pData->begin = ranges[i][0];
@@ -258,14 +260,16 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		pData->collisionResponses = &collisionResponses;
 		pData->qtree = &qtree;
 		pData->dynCollidables = &dynCollidables;
+		pData->deltaTime = deltaTime_;
 	}
 
-	{// start physics threads and wait for them to finish
+	{	// start physics threads
 		std::unique_lock switch_lock(sharedPhysicsSyncData->mut);
 		for (int i = 0; i < physicsThreadCount; i++) {
 			sharedPhysicsSyncData->go.at(i) = true;
 		}
 		sharedPhysicsSyncData->cond.notify_all();
+		//wait for workers to finish
 		sharedPhysicsSyncData->cond.wait(switch_lock, [&]() { 
 			/* wenn alle false sind wird true returned */
 			for (int i = 0; i < physicsThreadCount; i++) {
@@ -276,11 +280,6 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 			return true; 
 			}
 		);
-	}
-	for (int i = 0; i < physicsThreadCount; i++) {
-		for (auto& collinfo : (collisionInfosSplit[i])) {
-			collisionInfos.push_back(collinfo);
-		}
 	}
 	
 
@@ -301,13 +300,20 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		}
 	}*/
 	t2.stop();
+	//store all collisioninfos in one vector
 	Timer<> t3(new_physicsExecuteTime);
+	for (int i = 0; i < physicsThreadCount; i++) {
+		for (auto& collinfo : (collisionInfosSplit[i])) {
+			collisionInfos.push_back(collinfo);
+		}
+	}
+	//execute physics changes in pos, vel, accel
 	for (int i = 0; i < dynCollidables.size(); i++) {
 		auto& coll = dynCollidables.at(i);
-		//coll->velocity.y -= 0.02 * deltaTime_;
 		coll->velocity += collisionResponses.at(i).velChange;
 		coll->position += collisionResponses.at(i).posChange + coll->velocity * deltaTime_;
 		coll->collided = collisionResponses.at(i).collided;
+		coll->acceleration = 0;
 	}
 	t3.stop();
 }
