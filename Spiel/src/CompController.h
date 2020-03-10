@@ -12,5 +12,5 @@ public:
 	{}
 
 public:
-	vec2 entityIDs;
+	std::vector<uint32_t> entityIDs;
 };*/
