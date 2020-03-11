@@ -13,14 +13,14 @@ void Game::create() {
 	camera.zoom = 1 / 5.0f;
 
 	vec2 scaleEnt = { 0.4, 0.8 };
-	auto entC = Entity(Drawable(vec2(0, 0), 0.6, scaleEnt, vec4(0.0, 0.0, 0.0, 1), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.99f, true, 60.0f, vec2(0, 0)));
+	auto entC = Entity(Drawable(vec2(0, 0), 0.61, scaleEnt, vec4(0.0, 0.0, 0.0, 1), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.99f, true, 60.0f, vec2(0, 0)));
 	entC.rotation = 45.0f;
 	world.spawnEntity(entC);
 	controlledEntID = world.latestID;
 	playerController.registerEntity(CompDataPlayer(controlledEntID));
 
 	vec2 scalePortal = { 14, 14 };
-	Entity attractor = Entity(Drawable(vec2(-2, 0), 0.4, scalePortal, vec4(1, 0, 0, 0.5), Drawable::Form::CIRCLE), Collidable(scalePortal, Collidable::Form::CIRCLE, 0.9f, true, 100.0f, vec2(0, 0)));
+	Entity attractor = Entity(Drawable(vec2(-2, 0), 0.41, scalePortal, vec4(1, 0, 0, 0.5), Drawable::Form::CIRCLE), Collidable(scalePortal, Collidable::Form::CIRCLE, 0.9f, true, 100.0f, vec2(0, 0)));
 	attractor.solid = false;
 	world.spawnEntity(attractor);
 	attractorID = world.latestID;

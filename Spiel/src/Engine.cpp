@@ -289,10 +289,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	Timer<> t3(new_physicsExecuteTime);
 	//store all collisioninfos in one vector
-	for (int i = 0; i < physicsThreadCount; i++) {
-		for (auto& collinfo : (collisionInfosSplit[i])) {
-			collInfos.push_back(collinfo);
-		}
+	for (auto collInfoSplit : collisionInfosSplit) {
+		collInfos.insert(collInfos.end(), collInfoSplit.begin(), collInfoSplit.end());
 	}
 
 	//build hastable for first and last iterator element of collisioninfo

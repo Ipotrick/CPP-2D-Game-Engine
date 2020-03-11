@@ -139,7 +139,7 @@ private:
 	std::chrono::microseconds new_renderTime;
 	float renderTime;
 	std::chrono::microseconds new_renderSyncTime;
-	float renderSyncTime;#
+	float renderSyncTime;
 	
 	std::shared_ptr<RendererSharedData> sharedRenderData;
 	std::thread renderThread;
