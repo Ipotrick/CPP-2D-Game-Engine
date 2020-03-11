@@ -234,7 +234,7 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
 				rotation = (float)((int)rotation % 360);
 
-				auto collisionNormalVec = vec2(cos(rotation / RAD), sin(rotation / RAD));
+				auto collisionNormalVec = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
 				auto distVec = collisionNormalVec * minClippingDist;
 
 				float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
@@ -499,23 +499,31 @@ inline CollisionResponse doCircleRectangleCollision(Collidable const* coll_, Col
 	return response;
 }*/
 
+inline bool isOverlappingAABB(Collidable const* a, Collidable const* b) {
+	return fabs(b->getPos().x - a->getPos().x) <= fabs(b->getHitboxSize().x + a->getHitboxSize().x) * 0.5f &&
+	fabs(b->getPos().y - a->getPos().y) <= fabs(b->getHitboxSize().y + a->getHitboxSize().y) * 0.5f;
+}
+
 inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable const* other_) {
 	if (coll_ == other_) return CollisionResponse();
-
-	if (coll_->getForm() == Collidable::Form::CIRCLE) {
-		if (other_->getForm() == Collidable::Form::CIRCLE) {
-			return circleCircleCollisionCheck(coll_, other_);
+	//pretest with AABB
+	if (isOverlappingAABB(coll_, other_)) {
+		if (coll_->getForm() == Collidable::Form::CIRCLE) {
+			if (other_->getForm() == Collidable::Form::CIRCLE) {
+				return circleCircleCollisionCheck(coll_, other_);
+			}
+			else {
+				return checkCircleRectangleCollision(coll_, other_, true);
+			}
 		}
 		else {
-			return checkCircleRectangleCollision(coll_, other_, true);
+			if (other_->getForm() == Collidable::Form::CIRCLE) {
+				return checkCircleRectangleCollision(other_, coll_, false);
+			}
+			else {
+				return rectangleRectangleCollisionCheck(coll_, other_);
+			}
 		}
 	}
-	else {
-		if (other_->getForm() == Collidable::Form::CIRCLE) {
-			return checkCircleRectangleCollision(other_, coll_, false);
-		}
-		else {
-			return rectangleRectangleCollisionCheck(coll_, other_);
-		}
-	}
+	return CollisionResponse();
 }

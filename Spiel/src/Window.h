@@ -10,6 +10,7 @@ class Window {
 public:
 	Window(std::string name_ = "Default", uint32_t width_ = 1, uint32_t height_ = 1):
 		mut{},
+		glfwWindow{nullptr},
 		name{ name_ },
 		height{ height_ },
 		width{ width_ }
