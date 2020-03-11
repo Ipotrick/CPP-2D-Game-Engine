@@ -55,4 +55,7 @@ void CompControllerPlayer::executeScript(CompDataPlayer& data, float deltaTime)
 	if (engine.keyPressed(KEY::E)) {
 		entity->rotation -= 200.0f * deltaTime;
 	}
+	if (engine.keyPressed(KEY::F)) {
+
+	}
 }
