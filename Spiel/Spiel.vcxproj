@@ -33,6 +33,7 @@
     <ClInclude Include="src\PhysicsWorker.h" />
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\robin_hood.h" />
     <ClInclude Include="src\Timing.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\World.h" />
