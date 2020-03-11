@@ -1,9 +1,10 @@
 #include "Game.h"
 
-Game::Game() : Engine("Test", 1600, 900), componentControllers{}, mortalController(*this, componentControllers), playerController(*this, componentControllers)
+Game::Game() : Engine("Test", 1600, 900), componentControllers{}, mortalController(*this, componentControllers), playerController(*this, componentControllers), bulletController(*this, componentControllers)
 {
 	componentControllers.push_back(&mortalController);
 	componentControllers.push_back(&playerController);
+	componentControllers.push_back(&bulletController);
 
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
@@ -145,5 +146,6 @@ void Game::update(World& world, float dTime) {
 		//deregister ALL entities that are going to be delteted
 		mortalController.deregisterEntity(id);
 		playerController.deregisterEntity(id);
+		bulletController.deregisterEntity(id);
 	}
 }

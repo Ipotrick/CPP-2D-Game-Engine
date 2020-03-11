@@ -135,3 +135,30 @@ public:
 protected:
 	void executeScript(CompDataPlayer& data, float deltaTime) override;
 };
+
+struct CompDataBullet : CompData {
+	CompDataBullet(uint32_t id_, int maxHealth_, int collisionDamage_, int selfCollisionDamage_, float maxAge_) :
+		CompData{ id_ },
+		maxHealth { maxHealth_ },
+		curHealth { maxHealth },
+		collisionDamage { collisionDamage_ },
+		selfCollisionDamage { selfCollisionDamage_ },
+		maxAge { maxAge_ },
+		curAge { 0.0f }
+	{}
+	//(maxHealth <= 0) => ignore health
+	int maxHealth;
+	int curHealth;
+	//(maxAge < 0) => ignore age
+	float maxAge;
+	float curAge;
+	int collisionDamage;
+	int selfCollisionDamage;
+};
+
+class CompControllerBullet : public CompController<CompDataBullet> {
+public:
+	CompControllerBullet(Engine& engine, std::vector<void*>& otherComponents_) : CompController<CompDataBullet>{ engine, otherComponents_ } {}
+protected:
+	void executeScript(CompDataBullet& data, float deltaTime) override;
+};

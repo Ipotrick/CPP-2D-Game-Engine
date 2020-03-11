@@ -21,6 +21,7 @@ public:
 	std::vector<void*> componentControllers;
 	CompControllerMortal mortalController;
 	CompControllerPlayer playerController;
+	CompControllerBullet bulletController;
 	uint32_t controlledEntID;
 	uint32_t attractorID;
 	uint32_t pusherID;

@@ -31,7 +31,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ 6 },
+	physicsThreadCount{ 8 },
 	qtreeCapacity{ 50 }
 {
 	window->initialize();
