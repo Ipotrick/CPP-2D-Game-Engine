@@ -83,12 +83,8 @@ public:
 	void submitDrawableWorldSpace(Drawable d_);
 				
 					/* physics utility */
-	/* returns a range (iterator to begin and end) of the collision list for the ent, O(log2(n)) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(Entity const& ent_);
-	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(log2(n)) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfosHash(uint32_t id_);
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
 
 public:
 	World world;
@@ -155,8 +151,4 @@ inline void Engine::submitDrawableWindowSpace(Drawable d_) {
 
 inline void Engine::submitDrawableWorldSpace(Drawable d_) {
 	worldSpaceDrawables.emplace_back(d_);
-}
-
-inline std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(Entity const& ent_) {
-	return getCollisionInfos(ent_.getId());
 }

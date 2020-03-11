@@ -25,8 +25,10 @@
     <ClInclude Include="src\CompController.h" />
     <ClInclude Include="src\Drawable.h" />
     <ClInclude Include="src\Engine.h" />
+    <ClInclude Include="src\EngineComponents.h" />
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\GameComponents.h" />
     <ClInclude Include="src\glmath.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Physics.h" />
@@ -39,9 +41,10 @@
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\CompController.cpp" />
     <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\EngineComponents.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GameComponents.cpp" />
     <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Physics.cpp" />

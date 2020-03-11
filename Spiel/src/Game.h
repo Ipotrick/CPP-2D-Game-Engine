@@ -3,7 +3,7 @@
 #include <iostream>
 
 #include "Engine.h"
-#include "CompController.h"
+#include "GameComponents.h"
 
 class Dog;
 

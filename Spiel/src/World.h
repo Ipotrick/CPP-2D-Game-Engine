@@ -12,7 +12,7 @@ public:
 	{
 	}
 	
-	/* returns entity with the given if IF it exists, otherwise a nullptr is returned, O(log2(n)) */
+	/* returns entity with the given if IF it exists, otherwise a nullptr is returned, O(1) */
 	Entity * const getEntityPtr(uint32_t id_);
 	/* creates Copy of given entity and pushes it into the entitiy vector, O(1) */
 	void spawnEntity(Entity ent_);

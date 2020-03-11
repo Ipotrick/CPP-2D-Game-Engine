@@ -113,27 +113,7 @@ float Engine::getWindowAspectRatio()
 	return static_cast<float>(width)/ static_cast<float>(height);
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(uint32_t id_) {
-	/* !!!die collision infos mÅEsen geprdent sein, so dass alle idA's einer ent hintereinanderstehen!!! */
-	auto begin = std::lower_bound(collInfos.begin(), collInfos.end(), id_,
-		[](CollisionInfo const& collInfo_, uint32_t id__) {
-			return collInfo_.idA < id__;
-		}
-	);
-
-	if (begin != collInfos.end() && begin->idA == id_) {
-		auto end = std::next(begin);
-		while (end != collInfos.end() && end->idA == id_) {
-			end++;
-		}
-		return { begin, end };
-	}
-	else {
-		return { collInfos.end(), collInfos.end() };
-	}
-}
-
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfosHash(uint32_t id_)
+std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(uint32_t id_)
 {
 	return {collInfoBegins.find(id_)->second, collInfoEnds.find(id_)->second};
 }

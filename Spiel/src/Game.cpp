@@ -13,6 +13,10 @@ Game::Game() : Engine("Test", 1600, 900), componentControllers{}, mortalControll
 void Game::create() {
 	camera.zoom = 1 / 5.0f;
 
+	std::cout << "sizeof(Entity): " << sizeof(Entity) << std::endl;
+	std::cout << "sizeof(Collidable): " << sizeof(Collidable) << std::endl;
+	std::cout << "sizeof(Drawable): " << sizeof(Drawable) << std::endl;
+
 	vec2 scaleEnt = { 0.4, 0.8 };
 	auto entC = Entity(Drawable(vec2(0, 0), 0.61, scaleEnt, vec4(0.0, 0.0, 0.0, 1), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.99f, true, 60.0f, vec2(0, 0)));
 	entC.rotation = 45.0f;
@@ -61,7 +65,7 @@ void Game::create() {
 		auto newEnt = Entity(Drawable(pos, 0.5, scale, vec4(0, 0, 0, 1.0), formD),
 			Collidable(scale, formC, 0.0f, true, 1, vel));
 		world.spawnEntity(newEnt);
-		//mortalController.registerEntity(CompDataMortal(world.entities.at(world.entities.size() - 1).getId(), 100, 1, -1.0f));
+		mortalController.registerEntity(CompDataMortal(world.latestID, 100, 0, -1.0f));
 	}
 }
 
@@ -100,7 +104,7 @@ void Game::update(World& world, float dTime) {
 	// execute all scripts in the beginning after input
 	
 	mortalController.executeScripts(dTime);
-	
+	bulletController.executeScripts(dTime);
 
 	//set backgound
 	submitDrawableWindowSpace(Drawable(vec2(0, 0), 0, vec2(2, 2), vec4(1, 1, 1, 1), Drawable::Form::RECTANGLE, 0.0f));
@@ -114,7 +118,7 @@ void Game::update(World& world, float dTime) {
 	float acceleration = 1.0f;
 	float minDist = -attractor->getRadius() + 0.2f;
 
-	auto [begin, end] = getCollisionInfosHash(attractorID);
+	auto [begin, end] = getCollisionInfos(attractorID);
 	if (begin != end) {
 		for (auto iter = begin; iter != end; iter++) {
 			auto otherPtr = world.getEntityPtr(iter->idB);
@@ -129,7 +133,7 @@ void Game::update(World& world, float dTime) {
 		}
 	}
 
-	auto [begin2, end2] = getCollisionInfosHash(pusherID);
+	auto [begin2, end2] = getCollisionInfos(pusherID);
 	if (begin2 != end2) {
 		for (auto iter = begin2; iter != end2; iter++) {
 			auto otherPtr = world.getEntityPtr(iter->idB);
