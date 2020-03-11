@@ -44,11 +44,11 @@ void Game::create() {
 		Collidable(vec2(10, 0.4), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
 	mortalController.registerEntity(CompDataMortal(world.entities.at(world.entities.size() - 1).getId(), 0, 1, -1));
 
-	int num = 10000;
+	int num = 8000;
 
 	for (int i = 0; i < num; i++) {
 		vec2 pos = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
-		vec2 scale = vec2(0.04, 0.04);
+		vec2 scale = vec2(0.03, 0.03);
 		//vec2 vel = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*0.1f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 0.1f };
 		vec2 vel = { 0,0 };
 
@@ -94,7 +94,7 @@ void Game::update(World& world, float dTime) {
 	}
 	if (keyPressed(KEY::NP_0)) {
 		camera.rotation = 0.0f;
-		camera.position = { 4.5f, 4.5f };
+		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
 	}
 
@@ -120,7 +120,9 @@ void Game::update(World& world, float dTime) {
 			if (otherPtr->isSolid()) {
 				otherPtr->acceleration += normalize(attractor->getPos() - otherPtr->getPos()) * acceleration * powf((iter->clippingDist / attractor->getRadius()), 2);
 				if (iter->clippingDist < minDist) {
-					otherPtr->position += pusher->position - attractor->position;
+					//otherPtr->position += pusher->position - attractor->position;
+					vec2 otherToCenter = (attractor->position + pusher->position)/2.0f - otherPtr->getPos();
+					otherPtr->position += otherToCenter * 2;
 				}
 			}
 		}
