@@ -7,6 +7,8 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
+#include "robin_hood.h"
+
 #include "QuadTree.h"
 #include "input.h"
 #include "Timing.h"
@@ -85,6 +87,8 @@ public:
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(Entity const& ent_);
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(log2(n)) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
+	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfosHash(uint32_t id_);
 
 public:
 	World world;
@@ -102,7 +106,9 @@ private:
 	float maxDeltaTime = 0.010;
 
 	int physicsThreadCount;
-	std::vector<CollisionInfo> collisionInfos;
+	std::vector<CollisionInfo> collInfos;
+	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
+	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
 	std::vector<std::shared_ptr<PhysicsSharedData>> sharedPhysicsData;
 	std::shared_ptr<PhysicsSyncData> sharedPhysicsSyncData;
 	std::vector<std::thread> physicsThreads;
@@ -133,7 +139,7 @@ private:
 	std::chrono::microseconds new_renderTime;
 	float renderTime;
 	std::chrono::microseconds new_renderSyncTime;
-	float renderSyncTime;
+	float renderSyncTime;#
 	
 	std::shared_ptr<RendererSharedData> sharedRenderData;
 	std::thread renderThread;

@@ -26,7 +26,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	new_renderBufferPushTime{ 0 },
 	new_mainSyncTime{ 0 },
 	new_mainWaitTime{ 0 },
-	collisionInfos{},
+	collInfos{},
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
@@ -115,22 +115,27 @@ float Engine::getWindowAspectRatio()
 
 std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(uint32_t id_) {
 	/* !!!die collision infos mÅEsen geprdent sein, so dass alle idA's einer ent hintereinanderstehen!!! */
-	auto begin = std::lower_bound(collisionInfos.begin(), collisionInfos.end(), id_,
+	auto begin = std::lower_bound(collInfos.begin(), collInfos.end(), id_,
 		[](CollisionInfo const& collInfo_, uint32_t id__) {
 			return collInfo_.idA < id__;
 		}
 	);
 
-	if (begin != collisionInfos.end() && begin->idA == id_) {
+	if (begin != collInfos.end() && begin->idA == id_) {
 		auto end = std::next(begin);
-		while (end != collisionInfos.end() && end->idA == id_) {
+		while (end != collInfos.end() && end->idA == id_) {
 			end++;
 		}
 		return { begin, end };
 	}
 	else {
-		return { collisionInfos.end(), collisionInfos.end() };
+		return { collInfos.end(), collInfos.end() };
 	}
+}
+
+std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfosHash(uint32_t id_)
+{
+	return {collInfoBegins.find(id_)->second, collInfoEnds.find(id_)->second};
 }
 
 void Engine::commitTimeMessurements() {
@@ -162,7 +167,7 @@ void Engine::run() {
 			Timer<> mainTimer(new_mainTime);
 			{
 				Timer<> t(new_updateTime);
-				update(world, getDeltaTime());
+				update(world, getDeltaTimeSafe());
 				world.executeDespawns();
 			}
 			{
@@ -176,7 +181,7 @@ void Engine::run() {
 				renderBufferA.worldSpaceDrawables.clear();
 				
 				for (auto& d : windowSpaceDrawables) renderBufferA.windowSpaceDrawables.push_back(d);
-				for (auto& ent : world.entities) renderBufferA.worldSpaceDrawables.push_back(ent);
+				for (auto& ent : world.entities) renderBufferA.worldSpaceDrawables.push_back(ent.second);
 				for (auto& d : worldSpaceDrawables) renderBufferA.worldSpaceDrawables.push_back(d);
 				renderBufferA.camera = camera;
 			
@@ -207,8 +212,8 @@ void Engine::run() {
 void Engine::physicsUpdate(World& world_, float deltaTime_)
 {
 	Timer<> t1(new_physicsPrepareTime);
-	collisionInfos.clear();
-	collisionInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
+	collInfos.clear();
+	collInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
 
 	std::vector<Collidable*> dynCollidables;
 	vec2 maxPos, minPos;
@@ -216,7 +221,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		maxPos = world_.entities.at(0).getPos();
 		minPos = maxPos;
 	}
-	for (auto& el : world_.entities) {
+	for (auto& elHash : world_.entities) {
+		auto & el = elHash.second;
 		if (el.isDynamic()) {
 			dynCollidables.push_back(&el);							//build dynamic collidable vector
 		}
@@ -228,7 +234,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), qtreeCapacity);
 	for (auto& el : world_.entities) {
-		qtree.insert(&el);
+		qtree.insert(&el.second);
 	}
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 	t1.stop();
@@ -281,13 +287,31 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	t2.stop();
 
-	//store all collisioninfos in one vector
 	Timer<> t3(new_physicsExecuteTime);
+	//store all collisioninfos in one vector
 	for (int i = 0; i < physicsThreadCount; i++) {
 		for (auto& collinfo : (collisionInfosSplit[i])) {
-			collisionInfos.push_back(collinfo);
+			collInfos.push_back(collinfo);
 		}
 	}
+
+	//build hastable for first and last iterator element of collisioninfo
+	collInfoBegins.clear();
+	collInfoEnds.clear();
+	uint32_t lastIDA{};
+	for (auto iter = collInfos.begin(); iter != collInfos.end(); ++iter) {
+		if (iter == collInfos.begin()) {	//initializa values from first element
+			lastIDA = iter->idA;
+			collInfoBegins.insert({iter->idA, iter});
+		}
+		if (lastIDA != iter->idA) {	//new id found
+			collInfoEnds.insert({lastIDA, iter});
+			collInfoBegins.insert({iter->idA, iter});
+			lastIDA = iter->idA;
+		}
+	}
+	collInfoEnds.insert({ lastIDA, collInfos.end() });
+
 	//execute physics changes in pos, vel, accel
 	for (int i = 0; i < dynCollidables.size(); i++) {
 		auto& coll = dynCollidables.at(i);
