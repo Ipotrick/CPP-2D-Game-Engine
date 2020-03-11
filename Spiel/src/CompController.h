@@ -156,6 +156,8 @@ struct CompDataBullet : CompData {
 	int selfCollisionDamage;
 };
 
+//patrick kacks
+
 class CompControllerBullet : public CompController<CompDataBullet> {
 public:
 	CompControllerBullet(Engine& engine, std::vector<void*>& otherComponents_) : CompController<CompDataBullet>{ engine, otherComponents_ } {}
