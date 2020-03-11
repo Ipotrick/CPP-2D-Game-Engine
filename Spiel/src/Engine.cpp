@@ -32,7 +32,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	renderBufferA{},
 	windowSpaceDrawables{},
 	physicsThreadCount{ 6 },
-	qtreeCapacity{ 30 }
+	qtreeCapacity{ 50 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
@@ -230,28 +230,26 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	for (auto& el : world_.entities) {
 		qtree.insert(&el);
 	}
-
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
-
 	t1.stop();
-	Timer<> t2(new_physicsCollisionTime);
-	/* check for collisions */
 
+	/* check for collisions */
+	Timer<> t2(new_physicsCollisionTime);
+	/* split the entities between threads */
 	float splitStep = (float)dynCollidables.size() / (float)(physicsThreadCount);
 	std::vector<std::array<int ,2>> ranges(physicsThreadCount);
 	for (int i = 0; i < physicsThreadCount; i++) {
 		ranges[i][0] = floorf(i * splitStep);
 		ranges[i][1] = floorf((i + 1) * splitStep);
 	}
-
+	/* submit debug drawables for physics */
 	for (auto& el : Physics::debugDrawables) {
 		submitDrawableWorldSpace(el);
 	}
 	Physics::debugDrawables.clear();
 
-	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
-
 	//give physics workers their info
+	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 	for (int i = 0; i < physicsThreadCount; i++) {
 		auto& pData = sharedPhysicsData[i];
 		pData->begin = ranges[i][0];
@@ -269,7 +267,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 			sharedPhysicsSyncData->go.at(i) = true;
 		}
 		sharedPhysicsSyncData->cond.notify_all();
-		//wait for workers to finish
+		//wait for physics threads to finish
 		sharedPhysicsSyncData->cond.wait(switch_lock, [&]() { 
 			/* wenn alle false sind wird true returned */
 			for (int i = 0; i < physicsThreadCount; i++) {
@@ -281,25 +279,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 			}
 		);
 	}
-	
-
-	/*std::vector<Collidable*> nearCollidables;	//reuse heap memory for all dyn collidable collisions
-	nearCollidables.reserve(dynCollidables.size());
-	for (int i = 0; i < dynCollidables.size(); i++) {
-		auto& coll = dynCollidables[i];
-		nearCollidables.clear();
-
-		qtree.querry(nearCollidables, coll->getPos(), coll->getBoundsSize());
-
-		for (auto& other : nearCollidables) {
-			auto newResponse = checkForCollision(coll, other);
-			collisionResponses[i] = collisionResponses[i] + newResponse;
-			if (newResponse.collided) {
-				collisionInfos.emplace_back(CollisionInfo(coll->getId(), other->getId()));
-			}
-		}
-	}*/
 	t2.stop();
+
 	//store all collisioninfos in one vector
 	Timer<> t3(new_physicsExecuteTime);
 	for (int i = 0; i < physicsThreadCount; i++) {

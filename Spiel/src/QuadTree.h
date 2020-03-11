@@ -18,7 +18,7 @@ public:
 		hasSubTrees{ false },
 		marked{ false }
 	{
-		collidables.reserve(capacity_ + 1ll);
+		//collidables.reserve(capacity_ + 1ll);
 	}
 
 	Quadtree(vec2 minPos_, vec2 maxPos_, size_t capacity_):
@@ -29,7 +29,7 @@ public:
 		hasSubTrees{ false },
 		marked{ false }
 	{
-		collidables.reserve(capacity_ + 1ll);
+		//collidables.reserve(capacity_ + 1ll);
 	}
 public:
 
@@ -48,19 +48,17 @@ public:
 
 private:
 
-	inline std::tuple<bool, bool, bool, bool> isInSubtree(vec2 collPos, vec2 collSize) const {
-		bool isInUl = isOverlappingAABB(collPos, collSize, ul->pos, ul->size);
-		bool isInUr = isOverlappingAABB(collPos, collSize, ur->pos, ur->size);
-		bool isInDl = isOverlappingAABB(collPos, collSize, dl->pos, dl->size);
-		bool isInDr = isOverlappingAABB(collPos, collSize, dr->pos, dr->size);
-		return std::tuple<bool, bool, bool, bool>(isInUl, isInUr, isInDl, isInDr);
+	inline std::tuple<bool, bool, bool, bool> isInSubtree(vec2 const& collPos, vec2 const& collSize) const {
+		return std::tuple<bool, bool, bool, bool>(
+			isOverlappingAABB2(collPos, collSize, ul->pos, ul->size),
+			isOverlappingAABB2(collPos, collSize, ur->pos, ur->size),
+			isOverlappingAABB2(collPos, collSize, dl->pos, dl->size),
+			isOverlappingAABB2(collPos, collSize, dr->pos, dr->size));
 	}
 
-	inline bool isOverlappingAABB(vec2 const& posA, vec2 const& sizeA, vec2 const& posB, vec2 const& sizeB) const {
-		return (posA.x + (sizeA.x * 0.5f)) > (posB.x - (sizeB.x * 0.5f))
-			&& (posB.x + (sizeB.x * 0.5f)) > (posA.x - (sizeA.x * 0.5f))
-			&& (posA.y + (sizeA.y * 0.5f)) > (posB.y - (sizeB.y * 0.5f))
-			&& (posB.y + (sizeB.y * 0.5f)) > (posA.y - (sizeA.y * 0.5f));
+	inline bool isOverlappingAABB2(vec2 const& posA, vec2 const& sizeA, vec2 const& posB, vec2 const& sizeB) const {
+		return fabs(posB.x - posA.x) <= fabs(sizeB.x + sizeA.x) * 0.5f && 
+			fabs(posB.y - posA.y) <= fabs(sizeB.y + sizeA.y) * 0.5f;
 	}
 
 public:
@@ -116,9 +114,12 @@ inline void Quadtree::insert(Collidable* coll)
 {
 	if (hasSubTrees == false)
 	{
+		if (collidables.size() == 0) {
+			collidables.reserve(capacity / 2);
+		}
 		if (collidables.size() < capacity)
 		{
-			collidables.push_back(coll);
+			collidables.emplace_back(coll);
 		}
 		else
 		{
