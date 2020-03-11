@@ -69,6 +69,9 @@
     <ClInclude Include="src\Game.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\robin_hood.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
