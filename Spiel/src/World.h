@@ -1,11 +1,14 @@
 #pragma once
+#include <vector>
+
+#include "robin_hood.h"
 
 #include "Entity.h"
-#include <vector>
+
 
 class World {
 public:
-	World()
+	World() : latestID{0}
 	{
 	}
 	
@@ -27,20 +30,16 @@ public:
 	/* INNER ENGINE FUNCTION */
 	std::vector<Collidable*> getCollidablePtrVec();
 public:
-	std::vector<Entity> entities;
+	uint32_t latestID;
+	robin_hood::unordered_map<uint32_t, Entity> entities;
 private:
 	std::vector<int> despawnList;
 };
 
 inline Entity *const World::getEntityPtr(uint32_t id_) {
-	auto entIter = std::lower_bound(entities.begin(), entities.end(), id_,
-		[](Entity a, uint32_t b)
-		{
-			return a.getId() < b;
-		}
-	);
-	if (entIter != entities.end() && entIter->getId() == id_) {
-		return &*entIter;
+	auto entIter = entities.find(id_);
+	if (entIter != entities.end() && entIter->first == id_) {
+		return &entIter->second;
 	}
 	else {
 		return nullptr;

@@ -5,7 +5,7 @@ std::vector<Drawable> World::getDrawableVec()
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
 	for (auto& el : entities) {
-		res.push_back(el.getDrawable());
+		res.push_back(el.second.getDrawable());
 	}
 	return res;
 }
@@ -15,14 +15,15 @@ std::vector<Collidable*> World::getCollidablePtrVec()
 	std::vector<Collidable*> res;
 	res.reserve(entities.size());
 	for (auto& el : entities) {
-		res.emplace_back(el.getCollidablePtr());
+		res.emplace_back(el.second.getCollidablePtr());
 	}
 	return res;
 }
 
 void World::spawnEntity(Entity ent_)
 {
-	entities.emplace_back(ent_);
+	entities.insert({ ent_.getId(), ent_ });
+	latestID = ent_.getId();
 }
 
 void World::despawn(int entitiy_id)
@@ -44,16 +45,12 @@ std::vector<int> const& World::getDespawnIDs()
 	return despawnList;
 }
 
-
-
 void World::executeDespawns()
 {
 	for (int entitiy_id : despawnList) {
-		for (auto iter = entities.begin(); iter != entities.end(); iter++) {
-			if (iter->getId() == entitiy_id) {
-				entities.erase(iter);
-				break;
-			}
+		auto iter = entities.find(entitiy_id);
+		if (iter != entities.end()) {
+			entities.erase(iter);
 		}
 	}
 	despawnList.clear();
