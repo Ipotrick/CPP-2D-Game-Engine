@@ -31,7 +31,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ 8 },
+	physicsThreadCount{ std::thread::hardware_concurrency() -1 },
 	qtreeCapacity{ 50 }
 {
 	window->initialize();
@@ -214,9 +214,10 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
+	
 	//the random offset makes quadtree atrifacts go away
-	vec2 randOffsetMin = { +(rand() % 10000 / 1000.0f) + 1, +(rand() % 10000 / 1000.0f) + 1 };
-	vec2 randOffsetMax = { +(rand() % 10000 / 1000.0f) + 1, +(rand() % 10000 / 1000.0f) + 1 };
+	vec2 randOffsetMin = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
+	vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
 	//generate quadtree for fast lookup of nearby collidables
 	Quadtree qtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity);
 	for (auto& el : world_.entities) {
@@ -295,12 +296,6 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		}
 	}
 	collInfoEnds.insert({ lastIDA, collInfos.end() });
-
-	for (auto& el : collInfos) {
-		if (el.idB == 1) {
-			//std::cout << el.idA << " collided with " << el.idB << '\n';
-		}
-	}
 
 	//execute physics changes in pos, vel, accel
 	int i = 0;

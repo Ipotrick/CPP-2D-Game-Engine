@@ -9,6 +9,7 @@
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
+	constexpr float maxPosAbsVelChange = 10.0f;
 
 	inline std::vector<Drawable> debugDrawables;
 }

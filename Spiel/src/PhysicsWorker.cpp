@@ -46,10 +46,14 @@ void PhysicsWorker::operator()()
 
 			//add the velocity change through acceleration
 			(*collisionResponses)[i].velChange += coll.second->acceleration * physicsData->deltaTime;
-			//restrain vel change
-			constexpr float maxVelChange = 10.0f;
-			(*collisionResponses)[i].velChange.x = std::max(-maxVelChange, std::min(10.0f, (*collisionResponses)[i].velChange.x));
-			(*collisionResponses)[i].velChange.y = std::max(-maxVelChange, std::min(10.0f, (*collisionResponses)[i].velChange.y));
+			//restrain acelleration change
+			float absVelBefore = norm(coll.second->getVel());
+			float absVelAfter = norm(coll.second->getVel() + (*collisionResponses)[i].velChange);
+			float difference = absVelAfter - absVelBefore;
+			if (difference > Physics::maxPosAbsVelChange) {	//if maxVelChange is too high
+				float correcturFactor = Physics::maxPosAbsVelChange / difference;
+				(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange * correcturFactor;
+			}
 		}
 	}
 }

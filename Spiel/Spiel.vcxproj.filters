@@ -13,20 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="shader">
-      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\Component">
-      <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\Script">
-      <UniqueIdentifier>{1c16b84b-8a9c-4e7d-bfb4-14ba9c429120}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Headerdateien\Physics">
+    <Filter Include="_Physics">
       <UniqueIdentifier>{70648b4a-dee6-4dfa-81c0-4f69d61be49b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headerdateien\Rendering">
+    <Filter Include="_Component">
+      <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Rendering">
       <UniqueIdentifier>{8105babe-c711-49ff-a49d-160139bfc316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Script">
+      <UniqueIdentifier>{1c16b84b-8a9c-4e7d-bfb4-14ba9c429120}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_shader">
+      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,31 +58,31 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\GameComponents.h">
-      <Filter>Headerdateien\Component</Filter>
+      <Filter>_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\Component.h">
-      <Filter>Headerdateien\Component</Filter>
+      <Filter>_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\Script.h">
-      <Filter>Headerdateien\Script</Filter>
+      <Filter>_Script</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics.h">
-      <Filter>Headerdateien\Physics</Filter>
+      <Filter>_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\PhysicsWorker.h">
-      <Filter>Headerdateien\Physics</Filter>
+      <Filter>_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\QuadTree.h">
-      <Filter>Headerdateien\Physics</Filter>
+      <Filter>_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\Camera.h">
-      <Filter>Headerdateien\Rendering</Filter>
+      <Filter>_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer.h">
-      <Filter>Headerdateien\Rendering</Filter>
+      <Filter>_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Window.h">
-      <Filter>Headerdateien\Rendering</Filter>
+      <Filter>_Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -102,21 +102,21 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\GameComponents.cpp">
-      <Filter>Headerdateien\Component</Filter>
+      <Filter>_Component</Filter>
     </ClCompile>
     <ClCompile Include="src\PhysicsWorker.cpp">
-      <Filter>Headerdateien\Physics</Filter>
+      <Filter>_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
-      <Filter>Headerdateien\Rendering</Filter>
+      <Filter>_Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\Basic.frag">
-      <Filter>shader</Filter>
+      <Filter>_shader</Filter>
     </None>
     <None Include="shader\Basic.vert">
-      <Filter>shader</Filter>
+      <Filter>_shader</Filter>
     </None>
   </ItemGroup>
 </Project>
