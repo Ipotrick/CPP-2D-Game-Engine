@@ -148,6 +148,7 @@ void Engine::run() {
 			{
 				Timer<> t(new_updateTime);
 				update(world, getDeltaTimeSafe());
+				world.deregisterDespawnedEntities();
 				world.executeDespawns();
 			}
 			{
@@ -161,7 +162,8 @@ void Engine::run() {
 				renderBufferA.worldSpaceDrawables.clear();
 				
 				for (auto& d : windowSpaceDrawables) renderBufferA.windowSpaceDrawables.push_back(d);
-				for (auto& ent : world.entities) renderBufferA.worldSpaceDrawables.push_back(ent.second);
+				auto puffer = world.getDrawableVec();
+				renderBufferA.worldSpaceDrawables.insert(renderBufferA.worldSpaceDrawables.end(), puffer.begin(), puffer.end());
 				for (auto& d : worldSpaceDrawables) renderBufferA.worldSpaceDrawables.push_back(d);
 				renderBufferA.camera = camera;
 			
@@ -195,7 +197,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	collInfos.clear();
 	collInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
 
-	std::vector<Collidable*> dynCollidables;
+	std::vector<std::pair<uint32_t, Collidable *>> dynCollidables;
 	vec2 maxPos, minPos;
 	if (world_.entities.size() > 0) {
 		maxPos = world_.entities.at(0).getPos();
@@ -204,7 +206,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	for (auto& elHash : world_.entities) {
 		auto & el = elHash.second;
 		if (el.isDynamic()) {
-			dynCollidables.push_back(&el);							//build dynamic collidable vector
+			dynCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	//build dynamic collidable vector
 		}
 		//look if the quadtree has to take uop largera area
 		if (el.position.x < minPos.x) minPos.x = el.position.x;
@@ -212,9 +214,13 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
-	Quadtree qtree(minPos - vec2(1, 1), maxPos + vec2(1, 1), qtreeCapacity);
+	//the random offset makes quadtree atrifacts go away
+	vec2 randOffsetMin = { +(rand() % 10000 / 1000.0f) + 1, +(rand() % 10000 / 1000.0f) + 1 };
+	vec2 randOffsetMax = { +(rand() % 10000 / 1000.0f) + 1, +(rand() % 10000 / 1000.0f) + 1 };
+	//generate quadtree for fast lookup of nearby collidables
+	Quadtree qtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity);
 	for (auto& el : world_.entities) {
-		qtree.insert(&el.second);
+		qtree.insert({ el.first, (Collidable*) &(el.second) });
 	}
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 	t1.stop();
@@ -278,7 +284,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	collInfoEnds.clear();
 	uint32_t lastIDA{};
 	for (auto iter = collInfos.begin(); iter != collInfos.end(); ++iter) {
-		if (iter == collInfos.begin()) {	//initializa values from first element
+		if (iter == collInfos.begin()) {	//initialize values from first element
 			lastIDA = iter->idA;
 			collInfoBegins.insert({iter->idA, iter});
 		}
@@ -290,13 +296,20 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	collInfoEnds.insert({ lastIDA, collInfos.end() });
 
+	for (auto& el : collInfos) {
+		if (el.idB == 1) {
+			//std::cout << el.idA << " collided with " << el.idB << '\n';
+		}
+	}
+
 	//execute physics changes in pos, vel, accel
-	for (int i = 0; i < dynCollidables.size(); i++) {
-		auto& coll = dynCollidables.at(i);
-		coll->velocity += collisionResponses.at(i).velChange;
-		coll->position += collisionResponses.at(i).posChange + coll->velocity * deltaTime_;
-		coll->collided = collisionResponses.at(i).collided;
-		coll->acceleration = 0;
+	int i = 0;
+	for (auto& coll : dynCollidables) {
+		coll.second->velocity += collisionResponses.at(i).velChange;
+		coll.second->position += collisionResponses.at(i).posChange + coll.second->velocity * deltaTime_;
+		coll.second->collided = collisionResponses.at(i).collided;
+		coll.second->acceleration = 0;
+		i++;
 	}
 	t3.stop();
 }

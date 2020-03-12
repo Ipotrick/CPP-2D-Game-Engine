@@ -4,8 +4,7 @@
 #include <array>
 
 #include "glmath.h"
-#include "Collidable.h"
-#include "Drawable.h"
+#include "Entity.h"
 
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
@@ -50,7 +49,6 @@ inline std::tuple<float, float> dynamicCollision2(float m1, float u2, float m2, 
 
 /* retruns the change in velocity for the first entered entity in an elastic collision*/
 inline vec2 dynamicCollision2d2(vec2 const& u1, float const& m1, vec2 const& u2, float const& m2, vec2 const& cNV, float elasticity) {
-	vec2 ocNV = rotate(cNV, 90);
 	/* bezugssystem ist u2 */
 	auto a_u2 = u2 - u1;
 	float pu2 = dot(a_u2, cNV);
@@ -273,10 +271,6 @@ inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle,
 	if (dist < 0.0f) {
 		response.collided = true;
 		response.clippingDist = dist;
-
-		if (rect->getId() == 0) {
-			//Physics::debugDrawables.push_back(Drawable(circle->getPos() - backRotatedColDir * 0.5f * dist -backRotatedColDir * circle->getRadius(), 1, vec2(dist, 0.02), vec4(1, 0, 0, 0.9), Drawable::Form::RECTANGLE, getAngle(backRotatedColDir)));
-		}
 
 		if (circle->isSolid() && rect->isSolid()) {
 			float elasticity = std::max(circle->getElasticity(), rect->getElasticity());

@@ -19,7 +19,7 @@ struct PhysicsSyncData {
 
 struct PhysicsSharedData {
 	int id = 0;
-	std::vector<Collidable*> * dynCollidables;
+	std::vector<std::pair<uint32_t, Collidable*>>* dynCollidables;
 	int begin;
 	int end;
 	Quadtree * qtree;
