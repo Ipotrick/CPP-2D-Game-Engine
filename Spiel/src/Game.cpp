@@ -15,24 +15,12 @@ void Game::create() {
 	std::cout << "sizeof(Drawable): " << sizeof(Drawable) << std::endl;
 
 	vec2 scaleEnt = { 0.4, 0.8 };
-	//auto entC = Entity(Drawable(vec2(0, 0), 0.61, scaleEnt, vec4(0.0, 0.0, 0.0, 1), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.99f, true, 60.0f, vec2(0, 0)));
 	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Collidable::Form::RECTANGLE, true, true,  0.5f, 50.0f, vec2(0,0)));
 	auto cDraw = CompDataDrawable(vec4(0, 0, 0, 1), scaleEnt);
 	cEnt.rotation = 45.0f;
 	world.spawnEntity(cEnt, cDraw);
 	controlledEntID = world.getLastID();
 	world.playerController.registerEntity(controlledEntID, CompDataPlayer());
-
-	/*
-	Entity attractor = Entity(Drawable(vec2(-2, 0), 0.41, scalePortal, vec4(1, 0, 0, 0.5), Drawable::Form::CIRCLE), Collidable(scalePortal, Collidable::Form::CIRCLE, 0.9f, true, 100.0f, vec2(0, 0)));
-	attractor.solid = false;
-	world.spawnEntity(attractor);
-	attractorID = world.lastID;
-
-	Entity pusher = Entity(Drawable(vec2(2, 0), 0.4, scalePortal, vec4(0, 0, 1, 0.5), Drawable::Form::CIRCLE), Collidable(scalePortal, Collidable::Form::CIRCLE, 0.9f, true, 100.0f, vec2(0, 0)));
-	pusher.solid = false;
-	world.spawnEntity(pusher);
-	pusherID = world.lastID;*/
 
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Collidable::Form::CIRCLE, false, true));
@@ -60,7 +48,7 @@ void Game::create() {
 	int num = 5000;
 
 	vec2 scale = vec2(0.1, 0.1);
-	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Collidable::Form::CIRCLE, true, true, 0.5f, 1.0f, vec2()));
+	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Collidable::Form::CIRCLE, true, true, 0.01f, 0.5f, vec2()));
 	CompDataDrawable trashEntD = CompDataDrawable(vec4(0, 0, 0, 1), scale, 0.5f, CompDataDrawable::Form::CIRCLE);
 	for (int i = 0; i < num; i++) {
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
@@ -147,7 +135,7 @@ void Game::update(World& world, float dTime) {
 	submitDrawableWindowSpace(Drawable(vec2(0, 0), 0, vec2(2, 2), vec4(1, 1, 1, 1), Drawable::Form::RECTANGLE, 0.0f));
 
 	//display performance statistics
-	std::cout << getPerfInfo(4) << '\n';
+	//std::cout << getPerfInfo(4) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);

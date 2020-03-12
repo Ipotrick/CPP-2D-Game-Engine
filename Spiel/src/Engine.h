@@ -101,7 +101,7 @@ private:
 	uint32_t iteration;
 	float maxDeltaTime = 0.010;
 
-	int physicsThreadCount;
+	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
