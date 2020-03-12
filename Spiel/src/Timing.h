@@ -6,7 +6,7 @@
 #include <sstream>
 #include <thread>
 
-inline double micsecToFloat(std::chrono::microseconds mics) {
+inline float micsecToFloat(std::chrono::microseconds mics) {
 	return mics.count() * 0.000001f;
 }
 

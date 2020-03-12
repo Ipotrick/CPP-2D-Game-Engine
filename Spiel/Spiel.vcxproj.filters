@@ -19,27 +19,21 @@
     <Filter Include="Headerdateien\Component">
       <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Headerdateien\Script">
+      <UniqueIdentifier>{1c16b84b-8a9c-4e7d-bfb4-14ba9c429120}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Physics">
+      <UniqueIdentifier>{70648b4a-dee6-4dfa-81c0-4f69d61be49b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headerdateien\Rendering">
+      <UniqueIdentifier>{8105babe-c711-49ff-a49d-160139bfc316}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Camera.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Drawable.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Engine.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Renderer.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Timing.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Window.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Entity.h">
@@ -54,16 +48,7 @@
     <ClInclude Include="src\glmath.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\Basis.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Input.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\QuadTree.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsWorker.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Game.h">
@@ -72,24 +57,36 @@
     <ClInclude Include="src\robin_hood.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\CompController.h">
-      <Filter>Headerdateien\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EngineComponents.h">
-      <Filter>Headerdateien\Component</Filter>
-    </ClInclude>
     <ClInclude Include="src\GameComponents.h">
       <Filter>Headerdateien\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Component.h">
+      <Filter>Headerdateien\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Script.h">
+      <Filter>Headerdateien\Script</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics.h">
+      <Filter>Headerdateien\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsWorker.h">
+      <Filter>Headerdateien\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\QuadTree.h">
+      <Filter>Headerdateien\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camera.h">
+      <Filter>Headerdateien\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer.h">
+      <Filter>Headerdateien\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Window.h">
+      <Filter>Headerdateien\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Physics.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Renderer.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\World.cpp">
@@ -98,20 +95,20 @@
     <ClCompile Include="src\glmath.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\PhysicsWorker.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\Game.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\EngineComponents.cpp">
-      <Filter>Headerdateien\Component</Filter>
-    </ClCompile>
     <ClCompile Include="src\GameComponents.cpp">
       <Filter>Headerdateien\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PhysicsWorker.cpp">
+      <Filter>Headerdateien\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>Headerdateien\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

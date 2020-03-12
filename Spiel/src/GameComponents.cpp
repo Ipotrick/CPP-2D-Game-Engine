@@ -1,7 +1,7 @@
 #include "GameComponents.h"
 
 // mortal component index: 0
-
+/*
 void CompControllerMortal::executeScript(CompDataMortal& data, float deltaTime)
 {
 	if (data.maxHealth > 0) {
@@ -77,3 +77,4 @@ void CompControllerBullet::executeScript(CompDataBullet& data, float deltaTime)
 		}
 	}
 }
+*/

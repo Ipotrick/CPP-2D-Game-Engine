@@ -1,25 +1,33 @@
 #pragma once
 
-#include "CompController.h"
-#include "Engine.h"
+#include "glmath.h"
+#include "Component.h"
 
-template<typename CompDataType>
-class GameCompController : public BasicCompController<CompDataType> {
-public:
-	GameCompController(Engine& engine_, std::vector<void*>& otherComponents_) : BasicCompController<CompDataType>{}, engine { engine_ }, otherComponents{ otherComponents_ }
-	{}
+// drawable component
 
+struct CompDataDrawable : public CompData {
+	enum class Form {
+		CIRCLE,
+		RECTANGLE
+	};
+	vec4 color;
+	vec2 scale;
+	float drawingPrio;
+	Form form;
 
-protected:
-	Engine& engine;
-	std::vector<void*>& otherComponents;
+	CompDataDrawable(vec4 color_ = vec4(1,1,1,1), vec2 scale_ = vec2(1,1), float drawingPrio_ = 0.5f, Form form_ = Form::RECTANGLE) :
+		color{ color_ },
+		scale{ scale_ },
+		drawingPrio{ drawingPrio_ },
+		form{ form_ }
+	{
+	}
 };
 
-// mortal component index: 0
+// mortal component
 
 struct CompDataMortal : public CompData {
-	CompDataMortal(uint32_t id_, int maxHealth_, int collisionDamage_, float maxAge_) :
-		CompData{ id_ },
+	CompDataMortal( int maxHealth_, int collisionDamage_, float maxAge_) :
 		maxHealth{ maxHealth_ },
 		curHealth{ maxHealth },
 		collisionDamage{ collisionDamage_ },
@@ -35,39 +43,12 @@ struct CompDataMortal : public CompData {
 	int collisionDamage;
 };
 
-class CompControllerMortal : public GameCompController<CompDataMortal> {
-public:
-	CompControllerMortal(Engine& engine, std::vector<void*>& otherComponents_) : GameCompController<CompDataMortal>{ engine, otherComponents_ } {}
-protected:
-	void executeScript(CompDataMortal& data, float deltaTime) override;
-};
-
-//player component index: 1
+//player component
 
 struct CompDataPlayer : public CompData {
-	CompDataPlayer(uint32_t id_) :
-		CompData{ id_ }
-	{}
 };
 
-class CompControllerPlayer : public GameCompController<CompDataPlayer> {
-public:
-	CompControllerPlayer(Engine& engine, std::vector<void*>& otherComponents_) : GameCompController<CompDataPlayer>{ engine, otherComponents_ } {}
-protected:
-	void executeScript(CompDataPlayer& data, float deltaTime) override;
-};
+//bullet component
 
 struct CompDataBullet : CompData {
-	CompDataBullet(uint32_t id_) :
-		CompData{ id_ }
-	{}
-};
-
-//bullet component index: 2
-
-class CompControllerBullet : public GameCompController<CompDataBullet> {
-public:
-	CompControllerBullet(Engine& engine, std::vector<void*>& otherComponents_) : GameCompController<CompDataBullet>{ engine, otherComponents_ } {}
-protected:
-	void executeScript(CompDataBullet& data, float deltaTime) override;
 };

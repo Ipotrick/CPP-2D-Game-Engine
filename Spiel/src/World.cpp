@@ -4,45 +4,37 @@ std::vector<Drawable> World::getDrawableVec()
 {
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
-	for (auto& el : entities) {
-		res.push_back(el.second.getDrawable());
+	auto iterB = drawableController.componentData.begin();
+	for (auto iterA = entities.begin(); iterA != entities.end(); ++iterA) {
+		res.push_back(buildDrawable(iterA->second, iterB->second));
+		++iterB;
 	}
 	return res;
 }
 
-std::vector<Collidable*> World::getCollidablePtrVec()
+std::vector<std::tuple<uint32_t, Collidable*>> World::getCollidablePtrVec()
 {
-	std::vector<Collidable*> res;
+	std::vector<std::tuple<uint32_t, Collidable*>> res;
 	res.reserve(entities.size());
 	for (auto& el : entities) {
-		res.emplace_back(el.second.getCollidablePtr());
+		res.push_back({ el.first, el.second.getCollidablePtr() });
 	}
 	return res;
 }
 
-void World::spawnEntity(Entity ent_)
+void World::spawnEntity(Entity ent_, CompDataDrawable draw_)
 {
-	entities.insert({ ent_.getId(), ent_ });
-	latestID = ent_.getId();
+	entities.insert( {nextID, ent_ });
+	drawableController.registerEntity( nextID, draw_);
+	nextID++;
 }
 
-void World::despawn(int entitiy_id)
+void World::despawn(uint32_t entitiy_id)
 {
-	auto entPtr = getEntityPtr(entitiy_id);
-	if (entPtr != nullptr) {
-		despawn(*entPtr);
+	auto iter = entities.find(entitiy_id);
+	if (iter != entities.end()) {
+		despawnList.push_back(entitiy_id);
 	}
-}
-
-void World::despawn(Entity & entity_)
-{
-	entity_.despawned = true;
-	despawnList.emplace_back(entity_.getId());
-}
-
-std::vector<int> const& World::getDespawnIDs()
-{
-	return despawnList;
 }
 
 void World::executeDespawns()
@@ -54,4 +46,16 @@ void World::executeDespawns()
 		}
 	}
 	despawnList.clear();
+}
+
+void World::deregisterDespawnedEntities()
+{
+	for (int entitiy_id : despawnList) {
+		auto iter = entities.find(entitiy_id);
+		if (iter != entities.end()) {
+			mortalController.deregisterEntity(iter->first);
+			playerController.deregisterEntity(iter->first);
+			bulletController.deregisterEntity(iter->first);
+		}
+	}
 }

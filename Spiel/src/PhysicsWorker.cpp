@@ -18,16 +18,16 @@ void PhysicsWorker::operator()()
 		auto& collisionResponses = physicsData->collisionResponses;
 		auto& collisionInfos = physicsData->collisionInfos;
 		
-		std::vector<Collidable*> nearCollidables;	//reuse heap memory for all dyn collidable collisions
+		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 		for (int i = begin; i < end; i++) {
 			auto& coll = dynCollidables->at(i);
 			nearCollidables.clear();
 
-			qtree->querry(nearCollidables, coll->getPos(), coll->getBoundsSize());
+			qtree->querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
 
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
-				auto newResponse = checkForCollision(coll, other);
+				auto newResponse = checkForCollision(coll.second, other.second);
 				
 				if (newResponse.collided) {
 					// set weighted average of position changes 
@@ -40,14 +40,12 @@ void PhysicsWorker::operator()()
 					(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange + newResponse.velChange;
 
 					(*collisionResponses)[i].collided = true;
-				}
-				if (newResponse.collided) {
-					collisionInfos->push_back(CollisionInfo(coll->getId(), other->getId(), newResponse.clippingDist));
+					collisionInfos->push_back(CollisionInfo(coll.first, other.first, newResponse.clippingDist));
 				}
 			}
 
 			//add the velocity change through acceleration
-			(*collisionResponses)[i].velChange += coll->acceleration * physicsData->deltaTime;
+			(*collisionResponses)[i].velChange += coll.second->acceleration * physicsData->deltaTime;
 			//restrain vel change
 			constexpr float maxVelChange = 10.0f;
 			(*collisionResponses)[i].velChange.x = std::max(-maxVelChange, std::min(10.0f, (*collisionResponses)[i].velChange.x));

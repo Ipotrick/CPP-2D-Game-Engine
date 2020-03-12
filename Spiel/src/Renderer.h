@@ -11,7 +11,6 @@
 #include "GLFW/glfw3.h"
 
 #include "Camera.h"
-#include "Drawable.h"
 #include "Window.h"
 #include "Entity.h"
 #include "World.h"
