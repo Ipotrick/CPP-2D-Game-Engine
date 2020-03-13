@@ -4,6 +4,11 @@
 
 #include "glmath.h"
 
+enum class Form {
+	CIRCLE = 0x00,
+	RECTANGLE = 0x01
+};
+
 struct Basis {
 	/* x y world coordinates, z depth*/
 	vec2 position;
@@ -30,10 +35,6 @@ struct Basis {
 
 class Collidable : virtual public Basis {
 public:
-	enum class Form {
-		CIRCLE,
-		RECTANGLE
-	};
 protected:
 	bool dynamic;
 public:
@@ -104,10 +105,6 @@ inline float Collidable::getBoundsRadius() const {
 
 class Drawable : virtual public Basis {
 public:
-	enum class Form {
-		CIRCLE,
-		RECTANGLE
-	};
 	vec4 color;
 	vec2 scale;
 	float drawingPrio;
@@ -129,10 +126,8 @@ class Entity : public Collidable {
 public: 
 	Entity(vec2 pos_, float rota_, Collidable collide_) :
 		Collidable(collide_),
-		Basis(pos_, rota_),
-		despawned{false}
+		Basis(pos_, rota_)
 	{}
 
 public:
-	bool despawned;
 };

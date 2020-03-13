@@ -47,7 +47,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	}
 	sharedPhysicsSyncData = std::make_shared<PhysicsSyncData>();
 	sharedPhysicsSyncData->go = std::vector<bool>(physicsThreadCount);
-	for (int i = 0; i < physicsThreadCount; i++) {
+	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		physicsThreads.push_back(std::thread(PhysicsWorker(sharedPhysicsData.at(i), sharedPhysicsSyncData)));
 		physicsThreads.at(i).detach();
 	}
@@ -115,7 +115,14 @@ float Engine::getWindowAspectRatio()
 
 std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(uint32_t id_)
 {
-	return {collInfoBegins.find(id_)->second, collInfoEnds.find(id_)->second};
+	auto begin = collInfoBegins.find(id_);
+	auto end = collInfoEnds.find(id_);
+	if (begin != collInfoBegins.end() && end != collInfoEnds.end()) {	//is there even collisionInfo for the id?
+		return { begin->second, end->second };
+	}
+	else {
+		return { collInfos.end(), collInfos.end() };
+	}
 }
 
 void Engine::commitTimeMessurements() {
@@ -231,9 +238,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	/* split the entities between threads */
 	float splitStep = (float)dynCollidables.size() / (float)(physicsThreadCount);
 	std::vector<std::array<int ,2>> ranges(physicsThreadCount);
-	for (int i = 0; i < physicsThreadCount; i++) {
-		ranges[i][0] = floorf(i * splitStep);
-		ranges[i][1] = floorf((i + 1) * splitStep);
+	for (unsigned i = 0; i < physicsThreadCount; i++) {
+		ranges[i][0] = static_cast<int>(floorf(i * splitStep));
+		ranges[i][1] = static_cast<int>(floorf((i + 1) * splitStep));
 	}
 	/* submit debug drawables for physics */
 	for (auto& el : Physics::debugDrawables) {
@@ -243,7 +250,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	//give physics workers their info
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
-	for (int i = 0; i < physicsThreadCount; i++) {
+	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		auto& pData = sharedPhysicsData[i];
 		pData->begin = ranges[i][0];
 		pData->end = ranges[i][1];
@@ -256,14 +263,14 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	{	// start physics threads
 		std::unique_lock switch_lock(sharedPhysicsSyncData->mut);
-		for (int i = 0; i < physicsThreadCount; i++) {
+		for (unsigned i = 0; i < physicsThreadCount; i++) {
 			sharedPhysicsSyncData->go.at(i) = true;
 		}
 		sharedPhysicsSyncData->cond.notify_all();
 		//wait for physics threads to finish
 		sharedPhysicsSyncData->cond.wait(switch_lock, [&]() { 
 			/* wenn alle false sind wird true returned */
-			for (int i = 0; i < physicsThreadCount; i++) {
+			for (unsigned i = 0; i < physicsThreadCount; i++) {
 				if (sharedPhysicsSyncData->go.at(i) == true) {
 					return false;
 				}
@@ -289,10 +296,10 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 			lastIDA = iter->idA;
 			collInfoBegins.insert({iter->idA, iter});
 		}
-		if (lastIDA != iter->idA) {	//new id found
+		if (lastIDA != iter->idA) {	//new idA found
 			collInfoEnds.insert({lastIDA, iter});
 			collInfoBegins.insert({iter->idA, iter});
-			lastIDA = iter->idA;
+			lastIDA = iter->idA;	//set lastId to new id
 		}
 	}
 	collInfoEnds.insert({ lastIDA, collInfos.end() });

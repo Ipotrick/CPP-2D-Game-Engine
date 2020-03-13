@@ -18,9 +18,8 @@ struct CompController {
 	/* returns true if an entity with the given id is registered in the ComponentController, O(log2(n)) */
 	bool isRegistered(uint32_t);
 	/* returns a pointer to the componentData of the given entity. If the given id is not registered nullptr will be returned, O(log2(n)) */
-	CompDataType const* const getComponent(uint32_t id);
+	CompDataType * const getComponent(uint32_t id);
 	robin_hood::unordered_map<uint32_t, CompDataType> componentData;
-	
 };
 
 template<typename CompDataType>
@@ -42,16 +41,16 @@ template<typename CompDataType>
 inline bool CompController<CompDataType>::isRegistered(uint32_t id)
 {
 	auto res = componentData.find(id);
-	if (res != componentData.end() && res->first == id) {
-		return true;
+	if (res != componentData.end()) {
+		if (res->first == id) {
+			return true;
+		}
 	}
-	else {
-		return false;
-	}
+	return false;
 }
 
 template<typename CompDataType>
-inline CompDataType const* const CompController<CompDataType>::getComponent(uint32_t id)
+inline CompDataType * const CompController<CompDataType>::getComponent(uint32_t id)
 {
 	auto res = componentData.find(id);
 	if (res != componentData.end() && res->first == id) {

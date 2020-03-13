@@ -4,6 +4,7 @@
 
 #include "Engine.h"
 #include "GameComponents.h"
+#include "ScriptInclude.h"
 
 class Game : public Engine {
 public:
@@ -16,9 +17,10 @@ public:
 	void destroy() override {}
 
 public:
-	
-	uint32_t controlledEntID;
+	PlayerScript playerScript;
+	HealthScript healthScript;
+	AgeScript    ageScript;
+	BulletScript bulletScript;
 	uint32_t attractorID;
 	uint32_t pusherID;
-	
 };
