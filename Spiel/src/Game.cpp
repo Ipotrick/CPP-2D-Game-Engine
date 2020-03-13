@@ -5,7 +5,10 @@ Game::Game() :
 	playerScript{ world.playerCompCtrl, *this },
 	healthScript{ world.healthCompCtrl, *this },
 	ageScript   { world.ageCompCtrl,    *this },
-	bulletScript{ world.bulletCompCtrl, *this }
+	bulletScript{ world.bulletCompCtrl, *this },
+	triggerScript{ world.triggerCompCtrl, *this },
+	ownerScript{ world.ownerCompCtrl, *this },
+	slaveScript{ world.slaveCompCtrl, *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
@@ -61,6 +64,10 @@ void Game::create() {
 		}
 	}
 
+	Entity loadTrigC = Entity(vec2(4, 0), 0, Collidable(vec2(0.4f, 1), Form::RECTANGLE, false, true));
+	CompDataDrawable loadTrigD = CompDataDrawable(vec4(1, 0, 0, 1), vec2(0.4f, 1), 0.49f, Form::RECTANGLE);
+	world.spawnEntity(loadTrigC, loadTrigD);
+	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
 	int num = 10000;
 
@@ -128,6 +135,9 @@ void Game::update(World& world, float deltaTime) {
 	healthScript.executeAll(world, deltaTime);
 	ageScript.executeAll(world, deltaTime);
 	bulletScript.executeAll(world, deltaTime);
+	triggerScript.executeAll(world, deltaTime);
+	ownerScript.executeAll(world, deltaTime);
+	slaveScript.executeAll(world, deltaTime);
 
 	//display performance statistics
 	//std::cout << getPerfInfo(4) << '\n';

@@ -38,6 +38,9 @@ public:
 	CompController<CompDataAge>			ageCompCtrl;
 	CompController<CompDataPlayer>		playerCompCtrl;
 	CompController<CompDataBullet>		bulletCompCtrl;
+	CompController<CompDataTrigger>		triggerCompCtrl;
+	CompController<CompDataOwner>		ownerCompCtrl;
+	CompController<CompDataSlave>		slaveCompCtrl;
 private:
 	uint32_t nextID;
 	std::vector<int> despawnList;

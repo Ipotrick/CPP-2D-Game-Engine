@@ -59,3 +59,30 @@ struct CompDataBullet : public CompData {
 	int damage;
 	
 };
+
+//loading and event trigger component
+//0 = inactive, 1 = event trigger, 2, loading trigger
+
+struct CompDataTrigger : public CompData {
+	CompDataTrigger(int type_) :type{ type_ } {}
+
+	int type;
+
+};
+
+//owner component
+
+struct CompDataOwner : public CompData {
+	CompDataOwner(uint32_t slave_) :slave{ slave_ } {}
+
+	uint32_t slave;
+};
+
+//slave component
+
+struct CompDataSlave : public CompData {
+	CompDataSlave(uint32_t owner_) :owner{ owner_ } {}
+
+	uint32_t owner;
+
+};
