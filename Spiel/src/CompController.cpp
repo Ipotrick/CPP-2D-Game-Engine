@@ -67,8 +67,12 @@ void CompControllerPlayer::executeScript(CompDataPlayer& data, float deltaTime)
 
 void CompControllerBullet::executeScript(CompDataBullet& data, float deltaTime) 
 {
-	auto [begin, end] = engine.getCollisionInfos(data.id);
-	if (begin != end){
-		engine.world.despawn(data.id);
+	auto [begin, end] = engine.getCollisionInfosHash(data.id);
+	for (auto iter = begin; iter != end; ++iter) {
+		auto const& other = engine.world.getEntityPtr(iter->idB);
+		if (other->isSolid() && !isRegistered(iter->idB)) {
+			engine.world.despawn(data.id);
+			break;
+		}
 	}
 }

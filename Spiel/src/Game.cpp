@@ -100,6 +100,7 @@ void Game::update(World& world, float dTime) {
 	// execute all scripts in the beginning after input
 	
 	mortalController.executeScripts(dTime);
+	bulletController.executeScripts(dTime);
 	
 
 	//set backgound
