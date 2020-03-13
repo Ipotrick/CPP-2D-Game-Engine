@@ -1,5 +1,13 @@
 #pragma once
 
+enum class BUTTON {
+	MB_LEFT = 0,
+	MB_RIGHT = 1,
+	MB_MIDDLE = 2,
+	MB_4 = 3,
+	MB_5 = 4
+};
+
 enum class KEY {
 
 SPACE             = 32,
@@ -127,7 +135,7 @@ MENU              = 348
 
 };
 
-enum class KEYSTATUS {
+enum class InputStatus {
 	PRESS = GLFW_PRESS,
 	REPEAT = GLFW_REPEAT,
 	RELEASE = GLFW_RELEASE

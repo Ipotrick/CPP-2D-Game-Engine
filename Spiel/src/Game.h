@@ -21,6 +21,7 @@ public:
 	HealthScript healthScript;
 	AgeScript    ageScript;
 	BulletScript bulletScript;
+	uint32_t cursorID;
 	uint32_t attractorID;
 	uint32_t pusherID;
 };

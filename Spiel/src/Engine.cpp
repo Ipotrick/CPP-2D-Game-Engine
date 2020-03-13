@@ -80,41 +80,68 @@ std::string Engine::getPerfInfo(int detail)
 	return ss.str();
 }
 
-KEYSTATUS Engine::getKeyStatus(KEY key_)
+InputStatus Engine::getKeyStatus(KEY key_)
 {
 	std::lock_guard<std::mutex> l(window->mut);
-	return (KEYSTATUS)glfwGetKey(window->glfwWindow, int(key_));
+	return (InputStatus)glfwGetKey(window->glfwWindow, int(key_));
 }
 
 bool Engine::keyPressed(KEY key_)
 {
-	return getKeyStatus(key_) == KEYSTATUS::PRESS;
+	return getKeyStatus(key_) == InputStatus::PRESS;
 }
 
 bool Engine::keyReleased(KEY key_)
 {
-	return getKeyStatus(key_) == KEYSTATUS::RELEASE;
+	return getKeyStatus(key_) == InputStatus::RELEASE;
 }
 
 bool Engine::keyRepeating(KEY key_)
 {
-	return getKeyStatus(key_) == KEYSTATUS::REPEAT;
+	return getKeyStatus(key_) == InputStatus::REPEAT;
+}
+
+vec2 Engine::getCursorPos()
+{
+	vec2 size = getWindowSize();
+	std::lock_guard<std::mutex> l(window->mut);
+	double xPos, yPos;
+	glfwGetCursorPos(window->glfwWindow, &xPos, &yPos);
+	return { (float)xPos / size.x * 2.0f - 1.f, -(float)yPos / size.y * 2.0f +1.f };
+}
+
+InputStatus Engine::getButtonStatus(BUTTON but_)
+{
+	std::lock_guard<std::mutex> l(window->mut);
+	return static_cast<InputStatus>( glfwGetMouseButton(window->glfwWindow, static_cast<int>(but_)));
+}
+
+bool Engine::buttonPressed(BUTTON but_)
+{
+	return getButtonStatus(but_) == InputStatus::PRESS;
+}
+
+bool Engine::buttonReleased(BUTTON but_)
+{
+	return getButtonStatus(but_) == InputStatus::RELEASE;
 }
 
 vec2 Engine::getWindowSize()
 {
 	std::lock_guard<std::mutex> l(window->mut);
-	int width, height;
-	glfwGetWindowSize(window->glfwWindow, &width, &height);
-	return { static_cast<float>(width), static_cast<float>(height) };
+	return { static_cast<float>(window->width), static_cast<float>(window->height) };
 }
 
 float Engine::getWindowAspectRatio()
 {
 	std::lock_guard<std::mutex> l(window->mut);
-	int width, height;
-	glfwGetWindowSize(window->glfwWindow, &width, &height);
-	return static_cast<float>(width)/ static_cast<float>(height);
+	return static_cast<float>(window->width)/ static_cast<float>(window->height);
+}
+
+vec2 Engine::getPosWorldSpace(vec2 windowSpacePos_)
+{
+	auto transformedPos = mat4::translate(camera.position) * mat4::rotate_z(camera.rotation) * mat4::scale(vec2(1 / camera.frustumBend.x, 1/ camera.frustumBend.y)) * mat4::scale(1/camera.zoom) * vec4(windowSpacePos_.x, windowSpacePos_.y, 0, 1);
+	return { transformedPos.x, transformedPos.y };
 }
 
 std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(uint32_t id_)
