@@ -42,11 +42,24 @@ void Game::create() {
 		wallC.rotation = rotation;
 		world.spawnEntity(wallC, wallD);
 	}
+	wallC.hitboxSize = vec2(1, 1);
+	wallD.scale = vec2(1, 1);
+	for (int j = 0; j < 0; j++) {
+		if( j == 0 ) wallC.position = vec2(-10, 5);
+		if (j == 1) wallC.position = vec2(10, 5);
+		if (j == 2) wallC.position = vec2(-10, -5);
+		if (j == 3) wallC.position = vec2(10, -5);
+		for (int i = 0; i < 10000; i++) {
+			wallC.position = rotate(wallC.position, 0.5f * i);
+			world.spawnEntity(wallC, wallD);
+		}
+	}
 
-	int num = 5000;
 
-	vec2 scale = vec2(0.1f, 0.1f);
-	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.2f, 0.5f, vec2(0,0)));
+	int num = 10000;
+
+	vec2 scale = vec2(0.05f, 0.05f);
+	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.01f, 0.5f, vec2(0,0)));
 	CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE);
 	for (int i = 0; i < num; i++) {
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
@@ -97,7 +110,7 @@ void Game::update(World& world, float deltaTime) {
 	bulletScript.executeAll(world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(4) << '\n';
+	std::cout << getPerfInfo(4) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
