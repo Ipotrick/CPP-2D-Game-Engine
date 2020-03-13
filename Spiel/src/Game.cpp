@@ -9,6 +9,12 @@ Game::Game() :
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
+
+	vec2 scaleMouse = { 0.2,0.2 };
+	auto cCursor = Entity(vec2(0, 0), 0, Collidable(scaleMouse, Form::RECTANGLE, false, true));
+	auto dCursor = CompDataDrawable(vec4(1, 0, 0, 1), scaleMouse, 1.0f, Form::RECTANGLE);
+	world.spawnEntity(cCursor, dCursor);
+	cursorID = world.getLastID();
 }
 
 void Game::create() {
@@ -94,14 +100,28 @@ void Game::update(World& world, float deltaTime) {
 	if (keyPressed(KEY::NP_SUBTRACT)) {
 		camera.zoom *= 1.0f - (1.0f * deltaTime);
 	}
+	if (keyPressed(KEY::NP_7)) {
+		camera.rotation -= 100.0f * deltaTime;
+	}
+	if (keyPressed(KEY::NP_9)) {
+		camera.rotation += 100.0f * deltaTime;
+	}
 	if (keyPressed(KEY::NP_0)) {
 		camera.rotation = 0.0f;
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
 	}
 
-	// execute all scripts in the beginning after input
+	{
+		if (buttonPressed(BUTTON::MB_LEFT)) {
+			auto* cursor = world.getEntityPtr(cursorID);
+			cursor->position = getPosWorldSpace(getCursorPos());
+			cursor->rotation = camera.rotation;
+			world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1,1) / camera.zoom / 100.0f;
+		}
+	}
 	
+
 	
 	//execute scripts
 	playerScript.executeAll(world, deltaTime);
@@ -110,7 +130,7 @@ void Game::update(World& world, float deltaTime) {
 	bulletScript.executeAll(world, deltaTime);
 
 	//display performance statistics
-	std::cout << getPerfInfo(4) << '\n';
+	//std::cout << getPerfInfo(4) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);

@@ -59,24 +59,34 @@ public:
 	inline float getRenderTime() { return renderTime; }
 	/* returns the number of past iterations , O(1)*/ 
 	inline uint32_t getIteration() { return iteration; }
-	/* returnes a string wtih formated performance info. The detail level changes how much information is shown */
+	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
 	std::string getPerfInfo(int detail);
 
 					/*-- input utility --*/
 	/* returns the status(KEYSTATUS) of a given key_(KEY), O(1) (mutex locking) */
-	KEYSTATUS getKeyStatus(KEY key_);
+	InputStatus getKeyStatus(KEY key_);
 	/* returns if a given key_ is pressed, O(1) (mutex locking) */
 	bool keyPressed(KEY key_);
 	/* returns if a given key_ is released, O(1) (mutex locking) */
 	bool keyReleased(KEY key_);
 	/* returns if a given key_ is repeating, O(1) (mutex locking) */
 	bool keyRepeating(KEY key_);
+	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
+	vec2 getCursorPos();
+	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
+	InputStatus getButtonStatus(BUTTON but_);
+	/* returns true when a button is pressed, O(1) (mutex locking) */
+	bool buttonPressed(BUTTON but_);
+	/* returns true when a button is NOT pressed, O(1) (mutex locking) */
+	bool buttonReleased(BUTTON but_);
 
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
 	vec2 getWindowSize();
 	/* returns aspect ration width/height of the window, O(1)*/
 	float getWindowAspectRatio();
+	/* transformes world space coordinates into relative window space coordinates */
+	vec2 getPosWorldSpace(vec2 windowSpacePos_);
 
 					/* graphics utility */
 	/* submit a Drawable to be drawn relative to the window, O(1) */
