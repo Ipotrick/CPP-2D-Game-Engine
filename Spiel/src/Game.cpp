@@ -1,95 +1,110 @@
 #include "Game.h"
 
-Game::Game() : Engine("Test", 1600, 900), componentControllers{}, mortalController(*this, componentControllers), playerController(*this, componentControllers), bulletController(*this, componentControllers)
+Game::Game() : 
+	Engine("Test", 1600, 900), 
+	playerScript{ world.playerCompCtrl, *this },
+	healthScript{ world.healthCompCtrl, *this },
+	ageScript   { world.ageCompCtrl,    *this },
+	bulletScript{ world.bulletCompCtrl, *this }
 {
-	componentControllers.push_back(&mortalController);
-	componentControllers.push_back(&playerController);
-	componentControllers.push_back(&bulletController);
-
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
+
+	vec2 scaleMouse = { 0.2,0.2 };
+	auto cCursor = Entity(vec2(0, 0), 0, Collidable(scaleMouse, Form::RECTANGLE, false, true));
+	auto dCursor = CompDataDrawable(vec4(1, 0, 0, 1), scaleMouse, 1.0f, Form::RECTANGLE);
+	world.spawnEntity(cCursor, dCursor);
+	cursorID = world.getLastID();
 }
 
 void Game::create() {
 	camera.zoom = 1 / 5.0f;
 
-	vec2 scaleEnt = { 0.4, 0.8 };
-	auto entC = Entity(Drawable(vec2(0, 0), 0.6, scaleEnt, vec4(0.0, 0.0, 0.0, 1), Drawable::Form::RECTANGLE), Collidable(scaleEnt, Collidable::Form::RECTANGLE, 0.99f, true, 60.0f, vec2(0, 0)));
-	entC.rotation = 45.0f;
-	world.spawnEntity(entC);
-	controlledEntID = world.latestID;
-	playerController.registerEntity(CompDataPlayer(controlledEntID));
+	vec2 scaleEnt = { 0.4f, 0.8f };
+	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, true,  0.5f, 50.0f, vec2(0,0)));
+	auto cDraw = CompDataDrawable(vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE);
+	cEnt.rotation = 45.0f;
+	world.spawnEntity(cEnt, cDraw);
+	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
 
-	vec2 scalePortal = { 14, 14 };
-	Entity attractor = Entity(Drawable(vec2(-2, 0), 0.4, scalePortal, vec4(1, 0, 0, 0.5), Drawable::Form::CIRCLE), Collidable(scalePortal, Collidable::Form::CIRCLE, 0.9f, true, 100.0f, vec2(0, 0)));
-	attractor.solid = false;
-	world.spawnEntity(attractor);
-	attractorID = world.latestID;
+	vec2 scalePortal = { 28, 28 };
+	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, false, true));
+	CompDataDrawable portalD = CompDataDrawable(vec4(1, 0, 0, 0.5f), vec2(0,0), 0.49f, Form::CIRCLE);
+	world.spawnEntity(portalC, portalD);
+	attractorID = world.getLastID();
 
-	Entity pusher = Entity(Drawable(vec2(2, 0), 0.4, scalePortal, vec4(0, 0, 1, 0.5), Drawable::Form::CIRCLE), Collidable(scalePortal, Collidable::Form::CIRCLE, 0.9f, true, 100.0f, vec2(0, 0)));
-	pusher.solid = false;
-	world.spawnEntity(pusher);
-	pusherID = world.latestID;
+	portalC.hitboxSize = scalePortal / 16;
+	portalC.position = vec2(4, 4);
+	portalD.color = vec4(0, 0, 1, 0.5f);
+	portalD.drawingPrio = 0.48f;
+	world.spawnEntity(portalC, portalD);
+	pusherID = world.getLastID();
 
-	world.spawnEntity(Entity(Drawable(vec2(-5, 0), 0.5, vec2(0.4, 10), vec4(0.0, 0.0, 0.0, 1.0)),
-		Collidable(vec2(0.4, 10), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
-	mortalController.registerEntity(CompDataMortal(world.latestID, 0, 1, -1));
-	world.spawnEntity(Entity(Drawable(vec2(5, 0), 0.5, vec2(0.4, 10), vec4(0.0, 0.0, 0.0, 1.0)),
-		Collidable(vec2(0.4, 10), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
-	mortalController.registerEntity(CompDataMortal(world.latestID, 0, 1, -1));
-	world.spawnEntity(Entity(Drawable(vec2(0, -5), 0.5, vec2(10, 0.4), vec4(0.0, 0.0, 0.0, 1.0)),
-		Collidable(vec2(10, 0.4), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
-	mortalController.registerEntity(CompDataMortal(world.latestID, 0, 1, -1));
-	world.spawnEntity(Entity(Drawable(vec2(0, 5), 0.5, vec2(10, 0.4), vec4(0.0, 0.0, 0.0, 1.0)),
-		Collidable(vec2(10, 0.4), Collidable::Form::RECTANGLE, 1.0f, false, 100000000000000.0f)));
-	mortalController.registerEntity(CompDataMortal(world.latestID, 0, 1, -1));
-
-	int num = 5000;
-
-	for (int i = 0; i < num; i++) {
-		vec2 pos = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
-		vec2 scale = vec2(0.10, 0.10);
-		//vec2 vel = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f)*0.1f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 0.1f };
-		vec2 vel = { 0,0 };
-
-		Drawable::Form formD;
-		Collidable::Form formC;
-		if (true) {
-			formD = Drawable::Form::CIRCLE;
-			formC = Collidable::Form::CIRCLE;
+	Entity wallC = Entity(vec2(0,0), 0, Collidable(vec2(0.4f, 10), Form::RECTANGLE, true, false, 0.5f,  1'000'000'000'000'000.0f, vec2(0,0)));
+	CompDataDrawable wallD = CompDataDrawable(vec4(1, 1, 1, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE);
+	for (int i = 0; i < 4; i++) {
+		float rotation = 90.0f * i;
+		wallC.position = rotate(vec2(-5.f, 0), rotation);
+		wallC.rotation = rotation;
+		world.spawnEntity(wallC, wallD);
+	}
+	wallC.hitboxSize = vec2(1, 1);
+	wallD.scale = vec2(1, 1);
+	for (int j = 0; j < 0; j++) {
+		if( j == 0 ) wallC.position = vec2(-10, 5);
+		if (j == 1) wallC.position = vec2(10, 5);
+		if (j == 2) wallC.position = vec2(-10, -5);
+		if (j == 3) wallC.position = vec2(10, -5);
+		for (int i = 0; i < 10000; i++) {
+			wallC.position = rotate(wallC.position, 0.5f * i);
+			world.spawnEntity(wallC, wallD);
 		}
-		auto newEnt = Entity(Drawable(pos, 0.5, scale, vec4(0, 0, 0, 1.0), formD),
-			Collidable(scale, formC, 0.0f, true, 1, vel));
-		world.spawnEntity(newEnt);
-		//mortalController.registerEntity(CompDataMortal(world.entities.at(world.entities.size() - 1).getId(), 100, 1, -1.0f));
+	}
+
+
+	int num = 10000;
+
+	vec2 scale = vec2(0.05f, 0.05f);
+	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.01f, 0.5f, vec2(0,0)));
+	CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE);
+	for (int i = 0; i < num; i++) {
+		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
+
+		world.spawnEntity(trashEntC, trashEntD);
+		world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
 	}
 }
 
-void Game::update(World& world, float dTime) {
+void Game::update(World& world, float deltaTime) {
 	//take input
+
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();
 	}
 
-	playerController.executeScripts(dTime);
-
 	if (keyPressed(KEY::UP)) {
-		camera.position -= rotate(vec2(0.0f, -5.0f), camera.rotation) * dTime;
+		camera.position -= rotate(vec2(0.0f, -5.0f), camera.rotation) * deltaTime;
 	}
 	if (keyPressed(KEY::LEFT)) {
-		camera.position -= rotate(vec2(5.0f, 0.0f), camera.rotation) * dTime;
+		camera.position -= rotate(vec2(5.0f, 0.0f), camera.rotation) * deltaTime;
 	}
 	if (keyPressed(KEY::DOWN)) {
-		camera.position -= rotate(vec2(0.0f, 5.0f), camera.rotation) * dTime;
+		camera.position -= rotate(vec2(0.0f, 5.0f), camera.rotation) * deltaTime;
 	}
 	if (keyPressed(KEY::RIGHT)) {
-		camera.position -= rotate(vec2(-5.0f, 0.0f), camera.rotation) * dTime;
+		camera.position -= rotate(vec2(-5.0f, 0.0f), camera.rotation) * deltaTime;
 	}
 	if (keyPressed(KEY::NP_ADD)) {
-		camera.zoom *= 1.0f + (1.0f * dTime);
+		camera.zoom *= 1.0f + (1.0f * deltaTime);
 	}
 	if (keyPressed(KEY::NP_SUBTRACT)) {
-		camera.zoom *= 1.0f - (1.0f * dTime);
+		camera.zoom *= 1.0f - (1.0f * deltaTime);
+	}
+	if (keyPressed(KEY::NP_7)) {
+		camera.rotation -= 100.0f * deltaTime;
+	}
+	if (keyPressed(KEY::NP_9)) {
+		camera.rotation += 100.0f * deltaTime;
 	}
 	if (keyPressed(KEY::NP_0)) {
 		camera.rotation = 0.0f;
@@ -97,56 +112,52 @@ void Game::update(World& world, float dTime) {
 		camera.zoom = 1 / 5.0f;
 	}
 
-	// execute all scripts in the beginning after input
-	
-	mortalController.executeScripts(dTime);
-	bulletController.executeScripts(dTime);
+	{
+		if (buttonPressed(BUTTON::MB_LEFT)) {
+			auto* cursor = world.getEntityPtr(cursorID);
+			cursor->position = getPosWorldSpace(getCursorPos());
+			cursor->rotation = camera.rotation;
+			world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1,1) / camera.zoom / 100.0f;
+		}
+	}
 	
 
-	//set backgound
-	submitDrawableWindowSpace(Drawable(vec2(0, 0), 0, vec2(2, 2), vec4(1, 1, 1, 1), Drawable::Form::RECTANGLE, 0.0f));
+	
+	//execute scripts
+	playerScript.executeAll(world, deltaTime);
+	healthScript.executeAll(world, deltaTime);
+	ageScript.executeAll(world, deltaTime);
+	bulletScript.executeAll(world, deltaTime);
 
 	//display performance statistics
-	std::cout << getPerfInfo(4) << std::endl;
+	//std::cout << getPerfInfo(4) << '\n';
 	
-	LogTimer<> t(std::cout << "attractor");
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
 	float acceleration = 1.0f;
 	float minDist = -attractor->getRadius() + 0.2f;
 
-	auto [begin, end] = getCollisionInfosHash(attractorID);
+	auto [begin, end] = getCollisionInfos(attractorID);
 	if (begin != end) {
 		for (auto iter = begin; iter != end; iter++) {
 			auto otherPtr = world.getEntityPtr(iter->idB);
-			if (otherPtr->isSolid()) {
+			if (otherPtr->isSolid() && otherPtr->isDynamic()) {
 				otherPtr->acceleration += normalize(attractor->getPos() - otherPtr->getPos()) * acceleration * powf((iter->clippingDist / attractor->getRadius()), 2);
 				if (iter->clippingDist < minDist) {
-					//otherPtr->position += pusher->position - attractor->position;
 					vec2 otherToCenter = (attractor->position + pusher->position)/2.0f - otherPtr->getPos();
 					otherPtr->position += otherToCenter * 2;
 				}
 			}
 		}
 	}
-
-	auto [begin2, end2] = getCollisionInfosHash(pusherID);
+	auto [begin2, end2] = getCollisionInfos(pusherID);
 	if (begin2 != end2) {
 		for (auto iter = begin2; iter != end2; iter++) {
 			auto otherPtr = world.getEntityPtr(iter->idB);
 			if (otherPtr->isSolid()) {
-				//otherPtr->acceleration += normalize(pusher->getPos() - otherPtr->getPos()) * -acceleration * powf((iter->clippingDist / pusher->getRadius()), 2);
+				otherPtr->acceleration += normalize(pusher->getPos() - otherPtr->getPos()) * -acceleration * powf((iter->clippingDist / pusher->getRadius()), 2);
 			}
 		}
 	}
-	t.stop();
 	
-	//clean up component idLists
-	auto despawns = world.getDespawnIDs();
-	for (auto id : despawns) {
-		//deregister ALL entities that are going to be delteted
-		mortalController.deregisterEntity(id);
-		playerController.deregisterEntity(id);
-		bulletController.deregisterEntity(id);
-	}
 }

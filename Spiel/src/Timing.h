@@ -6,8 +6,12 @@
 #include <sstream>
 #include <thread>
 
-inline double micsecToFloat(std::chrono::microseconds mics) {
+inline float micsecToFloat(std::chrono::microseconds mics) {
 	return mics.count() * 0.000001f;
+}
+
+inline std::chrono::microseconds floatToMicsec(float fl) {
+	return std::chrono::microseconds( static_cast<uint32_t>(fl * 1'000'000.0f) );
 }
 
 template <typename Clock = std::chrono::high_resolution_clock ,typename Unit = std::chrono::microseconds>
@@ -89,7 +93,7 @@ public:
 		startTimePoint = Clock::now();
 	}
 
-	virtual void wait() {
+	void wait() {
 		if (type == Type::SLEEPY) {
 			actualWaitingStartTimePoint = Clock::now();
 			was_wait_called = true;
@@ -124,103 +128,20 @@ protected:
 	bool was_wait_called;
 };
 
-/*
-
-template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
-class SleepyWaiter : _Waiter<Clock, Unit> {
+template <typename Unit = std::chrono::microseconds>
+class LapTimer {
 public:
-	SleepyWaiter(Unit waiting_time_, Unit* actual_waiting_time_) : _Waiter<Clock, Unit>(waiting_time_, actual_waiting_time_) {}
-	virtual void wait() {
-		_Waiter<Clock, Unit>::actualWaitingStartTimePoint = Clock::now();
-		_Waiter<Clock, Unit>::was_wait_called = true;
-		if ((_Waiter<Clock, Unit>::startTimePoint + _Waiter<Clock, Unit>::waitingTime) > Clock::now()) {
-			std::this_thread::sleep_until((_Waiter<Clock, Unit>::startTimePoint + _Waiter<Clock, Unit>::waitingTime));
+	LapTimer(float lap_time_) : lap_time{ floatToMicsec(lap_time_) }, time_since_last_lap{ 0 } {}
+	uint64_t getLaps(float deltaTime) {
+		time_since_last_lap = time_since_last_lap + floatToMicsec(deltaTime);
+		uint64_t laps = time_since_last_lap / lap_time;
+		if (laps > 0) {
+			time_since_last_lap = time_since_last_lap % lap_time;
 		}
+		return laps;
 	}
-	~SleepyWaiter() {
-		if (!was_wait_called) {
-			wait();
-		}
-		if (actual_waiting_time != nullptr) {
-			*actual_waiting_time = std::chrono::duration_cast<Unit>(Clock::now() - actualWaitingStartTimePoint);
-		}
-	}
+
+private:
+	Unit lap_time;
+	Unit time_since_last_lap;
 };
-
-template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
-class BusyWaiter : _Waiter<Clock, Unit> {
-public:
-	BusyWaiter(Unit waiting_time_, Unit* actual_waiting_time_) : _Waiter<Clock, Unit>(waiting_time_, actual_waiting_time_) {}
-	virtual void wait() {
-		_Waiter<Clock, Unit>::actualWaitingStartTimePoint = Clock::now();
-		if (!_Waiter<Clock, Unit>::was_wait_called) {
-			while (Clock::now() < _Waiter<Clock, Unit>::waitingTime + _Waiter<Clock, Unit>::startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec);
-		}
-		_Waiter<Clock, Unit>::was_wait_called = true;
-	}
-	~BusyWaiter() {
-		if (!was_wait_called) {
-			wait();
-		}
-		if (actual_waiting_time != nullptr) {
-			*actual_waiting_time = std::chrono::duration_cast<Unit>(Clock::now() - actualWaitingStartTimePoint);
-		}
-	}
-};
-
-*/
-
-/*
-
-template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
-class SleepyWaiter {
-public:
-	SleepyWaiter(Unit waitingTime_)
-		: waitingTime{waitingTime_}, was_wait_called{false}
-	{
-		startTimePoint = Clock::now();
-	}
-	void wait() {
-		was_wait_called = true;
-		if ((startTimePoint + waitingTime) > Clock::now()) {
-			std::this_thread::sleep_until((startTimePoint + waitingTime));
-		}
-	}
-	~SleepyWaiter() {
-		if (!was_wait_called) {
-			wait();
-		}
-	}
-protected:
-	std::chrono::time_point<Clock> startTimePoint;
-	Unit waitingTime;
-	bool was_wait_called;
-};
-
-template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
-class BusyWaiter {
-public:
-	BusyWaiter(Unit waitingTime_)
-		: waitingTime{ waitingTime_ }, was_wait_called{ false }
-	{
-		startTimePoint = Clock::now();
-	}
-	void wait() {
-
-		if (!was_wait_called) {
-			while (Clock::now() < waitingTime + startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec);
-		}
-		was_wait_called = true;
-	}
-	~BusyWaiter() {
-		if (!was_wait_called) {
-			wait();
-		}
-	}
-protected:
-	std::chrono::time_point<Clock> startTimePoint;
-	Unit waitingTime;
-	bool was_wait_called;
-};
-
-*/

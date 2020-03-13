@@ -17,9 +17,7 @@ public:
 		capacity{ capacity_ },
 		hasSubTrees{ false },
 		marked{ false }
-	{
-		//collidables.reserve(capacity_ + 1ll);
-	}
+	{}
 
 	Quadtree(vec2 minPos_, vec2 maxPos_, size_t capacity_):
 		size(maxPos_ - minPos_),
@@ -28,18 +26,16 @@ public:
 		collidables(),
 		hasSubTrees{ false },
 		marked{ false }
-	{
-		//collidables.reserve(capacity_ + 1ll);
-	}
+	{}
 public:
 
 	void printContcoll(int i = 0) const;
 	
-	void insert(Collidable* coll);
+	void insert(std::pair<uint32_t,Collidable*> coll);
 
-	void querry(std::vector<Collidable*>& rVec, vec2 const& pos, vec2 const& size) const;
+	void querry(std::vector<std::pair<uint32_t, Collidable*>>& rVec, vec2 const& pos_, vec2 const& size_) const;
 
-	void querryWithDrawables(std::vector<Collidable*>& rVec, vec2 const& pos, vec2 const& size, std::vector<Drawable>& drawables) const;
+	void querryWithDrawables(std::vector<std::tuple<uint32_t, Collidable*>>& rVec, vec2 const& pos_, vec2 const& size_, std::vector<Drawable>& drawables) const;
 
 	void clear();
 
@@ -65,7 +61,7 @@ public:
 	mutable bool marked;
 private:
 	bool hasSubTrees;
-	std::vector<Collidable*> collidables;
+	std::vector<std::pair<uint32_t, Collidable*>> collidables;
 	size_t capacity;
 	vec2 size;
 	vec2 pos;
@@ -85,7 +81,7 @@ inline void Quadtree::printContcoll(int i) const {
 	std::cout << "tree " << ": \n";
 	for (auto& coll : collidables) {
 		for (int j = 0; j < i; j++) std::cout << "  ";
-		std::cout << "(" << coll->getPos().x << "," << coll->getPos().y << ")\n";
+		std::cout << "(" << coll.second->getPos().x << "," << coll.second->getPos().y << ")\n";
 	}
 
 	if (ul != nullptr) {
@@ -110,7 +106,7 @@ inline void Quadtree::printContcoll(int i) const {
 	}
 }
 
-inline void Quadtree::insert(Collidable* coll)
+inline void Quadtree::insert(std::pair<uint32_t, Collidable*> coll)
 {
 	if (hasSubTrees == false)
 	{
@@ -148,7 +144,7 @@ inline void Quadtree::insert(Collidable* coll)
 
 			for (auto& pcoll : collidablesOld)
 			{
-				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(pcoll->getPos(), pcoll->getBoundsSize()*2);
+				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(pcoll.second->getPos(), pcoll.second->getBoundsSize()*2);
 				int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 				if (isInCount > 1)
 				{
@@ -183,7 +179,7 @@ inline void Quadtree::insert(Collidable* coll)
 	}
 	else
 	{
-		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(coll->getPos(), coll->getBoundsSize());
+		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(coll.second->getPos(), coll.second->getBoundsSize());
 		int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 		if (isInCount > 1)
 		{
@@ -211,7 +207,7 @@ inline void Quadtree::insert(Collidable* coll)
 	}
 }
 
-inline void Quadtree::querry(std::vector<Collidable*>& rVec, vec2 const& pos_, vec2 const& size_) const
+inline void Quadtree::querry(std::vector<std::pair<uint32_t, Collidable*>>& rVec, vec2 const& pos_, vec2 const& size_) const
 {
 	if (hasSubTrees == true)
 	{
@@ -237,7 +233,7 @@ inline void Quadtree::querry(std::vector<Collidable*>& rVec, vec2 const& pos_, v
 	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
 }
 
-inline void Quadtree::querryWithDrawables(std::vector<Collidable*>& rVec, vec2 const& pos_, vec2 const& size_, std::vector<Drawable>& drawables) const
+inline void Quadtree::querryWithDrawables(std::vector<std::tuple<uint32_t, Collidable*>>& rVec, vec2 const& pos_, vec2 const& size_, std::vector<Drawable>& drawables) const
 {
 	if (hasSubTrees == true)
 	{
@@ -264,7 +260,7 @@ inline void Quadtree::querryWithDrawables(std::vector<Collidable*>& rVec, vec2 c
 		}
 	}
 	else {
-		drawables.push_back(Drawable(pos, 0.1, size, vec4(1, 1, 1, 1)));
+		drawables.push_back(Drawable(pos, 0.1f, size, vec4(1, 1, 1, 1), Form::RECTANGLE, 0.0f));
 	}
 	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
 }

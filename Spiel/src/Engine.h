@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 
+
+
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
@@ -57,24 +59,34 @@ public:
 	inline float getRenderTime() { return renderTime; }
 	/* returns the number of past iterations , O(1)*/ 
 	inline uint32_t getIteration() { return iteration; }
-	/* returnes a string wtih formated performance info. The detail level changes how much information is shown */
+	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
 	std::string getPerfInfo(int detail);
 
 					/*-- input utility --*/
 	/* returns the status(KEYSTATUS) of a given key_(KEY), O(1) (mutex locking) */
-	KEYSTATUS getKeyStatus(KEY key_);
+	InputStatus getKeyStatus(KEY key_);
 	/* returns if a given key_ is pressed, O(1) (mutex locking) */
 	bool keyPressed(KEY key_);
 	/* returns if a given key_ is released, O(1) (mutex locking) */
 	bool keyReleased(KEY key_);
 	/* returns if a given key_ is repeating, O(1) (mutex locking) */
 	bool keyRepeating(KEY key_);
+	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
+	vec2 getCursorPos();
+	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
+	InputStatus getButtonStatus(BUTTON but_);
+	/* returns true when a button is pressed, O(1) (mutex locking) */
+	bool buttonPressed(BUTTON but_);
+	/* returns true when a button is NOT pressed, O(1) (mutex locking) */
+	bool buttonReleased(BUTTON but_);
 
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
 	vec2 getWindowSize();
 	/* returns aspect ration width/height of the window, O(1)*/
 	float getWindowAspectRatio();
+	/* transformes world space coordinates into relative window space coordinates */
+	vec2 getPosWorldSpace(vec2 windowSpacePos_);
 
 					/* graphics utility */
 	/* submit a Drawable to be drawn relative to the window, O(1) */
@@ -83,12 +95,8 @@ public:
 	void submitDrawableWorldSpace(Drawable d_);
 				
 					/* physics utility */
-	/* returns a range (iterator to begin and end) of the collision list for the ent, O(log2(n)) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(Entity const& ent_);
-	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(log2(n)) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfosHash(uint32_t id_);
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
 
 public:
 	World world;
@@ -103,9 +111,9 @@ private:
 private:
 	bool running;
 	uint32_t iteration;
-	float maxDeltaTime = 0.010;
+	float maxDeltaTime = 0.010f;
 
-	int physicsThreadCount;
+	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
@@ -155,8 +163,4 @@ inline void Engine::submitDrawableWindowSpace(Drawable d_) {
 
 inline void Engine::submitDrawableWorldSpace(Drawable d_) {
 	worldSpaceDrawables.emplace_back(d_);
-}
-
-inline std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisionInfos(Entity const& ent_) {
-	return getCollisionInfos(ent_.getId());
 }

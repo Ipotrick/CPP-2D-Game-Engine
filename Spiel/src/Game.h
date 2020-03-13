@@ -3,9 +3,8 @@
 #include <iostream>
 
 #include "Engine.h"
-#include "CompController.h"
-
-class Dog;
+#include "GameComponents.h"
+#include "ScriptInclude.h"
 
 class Game : public Engine {
 public:
@@ -18,12 +17,11 @@ public:
 	void destroy() override {}
 
 public:
-	std::vector<void*> componentControllers;
-	CompControllerMortal mortalController;
-	CompControllerPlayer playerController;
-	CompControllerBullet bulletController;
-	uint32_t controlledEntID;
+	PlayerScript playerScript;
+	HealthScript healthScript;
+	AgeScript    ageScript;
+	BulletScript bulletScript;
+	uint32_t cursorID;
 	uint32_t attractorID;
 	uint32_t pusherID;
-	
 };
