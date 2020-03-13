@@ -5,7 +5,8 @@ Game::Game() :
 	playerScript{ world.playerCompCtrl, *this },
 	healthScript{ world.healthCompCtrl, *this },
 	ageScript   { world.ageCompCtrl,    *this },
-	bulletScript{ world.bulletCompCtrl, *this }
+	bulletScript{ world.bulletCompCtrl, *this },
+	cursorManipData{}
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
@@ -51,7 +52,7 @@ void Game::create() {
 	wallC.hitboxSize = vec2(1, 1);
 	wallD.scale = vec2(1, 1);
 	for (int j = 0; j < 0; j++) {
-		if( j == 0 ) wallC.position = vec2(-10, 5);
+		if( j == 0) wallC.position = vec2(-10, 5);
 		if (j == 1) wallC.position = vec2(10, 5);
 		if (j == 2) wallC.position = vec2(-10, -5);
 		if (j == 3) wallC.position = vec2(10, -5);
@@ -111,17 +112,7 @@ void Game::update(World& world, float deltaTime) {
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
 	}
-
-	{
-		if (buttonPressed(BUTTON::MB_LEFT)) {
-			auto* cursor = world.getEntityPtr(cursorID);
-			cursor->position = getPosWorldSpace(getCursorPos());
-			cursor->rotation = camera.rotation;
-			world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1,1) / camera.zoom / 100.0f;
-		}
-	}
-	
-
+	cursorManipFunc();
 	
 	//execute scripts
 	playerScript.executeAll(world, deltaTime);
@@ -160,4 +151,61 @@ void Game::update(World& world, float deltaTime) {
 		}
 	}
 	
+}
+
+void Game::cursorManipFunc()
+{
+	auto* cursor = world.getEntityPtr(cursorID);
+	cursor->position = getPosWorldSpace(getCursorPos());
+	cursor->rotation = camera.rotation;
+	world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
+	if (buttonPressed(BUTTON::MB_LEFT)) {
+		if (cursorManipData.locked) {
+			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
+			controlledEnt->velocity = 0;
+			if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
+				float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - controlledEnt->position));
+				float cursorNewRot = getAngle(normalize(cursor->position - controlledEnt->position));
+				float diff = cursorNewRot - cursorOldRot;
+				controlledEnt->rotation += diff;
+				cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
+			}
+			else if (keyPressed(KEY::LEFT_CONTROL)) {	//scale
+				vec2 ControlledEntRelativeCoordVec = rotate(vec2(1, 0), controlledEnt->rotation);
+				vec2 cursormovement = cursor->position - cursorManipData.oldCursorPos;
+				float relativeXMovement = dot(cursormovement, ControlledEntRelativeCoordVec);
+				if (dot(-cursorManipData.lockedIDDist, ControlledEntRelativeCoordVec) < 0) {
+					relativeXMovement *= -1;
+				}
+				float relativeYMovement = dot(cursormovement, rotate(ControlledEntRelativeCoordVec, 90));
+				if (dot(-cursorManipData.lockedIDDist, rotate(ControlledEntRelativeCoordVec, 90)) < 0) {
+					relativeYMovement *= -1;
+				}
+				controlledEnt->hitboxSize = controlledEnt->hitboxSize + vec2(relativeXMovement, relativeYMovement) * 2;
+				world.drawableCompCtrl.getComponent(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
+				cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
+			}
+			else {	//move
+				controlledEnt->position = cursor->getPos() + cursorManipData.lockedIDDist;
+			}
+		}
+		else {
+			auto [begin, end] = getCollisionInfos(cursorID);
+			auto iterWIthHighestDrawPrio = begin;
+			for (auto iter = begin; iter != end; ++iter) {
+				if (world.drawableCompCtrl.getComponent(iter->idB)->drawingPrio > world.drawableCompCtrl.getComponent(iterWIthHighestDrawPrio->idB)->drawingPrio) {	//higher drawprio found
+					iterWIthHighestDrawPrio = iter;
+				}
+			}
+			if (begin != end) {
+				cursorManipData.lockedID = iterWIthHighestDrawPrio->idB;
+				cursorManipData.lockedIDDist = world.getEntityPtr(iterWIthHighestDrawPrio->idB)->getPos() - cursor->getPos();
+				cursorManipData.locked = true;
+			}
+		}
+	}
+	else {
+		cursorManipData.locked = false;
+	}
+	cursorManipData.oldCursorPos = cursor->position;
 }
