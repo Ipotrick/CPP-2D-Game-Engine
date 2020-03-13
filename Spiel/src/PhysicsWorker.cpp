@@ -2,6 +2,16 @@
 
 void PhysicsWorker::operator()()
 {
+	auto& beginDyn = physicsData->beginDyn;
+	auto& endDyn = physicsData->endDyn;
+	auto& dynCollidables = physicsData->dynCollidables;
+	auto& beginStat = physicsData->beginStat;
+	auto& endStat = physicsData->endStat;
+	auto& statCollidables = physicsData->statCollidables;
+	auto& collisionResponses = physicsData->collisionResponses;
+	auto& collisionInfos = physicsData->collisionInfos;
+	auto& qtrees = physicsData->qtrees;
+
 	while (true) {
 		{
 			std::unique_lock<std::mutex> switch_lock(syncData->mut);
@@ -11,19 +21,37 @@ void PhysicsWorker::operator()()
 			if (syncData->run == false) break;
 		}
 
-		auto& begin = physicsData->begin;
-		auto& end = physicsData->end;
-		auto& dynCollidables = physicsData->dynCollidables;
-		auto& qtree = physicsData->qtree;
-		auto& collisionResponses = physicsData->collisionResponses;
-		auto& collisionInfos = physicsData->collisionInfos;
+		// build qtrees
+		for (int i = beginStat; i < endStat; i++) {
+			qtrees->at(physicsData->id).insert(statCollidables->at(i));
+		}
+		for (int i = beginDyn; i < endDyn; i++) {
+			qtrees->at(physicsData->id).insert(dynCollidables->at(i));
+		}
+		
+
+		// re sync with others after inserting
+		{
+			std::unique_lock<std::mutex> switch_lock(syncData->mut2);
+			syncData->insertReady++;
+			if (syncData->insertReady == physicsThreadCount) {
+				syncData->insertReady = 0;
+				syncData->cond2.notify_all();
+			}
+			else {
+				syncData->cond2.wait(switch_lock, [&]() { return syncData->insertReady == 0; });
+			}
+		}
+		
 		
 		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;	//reuse heap memory for all dyn collidable collisions
-		for (int i = begin; i < end; i++) {
+		for (int i = beginDyn; i < endDyn; i++) {
 			auto& coll = dynCollidables->at(i);
 			nearCollidables.clear();
 
-			qtree->querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
+			for (int i = 0; i < physicsThreadCount; i++) {
+				qtrees->at(i).querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
+			}
 
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {

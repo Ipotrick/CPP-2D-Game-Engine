@@ -1,5 +1,7 @@
 #include "Engine.h"
 
+#include <windows.h>
+
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
@@ -31,12 +33,13 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ std::thread::hardware_concurrency() -1 },
-	qtreeCapacity{ 50 }
+	physicsThreadCount{ std::thread::hardware_concurrency() -1},
+	qtreeCapacity{ 10 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
 	renderThread.detach();
+	SetThreadPriority(renderThread.native_handle(), -15);
 	windowSpaceDrawables.reserve(50);
 
 	sharedPhysicsData = std::vector<std::shared_ptr<PhysicsSharedData>>(physicsThreadCount);
@@ -48,8 +51,9 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedPhysicsSyncData = std::make_shared<PhysicsSyncData>();
 	sharedPhysicsSyncData->go = std::vector<bool>(physicsThreadCount);
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
-		physicsThreads.push_back(std::thread(PhysicsWorker(sharedPhysicsData.at(i), sharedPhysicsSyncData)));
+		physicsThreads.push_back(std::thread(PhysicsWorker(sharedPhysicsData.at(i), sharedPhysicsSyncData, physicsThreadCount)));
 		physicsThreads.at(i).detach();
+		SetThreadPriority(physicsThreads.at(i).native_handle(), 15);
 	}
 }
 
@@ -205,6 +209,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	collInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
 
 	std::vector<std::pair<uint32_t, Collidable *>> dynCollidables;
+	dynCollidables.reserve(world.entities.size());
+	std::vector<std::pair<uint32_t, Collidable*>> statCollidables;
+	statCollidables.reserve(world.entities.size());
 	vec2 maxPos, minPos;
 	if (world_.entities.size() > 0) {
 		maxPos = world_.entities.at(0).getPos();
@@ -215,6 +222,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		if (el.isDynamic()) {
 			dynCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	//build dynamic collidable vector
 		}
+		else {
+			statCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	//build static collidable vector
+		}
 		//look if the quadtree has to take uop largera area
 		if (el.position.x < minPos.x) minPos.x = el.position.x;
 		if (el.position.y < minPos.y) minPos.y = el.position.y;
@@ -222,6 +232,14 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
 	
+	std::vector<Quadtree> qtrees;
+	qtrees.reserve(physicsThreadCount);
+	for (unsigned i = 0; i < physicsThreadCount; i++) {
+		vec2 randOffsetMin = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
+		vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
+		qtrees.emplace_back(Quadtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity));
+	}
+	/*
 	//the random offset makes quadtree atrifacts go away
 	vec2 randOffsetMin = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
 	vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
@@ -229,35 +247,39 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	Quadtree qtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity);
 	for (auto& el : world_.entities) {
 		qtree.insert({ el.first, (Collidable*) &(el.second) });
-	}
+	}*/
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 	t1.stop();
 
 	/* check for collisions */
 	Timer<> t2(new_physicsCollisionTime);
 	/* split the entities between threads */
-	float splitStep = (float)dynCollidables.size() / (float)(physicsThreadCount);
-	std::vector<std::array<int ,2>> ranges(physicsThreadCount);
+	float splitStepDyn = (float)dynCollidables.size() / (float)(physicsThreadCount);
+	std::vector<std::array<int ,2>> rangesDyn(physicsThreadCount);
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
-		ranges[i][0] = static_cast<int>(floorf(i * splitStep));
-		ranges[i][1] = static_cast<int>(floorf((i + 1) * splitStep));
+		rangesDyn[i][0] = static_cast<int>(floorf(i * splitStepDyn));
+		rangesDyn[i][1] = static_cast<int>(floorf((i + 1) * splitStepDyn));
 	}
-	/* submit debug drawables for physics */
-	for (auto& el : Physics::debugDrawables) {
-		submitDrawableWorldSpace(el);
+	float splitStepStat = (float)statCollidables.size() / (float)(physicsThreadCount);
+	std::vector<std::array<int, 2>> rangesStat(physicsThreadCount);
+	for (unsigned i = 0; i < physicsThreadCount; i++) {
+		rangesStat[i][0] = static_cast<int>(floorf(i * splitStepStat));
+		rangesStat[i][1] = static_cast<int>(floorf((i + 1) * splitStepStat));
 	}
-	Physics::debugDrawables.clear();
 
 	//give physics workers their info
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		auto& pData = sharedPhysicsData[i];
-		pData->begin = ranges[i][0];
-		pData->end = ranges[i][1];
+		pData->dynCollidables = &dynCollidables;
+		pData->beginDyn = rangesDyn[i][0];
+		pData->endDyn = rangesDyn[i][1];
+		pData->statCollidables = &statCollidables;
+		pData->beginStat = rangesStat[i][0];
+		pData->endStat = rangesStat[i][1];
 		pData->collisionInfos = &collisionInfosSplit[i];
 		pData->collisionResponses = &collisionResponses;
-		pData->qtree = &qtree;
-		pData->dynCollidables = &dynCollidables;
+		pData->qtrees = &qtrees;
 		pData->deltaTime = deltaTime_;
 	}
 
@@ -314,4 +336,10 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		i++;
 	}
 	t3.stop();
+
+	/* submit debug drawables for physics */
+	for (auto& el : Physics::debugDrawables) {
+		submitDrawableWorldSpace(el);
+	}
+	Physics::debugDrawables.clear();
 }
