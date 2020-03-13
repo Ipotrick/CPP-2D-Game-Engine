@@ -25,7 +25,7 @@ struct CompDataDrawable : public CompData {
 //player component
 
 struct CompDataPlayer : public CompData {
-	CompDataPlayer() : bulletShotLapTimer{ 0.01f } {}
+	CompDataPlayer() : bulletShotLapTimer{ 0.001f } {}
 	LapTimer<> bulletShotLapTimer;
 };
 

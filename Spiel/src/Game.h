@@ -6,6 +6,15 @@
 #include "GameComponents.h"
 #include "ScriptInclude.h"
 
+struct CursorManipData {
+	CursorManipData() : locked{ false } {}
+
+	bool locked;
+	vec2 oldCursorPos;
+	uint32_t lockedID;
+	vec2 lockedIDDist;
+};
+
 class Game : public Engine {
 public:
 	Game();
@@ -25,6 +34,10 @@ public:
 	OwnerScript ownerScript;
 	SlaveScript slaveScript;
 	uint32_t cursorID;
+	
 	uint32_t attractorID;
 	uint32_t pusherID;
+
+	CursorManipData cursorManipData;
+	void cursorManipFunc();
 };
