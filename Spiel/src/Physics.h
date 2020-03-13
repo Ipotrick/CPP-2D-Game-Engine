@@ -319,8 +319,8 @@ inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable c
 	if (coll_ == other_) return CollisionResponse();
 	//pretest with AABB
 	if (isOverlappingAABB(coll_, other_)) {
-		if (coll_->getForm() == Collidable::Form::CIRCLE) {
-			if (other_->getForm() == Collidable::Form::CIRCLE) {
+		if (coll_->getForm() == Form::CIRCLE) {
+			if (other_->getForm() == Form::CIRCLE) {
 				return circleCircleCollisionCheck(coll_, other_);
 			}
 			else {
@@ -328,7 +328,7 @@ inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable c
 			}
 		}
 		else {
-			if (other_->getForm() == Collidable::Form::CIRCLE) {
+			if (other_->getForm() == Form::CIRCLE) {
 				return checkCircleRectangleCollision(other_, coll_, false);
 			}
 			else {

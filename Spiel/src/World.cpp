@@ -4,7 +4,7 @@ std::vector<Drawable> World::getDrawableVec()
 {
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
-	auto iterB = drawableController.componentData.begin();
+	auto iterB = drawableCompCtrl.componentData.begin();
 	for (auto iterA = entities.begin(); iterA != entities.end(); ++iterA) {
 		res.push_back(buildDrawable(iterA->second, iterB->second));
 		++iterB;
@@ -22,10 +22,10 @@ std::vector<std::tuple<uint32_t, Collidable*>> World::getCollidablePtrVec()
 	return res;
 }
 
-void World::spawnEntity(Entity ent_, CompDataDrawable draw_)
+void World::spawnEntity(Entity const& ent_, CompDataDrawable const& draw_)
 {
 	entities.insert( {nextID, ent_ });
-	drawableController.registerEntity( nextID, draw_);
+	drawableCompCtrl.registerEntity( nextID, draw_);
 	nextID++;
 }
 
@@ -53,9 +53,11 @@ void World::deregisterDespawnedEntities()
 	for (int entitiy_id : despawnList) {
 		auto iter = entities.find(entitiy_id);
 		if (iter != entities.end()) {
-			mortalController.deregisterEntity(iter->first);
-			playerController.deregisterEntity(iter->first);
-			bulletController.deregisterEntity(iter->first);
+			drawableCompCtrl.deregisterEntity(iter->first);
+			playerCompCtrl.deregisterEntity(iter->first);
+			healthCompCtrl.deregisterEntity(iter->first);
+			ageCompCtrl.deregisterEntity(iter->first);
+			bulletCompCtrl.deregisterEntity(iter->first);
 		}
 	}
 }

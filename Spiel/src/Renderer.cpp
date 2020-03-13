@@ -86,7 +86,7 @@ void Renderer::operator()()
 				glUniformMatrix4fv(1, 1, GL_FALSE, (modelMatrix).data());
 				glUniformMatrix4fv(6, 1, GL_FALSE, mat4::identity().data());
 				glUniform4fv(2, 1, el.color.data());
-				glUniform1i(3, (el.form == Drawable::Form::CIRCLE ? 1 : 0));
+				glUniform1i(3, (el.form == Form::CIRCLE ? 1 : 0));
 				glUniform2fv(4, 1, el.position.data());
 				glUniform1f(5, el.scale.r / 2.0f);
 				glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -100,7 +100,7 @@ void Renderer::operator()()
 				glUniformMatrix4fv(1, 1, GL_FALSE, modelMatrix.data());
 				glUniformMatrix4fv(6, 1, GL_FALSE, viewProjectionMatrix.data());
 				glUniform4fv(2, 1, el.color.data());
-				glUniform1i(3, (el.form == Drawable::Form::CIRCLE ? 1 : 0));
+				glUniform1i(3, (el.form == Form::CIRCLE ? 1 : 0));
 				glUniform2fv(4, 1, el.position.data());
 				glUniform1f(5, el.scale.r / 2.0f);
 				glDrawArrays(GL_TRIANGLES, 0, 3);

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BasicScripts.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Collidable.h" />
     <ClInclude Include="src\Component.h" />
@@ -30,10 +31,12 @@
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\PhysicsWorker.h" />
+    <ClInclude Include="src\PlayerScript.h" />
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\robin_hood.h" />
     <ClInclude Include="src\Script.h" />
+    <ClInclude Include="src\ScriptInclude.h" />
     <ClInclude Include="src\Timing.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\World.h" />
@@ -41,7 +44,6 @@
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\GameComponents.cpp" />
     <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\PhysicsWorker.cpp" />

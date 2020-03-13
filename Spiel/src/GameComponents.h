@@ -2,14 +2,12 @@
 
 #include "glmath.h"
 #include "Component.h"
+#include "Timing.h"
+#include "Entity.h"
 
 // drawable component
 
 struct CompDataDrawable : public CompData {
-	enum class Form {
-		CIRCLE,
-		RECTANGLE
-	};
 	vec4 color;
 	vec2 scale;
 	float drawingPrio;
@@ -24,31 +22,40 @@ struct CompDataDrawable : public CompData {
 	}
 };
 
-// mortal component
-
-struct CompDataMortal : public CompData {
-	CompDataMortal( int maxHealth_, int collisionDamage_, float maxAge_) :
-		maxHealth{ maxHealth_ },
-		curHealth{ maxHealth },
-		collisionDamage{ collisionDamage_ },
-		maxAge{ maxAge_ },
-		curAge{ 0.0f }
-	{}
-	//(maxHealth <= 0) => ignore health
-	int maxHealth;
-	int curHealth;
-	//(maxAge < 0) => ignore age
-	float maxAge;
-	float curAge;
-	int collisionDamage;
-};
-
 //player component
 
 struct CompDataPlayer : public CompData {
+	CompDataPlayer() : bulletShotLapTimer{ 0.01f } {}
+	LapTimer<> bulletShotLapTimer;
+};
+
+// health component
+
+struct CompDataHealth : public CompData {
+	CompDataHealth(int maxHealth_) :
+		maxHealth{ maxHealth_ },
+		curHealth{ maxHealth_ }
+	{}
+	int maxHealth;
+	int curHealth;
+};
+
+// age component
+
+struct CompDataAge : public CompData {
+	CompDataAge(float maxAge_) :
+		maxAge{ maxAge_ },
+		curAge{ 0.0f }
+	{}
+	float maxAge;
+	float curAge;
 };
 
 //bullet component
 
-struct CompDataBullet : CompData {
+struct CompDataBullet : public CompData {
+	CompDataBullet(int damage_) :damage{ damage_ } {}
+
+	int damage;
+	
 };

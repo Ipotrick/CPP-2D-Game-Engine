@@ -99,7 +99,7 @@ private:
 private:
 	bool running;
 	uint32_t iteration;
-	float maxDeltaTime = 0.010;
+	float maxDeltaTime = 0.010f;
 
 	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;

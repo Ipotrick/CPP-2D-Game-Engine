@@ -84,6 +84,15 @@
     <ClInclude Include="src\Window.h">
       <Filter>_Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\ScriptInclude.h">
+      <Filter>_Script</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlayerScript.h">
+      <Filter>_Script</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BasicScripts.h">
+      <Filter>_Script</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -100,9 +109,6 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GameComponents.cpp">
-      <Filter>_Component</Filter>
     </ClCompile>
     <ClCompile Include="src\PhysicsWorker.cpp">
       <Filter>_Physics</Filter>

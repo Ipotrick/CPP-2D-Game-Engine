@@ -58,17 +58,10 @@ VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  Spiel.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(266,65): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(224,60): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(224,39): warning C4244:  "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.h(94,28): warning C4305:  "Initialisierung": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(17,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(20,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(23,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(25,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(27,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(29,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(36,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Spiel.cpp(41,1): warning C4305:  "Argument": Verkürzung von "double" in "float"
+  Engine.cpp
+  Game.cpp
+  Renderer.cpp
+  World.cpp
+  main.cpp
+  Code wird generiert...
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe
