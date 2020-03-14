@@ -71,6 +71,7 @@ Engine::~Engine() {
 std::string Engine::getPerfInfo(int detail)
 {
 	std::stringstream ss;
+	if (detail >= 4) ss << "Entities: " << world.entities.size() << "\n";
 	ss << "deltaTime(s): " << deltaTime << " ticks/s: " << (1 / deltaTime) << " simspeed: " << getDeltaTimeSafe()/ deltaTime << '\n';
 	if (detail >= 1) ss << "    mainTime(s): "   << mainTime << " mainSyncTime(s): " << mainSyncTime << " mainWaitTime(s): " << mainWaitTime <<'\n';
 	if (detail >= 2) ss << "        update(s): " << updateTime    << " physics(s): " << physicsTime << " renderBufferPush(s): " << renderBufferPushTime << '\n';
@@ -218,6 +219,16 @@ void Engine::run() {
 			sharedRenderData->renderBufferB = renderBufferA;												//push Drawables and camera
 			new_renderTime = sharedRenderData->new_renderTime;	//save render time
 			new_renderSyncTime = sharedRenderData->new_renderSyncTime;
+			// light data
+			sharedRenderData->lightCollisions.clear();
+			for (auto& light : world.lightCompCtrl.componentData) {
+				auto [begin, end] = getCollisionInfos(light.first);
+				for (auto iter = begin; iter != end; ++iter) {
+					sharedRenderData->lightCollisions.push_back(*iter);
+				}
+			}
+			sharedRenderData->lights = world.getLightVec();
+
 			if (sharedRenderData->run == false) {
 				running = false;
 			}

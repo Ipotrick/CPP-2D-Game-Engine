@@ -80,7 +80,9 @@ public:
 
 class TriggerScript : public ScriptController<CompDataTrigger, CompController<CompDataTrigger>> {
 public:
-	TriggerScript(CompController< CompDataTrigger>& cmpCtrl_, Engine& engine_) : ScriptController<CompDataTrigger, CompController< CompDataTrigger>>(cmpCtrl_, engine_) {}
+	TriggerScript(CompController< CompDataTrigger>& cmpCtrl_, Engine& engine_) : ScriptController<CompDataTrigger, CompController< CompDataTrigger>>(cmpCtrl_, engine_), spawnTimer{ 0.01 } {}
+	LapTimer<> spawnTimer;
+
 
 	inline void executeSample(uint32_t id, CompDataTrigger& data, World& world, float deltaTime) override {
 		auto begin = world.playerCompCtrl.componentData.begin();
@@ -93,17 +95,14 @@ public:
 				{
 					if (iter->first == iter2->idB)
 					{
-						Entity midComp1C = Entity(vec2(0, -4), 0, Collidable(vec2(3, 0.4f), Form::RECTANGLE, false, true));
-						CompDataDrawable midComp1D = CompDataDrawable(vec4(1, 0, 0, 1), vec2(4, 2.5f), 0.49f, Form::RECTANGLE);
-						world.spawnEntity(midComp1C, midComp1D);
+						vec2 scale = vec2(0.05f, 0.05f);
+						Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.01f, 0.5f, vec2(0, 0)));
+						CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE, true);
 
-						Entity midComp2C = Entity(vec2(0, -1.5f), 0, Collidable(vec2(3, 0.4f), Form::RECTANGLE, false, true));
-						CompDataDrawable midComp2D = CompDataDrawable(vec4(1, 0, 0, 1), vec2(2, 1.5), 0.49f, Form::RECTANGLE);
-						world.spawnEntity(midComp2C, midComp2D);
-
-						Entity midComp3C = Entity(vec2(0, 0), 0, Collidable(vec2(3, 0.4f), Form::RECTANGLE, false, true));
-						CompDataDrawable midComp3D = CompDataDrawable(vec4(1, 0, 0, 1), vec2(0.75f, 1), 0.49f, Form::RECTANGLE);
-						world.spawnEntity(midComp3C, midComp3D);
+						for (int i = 0; i < spawnTimer.getLaps(deltaTime); i++) {
+							world.spawnEntity(trashEntC, trashEntD);
+							world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
+						}
 					}
 				}
 			}

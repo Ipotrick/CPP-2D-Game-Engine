@@ -4,10 +4,22 @@ std::vector<Drawable> World::getDrawableVec()
 {
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
-	auto iterB = drawableCompCtrl.componentData.begin();
-	for (auto iterA = entities.begin(); iterA != entities.end(); ++iterA) {
-		res.push_back(buildDrawable(iterA->second, iterB->second));
-		++iterB;
+	for (auto iterA = drawableCompCtrl.componentData.begin(); iterA != drawableCompCtrl.componentData.end(); ++iterA) {
+		res.push_back(buildDrawable(iterA->first, *getEntityPtr(iterA->first), iterA->second));
+	}
+	return res;
+}
+
+Light World::buildLight(uint32_t id, Entity const& ent_, CompDataLight const& light_)
+{
+	return Light(ent_.position, ent_.hitboxSize.x * 0.5f, id, light_.color);
+}
+
+std::vector<Light> World::getLightVec()
+{
+	std::vector<Light> res;
+	for (auto iterA = lightCompCtrl.componentData.begin(); iterA != lightCompCtrl.componentData.end(); ++iterA) {
+		res.push_back(buildLight(iterA->first, *getEntityPtr(iterA->first), iterA->second));
 	}
 	return res;
 }

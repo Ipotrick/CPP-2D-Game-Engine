@@ -5,6 +5,16 @@
 
 #include "GameComponents.h"
 #include "Entity.h"
+#include "glmath.h"
+
+
+struct Light {
+	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{pos}, radius{rad}, id{id_}, color{col} {}
+	vec2 position;
+	float radius;
+	uint32_t id;
+	vec4 color;
+};
 
 
 class World {
@@ -27,13 +37,16 @@ private:
 	friend class Engine;
 	void deregisterDespawnedEntities();	//CALL BEFORE "executeDespawns"
 	void executeDespawns();
-	Drawable buildDrawable(Entity const& ent_, CompDataDrawable const& draw_);
+	Drawable buildDrawable(uint32_t id_, Entity const& ent_, CompDataDrawable const& draw_);
 	std::vector<Drawable> getDrawableVec();
+	Light buildLight(uint32_t id, Entity const& ent_, CompDataLight const& light_);
+	std::vector<Light> getLightVec();
 	std::vector<std::tuple<uint32_t, Collidable*>> getCollidablePtrVec();
 public:
 	robin_hood::unordered_map<uint32_t, Entity> entities;
 	/* ComponentController list */
 	CompController<CompDataDrawable>	drawableCompCtrl;
+	CompController<CompDataLight>		lightCompCtrl;
 	CompController<CompDataHealth>		healthCompCtrl;
 	CompController<CompDataAge>			ageCompCtrl;
 	CompController<CompDataPlayer>		playerCompCtrl;
@@ -62,7 +75,7 @@ inline uint32_t const World::getLastID() {
 }
 
 
-inline Drawable World::buildDrawable(Entity const& ent_, CompDataDrawable const& draw_)
+inline Drawable World::buildDrawable(uint32_t id_, Entity const& ent_, CompDataDrawable const& draw_)
 {
-	return Drawable(ent_.position, draw_.drawingPrio, draw_.scale, draw_.color, (Form)draw_.form, ent_.rotation);
+	return Drawable(id_, ent_.position, draw_.drawingPrio, draw_.scale, draw_.color, (Form)draw_.form, ent_.rotation, draw_.throwsShadow);
 }

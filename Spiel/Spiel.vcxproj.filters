@@ -124,5 +124,11 @@
     <None Include="shader\Basic.vert">
       <Filter>_shader</Filter>
     </None>
+    <None Include="shader\shadow.frag">
+      <Filter>_shader</Filter>
+    </None>
+    <None Include="shader\shadow.vert">
+      <Filter>_shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

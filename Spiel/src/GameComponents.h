@@ -12,12 +12,14 @@ struct CompDataDrawable : public CompData {
 	vec2 scale;
 	float drawingPrio;
 	Form form;
+	bool throwsShadow;
 
-	CompDataDrawable(vec4 color_ = vec4(1,1,1,1), vec2 scale_ = vec2(1,1), float drawingPrio_ = 0.5f, Form form_ = Form::RECTANGLE) :
+	CompDataDrawable(vec4 color_ = vec4(1, 1, 1, 1), vec2 scale_ = vec2(1, 1), float drawingPrio_ = 0.5f, Form form_ = Form::RECTANGLE, bool throwsShadow_ = false) :
 		color{ color_ },
 		scale{ scale_ },
 		drawingPrio{ drawingPrio_ },
-		form{ form_ }
+		form{ form_ },
+		throwsShadow{ throwsShadow_ }
 	{
 	}
 };
@@ -85,4 +87,11 @@ struct CompDataSlave : public CompData {
 
 	uint32_t owner;
 
+};
+
+// light component
+
+struct CompDataLight : public CompData {
+	CompDataLight(vec4 col_ = vec4(1,1,1,1)) :color{col_} {}
+	vec4 color;
 };

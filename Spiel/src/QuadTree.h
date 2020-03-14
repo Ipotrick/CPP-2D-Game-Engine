@@ -260,7 +260,7 @@ inline void Quadtree::querryWithDrawables(std::vector<std::tuple<uint32_t, Colli
 		}
 	}
 	else {
-		drawables.push_back(Drawable(pos, 0.1f, size, vec4(1, 1, 1, 1), Form::RECTANGLE, 0.0f));
+		drawables.push_back(Drawable(0, pos, 0.1f, size, vec4(1, 1, 1, 1), Form::RECTANGLE, 0.0f));
 	}
 	rVec.insert(rVec.end(), collidables.begin(), collidables.end());
 }

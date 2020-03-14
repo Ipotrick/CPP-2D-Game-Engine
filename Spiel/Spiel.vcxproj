@@ -53,6 +53,8 @@
   <ItemGroup>
     <None Include="shader\Basic.frag" />
     <None Include="shader\Basic.vert" />
+    <None Include="shader\shadow.frag" />
+    <None Include="shader\shadow.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

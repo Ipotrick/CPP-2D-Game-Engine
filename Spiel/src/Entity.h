@@ -108,14 +108,18 @@ public:
 	vec4 color;
 	vec2 scale;
 	float drawingPrio;
+	uint32_t id;
 	Form form;
+	bool throwsShadow;
 
-	Drawable(vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, Form form_, float rotation_ ) :
+	Drawable(uint32_t id_, vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, Form form_, float rotation_, bool throwsShadow_ = false) :
 		Basis(vec2(position_.x, position_.y), rotation_),
 		drawingPrio{ drawingPrio_ },
 		scale{ scale_ },
 		color{ color_ },
-		form{ form_ }
+		id{ id_ },
+		form{ form_ },
+		throwsShadow{ throwsShadow_ }
 	{
 	}
 };

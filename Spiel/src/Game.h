@@ -7,12 +7,14 @@
 #include "ScriptInclude.h"
 
 struct CursorManipData {
-	CursorManipData() : locked{ false } {}
+	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 1 } {}
 
 	bool locked;
 	vec2 oldCursorPos;
 	uint32_t lockedID;
 	vec2 lockedIDDist;
+	LapTimer<> ballSpawnLap;
+	LapTimer<> wallSpawnLap;
 };
 
 class Game : public Engine {
@@ -26,13 +28,14 @@ public:
 	void destroy() override {}
 
 public:
-	PlayerScript playerScript;
-	HealthScript healthScript;
-	AgeScript    ageScript;
-	BulletScript bulletScript;
-	TriggerScript triggerScript;
-	OwnerScript ownerScript;
-	SlaveScript slaveScript;
+	PlayerScript	playerScript;
+	HealthScript	healthScript;
+	AgeScript		ageScript;
+	BulletScript	bulletScript;
+	TriggerScript	triggerScript;
+	OwnerScript		ownerScript;
+	SlaveScript		slaveScript;
+
 	uint32_t cursorID;
 	
 	uint32_t attractorID;

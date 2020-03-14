@@ -25,14 +25,14 @@ void Game::create() {
 
 	vec2 scaleEnt = { 0.4f, 0.8f };
 	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, true,  0.5f, 50.0f, vec2(0,0)));
-	auto cDraw = CompDataDrawable(vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE);
+	auto cDraw = CompDataDrawable(vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
 	cEnt.rotation = 45.0f;
 	world.spawnEntity(cEnt, cDraw);
 	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
 
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, false, true));
-	CompDataDrawable portalD = CompDataDrawable(vec4(1, 0, 0, 0.5f), vec2(0,0), 0.49f, Form::CIRCLE);
+	CompDataDrawable portalD = CompDataDrawable(vec4(1, 0, 0, 0.5f), vec2(3,3), 0.49f, Form::CIRCLE);
 	world.spawnEntity(portalC, portalD);
 	attractorID = world.getLastID();
 
@@ -44,7 +44,7 @@ void Game::create() {
 	pusherID = world.getLastID();
 
 	Entity wallC = Entity(vec2(0,0), 0, Collidable(vec2(0.4f, 10), Form::RECTANGLE, true, false, 0.5f,  1'000'000'000'000'000.0f, vec2(0,0)));
-	CompDataDrawable wallD = CompDataDrawable(vec4(1, 1, 1, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE);
+	CompDataDrawable wallD = CompDataDrawable(vec4(1, 1, 1, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE, true);
 	for (int i = 0; i < 4; i++) {
 		float rotation = 90.0f * i;
 		wallC.position = rotate(vec2(-5.f, 0), rotation);
@@ -69,11 +69,11 @@ void Game::create() {
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 10000;
+	int num = 5000;
 
 	vec2 scale = vec2(0.05f, 0.05f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.01f, 0.5f, vec2(0,0)));
-	CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE);
+	CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE, true);
 	for (int i = 0; i < num; i++) {
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
 
@@ -88,7 +88,6 @@ void Game::update(World& world, float deltaTime) {
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();
 	}
-
 	if (keyPressed(KEY::UP)) {
 		camera.position -= rotate(vec2(0.0f, -5.0f), camera.rotation) * deltaTime;
 	}
@@ -119,14 +118,6 @@ void Game::update(World& world, float deltaTime) {
 		camera.zoom = 1 / 5.0f;
 	}
 
-	{
-		if (buttonPressed(BUTTON::MB_LEFT)) {
-			auto* cursor = world.getEntityPtr(cursorID);
-			cursor->position = getPosWorldSpace(getCursorPos());
-			cursor->rotation = camera.rotation;
-			world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1,1) / camera.zoom / 100.0f;
-		}
-	}
 	cursorManipFunc();
 
 	
@@ -140,7 +131,7 @@ void Game::update(World& world, float deltaTime) {
 	slaveScript.executeAll(world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(4) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -177,35 +168,38 @@ void Game::cursorManipFunc()
 	auto* cursor = world.getEntityPtr(cursorID);
 	cursor->position = getPosWorldSpace(getCursorPos());
 	cursor->rotation = camera.rotation;
+	cursor->hitboxSize = vec2(1, 1) / camera.zoom / 100.0f;
 	world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
 		if (cursorManipData.locked) {
 			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
-			controlledEnt->velocity = 0;
-			if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
-				float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - controlledEnt->position));
-				float cursorNewRot = getAngle(normalize(cursor->position - controlledEnt->position));
-				float diff = cursorNewRot - cursorOldRot;
-				controlledEnt->rotation += diff;
-				cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
-			}
-			else if (keyPressed(KEY::LEFT_CONTROL)) {	//scale
-				vec2 ControlledEntRelativeCoordVec = rotate(vec2(1, 0), controlledEnt->rotation);
-				vec2 cursormovement = cursor->position - cursorManipData.oldCursorPos;
-				float relativeXMovement = dot(cursormovement, ControlledEntRelativeCoordVec);
-				if (dot(-cursorManipData.lockedIDDist, ControlledEntRelativeCoordVec) < 0) {
-					relativeXMovement *= -1;
+			if (controlledEnt != nullptr) {
+				controlledEnt->velocity = 0;
+				if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
+					float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - controlledEnt->position));
+					float cursorNewRot = getAngle(normalize(cursor->position - controlledEnt->position));
+					float diff = cursorNewRot - cursorOldRot;
+					controlledEnt->rotation += diff;
+					cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
 				}
-				float relativeYMovement = dot(cursormovement, rotate(ControlledEntRelativeCoordVec, 90));
-				if (dot(-cursorManipData.lockedIDDist, rotate(ControlledEntRelativeCoordVec, 90)) < 0) {
-					relativeYMovement *= -1;
+				else if (keyPressed(KEY::LEFT_CONTROL)) {	//scale
+					vec2 ControlledEntRelativeCoordVec = rotate(vec2(1, 0), controlledEnt->rotation);
+					vec2 cursormovement = cursor->position - cursorManipData.oldCursorPos;
+					float relativeXMovement = dot(cursormovement, ControlledEntRelativeCoordVec);
+					if (dot(-cursorManipData.lockedIDDist, ControlledEntRelativeCoordVec) < 0) {
+						relativeXMovement *= -1;
+					}
+					float relativeYMovement = dot(cursormovement, rotate(ControlledEntRelativeCoordVec, 90));
+					if (dot(-cursorManipData.lockedIDDist, rotate(ControlledEntRelativeCoordVec, 90)) < 0) {
+						relativeYMovement *= -1;
+					}
+					controlledEnt->hitboxSize = controlledEnt->hitboxSize + vec2(relativeXMovement, relativeYMovement) * 2;
+					world.drawableCompCtrl.getComponent(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
+					cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
 				}
-				controlledEnt->hitboxSize = controlledEnt->hitboxSize + vec2(relativeXMovement, relativeYMovement) * 2;
-				world.drawableCompCtrl.getComponent(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
-				cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
-			}
-			else {	//move
-				controlledEnt->position = cursor->getPos() + cursorManipData.lockedIDDist;
+				else {	//move
+					controlledEnt->position = cursor->getPos() + cursorManipData.lockedIDDist;
+				}
 			}
 		}
 		else {
@@ -222,9 +216,37 @@ void Game::cursorManipFunc()
 				cursorManipData.locked = true;
 			}
 		}
+
+		if (keyPressed(KEY::DELETE) || keyPressed(KEY::BACKSPACE)) {
+			if (cursorManipData.locked == true) {
+				world.despawn(cursorManipData.lockedID);
+			}
+		}
 	}
 	else {
 		cursorManipData.locked = false;
+
+		// spawns:
+		if (keyPressed(KEY::U)) {
+			vec2 scale = vec2(0.05f, 0.05f);
+			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.01f, 0.5f, vec2(0, 0)));
+			CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE);
+
+			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
+				world.spawnEntity(trashEntC, trashEntD);
+				world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
+			}
+		}
+
+		if (keyPressed(KEY::I)) {
+			vec2 scale = vec2(0.5f, 0.5f);
+			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, true, false, 0.01f, 0.5f, vec2(0, 0)));
+			CompDataDrawable trashEntD = CompDataDrawable(vec4(0.5, 0.5, 0.5, 1), scale, 0.5f, Form::RECTANGLE);
+
+			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
+				world.spawnEntity(trashEntC, trashEntD);
+			}
+		}
 	}
 	cursorManipData.oldCursorPos = cursor->position;
 }
