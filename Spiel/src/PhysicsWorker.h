@@ -5,6 +5,7 @@
 #include <condition_variable>
 
 #include "Physics.h"
+#include "robin_hood.h"
 #include "QuadTree.h"
 #include "Timing.h"
 
@@ -36,6 +37,7 @@ struct PhysicsSharedData {
 	int endStat;
 	float deltaTime;
 	std::vector<CollisionResponse> * collisionResponses;
+	std::vector<robin_hood::unordered_map<uint32_t, CollisionResponse>>* collisionResponsesOthers;
 	std::vector<CollisionInfo> * collisionInfos;
 	std::vector<Quadtree>* qtrees;
 };

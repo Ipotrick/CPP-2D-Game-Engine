@@ -56,35 +56,39 @@ void PhysicsWorker::operator()()
 			}
 
 			// heuristic to reduce bad velocity stacking
-			constexpr unsigned int maxVelChanges{ 3 };
+			float const smallParticleArea{ 0.15f*0.15f };
+			
+			unsigned int const maxVelChanges = static_cast<unsigned>(floorf(coll.second->getHitboxSize().x * coll.second->getHitboxSize().y * (1 / smallParticleArea))) + 3;
 			unsigned int velChanges{ 0 };
 
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
-				auto newResponse = checkForCollision(coll.second, other.second);
-				
-				if (newResponse.collided) {
-					// set weighted average of position changes 
-					auto bothPosChangeLengths = norm((*collisionResponses)[i].posChange) + norm(newResponse.posChange);
-					if (bothPosChangeLengths > 0) {
-						(*collisionResponses)[i].posChange = norm((*collisionResponses)[i].posChange) / bothPosChangeLengths * (*collisionResponses)[i].posChange
-							+ norm(newResponse.posChange) / bothPosChangeLengths * newResponse.posChange;
-					}
+				if (coll.first != other.first) {
 
-					if (norm(newResponse.velChange) > 0.01f) {
-						velChanges++;
-					}
-					if (velChanges < maxVelChanges) {
-						(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange + newResponse.velChange;
-					}
+					auto newResponse = checkForCollision(coll.second, other.second);
 
-					(*collisionResponses)[i].collided = true;
-					collisionInfos->push_back(CollisionInfo(coll.first, other.first, newResponse.clippingDist));
+					if (newResponse.collided) {
+						// set weighted average of position changes 
+						auto bothPosChangeLengths = norm((*collisionResponses)[i].posChange) + norm(newResponse.posChange);
+						if (bothPosChangeLengths > 0) {
+							(*collisionResponses)[i].posChange = norm((*collisionResponses)[i].posChange) / bothPosChangeLengths * (*collisionResponses)[i].posChange
+								+ norm(newResponse.posChange) / bothPosChangeLengths * newResponse.posChange;
+						}
 
-					
-					
+						if (norm(newResponse.velChange) > 0.01f) {
+							velChanges++;
+						}
+						if (velChanges < maxVelChanges) {
+							(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange + newResponse.velChange;
+						}
+
+						(*collisionResponses)[i].collided = true;
+						collisionInfos->push_back(CollisionInfo(coll.first, other.first, newResponse.clippingDist));
+
+					}
 				}
 			}
+
 
 			//add the velocity change through acceleration
 			(*collisionResponses)[i].velChange += coll.second->acceleration * physicsData->deltaTime;

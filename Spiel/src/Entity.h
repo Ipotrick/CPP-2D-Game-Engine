@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm> 
+#include <atomic>
 
 #include "glmath.h"
 
@@ -49,6 +50,20 @@ public:
 		acceleration{ 0,0 },
 		collided{ false },
 		solid{ solid_ }
+	{
+	}
+
+	Collidable(Collidable const& c) :
+		Basis{c.getPos(), c.getRota()},
+		hitboxSize{ c.getHitboxSize() },
+		hitboxForm{ c.getForm() },
+		elasticity{ c.elasticity },
+		dynamic{ c.isDynamic() },
+		mass{ c.getMass() },
+		velocity{ c.getVel() },
+		acceleration{ 0,0 },
+		collided{ false },
+		solid{ c.isSolid() }
 	{
 	}
 

@@ -72,8 +72,8 @@ void Game::create() {
 
 	int num = 5000;
 
-	vec2 scale = vec2(0.05f, 0.05f);
-	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.5f, 0.5f, vec2(0,0)));
+	vec2 scale = vec2(0.14f, 0.14f);
+	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0,0)));
 	CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE, true);
 	for (int i = 0; i < num; i++) {
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
@@ -230,7 +230,7 @@ void Game::cursorManipFunc()
 		// spawns:
 		if (keyPressed(KEY::U)) {
 			vec2 scale = vec2(0.05f, 0.05f);
-			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.00f, 0.5f, vec2(0, 0)));
+			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0, 0)));
 			CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {

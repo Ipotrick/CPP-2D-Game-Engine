@@ -33,7 +33,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ std::thread::hardware_concurrency() -1},
+	physicsThreadCount{ std::thread::hardware_concurrency() - 1},
 	qtreeCapacity{ 10 }
 {
 	window->initialize();
@@ -288,9 +288,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}*/
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
 
-	std::vector< std::vector<CollisionResponse>> collisionResponsesOthers;
+	std::vector< robin_hood::unordered_map<uint32_t, CollisionResponse>> collisionResponsesOthers;
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
-		collisionResponsesOthers.emplace_back(std::vector<CollisionResponse>(dynCollidables.size()));
+		collisionResponsesOthers.emplace_back(robin_hood::unordered_map<uint32_t, CollisionResponse>(dynCollidables.size()));
 	}
 	t1.stop();
 
@@ -375,7 +375,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	for (auto& coll : dynCollidables) {
 		coll.second->velocity += collisionResponses.at(i).velChange;
 		coll.second->position += collisionResponses.at(i).posChange + coll.second->velocity * deltaTime_;
-		coll.second->collided = collisionResponses.at(i).collided;
+		coll.second->collided |= collisionResponses.at(i).collided;
+		coll.second->position += coll.second->velocity * deltaTime_;
 		coll.second->acceleration = 0;
 		i++;
 	}
