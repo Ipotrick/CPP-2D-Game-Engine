@@ -1,4 +1,6 @@
 #include "PhysicsWorker.h"
+#include <algorithm>
+#include <random>
 
 void PhysicsWorker::operator()()
 {
@@ -53,6 +55,10 @@ void PhysicsWorker::operator()()
 				qtrees->at(i).querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
 			}
 
+			// heuristic to reduce bad velocity stacking
+			constexpr unsigned int maxVelChanges{ 3 };
+			unsigned int velChanges{ 0 };
+
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
 				auto newResponse = checkForCollision(coll.second, other.second);
@@ -65,10 +71,18 @@ void PhysicsWorker::operator()()
 							+ norm(newResponse.posChange) / bothPosChangeLengths * newResponse.posChange;
 					}
 
-					(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange + newResponse.velChange;
+					if (norm(newResponse.velChange) > 0.01f) {
+						velChanges++;
+					}
+					if (velChanges < maxVelChanges) {
+						(*collisionResponses)[i].velChange = (*collisionResponses)[i].velChange + newResponse.velChange;
+					}
 
 					(*collisionResponses)[i].collided = true;
 					collisionInfos->push_back(CollisionInfo(coll.first, other.first, newResponse.clippingDist));
+
+					
+					
 				}
 			}
 

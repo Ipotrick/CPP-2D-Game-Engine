@@ -287,6 +287,11 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		qtree.insert({ el.first, (Collidable*) &(el.second) });
 	}*/
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
+
+	std::vector< std::vector<CollisionResponse>> collisionResponsesOthers;
+	for (unsigned i = 0; i < physicsThreadCount; i++) {
+		collisionResponsesOthers.emplace_back(std::vector<CollisionResponse>(dynCollidables.size()));
+	}
 	t1.stop();
 
 	/* check for collisions */
@@ -317,6 +322,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		pData->endStat = rangesStat[i][1];
 		pData->collisionInfos = &collisionInfosSplit[i];
 		pData->collisionResponses = &collisionResponses;
+		pData->collisionResponsesOthers = &collisionResponsesOthers;
 		pData->qtrees = &qtrees;
 		pData->deltaTime = deltaTime_;
 	}
