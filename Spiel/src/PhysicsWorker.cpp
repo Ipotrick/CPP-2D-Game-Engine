@@ -57,17 +57,19 @@ void PhysicsWorker::operator()()
 			for (auto& other : nearCollidables) {
 				if (coll.first != other.first) {
 
-					auto newTestResult = checkForCollision(coll.second, other.second);
+					if (coll.second->isSolid() || other.second->isDynamic()) {	// coll.solid = false && other.dynamic == false : sensors do not check for static entities
+						auto newTestResult = checkForCollision(coll.second, other.second);
 
-					if (newTestResult.collided) {
-						// set weighted average of position changes 
-						auto bothPosChangeLengths = norm((*collisionResponses)[i].posChange) + norm(newTestResult.posChange);
-						if (bothPosChangeLengths > 0) {
-							(*collisionResponses)[i].posChange = norm((*collisionResponses)[i].posChange) / bothPosChangeLengths * (*collisionResponses)[i].posChange
-								+ norm(newTestResult.posChange) / bothPosChangeLengths * newTestResult.posChange;
+						if (newTestResult.collided) {
+							// set weighted average of position changes 
+							auto bothPosChangeLengths = norm((*collisionResponses)[i].posChange) + norm(newTestResult.posChange);
+							if (bothPosChangeLengths > 0) {
+								(*collisionResponses)[i].posChange = norm((*collisionResponses)[i].posChange) / bothPosChangeLengths * (*collisionResponses)[i].posChange
+									+ norm(newTestResult.posChange) / bothPosChangeLengths * newTestResult.posChange;
+							}
+
+							collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal));
 						}
-
-						collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal));
 					}
 				}
 			}

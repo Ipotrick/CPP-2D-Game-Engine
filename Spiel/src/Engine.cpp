@@ -240,8 +240,6 @@ void Engine::run() {
 void Engine::physicsUpdate(World& world_, float deltaTime_)
 {
 	Timer<> t1(new_physicsPrepareTime);
-	collInfos.clear();
-	collInfos.reserve(world_.entities.size()); // ~one collisioninfo per entity minumum capacity
 
 	std::vector<std::pair<uint32_t, Collidable *>> dynCollidables;
 	dynCollidables.reserve(world.entities.size());
@@ -332,6 +330,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	Timer<> t3(new_physicsExecuteTime);
 	//store all collisioninfos in one vector
+	collInfos.clear();
+	collInfos.reserve(world_.entities.size()); // ~one collisioninfo per entity minumum capacity
 	for (auto collInfoSplit : collisionInfosSplit) {
 		collInfos.insert(collInfos.end(), collInfoSplit.begin(), collInfoSplit.end());
 	}

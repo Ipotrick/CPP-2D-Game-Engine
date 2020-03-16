@@ -51,18 +51,6 @@ void Game::create() {
 		wallC.rotation = rotation;
 		world.spawnEntity(wallC, wallD);
 	}
-	wallC.hitboxSize = vec2(1, 1);
-	wallD.scale = vec2(1, 1);
-	for (int j = 0; j < 0; j++) {
-		if( j == 0 ) wallC.position = vec2(-10, 5);
-		if (j == 1) wallC.position = vec2(10, 5);
-		if (j == 2) wallC.position = vec2(-10, -5);
-		if (j == 3) wallC.position = vec2(10, -5);
-		for (int i = 0; i < 10000; i++) {
-			wallC.position = rotate(wallC.position, 0.5f * i);
-			world.spawnEntity(wallC, wallD);
-		}
-	}
 
 	Entity loadTrigC = Entity(vec2(4, 0), 0, Collidable(vec2(0.4f, 1), Form::RECTANGLE, false, true));
 	CompDataDrawable loadTrigD = CompDataDrawable(vec4(1, 0, 0, 1), vec2(0.4f, 1), 0.49f, Form::RECTANGLE);
@@ -119,19 +107,18 @@ void Game::update(World& world, float deltaTime) {
 	}
 
 	cursorManipFunc();
-
 	
 	//execute scripts
-	playerScript.executeAll(world, deltaTime);
-	healthScript.executeAll(world, deltaTime);
-	ageScript.executeAll(world, deltaTime);
-	bulletScript.executeAll(world, deltaTime);
+	playerScript.executeAll( world, deltaTime);
+	healthScript.executeAll( world, deltaTime);
+	ageScript.executeAll(    world, deltaTime);
+	bulletScript.executeAll( world, deltaTime);
 	triggerScript.executeAll(world, deltaTime);
-	ownerScript.executeAll(world, deltaTime);
-	slaveScript.executeAll(world, deltaTime);
+	ownerScript.executeAll(  world, deltaTime);
+	slaveScript.executeAll(  world, deltaTime);
 
 	//display performance statistics
-	std::cout << getPerfInfo(5) << '\n';
+	//std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
