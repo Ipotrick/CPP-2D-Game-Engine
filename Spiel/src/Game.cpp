@@ -69,7 +69,7 @@ void Game::create() {
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 1000;
+	int num = 4000;
 
 	vec2 scale = vec2(0.14f, 0.14f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0,0)));
@@ -160,7 +160,6 @@ void Game::update(World& world, float deltaTime) {
 			}
 		}
 	}
-	
 }
 
 void Game::cursorManipFunc()
@@ -240,7 +239,7 @@ void Game::cursorManipFunc()
 
 		if (keyPressed(KEY::I)) {
 			vec2 scale = vec2(0.5f, 0.5f);
-			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, true, false, 0.00f, 100000000900000000.f, vec2(0, 0)));
+			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, true, false, 0.00f, 100000000000000000.f, vec2(0, 0)));
 			CompDataDrawable trashEntD = CompDataDrawable(vec4(0.5, 0.5, 0.5, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {

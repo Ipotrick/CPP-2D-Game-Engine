@@ -14,29 +14,27 @@ namespace Physics {
 	inline std::vector<Drawable> debugDrawables;
 }
 
-struct CollisionResponse {
+struct CollisionTestResult {
 	vec2 posChange;
-	vec2 velChange;
-	bool collided;
+	vec2 collisionNormal;
 	float clippingDist;
+	bool collided;
 
-	CollisionResponse() : posChange{ 0.0f }, velChange{ 0.0f }, collided{ false }, clippingDist{ 0.0f } {}
+	CollisionTestResult() : posChange{ 0.0f }, collided{ false }, clippingDist{ 0.0f } {}
 };
 
 struct CollisionInfo {
 	uint32_t idA;
 	uint32_t idB;
 	float clippingDist;
+	vec2 collisionNormal;
 
-	CollisionInfo(uint32_t idA_, uint32_t idB_, float clippingDist_) :idA{ idA_ }, idB{ idB_ }, clippingDist{ clippingDist_ } {}
+	CollisionInfo(uint32_t idA_, uint32_t idB_, float clippingDist_, vec2 collisionNormal_) :idA{ idA_ }, idB{ idB_ }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ } {}
 };
 
-inline CollisionResponse operator+(CollisionResponse a, CollisionResponse b) {
-	a.collided |= b.collided;
-	a.posChange += b.posChange;
-	a.velChange += b.velChange;
-	return a;
-}
+struct CollisionResponse {
+	vec2 posChange;
+};
 
 __forceinline float dynamicCollision3(float v1, float m1, float v2, float m2, float e) {
 	return (e*m2*(v2 - v1) + m1* v1 + m2* v2)/(m1 + m2);
@@ -73,48 +71,47 @@ __forceinline bool doIntervalsOverlap(float minFirst, float  maxFirst, float  mi
 
 __forceinline float clippingDist(float minFirst, float  maxFirst, float  minSecond, float  maxSecond)
 {
-	if (minFirst > maxSecond || minSecond > maxFirst)
-	{
+	if (minFirst > maxSecond || minSecond > maxFirst) {
 		return 0.0f;
 	}
-	else
-	{
+	else {
 		std::array<float, 2> distances{ fabs(minFirst - maxSecond), fabs(maxFirst - minSecond) };
 		return *std::min_element(distances.begin(), distances.end());
 	}
 }
 
-inline CollisionResponse circleCircleCollisionCheck(Collidable const* coll_, Collidable const* other_)  {
-	CollisionResponse response = CollisionResponse();
+inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll_, Collidable const* other_)  {
+	CollisionTestResult result = CollisionTestResult();
 	float dist = circleDist(coll_->getPos(), coll_->getRadius(), other_->getPos(), other_->getRadius());
 
 	if (dist < 0.0f)
 	{
-		response.collided = true;
-		response.clippingDist = dist;
+		result.collided = true;
+		result.clippingDist = dist;
 		if (coll_->isSolid() && other_->isSolid()) {
 			auto collisionNormalVec = normalize(coll_->getPos() - other_->getPos());	/* a vector from b to coll_ */ 
+			result.collisionNormal = collisionNormalVec;
 			auto circleOverlap = -dist;
 			auto distVec = collisionNormalVec * circleOverlap;
 
-			float elasticity = std::min(std::max(coll_->getElasticity(), other_->getElasticity()), 1.0f);
-			auto velChange = dynamicCollision2d3(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
+			//float elasticity = std::min(std::max(coll_->getElasticity(), other_->getElasticity()), 1.0f);
+			//auto velChange = dynamicCollision2d3(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
 
 			
 			if (coll_->isDynamic()) {
 				if (other_->isDynamic()) {
 					float bothRadii = coll_->getRadius() + other_->getRadius();
 					float bPart = other_->getRadius() / bothRadii;
-					response.posChange = distVec * bPart * 1.001f;
+					result.posChange = distVec * bPart * 1.001f;
 				}
 				else {
-					response.posChange = distVec * 1.001f;
+					result.posChange = distVec * 1.001f;
 				}
 			}
-			response.velChange = velChange;
+			//response.velChange = velChange;
 		}
 	}
-	return response;
+	return result;
 }
 
 inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll_, Collidable const* other_)
@@ -160,28 +157,29 @@ inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll
 	return std::tuple(true, resRotation, minClippingDist);
 }
 
-inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll_, Collidable const* other_)
+inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* coll_, Collidable const* other_)
 {
-	CollisionResponse response = CollisionResponse();
+	CollisionTestResult result = CollisionTestResult();
 	auto [partialResult1, rotation1, dist1] = partialSATCollision(coll_, other_);
 	if (partialResult1 == true) {
 		auto [partialResult2, rotation2, dist2] = partialSATCollision(other_, coll_);
 
 		if (partialResult2)
 		{
-			response.collided = true;
+			result.collided = true;
 			auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
-			response.clippingDist = minClippingDist;
+			result.clippingDist = minClippingDist;
 			if (coll_->isSolid() && other_->isSolid()) {
 				
 				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
 				rotation = (float)((int)rotation % 360);
 
 				auto collisionNormalVec = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
+				result.collisionNormal = collisionNormalVec;
 				auto distVec = collisionNormalVec * minClippingDist;
 
-				float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
-				auto velChange = dynamicCollision2d3(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
+				//float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
+				//auto velChange = dynamicCollision2d3(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
 
 
 				if (coll_->isDynamic()) {
@@ -190,21 +188,21 @@ inline CollisionResponse rectangleRectangleCollisionCheck(Collidable const* coll
 						float collPart = coll_->getHitboxSize().x * coll_->getHitboxSize().y / BothSizes;
 						float otherPart = other_->getHitboxSize().x * other_->getHitboxSize().y / BothSizes;
 
-						response.posChange = distVec * otherPart * 1.001f;
+						result.posChange = distVec * otherPart * 1.001f;
 					}
 					else {
-						response.posChange = distVec * 1.001f;
+						result.posChange = distVec * 1.001f;
 					}
 				}
-				response.velChange = velChange;
+				//response.velChange = velChange;
 			}
 		}
 	}
-	return response;
+	return result;
 }
 
-inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle, Collidable const* rect, bool isCirclePrimary) {
-	CollisionResponse response = CollisionResponse();
+inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circle, Collidable const* rect, bool isCirclePrimary) {
+	CollisionTestResult result = CollisionTestResult();
 
 	auto const& rotation = rect->getRota();
 	auto rotCirclePos = rotate(circle->getPos(), -rotation);
@@ -256,44 +254,48 @@ inline CollisionResponse checkCircleRectangleCollision(Collidable const* circle,
 	vec2 backRotatedColDir = rotate(collisionDir, rotation);
 
 	if (dist < 0.0f) {
-		response.collided = true;
-		response.clippingDist = dist;
+		result.collided = true;
+		result.clippingDist = dist;
 
 		if (circle->isSolid() && rect->isSolid()) {
-			float elasticity = std::max(circle->getElasticity(), rect->getElasticity());
+			//float elasticity = std::max(circle->getElasticity(), rect->getElasticity());
 
 			/* the primary is allways dynamic */
 			if (isCirclePrimary) {
-				auto velChange = dynamicCollision2d3(circle->getVel(), circle->getMass(), rect->getVel(), rect->getMass(), backRotatedColDir, elasticity);
+				//auto velChange = dynamicCollision2d3(circle->getVel(), circle->getMass(), rect->getVel(), rect->getMass(), backRotatedColDir, elasticity);
+
+				result.collisionNormal = backRotatedColDir;
 				if (rect->isDynamic()) {
 					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
 					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
 					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
 					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
-					response.posChange = -backRotatedColDir * dist * rectPart * 1.001f;
+					result.posChange = -backRotatedColDir * dist * rectPart * 1.001f;
 				}
 				else {
-					response.posChange = -backRotatedColDir * dist * 1.001f;
+					result.posChange = -backRotatedColDir * dist * 1.001f;
 				}
-				response.velChange = velChange;
+				//response.velChange = velChange;
 			}
 			else {
-				auto velChange = dynamicCollision2d3(rect->getVel(), rect->getMass(), circle->getVel(), circle->getMass(), -backRotatedColDir, elasticity);
+				//auto velChange = dynamicCollision2d3(rect->getVel(), rect->getMass(), circle->getVel(), circle->getMass(), -backRotatedColDir, elasticity);
+
+				result.collisionNormal = -backRotatedColDir;
 				if (circle->isDynamic()) {
 					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
 					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
 					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
 					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
-					response.posChange = backRotatedColDir * dist * circlePart * 1.001f;
+					result.posChange = backRotatedColDir * dist * circlePart * 1.001f;
 				}
 				else {
-					response.posChange = backRotatedColDir * dist * 1.001f;
+					result.posChange = backRotatedColDir * dist * 1.001f;
 				}
-				response.velChange = velChange;
+				//response.velChange = velChange;
 			}
 		}
 	}
-	return response;
+	return result;
 }
 
 inline bool isOverlappingAABB(Collidable const* a, Collidable const* b) {
@@ -301,8 +303,7 @@ inline bool isOverlappingAABB(Collidable const* a, Collidable const* b) {
 	fabs(b->getPos().y - a->getPos().y) <= fabs(b->getBoundsSize().y + a->getBoundsSize().y) * 0.5f;
 }
 
-inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable const* other_) {
-	if (coll_ == other_) return CollisionResponse();
+inline CollisionTestResult checkForCollision(Collidable const* coll_, Collidable const* other_) {
 	//pretest with AABB
 	if (isOverlappingAABB(coll_, other_)) {
 		if (coll_->getForm() == Form::CIRCLE) {
@@ -322,5 +323,5 @@ inline CollisionResponse checkForCollision(Collidable const* coll_, Collidable c
 			}
 		}
 	}
-	return CollisionResponse();
+	return CollisionTestResult();
 }

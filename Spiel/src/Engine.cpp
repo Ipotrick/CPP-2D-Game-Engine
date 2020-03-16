@@ -1,11 +1,10 @@
 #include "Engine.h"
 
-#include <windows.h>
 
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 40 },//10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 40 },// 10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -39,7 +38,6 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
 	renderThread.detach();
-	SetThreadPriority(renderThread.native_handle(), -15);
 	windowSpaceDrawables.reserve(50);
 
 	sharedPhysicsData = std::vector<std::shared_ptr<PhysicsSharedData>>(physicsThreadCount);
@@ -53,7 +51,6 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		physicsThreads.push_back(std::thread(PhysicsWorker(sharedPhysicsData.at(i), sharedPhysicsSyncData, physicsThreadCount)));
 		physicsThreads.at(i).detach();
-		SetThreadPriority(physicsThreads.at(i).native_handle(), 15);
 	}
 }
 
@@ -149,7 +146,7 @@ std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::ite
 {
 	auto begin = collInfoBegins.find(id_);
 	auto end = collInfoEnds.find(id_);
-	if (begin != collInfoBegins.end() && end != collInfoEnds.end()) {	//is there even collisionInfo for the id?
+	if (begin != collInfoBegins.end() && end != collInfoEnds.end()) {	// is there even collisionInfo for the id?
 		return { begin->second, end->second };
 	}
 	else {
@@ -180,7 +177,7 @@ void Engine::run() {
 		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY, &new_mainWaitTime);
 		commitTimeMessurements();
 		glfwPollEvents();
-		sharedRenderData->cond.notify_one();	//wake up rendering thread
+		sharedRenderData->cond.notify_one();	// wake up rendering thread
 
 		{
 			Timer<> mainTimer(new_mainTime);
@@ -214,10 +211,10 @@ void Engine::run() {
 		{	
 			Timer<> t(new_mainSyncTime);
 			std::unique_lock<std::mutex> switch_lock(sharedRenderData->mut);
-			sharedRenderData->cond.wait(switch_lock, [&]() { return sharedRenderData->ready == true; });	//wait for rendering thread to finish
-			sharedRenderData->ready = false;																//reset renderers ready flag
-			sharedRenderData->renderBufferB = renderBufferA;												//push Drawables and camera
-			new_renderTime = sharedRenderData->new_renderTime;	//save render time
+			sharedRenderData->cond.wait(switch_lock, [&]() { return sharedRenderData->ready == true; });	// wait for rendering thread to finish
+			sharedRenderData->ready = false;																// reset renderers ready flag
+			sharedRenderData->renderBufferB = renderBufferA;												// push Drawables and camera
+			new_renderTime = sharedRenderData->new_renderTime;	// save render time
 			new_renderSyncTime = sharedRenderData->new_renderSyncTime;
 			// light data
 			sharedRenderData->lightCollisions.clear();
@@ -244,7 +241,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 {
 	Timer<> t1(new_physicsPrepareTime);
 	collInfos.clear();
-	collInfos.reserve(world_.entities.size()); //~one collisioninfo per entity minumum capacity
+	collInfos.reserve(world_.entities.size()); // ~one collisioninfo per entity minumum capacity
 
 	std::vector<std::pair<uint32_t, Collidable *>> dynCollidables;
 	dynCollidables.reserve(world.entities.size());
@@ -257,13 +254,14 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	for (auto& elHash : world_.entities) {
 		auto & el = elHash.second;
+		el.collided = false;	// reset collided flag
 		if (el.isDynamic()) {
-			dynCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	//build dynamic collidable vector
+			dynCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	// build dynamic collidable vector
 		}
 		else {
-			statCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	//build static collidable vector
+			statCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	// build static collidable vector
 		}
-		//look if the quadtree has to take uop largera area
+		// look if the quadtree has to take uop largera area
 		if (el.position.x < minPos.x) minPos.x = el.position.x;
 		if (el.position.y < minPos.y) minPos.y = el.position.y;
 		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
@@ -277,21 +275,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
 		qtrees.emplace_back(Quadtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity));
 	}
-	/*
-	//the random offset makes quadtree atrifacts go away
-	vec2 randOffsetMin = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
-	vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
-	//generate quadtree for fast lookup of nearby collidables
-	Quadtree qtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity);
-	for (auto& el : world_.entities) {
-		qtree.insert({ el.first, (Collidable*) &(el.second) });
-	}*/
 	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
-
-	std::vector< robin_hood::unordered_map<uint32_t, CollisionResponse>> collisionResponsesOthers;
-	for (unsigned i = 0; i < physicsThreadCount; i++) {
-		collisionResponsesOthers.emplace_back(robin_hood::unordered_map<uint32_t, CollisionResponse>(dynCollidables.size()));
-	}
 	t1.stop();
 
 	/* check for collisions */
@@ -310,7 +294,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		rangesStat[i][1] = static_cast<int>(floorf((i + 1) * splitStepStat));
 	}
 
-	//give physics workers their info
+	// give physics workers their info
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		auto& pData = sharedPhysicsData[i];
@@ -322,7 +306,6 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		pData->endStat = rangesStat[i][1];
 		pData->collisionInfos = &collisionInfosSplit[i];
 		pData->collisionResponses = &collisionResponses;
-		pData->collisionResponsesOthers = &collisionResponsesOthers;
 		pData->qtrees = &qtrees;
 		pData->deltaTime = deltaTime_;
 	}
@@ -370,13 +353,31 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	collInfoEnds.insert({ lastIDA, collInfos.end() });
 
-	//execute physics changes in pos, vel, accel
+	// execute inelastic collisions 
+	for (auto& collInfo : collInfos) {
+		auto* coll = world.getEntityPtr(collInfo.idA);
+		auto* other = world.getEntityPtr(collInfo.idB);
+
+		coll->collided = true;
+		other->collided = true;
+
+		if (coll->isSolid() && other->isSolid()) {
+			float elast = std::max(coll->elasticity, other->elasticity);
+			vec2 collVelChange = dynamicCollision2d3(coll->velocity, coll->mass, other->velocity, other->mass, collInfo.collisionNormal, elast);
+			if (other->isDynamic()) {
+				other->velocity += dynamicCollision2d3(other->velocity, other->mass, coll->velocity, coll->mass, -collInfo.collisionNormal, elast);
+			}
+			coll->velocity += collVelChange;
+		}
+	}
+
+	// execute physics changes in pos, vel, accel
 	int i = 0;
 	for (auto& coll : dynCollidables) {
-		coll.second->velocity += collisionResponses.at(i).velChange;
-		coll.second->position += collisionResponses.at(i).posChange + coll.second->velocity * deltaTime_;
-		coll.second->collided |= collisionResponses.at(i).collided;
+		coll.second->velocity += coll.second->acceleration * deltaTime_;
 		coll.second->position += coll.second->velocity * deltaTime_;
+		coll.second->position += collisionResponses.at(i).posChange;
+		
 		coll.second->acceleration = 0;
 		i++;
 	}
