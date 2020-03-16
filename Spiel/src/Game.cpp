@@ -29,7 +29,6 @@ void Game::create() {
 	cEnt.rotation = 45.0f;
 	world.spawnEntity(cEnt, cDraw);
 	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
-	std::cout << "v1 after spawn: " << world.getEntityPtr(1)->velocity << std::endl;
 
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, false, true));
@@ -70,7 +69,7 @@ void Game::create() {
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 5000;
+	int num = 1000;
 
 	vec2 scale = vec2(0.14f, 0.14f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0,0)));
@@ -132,7 +131,7 @@ void Game::update(World& world, float deltaTime) {
 	slaveScript.executeAll(world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);

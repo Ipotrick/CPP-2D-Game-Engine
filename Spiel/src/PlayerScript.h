@@ -36,7 +36,7 @@ public:
 		}
 		if (engine.keyPressed(KEY::F)) {
 			vec2 bulletSize = vec2(0.05f, 0.05f);
-			float bulletVel = 20.0f;
+			float bulletVel = 10.0f;
 			float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
 			uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 			for (uint64_t i = 0; i < bullets; i++) {

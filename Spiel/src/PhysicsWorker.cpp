@@ -58,7 +58,7 @@ void PhysicsWorker::operator()()
 			// heuristic to reduce bad velocity stacking
 			float const smallParticleArea{ 0.15f*0.15f };
 			
-			unsigned int const maxVelChanges = static_cast<unsigned>(floorf(coll.second->getHitboxSize().x * coll.second->getHitboxSize().y * (1 / smallParticleArea))) + 3;
+			unsigned int const maxVelChanges = static_cast<unsigned>(floorf(coll.second->getHitboxSize().x * coll.second->getHitboxSize().y * (1 / smallParticleArea))) + 2;
 			unsigned int velChanges{ 0 };
 
 			//check for collisions and save the changes in velocity and position these cause
