@@ -23,9 +23,11 @@ Game::Game() :
 void Game::create() {
 	camera.zoom = 1 / 5.0f;
 
+	std::cout << "sizeof(Collidable): " << sizeof(Collidable) << " sizeof(float): " << sizeof(bool) << std::endl;
+
 	vec2 scaleEnt = { 0.4f, 0.8f };
 	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, true,  0.5f, 50.0f, vec2(3,3)));
-	auto cDraw = CompDataDrawable(vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
+	auto cDraw = CompDataDrawable(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
 	cEnt.rotation = 45.0f;
 	world.spawnEntity(cEnt, cDraw);
 	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
@@ -36,7 +38,7 @@ void Game::create() {
 	world.spawnEntity(portalC, portalD);
 	attractorID = world.getLastID();
 
-	portalC.hitboxSize = scalePortal / 16;
+	portalC.size = scalePortal / 16;
 	portalC.position = vec2(4, 4);
 	portalD.color = vec4(0, 0, 1, 0.5f);
 	portalD.drawingPrio = 0.48f;
@@ -44,7 +46,7 @@ void Game::create() {
 	pusherID = world.getLastID();
 
 	Entity wallC = Entity(vec2(0,0), 0, Collidable(vec2(0.4f, 10), Form::RECTANGLE, true, false, 0.3f,  1'000'000'000'000'000.0f, vec2(0,0)));
-	CompDataDrawable wallD = CompDataDrawable(vec4(1, 1, 1, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE, true);
+	CompDataDrawable wallD = CompDataDrawable(vec4(0, 0, 0, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE, true);
 	for (int i = 0; i < 4; i++) {
 		float rotation = 90.0f * i;
 		wallC.position = rotate(vec2(-5.f, 0), rotation);
@@ -57,13 +59,13 @@ void Game::create() {
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 4000;
+	int num = 10000;
 
-	vec2 scale = vec2(0.14f, 0.14f);
-	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0,0)));
-	CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE, true);
+	vec2 scale = vec2(0.08f, 0.08f);
+	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.9f, 0.5f, vec2(0,0)));
+	CompDataDrawable trashEntD = CompDataDrawable(vec4(0, 0, 0, 1), scale, 0.5f, Form::CIRCLE, true);
 	for (int i = 0; i < num; i++) {
-		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 5 };
+		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
 
 		world.spawnEntity(trashEntC, trashEntD);
 		world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
@@ -72,6 +74,8 @@ void Game::create() {
 
 void Game::update(World& world, float deltaTime) {
 	//take input
+
+	submitDrawableWindowSpace(Drawable(0, vec2(0, 0), 0, vec2(2,2), vec4(0.5, 0.5, 0.5, 1), Form::RECTANGLE, 0));
 
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();
@@ -118,7 +122,7 @@ void Game::update(World& world, float deltaTime) {
 	slaveScript.executeAll(  world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -130,7 +134,7 @@ void Game::update(World& world, float deltaTime) {
 		for (auto iter = begin; iter != end; iter++) {
 			auto otherPtr = world.getEntityPtr(iter->idB);
 			if (otherPtr->isSolid() && otherPtr->isDynamic()) {
-				otherPtr->acceleration += normalize(attractor->getPos() - otherPtr->getPos()) * acceleration * powf((iter->clippingDist / attractor->getRadius()), 2);
+				otherPtr->velocity += normalize(attractor->getPos() - otherPtr->getPos()) * acceleration * powf((iter->clippingDist / attractor->getRadius()), 2) * deltaTime;
 				if (iter->clippingDist < minDist) {
 					vec2 otherToCenter = (attractor->position + pusher->position)/2.0f - otherPtr->getPos();
 					otherPtr->position += otherToCenter * 2;
@@ -143,7 +147,7 @@ void Game::update(World& world, float deltaTime) {
 		for (auto iter = begin2; iter != end2; iter++) {
 			auto otherPtr = world.getEntityPtr(iter->idB);
 			if (otherPtr->isSolid()) {
-				otherPtr->acceleration += normalize(pusher->getPos() - otherPtr->getPos()) * -acceleration * powf((iter->clippingDist / pusher->getRadius()), 2);
+				otherPtr->velocity += normalize(pusher->getPos() - otherPtr->getPos()) * -acceleration * powf((iter->clippingDist / pusher->getRadius()), 2) * deltaTime;
 			}
 		}
 	}
@@ -154,7 +158,7 @@ void Game::cursorManipFunc()
 	auto* cursor = world.getEntityPtr(cursorID);
 	cursor->position = getPosWorldSpace(getCursorPos());
 	cursor->rotation = camera.rotation;
-	cursor->hitboxSize = vec2(1, 1) / camera.zoom / 100.0f;
+	cursor->size = vec2(1, 1) / camera.zoom / 100.0f;
 	world.drawableCompCtrl.getComponent(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
 		if (cursorManipData.locked) {
@@ -179,7 +183,7 @@ void Game::cursorManipFunc()
 					if (dot(-cursorManipData.lockedIDDist, rotate(ControlledEntRelativeCoordVec, 90)) < 0) {
 						relativeYMovement *= -1;
 					}
-					controlledEnt->hitboxSize = controlledEnt->hitboxSize + vec2(relativeXMovement, relativeYMovement) * 2;
+					controlledEnt->size = controlledEnt->size + vec2(relativeXMovement, relativeYMovement) * 2;
 					world.drawableCompCtrl.getComponent(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
 					cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
 				}
@@ -215,7 +219,7 @@ void Game::cursorManipFunc()
 		// spawns:
 		if (keyPressed(KEY::U)) {
 			vec2 scale = vec2(0.05f, 0.05f);
-			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0, 0)));
+			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.9f, 0.5f, vec2(0, 0)));
 			CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {

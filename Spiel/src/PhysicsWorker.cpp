@@ -57,7 +57,7 @@ void PhysicsWorker::operator()()
 			for (auto& other : nearCollidables) {
 				if (coll.first != other.first) {
 
-					if (coll.second->isSolid() || other.second->isDynamic()) {	// coll.solid = false && other.dynamic == false : sensors do not check for static entities
+					//if (coll.second->isSolid() || other.second->isDynamic()) {	// coll.solid = false && other.dynamic == false : sensors do not check for static entities
 						auto newTestResult = checkForCollision(coll.second, other.second);
 
 						if (newTestResult.collided) {
@@ -70,7 +70,7 @@ void PhysicsWorker::operator()()
 
 							collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal));
 						}
-					}
+					//}
 				}
 			}
 		}

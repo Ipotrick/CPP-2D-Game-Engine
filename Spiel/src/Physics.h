@@ -9,9 +9,10 @@
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
-	constexpr float maxPosAbsVelChange = 10.0f;
+	constexpr float pushoutFactor = 1.05f;
 
 	inline std::vector<Drawable> debugDrawables;
+
 }
 
 struct CollisionTestResult {
@@ -102,10 +103,10 @@ inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll_, C
 				if (other_->isDynamic()) {
 					float bothRadii = coll_->getRadius() + other_->getRadius();
 					float bPart = other_->getRadius() / bothRadii;
-					result.posChange = distVec * bPart * 1.001f;
+					result.posChange = distVec * bPart * Physics::pushoutFactor;
 				}
 				else {
-					result.posChange = distVec * 1.001f;
+					result.posChange = distVec * Physics::pushoutFactor;
 				}
 			}
 			//response.velChange = velChange;
@@ -122,15 +123,15 @@ inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll
 	{
 		float backRotationDegree = -coll_->getRota() + 90 * i;
 		auto backRotatedEntPos = rotate(coll_->getPos(), backRotationDegree);
-		float entHalfSize = (i == 0 ? coll_->getHitboxSize().x * 0.5f : coll_->getHitboxSize().y * 0.5f);
+		float entHalfSize = (i == 0 ? coll_->getSize().x * 0.5f : coll_->getSize().y * 0.5f);
 		float minEntProjPos = backRotatedEntPos.x - entHalfSize;
 		float maxEntProjPos = backRotatedEntPos.x + entHalfSize;
 
 		std::array<vec2, 4> otherCorners;
-		otherCorners[0] = other_->getPos() + rotate(vec2(other_->getHitboxSize().x * 0.5f, other_->getHitboxSize().y * 0.5f), other_->getRota());
-		otherCorners[1] = other_->getPos() + rotate(vec2(other_->getHitboxSize().x * 0.5f, -other_->getHitboxSize().y * 0.5f), other_->getRota());
-		otherCorners[2] = other_->getPos() + rotate(vec2(-other_->getHitboxSize().x * 0.5f, other_->getHitboxSize().y * 0.5f), other_->getRota());
-		otherCorners[3] = other_->getPos() + rotate(vec2(-other_->getHitboxSize().x * 0.5f, -other_->getHitboxSize().y * 0.5f), other_->getRota());
+		otherCorners[0] = other_->getPos() + rotate(vec2(other_->getSize().x * 0.5f, other_->getSize().y * 0.5f), other_->getRota());
+		otherCorners[1] = other_->getPos() + rotate(vec2(other_->getSize().x * 0.5f, -other_->getSize().y * 0.5f), other_->getRota());
+		otherCorners[2] = other_->getPos() + rotate(vec2(-other_->getSize().x * 0.5f, other_->getSize().y * 0.5f), other_->getRota());
+		otherCorners[3] = other_->getPos() + rotate(vec2(-other_->getSize().x * 0.5f, -other_->getSize().y * 0.5f), other_->getRota());
 		for (int j = 0; j < 4; ++j) otherCorners[j] = rotate(otherCorners[j], backRotationDegree);
 
 		auto comp = [](vec2 a, vec2 b) { return a.x < b.x; };
@@ -184,14 +185,14 @@ inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* co
 
 				if (coll_->isDynamic()) {
 					if (other_->isDynamic()) {
-						float BothSizes = coll_->getHitboxSize().x * coll_->getHitboxSize().y + other_->getHitboxSize().x * other_->getHitboxSize().y;
-						float collPart = coll_->getHitboxSize().x * coll_->getHitboxSize().y / BothSizes;
-						float otherPart = other_->getHitboxSize().x * other_->getHitboxSize().y / BothSizes;
+						float BothSizes = coll_->getSize().x * coll_->getSize().y + other_->getSize().x * other_->getSize().y;
+						float collPart = coll_->getSize().x * coll_->getSize().y / BothSizes;
+						float otherPart = other_->getSize().x * other_->getSize().y / BothSizes;
 
-						result.posChange = distVec * otherPart * 1.001f;
+						result.posChange = distVec * otherPart * Physics::pushoutFactor;
 					}
 					else {
-						result.posChange = distVec * 1.001f;
+						result.posChange = distVec * Physics::pushoutFactor;
 					}
 				}
 				//response.velChange = velChange;
@@ -208,7 +209,7 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 	auto rotCirclePos = rotate(circle->getPos(), -rotation);
 	auto rotRectPos = rotate(rect->getPos(), -rotation);
 
-	auto rectHalfSize = rect->getHitboxSize() * 0.5;
+	auto rectHalfSize = rect->getSize() * 0.5;
 
 	/* calmp the circle position to the rectangle skin. This is the nbearest point of the circle to the rect. if circle is insided the rectangle, the clamping doesnt work. */
 	auto clampedCirclePos = vec2(
@@ -270,10 +271,10 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
 					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
 					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
-					result.posChange = -backRotatedColDir * dist * rectPart * 1.001f;
+					result.posChange = -backRotatedColDir * dist * rectPart * 1.005f;
 				}
 				else {
-					result.posChange = -backRotatedColDir * dist * 1.001f;
+					result.posChange = -backRotatedColDir * dist * Physics::pushoutFactor;
 				}
 				//response.velChange = velChange;
 			}
@@ -289,7 +290,7 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 					result.posChange = backRotatedColDir * dist * circlePart * 1.001f;
 				}
 				else {
-					result.posChange = backRotatedColDir * dist * 1.001f;
+					result.posChange = backRotatedColDir * dist * Physics::pushoutFactor;
 				}
 				//response.velChange = velChange;
 			}

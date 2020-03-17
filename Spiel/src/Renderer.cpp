@@ -83,7 +83,7 @@ void Renderer::operator()()
 			auto iterWindow = windowDrawables.begin();
 			while (!(iterWorld == worldDrawables.end()) || !(iterWindow == windowDrawables.end())) {
 				if (!(iterWorld == worldDrawables.end()) && !(iterWindow == windowDrawables.end())) {	// there are world AND window drawables left
-					if (iterWorld->drawingPrio > iterWindow->drawingPrio) {	// decide wich to draw considering drawingprio
+					if (iterWorld->drawingPrio < iterWindow->drawingPrio) {	// decide wich to draw considering drawingprio
 						if (iterWorld->drawingPrio >= 0.9f) break;
 						drawWorldSpace(*iterWorld++, viewProjectionMatrix);
 					}

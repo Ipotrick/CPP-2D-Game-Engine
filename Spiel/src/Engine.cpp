@@ -1,5 +1,7 @@
 #include "Engine.h"
 
+#define NOMINMAX
+#include <windows.h>
 
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
@@ -33,10 +35,11 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	renderBufferA{},
 	windowSpaceDrawables{},
 	physicsThreadCount{ std::thread::hardware_concurrency() - 1},
-	qtreeCapacity{ 10 }
+	qtreeCapacity{ 5 }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
+	SetThreadPriority(renderThread.native_handle(), 0);
 	renderThread.detach();
 	windowSpaceDrawables.reserve(50);
 
@@ -50,6 +53,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedPhysicsSyncData->go = std::vector<bool>(physicsThreadCount);
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		physicsThreads.push_back(std::thread(PhysicsWorker(sharedPhysicsData.at(i), sharedPhysicsSyncData, physicsThreadCount)));
+		SetThreadPriority(physicsThreads.back().native_handle(), 15);
 		physicsThreads.at(i).detach();
 	}
 }
@@ -252,7 +256,6 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	for (auto& elHash : world_.entities) {
 		auto & el = elHash.second;
-		el.collided = false;	// reset collided flag
 		if (el.isDynamic()) {
 			dynCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	// build dynamic collidable vector
 		}
@@ -343,42 +346,40 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	for (auto iter = collInfos.begin(); iter != collInfos.end(); ++iter) {
 		if (iter == collInfos.begin()) {	//initialize values from first element
 			lastIDA = iter->idA;
-			collInfoBegins.insert({iter->idA, iter});
+			collInfoBegins.insert({ iter->idA, iter });
 		}
 		if (lastIDA != iter->idA) {	//new idA found
-			collInfoEnds.insert({lastIDA, iter});
-			collInfoBegins.insert({iter->idA, iter});
+			collInfoEnds.insert({ lastIDA, iter });
+			collInfoBegins.insert({ iter->idA, iter });
 			lastIDA = iter->idA;	//set lastId to new id
 		}
 	}
 	collInfoEnds.insert({ lastIDA, collInfos.end() });
 
-	// execute inelastic collisions 
-	for (auto& collInfo : collInfos) {
-		auto* coll = world.getEntityPtr(collInfo.idA);
-		auto* other = world.getEntityPtr(collInfo.idB);
+	{
+		LogTimer<> t(std::cout);
+		// execute inelastic collisions 
+		for (auto& collInfo : collInfos) {
+			auto* coll = world.getEntityPtr(collInfo.idA);
+			auto* other = world.getEntityPtr(collInfo.idB);
 
-		coll->collided = true;
-		other->collided = true;
-
-		if (coll->isSolid() && other->isSolid()) {
-			float elast = std::max(coll->elasticity, other->elasticity);
-			vec2 collVelChange = dynamicCollision2d3(coll->velocity, coll->mass, other->velocity, other->mass, collInfo.collisionNormal, elast);
-			if (other->isDynamic()) {
-				other->velocity += dynamicCollision2d3(other->velocity, other->mass, coll->velocity, coll->mass, -collInfo.collisionNormal, elast);
+			if (coll->isSolid() && other->isSolid()) {
+				float elast = std::max(coll->elasticity, other->elasticity);
+				vec2 collVelChange = dynamicCollision2d3(coll->velocity, coll->mass, other->velocity, other->mass, collInfo.collisionNormal, elast);
+				if (other->isDynamic()) {
+					other->velocity += dynamicCollision2d3(other->velocity, other->mass, coll->velocity, coll->mass, -collInfo.collisionNormal, elast);
+				}
+				coll->velocity += collVelChange;
 			}
-			coll->velocity += collVelChange;
 		}
 	}
 
 	// execute physics changes in pos, vel, accel
 	int i = 0;
 	for (auto& coll : dynCollidables) {
-		coll.second->velocity += coll.second->acceleration * deltaTime_;
 		coll.second->position += coll.second->velocity * deltaTime_;
 		coll.second->position += collisionResponses.at(i).posChange;
 		
-		coll.second->acceleration = 0;
 		i++;
 	}
 	t3.stop();

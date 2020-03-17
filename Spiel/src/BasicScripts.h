@@ -17,13 +17,6 @@ public:
 			}
 		}
 
-		if (gotHitByBullet) {
-			world.drawableCompCtrl.getComponent(id)->color = vec4(1, 0, 0, 1);
-		}
-		else {
-			world.drawableCompCtrl.getComponent(id)->color = vec4(1, 1, 1, 1);
-		}
-
 		if (data.curHealth <= 0) {
 			world.despawn(id);
 		}
@@ -96,7 +89,7 @@ public:
 					if (iter->first == iter2->idB)
 					{
 						vec2 scale = vec2(0.05f, 0.05f);
-						Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.3f, 0.5f, vec2(0, 0)));
+						Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.9f, 0.5f, vec2(0, 0)));
 						CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE, true);
 
 						for (int i = 0; i < spawnTimer.getLaps(deltaTime); i++) {

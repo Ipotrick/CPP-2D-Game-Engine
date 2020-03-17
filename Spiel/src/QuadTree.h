@@ -111,7 +111,7 @@ inline void Quadtree::insert(std::pair<uint32_t, Collidable*> coll)
 	if (hasSubTrees == false)
 	{
 		if (collidables.size() == 0) {
-			collidables.reserve(capacity / 2);
+			collidables.reserve(capacity);
 		}
 		if (collidables.size() < capacity)
 		{

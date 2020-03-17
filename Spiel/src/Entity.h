@@ -5,7 +5,7 @@
 
 #include "glmath.h"
 
-enum class Form {
+enum class Form : uint8_t{
 	CIRCLE = 0x00,
 	RECTANGLE = 0x01
 };
@@ -36,46 +36,39 @@ struct Basis {
 
 class Collidable : virtual public Basis {
 public:
-protected:
-	bool dynamic;
+
 public:
 	Collidable(vec2 size_, Form form_, bool solid_, bool dynamic_, float elasticity_ = 1,  float mass_ = 1, vec2 velocity_ = vec2(0, 0)) :
 		Basis{},
-		hitboxSize{ size_ },
-		hitboxForm{ form_ },
+		size{ size_ },
+		form{ form_ },
 		elasticity{ elasticity_ },
 		dynamic{ dynamic_ },
 		mass{ mass_ },
 		velocity{ velocity_ },
-		acceleration{ 0,0 },
-		collided{ false },
 		solid{ solid_ }
 	{
 	}
 
 	Collidable(Collidable const& c) :
 		Basis{c.getPos(), c.getRota()},
-		hitboxSize{ c.getHitboxSize() },
-		hitboxForm{ c.getForm() },
+		size{ c.getSize() },
+		form{ c.getForm() },
 		elasticity{ c.elasticity },
 		dynamic{ c.isDynamic() },
 		mass{ c.getMass() },
 		velocity{ c.getVel() },
-		acceleration{ 0,0 },
-		collided{ false },
 		solid{ c.isSolid() }
 	{
 	}
 
 	inline vec2 getVel() const { return velocity; }
-	inline vec2 getAcl() const { return acceleration; }
-	inline Form getForm() const { return hitboxForm; }
-	inline vec2 getHitboxSize() const { return hitboxSize; }
-	inline float getRadius() const { assert(hitboxForm == Form::CIRCLE); return hitboxSize.r / 2; }
+	inline Form getForm() const { return form; }
+	inline vec2 getSize() const { return size; }
+	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
 	inline float getMass() const { return mass; }
 	inline float getElasticity() const { return elasticity; }
 
-	inline bool isCollided() const { return collided; }
 	inline bool isDynamic() const { return dynamic; }
 	inline bool isSolid() const { return solid; }
 
@@ -85,18 +78,19 @@ public:
 	float getBoundsRadius() const;
 
 public:
-	Form hitboxForm;
-	vec2 hitboxSize;
+	vec2 size;
 	vec2 velocity;
-	vec2 acceleration;
 	float mass;
 	float elasticity;
-	bool collided;
 	bool solid;
+protected:
+	bool dynamic;
+public:
+	Form form;
 };
 
 inline vec2 Collidable::getBoundsSize() const {
-	if (hitboxForm == Form::CIRCLE)
+	if (form == Form::CIRCLE)
 	{
 		return vec2(getBoundsRadius() * 2);
 	}
@@ -107,12 +101,12 @@ inline vec2 Collidable::getBoundsSize() const {
 }
 
 inline float Collidable::getBoundsRadius() const {
-	if (hitboxForm == Form::CIRCLE) {
-		return hitboxSize.r / 2.0f;
+	if (form == Form::CIRCLE) {
+		return size.r / 2.0f;
 	}
 	else {
 
-		return sqrtf((hitboxSize.x * hitboxSize.x + hitboxSize.y * hitboxSize.y)) / 2.0f;
+		return sqrtf((size.x * size.x + size.y * size.y)) / 2.0f;
 	}
 }
 

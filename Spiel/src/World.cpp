@@ -12,7 +12,7 @@ std::vector<Drawable> World::getDrawableVec()
 
 Light World::buildLight(uint32_t id, Entity const& ent_, CompDataLight const& light_)
 {
-	return Light(ent_.position, ent_.hitboxSize.x * 0.5f, id, light_.color);
+	return Light(ent_.position, ent_.size.x * 0.5f, id, light_.color);
 }
 
 std::vector<Light> World::getLightVec()
