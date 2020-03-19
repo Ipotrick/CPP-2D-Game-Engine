@@ -28,48 +28,76 @@ std::vector<std::tuple<uint32_t, Collidable*>> World::getCollidablePtrVec()
 {
 	std::vector<std::tuple<uint32_t, Collidable*>> res;
 	res.reserve(entities.size());
-	for (auto& el : entities) {
-		res.push_back({ el.first, el.second.getCollidablePtr() });
+	for (int id = 1; id < entities.size(); id++) {
+		if (entities[id].first) {
+			res.push_back({ id, entities[id].second.getCollidablePtr() });
+		}
 	}
 	return res;
 }
 
-void World::spawnEntity(Entity const& ent_, CompDataDrawable const& draw_)
+void World::spawnEntity(Entity const& ent_, CompDataDrawable const& draw_) {
+	if (emptySlots.size() > 0) {
+		uint32_t id = emptySlots.front();
+		emptySlots.pop();
+		entities[id].first = true;
+		entities[id].second = ent_;
+		lastID = id;
+	}
+	else {
+		entities.push_back({ true,ent_ });
+		lastID = nexBacktID;
+		nexBacktID++;
+	}
+
+	drawableCompCtrl.registerEntity(lastID, draw_);
+}
+
+void World::spawnSolidEntity(Entity const& ent_, CompDataSolidBody solid, CompDataDrawable const& draw_)
 {
-	entities.insert( {nextID, ent_ });
-	drawableCompCtrl.registerEntity( nextID, draw_);
-	nextID++;
+	if (emptySlots.size() > 0) {
+		uint32_t id = emptySlots.front();
+		emptySlots.pop();
+		entities[id].first = true;
+		entities[id].second = ent_;
+		lastID = id;
+	}
+	else {
+		entities.push_back({ true,ent_ });
+		lastID = nexBacktID;
+		nexBacktID++;
+	}
+
+	drawableCompCtrl.registerEntity(lastID, draw_);
+	solidBodyCompCtrl.registerEntity(lastID, solid);
 }
 
 void World::despawn(uint32_t entitiy_id)
 {
-	auto iter = entities.find(entitiy_id);
-	if (iter != entities.end()) {
+	if (entitiy_id < entities.size() && entities[entitiy_id].first) {
 		despawnList.push_back(entitiy_id);
 	}
 }
 
 void World::executeDespawns()
 {
-	for (int entitiy_id : despawnList) {
-		auto iter = entities.find(entitiy_id);
-		if (iter != entities.end()) {
-			entities.erase(iter);
-		}
+	for (int entity_id : despawnList) {
+		entities[entity_id].first = false;
+		emptySlots.push(entity_id);
 	}
 	despawnList.clear();
 }
 
 void World::deregisterDespawnedEntities()
 {
-	for (int entitiy_id : despawnList) {
-		auto iter = entities.find(entitiy_id);
-		if (iter != entities.end()) {
-			drawableCompCtrl.deregisterEntity(iter->first);
-			playerCompCtrl.deregisterEntity(iter->first);
-			healthCompCtrl.deregisterEntity(iter->first);
-			ageCompCtrl.deregisterEntity(iter->first);
-			bulletCompCtrl.deregisterEntity(iter->first);
+	for (int entity_id : despawnList) {
+		if(entities[entity_id].first) {
+			solidBodyCompCtrl.deregisterEntity(entity_id);
+			drawableCompCtrl.deregisterEntity(entity_id);
+			playerCompCtrl.deregisterEntity(entity_id);
+			healthCompCtrl.deregisterEntity(entity_id);
+			ageCompCtrl.deregisterEntity(entity_id);
+			bulletCompCtrl.deregisterEntity(entity_id);
 		}
 	}
 }

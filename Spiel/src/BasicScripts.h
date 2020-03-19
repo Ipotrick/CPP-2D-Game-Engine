@@ -63,6 +63,15 @@ public:
 
 		if (foundCollisionWithMortal) {
 			world.despawn(id);
+			auto newEnt = world.getEntityPtr(id);
+			newEnt->size *= 0.5f;
+			if (norm(newEnt->size) > 0.02f) {
+				newEnt->velocity *= 0.5f;
+				auto newDrawable = world.drawableCompCtrl.getComponent(id);
+				newDrawable->scale *= 0.5f;
+				world.spawnSolidEntity(*newEnt, *world.solidBodyCompCtrl.getComponent(id), *newDrawable);
+				world.bulletCompCtrl.registerEntity(world.getLastID(), CompDataBullet(data.damage * 0.5f));
+			}
 		}
 	}
 	inline void executeMeta(World& world, float deltaTime) {
@@ -89,11 +98,11 @@ public:
 					if (iter->first == iter2->idB)
 					{
 						vec2 scale = vec2(0.05f, 0.05f);
-						Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, 0.9f, 0.5f, vec2(0, 0)));
+						Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, vec2(0, 0)));
 						CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::CIRCLE, true);
 
 						for (int i = 0; i < spawnTimer.getLaps(deltaTime); i++) {
-							world.spawnEntity(trashEntC, trashEntD);
+							world.spawnSolidEntity(trashEntC, CompDataSolidBody(0.9f, 0.5f),trashEntD);
 							world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
 						}
 					}

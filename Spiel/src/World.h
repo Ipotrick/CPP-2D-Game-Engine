@@ -1,8 +1,10 @@
 #pragma once
 #include <vector>
+#include <queue>
 
 #include "robin_hood.h"
 
+#include "CoreComponents.h"
 #include "GameComponents.h"
 #include "Entity.h"
 #include "glmath.h"
@@ -19,14 +21,19 @@ struct Light {
 
 class World {
 public:
-	World() : nextID{ 0 }, despawnList{}
+	World() : nexBacktID{ 1 }, lastID{ 0 }, despawnList{}
 	{
+		entities.push_back({ false, Entity(0,0, Collidable(vec2(0,0), Form::CIRCLE, false, false)) });
 	}
 	
 	/* returns entity with the given if IF it exists, otherwise a nullptr is returned, O(1) */
 	Entity * const getEntityPtr(uint32_t id_);
-	/* creates Copy of given entity and pushes it into the entitiy vector, O(1) */
+	/* returns memory space at id slot, O(1) */
+	std::pair<bool, Entity> operator[](uint32_t id_);
+	/* creates Copy of given entity inside the entity map, O(1) */
 	void spawnEntity(Entity const& ent_, CompDataDrawable const& draw_);
+	/* creates Copy of given entity inside the entity map, O(1) */
+	void spawnSolidEntity(Entity const& ent_, CompDataSolidBody solid, CompDataDrawable const& draw_);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
 	void despawn(uint32_t entitiy_id);
 	/* returnes the last ID */
@@ -43,8 +50,11 @@ private:
 	std::vector<Light> getLightVec();
 	std::vector<std::tuple<uint32_t, Collidable*>> getCollidablePtrVec();
 public:
-	robin_hood::unordered_map<uint32_t, Entity> entities;
-	/* ComponentController list */
+
+	std::vector<std::pair<bool, Entity>> entities;
+	/* engine ComponentController list */
+	CompControllerLUT<CompDataSolidBody> solidBodyCompCtrl;
+	/* game ComponentController list */
 	CompController<CompDataDrawable>	drawableCompCtrl;
 	CompController<CompDataLight>		lightCompCtrl;
 	CompController<CompDataHealth>		healthCompCtrl;
@@ -55,23 +65,30 @@ public:
 	CompController<CompDataOwner>		ownerCompCtrl;
 	CompController<CompDataSlave>		slaveCompCtrl;
 private:
-	uint32_t nextID;
+	std::queue<uint32_t> emptySlots;
+	uint32_t nexBacktID;
+	uint32_t lastID;
 	std::vector<int> despawnList;
 };
 
 inline Entity *const World::getEntityPtr(uint32_t id_) {
-	auto entIter = entities.find(id_);
-	if (entIter != entities.end() && entIter->first == id_) {
-		return &entIter->second;
+	if (id_ < entities.size() && entities[id_].first) {
+		return &entities[id_].second;
 	}
 	else {
 		return nullptr;
 	}
 }
 
+inline std::pair<bool, Entity> World::operator[](uint32_t id_)
+{
+	assert(id_ < entities.size());	//out of vector bounds
+	return entities[id_];
+}
+
 inline uint32_t const World::getLastID() {
-	assert(nextID > 0);	//DO NOT CALL THIS FUNCTION WITH 0 ENTITIES
-	return nextID -1;
+	assert(lastID > 0);	//DO NOT CALL THIS FUNCTION WITH 0 ENTITIES
+	return lastID;
 }
 
 

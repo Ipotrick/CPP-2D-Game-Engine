@@ -23,6 +23,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\Collidable.h" />
     <ClInclude Include="src\Component.h" />
+    <ClInclude Include="src\CoreComponents.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\Game.h" />

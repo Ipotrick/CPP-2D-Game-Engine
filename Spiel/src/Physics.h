@@ -9,7 +9,7 @@
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
-	constexpr float pushoutFactor = 1.05f;
+	constexpr float pushoutFactor = 1.01f;
 
 	inline std::vector<Drawable> debugDrawables;
 
@@ -35,6 +35,7 @@ struct CollisionInfo {
 
 struct CollisionResponse {
 	vec2 posChange;
+	uint8_t collisions;
 };
 
 __forceinline float dynamicCollision3(float v1, float m1, float v2, float m2, float e) {
@@ -81,57 +82,67 @@ __forceinline float clippingDist(float minFirst, float  maxFirst, float  minSeco
 	}
 }
 
-inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll_, Collidable const* other_)  {
+// primCollNormal is allways FROM other TO coll, dist is the dist TO push out, so dist > 0!
+inline vec2 calcPosChange(Collidable const* coll, Collidable const* other, float const dist, vec2 const& primCollNormal) {
+	if (other->isDynamic()) {
+		float bothRadii = coll->getRadius() + other->getRadius();
+		float bPart = other->getRadius() / bothRadii;
+		float collDirV1 = dot(coll->velocity, primCollNormal);
+		float collDirV2 = dot(other->velocity, primCollNormal);
+		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f) {
+			//they move into each other
+			if (collDirV2 < 0) {
+				//coll moved into other
+				return dist * primCollNormal * Physics::pushoutFactor;
+			}
+			else {
+				//other moved into coll
+			}
+		}
+		else {
+			return dist * primCollNormal * bPart * Physics::pushoutFactor;
+		}
+	}
+	else {
+		return dist * primCollNormal * Physics::pushoutFactor;
+	}
+}
+
+inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll, Collidable const* other)  {
 	CollisionTestResult result = CollisionTestResult();
-	float dist = circleDist(coll_->getPos(), coll_->getRadius(), other_->getPos(), other_->getRadius());
+	float dist = circleDist(coll->getPos(), coll->getRadius(), other->getPos(), other->getRadius());
 
 	if (dist < 0.0f)
 	{
 		result.collided = true;
 		result.clippingDist = dist;
-		if (coll_->isSolid() && other_->isSolid()) {
-			auto collisionNormalVec = normalize(coll_->getPos() - other_->getPos());	/* a vector from b to coll_ */ 
+		if (coll->isSolid() && other->isSolid()) {
+			auto collisionNormalVec = normalize(coll->getPos() - other->getPos());	/* a vector from b to coll_ */ 
 			result.collisionNormal = collisionNormalVec;
-			auto circleOverlap = -dist;
-			auto distVec = collisionNormalVec * circleOverlap;
 
-			//float elasticity = std::min(std::max(coll_->getElasticity(), other_->getElasticity()), 1.0f);
-			//auto velChange = dynamicCollision2d3(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
-
-			
-			if (coll_->isDynamic()) {
-				if (other_->isDynamic()) {
-					float bothRadii = coll_->getRadius() + other_->getRadius();
-					float bPart = other_->getRadius() / bothRadii;
-					result.posChange = distVec * bPart * Physics::pushoutFactor;
-				}
-				else {
-					result.posChange = distVec * Physics::pushoutFactor;
-				}
-			}
-			//response.velChange = velChange;
+			result.posChange = calcPosChange(coll, other, -dist, collisionNormalVec);
 		}
 	}
 	return result;
 }
 
-inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll_, Collidable const* other_)
+inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll, Collidable const* other)
 {
 	float resRotation = 0.0f;
 	float minClippingDist = 10000000000000.0f;
 	for (int i = 0; i < 2; ++i)
 	{
-		float backRotationDegree = -coll_->getRota() + 90 * i;
-		auto backRotatedEntPos = rotate(coll_->getPos(), backRotationDegree);
-		float entHalfSize = (i == 0 ? coll_->getSize().x * 0.5f : coll_->getSize().y * 0.5f);
+		float backRotationDegree = -coll->getRota() + 90 * i;
+		auto backRotatedEntPos = rotate(coll->getPos(), backRotationDegree);
+		float entHalfSize = (i == 0 ? coll->getSize().x * 0.5f : coll->getSize().y * 0.5f);
 		float minEntProjPos = backRotatedEntPos.x - entHalfSize;
 		float maxEntProjPos = backRotatedEntPos.x + entHalfSize;
 
 		std::array<vec2, 4> otherCorners;
-		otherCorners[0] = other_->getPos() + rotate(vec2(other_->getSize().x * 0.5f, other_->getSize().y * 0.5f), other_->getRota());
-		otherCorners[1] = other_->getPos() + rotate(vec2(other_->getSize().x * 0.5f, -other_->getSize().y * 0.5f), other_->getRota());
-		otherCorners[2] = other_->getPos() + rotate(vec2(-other_->getSize().x * 0.5f, other_->getSize().y * 0.5f), other_->getRota());
-		otherCorners[3] = other_->getPos() + rotate(vec2(-other_->getSize().x * 0.5f, -other_->getSize().y * 0.5f), other_->getRota());
+		otherCorners[0] = other->getPos() + rotate(vec2(other->getSize().x * 0.5f, other->getSize().y * 0.5f), other->getRota());
+		otherCorners[1] = other->getPos() + rotate(vec2(other->getSize().x * 0.5f, -other->getSize().y * 0.5f), other->getRota());
+		otherCorners[2] = other->getPos() + rotate(vec2(-other->getSize().x * 0.5f, other->getSize().y * 0.5f), other->getRota());
+		otherCorners[3] = other->getPos() + rotate(vec2(-other->getSize().x * 0.5f, -other->getSize().y * 0.5f), other->getRota());
 		for (int j = 0; j < 4; ++j) otherCorners[j] = rotate(otherCorners[j], backRotationDegree);
 
 		auto comp = [](vec2 a, vec2 b) { return a.x < b.x; };
@@ -144,7 +155,7 @@ inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll
 			if (newClippingDist < minClippingDist)
 			{
 				minClippingDist = newClippingDist;
-				resRotation = coll_->getRota() + 270 * i;
+				resRotation = coll->getRota() + 270 * i;
 				bool orientation = isIntervalCenterSmaller(minEntProjPos, maxEntProjPos, minOEntProjPos.x, maxOEntProjPos.x);
 				resRotation += 180 * orientation;
 			}
@@ -158,44 +169,27 @@ inline std::tuple<bool, float, float> partialSATCollision(Collidable const* coll
 	return std::tuple(true, resRotation, minClippingDist);
 }
 
-inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* coll_, Collidable const* other_)
+inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* coll, Collidable const* other)
 {
 	CollisionTestResult result = CollisionTestResult();
-	auto [partialResult1, rotation1, dist1] = partialSATCollision(coll_, other_);
+	auto [partialResult1, rotation1, dist1] = partialSATCollision(coll, other);
 	if (partialResult1 == true) {
-		auto [partialResult2, rotation2, dist2] = partialSATCollision(other_, coll_);
+		auto [partialResult2, rotation2, dist2] = partialSATCollision(other, coll);
 
 		if (partialResult2)
 		{
 			result.collided = true;
 			auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
 			result.clippingDist = minClippingDist;
-			if (coll_->isSolid() && other_->isSolid()) {
+			if (coll->isSolid() && other->isSolid()) {
 				
 				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
 				rotation = (float)((int)rotation % 360);
 
-				auto collisionNormalVec = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
-				result.collisionNormal = collisionNormalVec;
-				auto distVec = collisionNormalVec * minClippingDist;
+				auto collNormal = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
+				result.collisionNormal = collNormal;
 
-				//float elasticity = std::max(coll_->getElasticity(), other_->getElasticity());
-				//auto velChange = dynamicCollision2d3(coll_->getVel(), coll_->getMass(), other_->getVel(), other_->getMass(), collisionNormalVec, elasticity);
-
-
-				if (coll_->isDynamic()) {
-					if (other_->isDynamic()) {
-						float BothSizes = coll_->getSize().x * coll_->getSize().y + other_->getSize().x * other_->getSize().y;
-						float collPart = coll_->getSize().x * coll_->getSize().y / BothSizes;
-						float otherPart = other_->getSize().x * other_->getSize().y / BothSizes;
-
-						result.posChange = distVec * otherPart * Physics::pushoutFactor;
-					}
-					else {
-						result.posChange = distVec * Physics::pushoutFactor;
-					}
-				}
-				//response.velChange = velChange;
+				result.posChange = calcPosChange(coll, other, minClippingDist, collNormal);
 			}
 		}
 	}
@@ -252,48 +246,28 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 		collisionDir = normalize(clampedToCircleCenter);
 		dist = clampedToCircleCenterLen - circle->getRadius();
 	}
-	vec2 backRotatedColDir = rotate(collisionDir, rotation);
+	vec2 backRotatedCollNormal = rotate(collisionDir, rotation);
 
 	if (dist < 0.0f) {
 		result.collided = true;
 		result.clippingDist = dist;
+		if (isCirclePrimary) {
+			result.collisionNormal = backRotatedCollNormal;
+		}
+		else {
+			result.collisionNormal = -backRotatedCollNormal;
+		}
 
 		if (circle->isSolid() && rect->isSolid()) {
-			//float elasticity = std::max(circle->getElasticity(), rect->getElasticity());
-
-			/* the primary is allways dynamic */
+			Collidable const* coll; Collidable const* other; vec2 primCollNormal;
 			if (isCirclePrimary) {
-				//auto velChange = dynamicCollision2d3(circle->getVel(), circle->getMass(), rect->getVel(), rect->getMass(), backRotatedColDir, elasticity);
-
-				result.collisionNormal = backRotatedColDir;
-				if (rect->isDynamic()) {
-					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
-					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
-					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
-					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
-					result.posChange = -backRotatedColDir * dist * rectPart * 1.005f;
-				}
-				else {
-					result.posChange = -backRotatedColDir * dist * Physics::pushoutFactor;
-				}
-				//response.velChange = velChange;
+				coll = circle; other = rect; primCollNormal = backRotatedCollNormal;
 			}
 			else {
-				//auto velChange = dynamicCollision2d3(rect->getVel(), rect->getMass(), circle->getVel(), circle->getMass(), -backRotatedColDir, elasticity);
-
-				result.collisionNormal = -backRotatedColDir;
-				if (circle->isDynamic()) {
-					/* when both are dynamic split the pushback and give each one relativce pushback to their size */
-					float bothSizes = circle->getBoundsRadius() * circle->getBoundsRadius() + rect->getBoundsRadius() * rect->getBoundsRadius();
-					float circlePart = circle->getBoundsRadius() * circle->getBoundsRadius() / bothSizes;
-					float rectPart = rect->getBoundsRadius() * rect->getBoundsRadius() / bothSizes;
-					result.posChange = backRotatedColDir * dist * circlePart * 1.001f;
-				}
-				else {
-					result.posChange = backRotatedColDir * dist * Physics::pushoutFactor;
-				}
-				//response.velChange = velChange;
+				coll = rect; other = circle; primCollNormal = -backRotatedCollNormal;
 			}
+
+			result.posChange = calcPosChange(coll, other, -dist, primCollNormal);
 		}
 	}
 	return result;
