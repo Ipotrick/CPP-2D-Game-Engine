@@ -93,6 +93,9 @@
     <ClInclude Include="src\BasicScripts.h">
       <Filter>_Script</Filter>
     </ClInclude>
+    <ClInclude Include="src\CoreComponents.h">
+      <Filter>_Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">

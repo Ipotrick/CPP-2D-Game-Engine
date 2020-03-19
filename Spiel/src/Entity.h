@@ -38,13 +38,11 @@ class Collidable : virtual public Basis {
 public:
 
 public:
-	Collidable(vec2 size_, Form form_, bool solid_, bool dynamic_, float elasticity_ = 1,  float mass_ = 1, vec2 velocity_ = vec2(0, 0)) :
+	Collidable(vec2 size_, Form form_, bool solid_, bool dynamic_, vec2 velocity_ = vec2(0, 0)) :
 		Basis{},
 		size{ size_ },
 		form{ form_ },
-		elasticity{ elasticity_ },
 		dynamic{ dynamic_ },
-		mass{ mass_ },
 		velocity{ velocity_ },
 		solid{ solid_ }
 	{
@@ -54,10 +52,8 @@ public:
 		Basis{c.getPos(), c.getRota()},
 		size{ c.getSize() },
 		form{ c.getForm() },
-		elasticity{ c.elasticity },
 		dynamic{ c.isDynamic() },
-		mass{ c.getMass() },
-		velocity{ c.getVel() },
+		velocity{c.velocity},
 		solid{ c.isSolid() }
 	{
 	}
@@ -66,9 +62,6 @@ public:
 	inline Form getForm() const { return form; }
 	inline vec2 getSize() const { return size; }
 	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
-	inline float getMass() const { return mass; }
-	inline float getElasticity() const { return elasticity; }
-
 	inline bool isDynamic() const { return dynamic; }
 	inline bool isSolid() const { return solid; }
 
@@ -80,8 +73,6 @@ public:
 public:
 	vec2 size;
 	vec2 velocity;
-	float mass;
-	float elasticity;
 	bool solid;
 protected:
 	bool dynamic;

@@ -249,24 +249,22 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	dynCollidables.reserve(world.entities.size());
 	std::vector<std::pair<uint32_t, Collidable*>> statCollidables;
 	statCollidables.reserve(world.entities.size());
-	vec2 maxPos, minPos;
-	if (world_.entities.size() > 0) {
-		maxPos = world_.entities.at(0).getPos();
-		minPos = maxPos;
-	}
-	for (auto& elHash : world_.entities) {
-		auto & el = elHash.second;
-		if (el.isDynamic()) {
-			dynCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	// build dynamic collidable vector
+	vec2 maxPos{ 0,0 }, minPos{ 0,0 };
+	for (int id = 1; id < world.entities.size(); id++) {
+		if (world[id].first) {
+			auto& el = world.entities[id].second;
+			if (el.isDynamic()) {
+				dynCollidables.push_back({ id, (Collidable*) & (el) });	// build dynamic collidable vector
+			}
+			else {
+				statCollidables.push_back({ id, (Collidable*) & (el) });	// build static collidable vector
+			}
+			// look if the quadtree has to take uop largera area
+			if (el.position.x < minPos.x) minPos.x = el.position.x;
+			if (el.position.y < minPos.y) minPos.y = el.position.y;
+			if (el.position.x > maxPos.x) maxPos.x = el.position.x;
+			if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 		}
-		else {
-			statCollidables.push_back({ elHash.first, (Collidable*)&(elHash.second) });	// build static collidable vector
-		}
-		// look if the quadtree has to take uop largera area
-		if (el.position.x < minPos.x) minPos.x = el.position.x;
-		if (el.position.y < minPos.y) minPos.y = el.position.y;
-		if (el.position.x > maxPos.x) maxPos.x = el.position.x;
-		if (el.position.y > maxPos.y) maxPos.y = el.position.y;
 	}
 	
 	std::vector<Quadtree> qtrees;
@@ -356,21 +354,21 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	collInfoEnds.insert({ lastIDA, collInfos.end() });
 
-	{
-		LogTimer<> t(std::cout);
-		// execute inelastic collisions 
-		for (auto& collInfo : collInfos) {
-			auto* coll = world.getEntityPtr(collInfo.idA);
-			auto* other = world.getEntityPtr(collInfo.idB);
+	// execute inelastic collisions 
+	for (auto& collInfo : collInfos) {
+		auto* coll = world.getEntityPtr(collInfo.idA);
+		auto* other = world.getEntityPtr(collInfo.idB);
 
-			if (coll->isSolid() && other->isSolid()) {
-				float elast = std::max(coll->elasticity, other->elasticity);
-				vec2 collVelChange = dynamicCollision2d3(coll->velocity, coll->mass, other->velocity, other->mass, collInfo.collisionNormal, elast);
-				if (other->isDynamic()) {
-					other->velocity += dynamicCollision2d3(other->velocity, other->mass, coll->velocity, coll->mass, -collInfo.collisionNormal, elast);
-				}
-				coll->velocity += collVelChange;
+		if (coll->isSolid() && other->isSolid()) {
+			auto solidColl = world.solidBodyCompCtrl.getComponent(collInfo.idA);
+			auto solidOther = world.solidBodyCompCtrl.getComponent(collInfo.idB);
+
+			float elast = std::max(solidColl->elasticity, solidOther->elasticity);
+			vec2 collVelChange = dynamicCollision2d3(coll->velocity, solidColl->mass, other->velocity, solidOther->mass, collInfo.collisionNormal, elast);
+			if (other->isDynamic()) {
+				other->velocity += dynamicCollision2d3(other->velocity, solidOther->mass, coll->velocity, solidColl->mass, -collInfo.collisionNormal, elast);
 			}
+			coll->velocity += collVelChange;
 		}
 	}
 

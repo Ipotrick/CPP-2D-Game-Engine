@@ -34,15 +34,16 @@ public:
 			entity->rotation -= 200.0f * deltaTime;
 		}
 		if (engine.keyPressed(KEY::F)) {
-			vec2 bulletSize = vec2(0.05f, 0.05f);
+			float scale = rand() % 10 * 0.1f + 0.5f;
+			vec2 bulletSize = vec2(0.05f, 0.05f) * scale;
 			float bulletVel = 10.0f;
 			float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
 			uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 			for (uint64_t i = 0; i < bullets; i++) {
-				Entity bullC = Entity(entity->getPos() + rotate(vec2(-entity->getSize().y, 0) / 2.0f, entity->rotation + 270), 0, Collidable(bulletSize, Form::CIRCLE, true, true, 1, 0.001f, entity->velocity + bulletVel * rotate(vec2(0, 1), entity->rotation + velOffsetRota)));
-				CompDataDrawable bullD = CompDataDrawable(vec4(1, 0.f, 1.f, 1), bulletSize, 0.4f, Form::CIRCLE);
-				world.spawnEntity(bullC, bullD);
-				world.bulletCompCtrl.registerEntity(world.getLastID(), CompDataBullet(10));
+				Entity bullC = Entity(entity->getPos() + rotate(vec2(-entity->getSize().y, 0) / 1.9f, entity->rotation + 270), 0, Collidable(bulletSize, Form::CIRCLE, true, true, entity->velocity + bulletVel * rotate(vec2(0, 1), entity->rotation + velOffsetRota)));
+				CompDataDrawable bullD = CompDataDrawable(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
+				world.spawnSolidEntity(bullC, CompDataSolidBody(1, 0.001f) ,bullD);
+				world.bulletCompCtrl.registerEntity(world.getLastID(), CompDataBullet(10 * scale));
 			}
 		}
 	}
