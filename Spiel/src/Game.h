@@ -7,7 +7,7 @@
 #include "ScriptInclude.h"
 
 struct CursorManipData {
-	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 1 } {}
+	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
 
 	bool locked;
 	vec2 oldCursorPos;
