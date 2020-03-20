@@ -44,7 +44,8 @@ public:
 		form{ form_ },
 		dynamic{ dynamic_ },
 		velocity{ velocity_ },
-		solid{ solid_ }
+		solid{ solid_ },
+		angleVelocity{ 0.f }
 	{
 	}
 
@@ -54,11 +55,13 @@ public:
 		form{ c.getForm() },
 		dynamic{ c.isDynamic() },
 		velocity{c.velocity},
-		solid{ c.isSolid() }
+		solid{ c.isSolid() },
+		angleVelocity{ c.angleVelocity }
 	{
 	}
 
 	inline vec2 getVel() const { return velocity; }
+	inline float getAnglVel() const { return angleVelocity; }
 	inline Form getForm() const { return form; }
 	inline vec2 getSize() const { return size; }
 	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
@@ -73,6 +76,7 @@ public:
 public:
 	vec2 size;
 	vec2 velocity;
+	float angleVelocity;
 	bool solid;
 protected:
 	bool dynamic;

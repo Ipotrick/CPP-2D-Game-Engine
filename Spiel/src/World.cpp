@@ -69,6 +69,9 @@ void World::spawnSolidEntity(Entity const& ent_, CompDataSolidBody solid, CompDa
 	}
 
 	drawableCompCtrl.registerEntity(lastID, draw_);
+	if (solid.momentOfInertia == 0.0f) {
+		solid.momentOfInertia = 1.0f / 12.0f * solid.mass * powf(std::max(ent_.getSize().x, ent_.getSize().y), 2) * 10;	//calculate moment of inertia I = 1/12 * m * l^2
+	}
 	solidBodyCompCtrl.registerEntity(lastID, solid);
 }
 
@@ -100,4 +103,8 @@ void World::deregisterDespawnedEntities()
 			bulletCompCtrl.deregisterEntity(entity_id);
 		}
 	}
+}
+
+uint32_t const World::getSize() {
+	return entities.size() - emptySlots.size();
 }

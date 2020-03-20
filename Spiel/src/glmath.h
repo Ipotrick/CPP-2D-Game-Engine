@@ -175,6 +175,11 @@ inline const vec2 operator/(const vec2& v, const float s)
 		v.y / s);
 }
 
+inline const vec2 operator/(const vec2& v0, const vec2& v1)
+{
+	return vec2(v0.x / v1.x, v0.y / v1.y);
+}
+
 /// add two vectors \c v0 and \c v1
 inline const vec2 operator+(const vec2& v0, const vec2& v1)
 {
@@ -233,6 +238,12 @@ inline const float dot(const vec2& v0, const vec2& v1)
 	return (v0.x * v1.x + v0.y * v1.y);
 }
 
+/// compute the cross product of \c v0 and \c v1
+inline const float cross(const vec2& v0, const vec2& v1)
+{
+	return v0.x * v1.y - v0.y * v1.x;
+}
+
 /// reflect vector \c v at normal \c n
 inline const vec2 reflect(const vec2& v, const vec2& n)
 {
@@ -256,10 +267,7 @@ inline std::ostream& operator<<(std::ostream& os, const vec2& v)
 inline vec2 rotate(vec2 const& vec_, float angle_) {
 	float ca = cosf(angle_ * ((float)M_PI / 180.0f));
 	float sa = sinf(angle_ * ((float)M_PI / 180.0f));
-	vec2 vec;
-	vec.x = ca * vec_.x - sa * vec_.y;
-	vec.y = sa * vec_.x + ca * vec_.y;
-	return vec;
+	return { ca * vec_.x - sa * vec_.y , sa * vec_.x + ca * vec_.y };
 }
 
 inline float getAngle(vec2 v)

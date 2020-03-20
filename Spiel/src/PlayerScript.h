@@ -28,10 +28,13 @@ public:
 			entity->velocity += rotate(vec2(10.0f, 0.0f), entity->rotation) * deltaTime;
 		}
 		if (engine.keyPressed(KEY::Q)) {
-			entity->rotation += 200.0f * deltaTime;
+			entity->angleVelocity += 700.0f * deltaTime;
+		} 
+		else if (engine.keyPressed(KEY::E)) {
+			entity->angleVelocity -= 700.0f * deltaTime;
 		}
-		if (engine.keyPressed(KEY::E)) {
-			entity->rotation -= 200.0f * deltaTime;
+		else {
+
 		}
 		if (engine.keyPressed(KEY::F)) {
 			float scale = rand() % 10 * 0.1f + 0.5f;

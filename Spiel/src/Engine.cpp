@@ -72,7 +72,7 @@ Engine::~Engine() {
 std::string Engine::getPerfInfo(int detail)
 {
 	std::stringstream ss;
-	if (detail >= 4) ss << "Entities: " << world.entities.size() << "\n";
+	if (detail >= 4) ss << "Entities: " << world.getSize() << "\n";
 	ss << "deltaTime(s): " << deltaTime << " ticks/s: " << (1 / deltaTime) << " simspeed: " << getDeltaTimeSafe()/ deltaTime << '\n';
 	if (detail >= 1) ss << "    mainTime(s): "   << mainTime << " mainSyncTime(s): " << mainSyncTime << " mainWaitTime(s): " << mainWaitTime <<'\n';
 	if (detail >= 2) ss << "        update(s): " << updateTime    << " physics(s): " << physicsTime << " renderBufferPush(s): " << renderBufferPushTime << '\n';
@@ -364,11 +364,13 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 			auto solidOther = world.solidBodyCompCtrl.getComponent(collInfo.idB);
 
 			float elast = std::max(solidColl->elasticity, solidOther->elasticity);
-			vec2 collVelChange = dynamicCollision2d3(coll->velocity, solidColl->mass, other->velocity, solidOther->mass, collInfo.collisionNormal, elast);
+			auto [collChanges, otherChanges] = dynamicCollision2d4(*coll, solidColl->mass, solidColl->momentOfInertia, *other, solidOther->mass, solidOther->momentOfInertia, collInfo.collisionNormal, collInfo.collisionPos, elast);
+			coll->velocity += collChanges.first;
+			coll->angleVelocity += collChanges.second;
 			if (other->isDynamic()) {
-				other->velocity += dynamicCollision2d3(other->velocity, solidOther->mass, coll->velocity, solidColl->mass, -collInfo.collisionNormal, elast);
+				other->velocity += otherChanges.first;
+				other->angleVelocity += otherChanges.second;
 			}
-			coll->velocity += collVelChange;
 		}
 	}
 
@@ -377,7 +379,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	for (auto& coll : dynCollidables) {
 		coll.second->position += coll.second->velocity * deltaTime_;
 		coll.second->position += collisionResponses.at(i).posChange;
-		
+		coll.second->rotation += coll.second->angleVelocity * deltaTime;
 		i++;
 	}
 	t3.stop();
