@@ -11,14 +11,14 @@
 
 #include "robin_hood.h"
 
-#include "QuadTree.h"
-#include "input.h"
 #include "Timing.h"
+#include "QuadTree.h"
+#include "Physics.h"
+#include "input.h"
 #include "Window.h"
 #include "Camera.h"
-#include "Physics.h"
-#include "Entity.h"
 #include "World.h"
+#include "Entity.h"
 
 #include "PhysicsWorker.h"
 #include "Renderer.h"

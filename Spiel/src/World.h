@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+
 #include <vector>
 #include <queue>
 
@@ -38,6 +40,8 @@ public:
 	void despawn(uint32_t entitiy_id);
 	/* returnes the last ID */
 	uint32_t const getLastID();
+	/* returns count of entities */
+	uint32_t const getSize();
 
 private:
 	/* INNER ENGINE FUNCTIONS: */
@@ -50,8 +54,6 @@ private:
 	std::vector<Light> getLightVec();
 	std::vector<std::tuple<uint32_t, Collidable*>> getCollidablePtrVec();
 public:
-
-	std::vector<std::pair<bool, Entity>> entities;
 	/* engine ComponentController list */
 	CompControllerLUT<CompDataSolidBody> solidBodyCompCtrl;
 	/* game ComponentController list */
@@ -65,6 +67,7 @@ public:
 	CompController<CompDataOwner>		ownerCompCtrl;
 	CompController<CompDataSlave>		slaveCompCtrl;
 private:
+	std::vector<std::pair<bool, Entity>> entities;
 	std::queue<uint32_t> emptySlots;
 	uint32_t nexBacktID;
 	uint32_t lastID;

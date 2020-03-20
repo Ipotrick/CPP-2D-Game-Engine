@@ -23,12 +23,14 @@ Game::Game() :
 void Game::create() {
 	camera.zoom = 1 / 5.0f;
 
-	vec2 scaleEnt = { 0.4f, 0.8f };
-	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, true, vec2(3,3)));
+	vec2 scaleEnt = { 0.4f, 1.0f };
+	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, true, vec2(3,0)));
 	auto cDraw = CompDataDrawable(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
-	cEnt.rotation = 45.0f;
-	world.spawnSolidEntity(cEnt,CompDataSolidBody(0.5f, 50.0f), cDraw);
+	cEnt.rotation = 0.0;
+	world.spawnSolidEntity(cEnt,CompDataSolidBody(0.5f, 70.0f), cDraw);
 	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
+
+	std::cout << world.solidBodyCompCtrl.getComponent(world.getLastID())->momentOfInertia << std::endl;
 
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, false, true));
@@ -52,20 +54,30 @@ void Game::create() {
 		world.spawnSolidEntity(wallC, CompDataSolidBody(0.3f, 1'000'000'000'000'000.0f), wallD);
 	}
 
-	Entity loadTrigC = Entity(vec2(4, 0), 0, Collidable(vec2(0.4f, 1), Form::RECTANGLE, false, true));
+	Entity loadTrigC = Entity(vec2(14, 0), 0, Collidable(vec2(0.4f, 1), Form::RECTANGLE, false, true));
 	CompDataDrawable loadTrigD = CompDataDrawable(vec4(1, 0, 0, 1), vec2(0.4f, 1), 0.49f, Form::RECTANGLE);
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 7500;
+	int num = 5000;
 
 	vec2 scale = vec2(0.08f, 0.08f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, true, vec2(0,0)));
 	CompDataDrawable trashEntD = CompDataDrawable(vec4(0, 0, 0, 1), scale, 0.5f, Form::CIRCLE, true);
+	auto trashSolid = CompDataSolidBody(0.9f, 0.5f);
+	trashSolid.momentOfInertia = 0.1f;
 	for (int i = 0; i < num; i++) {
+		if (i % 2) {
+			trashEntC.form = Form::CIRCLE;
+			trashEntD.form = Form::CIRCLE;
+		}
+		else {
+			trashEntC.form = Form::RECTANGLE;
+			trashEntD.form = Form::RECTANGLE;
+		}
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
 
-		world.spawnSolidEntity(trashEntC, CompDataSolidBody(0.9f, 0.5f), trashEntD);
+		world.spawnSolidEntity(trashEntC, trashSolid, trashEntD);
 		world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
 	}
 }
@@ -119,7 +131,7 @@ void Game::update(World& world, float deltaTime) {
 	slaveScript.executeAll(  world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -215,12 +227,14 @@ void Game::cursorManipFunc()
 
 		// spawns:
 		if (keyPressed(KEY::U)) {
-			vec2 scale = vec2(0.05f, 0.05f);
+			vec2 scale = vec2(0.08f, 0.08f);
 			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, true, true, vec2(0, 0)));
 			CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
-				world.spawnSolidEntity(trashEntC, CompDataSolidBody(0.9f, 0.5f),trashEntD);
+				auto solid = CompDataSolidBody(0.9f, 2.5f);
+				solid.momentOfInertia = 0.1f;
+				world.spawnSolidEntity(trashEntC, solid,trashEntD);
 				world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
 			}
 		}
