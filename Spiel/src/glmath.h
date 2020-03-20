@@ -270,6 +270,10 @@ inline vec2 rotate(vec2 const& vec_, float angle_) {
 	return { ca * vec_.x - sa * vec_.y , sa * vec_.x + ca * vec_.y };
 }
 
+inline vec2 rotate90(vec2 const& vec) {
+	return {-vec.y, vec.x};
+}
+
 inline float getAngle(vec2 v)
 {
 	if (v.y == 0.0f)

@@ -63,8 +63,8 @@ __forceinline std::pair<std::pair<vec2, float>,std::pair< vec2, float>> dynamicC
 	vec2 rBP = collPos - b.getPos();
 	
 	//speed the Collidables have at the specifiy collision point
-	vec2 va = a.getVel() + rotate(rAP, 90) * a.getAnglVel() / RAD;
-	vec2 vb = b.getVel() + rotate(rAP, 90) * b.getAnglVel() / RAD;
+	vec2 va = a.getVel() + rotate90(rAP) * a.getAnglVel() / RAD;
+	vec2 vb = b.getVel() + rotate90(rAP) * b.getAnglVel() / RAD;
 	vec2 vAB = va - vb;
 
 	if (dot(vAB, cNV) < 0.0f) {	//are they even going into each other?
