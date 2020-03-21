@@ -67,7 +67,7 @@ template<typename CompDataType>
 CompDataType& CompController<CompDataType>::getComponent(uint32_t id) 
 {
 	assert(isRegistered(id));
-	return componentData.find(id).second;
+	return componentData[id];
 }
 
 template<typename CompDataType>

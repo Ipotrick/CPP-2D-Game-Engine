@@ -4,8 +4,6 @@
 #include <iostream>
 #include <sstream>
 
-
-
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
@@ -17,6 +15,7 @@
 #include "input.h"
 #include "Window.h"
 #include "Camera.h"
+#include "EventHandler.h"
 #include "World.h"
 #include "Entity.h"
 
@@ -100,6 +99,7 @@ public:
 
 public:
 	World world;
+	EventHandler events;
 	Camera camera;
 
 	std::chrono::microseconds minimunLoopTime;

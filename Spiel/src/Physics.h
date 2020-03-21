@@ -114,8 +114,8 @@ __forceinline float clippingDist(float minFirst, float  maxFirst, float  minSeco
 // primCollNormal is allways FROM other TO coll, dist is the dist TO push out, so dist > 0!
 inline vec2 calcPosChange(Collidable const* coll, Collidable const* other, float const dist, vec2 const& primCollNormal) {
 	if (other->isDynamic()) {
-		float bothRadii = coll->getRadius() + other->getRadius();
-		float bPart = other->getRadius() / bothRadii;
+		float bothRadii = coll->getBoundsRadius() + other->getBoundsRadius();
+		float bPart = other->getBoundsRadius() / bothRadii;
 		float collDirV1 = dot(coll->velocity, primCollNormal);
 		float collDirV2 = dot(other->velocity, primCollNormal);
 		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f) {

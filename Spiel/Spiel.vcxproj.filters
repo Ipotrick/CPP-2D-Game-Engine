@@ -96,6 +96,9 @@
     <ClInclude Include="src\CoreComponents.h">
       <Filter>_Component</Filter>
     </ClInclude>
+    <ClInclude Include="src\EventHandler.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
       <Filter>_Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventHandler.cpp">
+      <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
