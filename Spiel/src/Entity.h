@@ -67,6 +67,7 @@ public:
 	inline Form getForm() const { return form; }
 	inline vec2 getSize() const { return size; }
 	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
+	inline float getSurfaceArea() const { return size.x * size.y; }
 	inline bool isDynamic() const { return dynamic; }
 	inline bool isSolid() const { return solid; }
 	inline bool isParticle() const { return particle; }
