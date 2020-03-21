@@ -38,13 +38,13 @@ class Collidable : virtual public Basis {
 public:
 
 public:
-	Collidable(vec2 size_, Form form_, bool solid_, bool dynamic_, vec2 velocity_ = vec2(0, 0)) :
+	Collidable(vec2 size_, Form form_, bool dynamic_, vec2 velocity_ = vec2(0, 0)) :
 		Basis{},
 		size{ size_ },
 		form{ form_ },
 		dynamic{ dynamic_ },
 		velocity{ velocity_ },
-		solid{ solid_ },
+		solid{ false },
 		angleVelocity{ 0.f }
 	{
 	}
@@ -117,7 +117,7 @@ public:
 	bool throwsShadow;
 
 	Drawable(uint32_t id_, vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, Form form_, float rotation_, bool throwsShadow_ = false) :
-		Basis(vec2(position_.x, position_.y), rotation_),
+		Basis(vec2(position_.x, position_.y), rotation_), 
 		drawingPrio{ drawingPrio_ },
 		scale{ scale_ },
 		color{ color_ },

@@ -58,20 +58,18 @@ void PhysicsWorker::operator()()
 			for (auto& other : nearCollidables) {
 				if (coll.first != other.first) {
 
-					//if (coll.second->isSolid() || other.second->isDynamic()) {	// coll.solid = false && other.dynamic == false : sensors do not check for static entities
-						auto newTestResult = checkForCollision(coll.second, other.second);
+					auto newTestResult = checkForCollision(coll.second, other.second, coll.second->isSolid() && other.second->isSolid());
 
-						if (newTestResult.collided) {
-							collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
-							//take average of pushouts with weights
-							float weightOld = norm((*collisionResponses)[i].posChange);
-							float weightNew = norm(newTestResult.posChange);
-							float normalizer = weightOld + weightNew;
-							if (normalizer > Physics::nullDelta) {
-								(*collisionResponses)[i].posChange = ((*collisionResponses)[i].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
-							}
+					if (newTestResult.collided) {
+						collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
+						//take average of pushouts with weights
+						float weightOld = norm((*collisionResponses)[i].posChange);
+						float weightNew = norm(newTestResult.posChange);
+						float normalizer = weightOld + weightNew;
+						if (normalizer > Physics::nullDelta) {
+							(*collisionResponses)[i].posChange = ((*collisionResponses)[i].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
 						}
-					//}
+					}
 				}
 			}
 		}

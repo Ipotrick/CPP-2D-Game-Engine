@@ -6,7 +6,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 40 },// 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10 },// 10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -72,7 +72,7 @@ Engine::~Engine() {
 std::string Engine::getPerfInfo(int detail)
 {
 	std::stringstream ss;
-	if (detail >= 4) ss << "Entities: " << world.getSize() << "\n";
+	if (detail >= 4) ss << "Entities: " << world.getEntCount() << "\n";
 	ss << "deltaTime(s): " << deltaTime << " ticks/s: " << (1 / deltaTime) << " simspeed: " << getDeltaTimeSafe()/ deltaTime << '\n';
 	if (detail >= 1) ss << "    mainTime(s): "   << mainTime << " mainSyncTime(s): " << mainSyncTime << " mainWaitTime(s): " << mainWaitTime <<'\n';
 	if (detail >= 2) ss << "        update(s): " << updateTime    << " physics(s): " << physicsTime << " renderBufferPush(s): " << renderBufferPushTime << '\n';
@@ -250,9 +250,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	std::vector<std::pair<uint32_t, Collidable*>> statCollidables;
 	statCollidables.reserve(world.entities.size());
 	vec2 maxPos{ 0,0 }, minPos{ 0,0 };
-	for (int id = 1; id < world.entities.size(); id++) {
-		if (world[id].first) {
-			auto& el = world.entities[id].second;
+	for (int id = 1; id < world.getEntMemSize(); id++) {
+		if (world.doesEntExist(id)) {
+			auto& el = world.getEntity(id);
 			if (el.isDynamic()) {
 				dynCollidables.push_back({ id, (Collidable*) & (el) });	// build dynamic collidable vector
 			}
@@ -306,7 +306,6 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		pData->collisionInfos = &collisionInfosSplit[i];
 		pData->collisionResponses = &collisionResponses;
 		pData->qtrees = &qtrees;
-		pData->deltaTime = deltaTime_;
 	}
 
 	{	// start physics threads
@@ -360,8 +359,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		auto* other = world.getEntityPtr(collInfo.idB);
 
 		if (coll->isSolid() && other->isSolid()) {
-			auto solidColl = world.solidBodyCompCtrl.getComponent(collInfo.idA);
-			auto solidOther = world.solidBodyCompCtrl.getComponent(collInfo.idB);
+			auto solidColl = world.solidBodyCompCtrl.getComponentPtr(collInfo.idA);
+			auto solidOther = world.solidBodyCompCtrl.getComponentPtr(collInfo.idB);
 
 			float elast = std::max(solidColl->elasticity, solidOther->elasticity);
 			auto [collChanges, otherChanges] = dynamicCollision2d4(*coll, solidColl->mass, solidColl->momentOfInertia, *other, solidOther->mass, solidOther->momentOfInertia, collInfo.collisionNormal, collInfo.collisionPos, elast);
@@ -378,8 +377,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	int i = 0;
 	for (auto& coll : dynCollidables) {
 		coll.second->position += coll.second->velocity * deltaTime_;
-		coll.second->position += collisionResponses.at(i).posChange;
 		coll.second->rotation += coll.second->angleVelocity * deltaTime;
+		coll.second->position += collisionResponses.at(i).posChange;	//non solids have a pushout of 0
+
 		i++;
 	}
 	t3.stop();

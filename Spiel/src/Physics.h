@@ -137,7 +137,7 @@ inline vec2 calcPosChange(Collidable const* coll, Collidable const* other, float
 	}
 }
 
-inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll, Collidable const* other)  {
+inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll, Collidable const* other, bool bothSolid)  {
 	CollisionTestResult result = CollisionTestResult();
 	float dist = circleDist(coll->getPos(), coll->getRadius(), other->getPos(), other->getRadius());
 
@@ -146,10 +146,10 @@ inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll, Co
 		result.collided = true;
 		result.clippingDist = dist;
 		result.collisionPos = normalize(coll->getPos() - other->getPos()) * other->getRadius() + other->getPos();
-		if (coll->isSolid() && other->isSolid()) {
-			auto collisionNormalVec = normalize(coll->getPos() - other->getPos());	/* a vector from b to coll_ */ 
-			result.collisionNormal = collisionNormalVec;
 
+		auto collisionNormalVec = normalize(coll->getPos() - other->getPos());	/* a vector from b to coll_ */
+		result.collisionNormal = collisionNormalVec;
+		if (bothSolid) {
 			result.posChange = calcPosChange(coll, other, -dist, collisionNormalVec);
 		}
 	}
@@ -209,7 +209,7 @@ inline std::tuple<bool, float, float, vec2> partialSATCollision(Collidable const
 	return std::tuple(true, resRotation, minClippingDist, collisionPos);
 }
 
-inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* coll, Collidable const* other)
+inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* coll, Collidable const* other, bool bothSolid)
 {
 	CollisionTestResult result = CollisionTestResult();
 	auto [partialResult1, rotation1, dist1, collPos1] = partialSATCollision(coll, other);
@@ -222,14 +222,14 @@ inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* co
 			auto minClippingDist = dist1 < dist2 ? dist1 : dist2;
 			result.clippingDist = minClippingDist;
 			result.collisionPos = dist1 < dist2 ? collPos1 : collPos2;
-			if (coll->isSolid() && other->isSolid()) {
-				
-				auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
-				rotation = (float)((int)rotation % 360);
 
-				auto collNormal = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
-				result.collisionNormal = collNormal;
+			auto rotation = dist1 < dist2 ? rotation1 : rotation2 + 180;
+			rotation = (float)((int)rotation % 360);
 
+			auto collNormal = vec2(cosf(rotation / RAD), sinf(rotation / RAD));
+			result.collisionNormal = collNormal;
+
+			if (bothSolid) {
 				result.posChange = calcPosChange(coll, other, minClippingDist, collNormal);
 			}
 		}
@@ -237,7 +237,7 @@ inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* co
 	return result;
 }
 
-inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circle, Collidable const* rect, bool isCirclePrimary) {
+inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circle, Collidable const* rect, bool bothSolid, bool isCirclePrimary) {
 	CollisionTestResult result = CollisionTestResult();
 
 	auto const& rotation = rect->getRota();
@@ -293,24 +293,19 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 		result.collided = true;
 		result.clippingDist = dist;
 		result.collisionPos = rotate(clampedCirclePos, rotation);
+		Collidable const* coll; Collidable const* other; vec2 primCollNormal; 
 		if (isCirclePrimary) {
-			result.collisionNormal = backRotatedCollNormal;
+			coll = circle; other = rect; primCollNormal = backRotatedCollNormal;
 		}
 		else {
-			result.collisionNormal = -backRotatedCollNormal;
+			coll = rect; other = circle; primCollNormal = -backRotatedCollNormal;
 		}
+		result.collisionNormal = primCollNormal;
 
-		if (circle->isSolid() && rect->isSolid()) {
-			Collidable const* coll; Collidable const* other; vec2 primCollNormal;
-			if (isCirclePrimary) {
-				coll = circle; other = rect; primCollNormal = backRotatedCollNormal;
-			}
-			else {
-				coll = rect; other = circle; primCollNormal = -backRotatedCollNormal;
-			}
-
+		if (bothSolid) {
 			result.posChange = calcPosChange(coll, other, -dist, primCollNormal);
 		}
+		
 	}
 	return result;
 }
@@ -320,23 +315,23 @@ inline bool isOverlappingAABB(Collidable const* a, Collidable const* b) {
 	fabs(b->getPos().y - a->getPos().y) <= fabs(b->getBoundsSize().y + a->getBoundsSize().y) * 0.5f;
 }
 
-inline CollisionTestResult checkForCollision(Collidable const* coll_, Collidable const* other_) {
+inline CollisionTestResult checkForCollision(Collidable const* coll_, Collidable const* other_, bool bothSolid) {
 	//pretest with AABB
 	if (isOverlappingAABB(coll_, other_)) {
 		if (coll_->getForm() == Form::CIRCLE) {
 			if (other_->getForm() == Form::CIRCLE) {
-				return circleCircleCollisionCheck(coll_, other_);
+				return circleCircleCollisionCheck(coll_, other_, bothSolid);
 			}
 			else {
-				return checkCircleRectangleCollision(coll_, other_, true);
+				return checkCircleRectangleCollision(coll_, other_, bothSolid, true);
 			}
 		}
 		else {
 			if (other_->getForm() == Form::CIRCLE) {
-				return checkCircleRectangleCollision(other_, coll_, false);
+				return checkCircleRectangleCollision(other_, coll_, bothSolid, false);
 			}
 			else {
-				return rectangleRectangleCollisionCheck(coll_, other_);
+				return rectangleRectangleCollisionCheck(coll_, other_, bothSolid);
 			}
 		}
 	}

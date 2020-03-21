@@ -18,9 +18,11 @@ struct CompController {
 	/* remove entitiy from the infruence of the component, O(n) */
 	void deregisterEntity(uint32_t id);
 	/* returns true if an entity with the given id is registered in the ComponentController, O(log2(n)) */
-	bool isRegistered(uint32_t);
-	/* returns a pointer to the componentData of the given entity. If the given id is not registered nullptr will be returned, O(log2(n)) */
-	CompDataType * const getComponent(uint32_t id);
+	bool isRegistered(uint32_t id);
+	/* returns a pointer to the componentData of the given entity. If the given id is not registered nullptr will be returned, O(1) (hash access) */
+	CompDataType * const getComponentPtr(uint32_t id);
+	/* returns a reference to the componentData of a given entity. UNCHECKED! CALL isRegistered BEFORE USE!, O(1) */
+	CompDataType& getComponent(uint32_t id);
 	robin_hood::unordered_map<uint32_t, CompDataType> componentData;
 };
 
@@ -50,7 +52,7 @@ inline bool CompController<CompDataType>::isRegistered(uint32_t id)
 }
 
 template<typename CompDataType>
-inline CompDataType * const CompController<CompDataType>::getComponent(uint32_t id)
+inline CompDataType * const CompController<CompDataType>::getComponentPtr(uint32_t id)
 {
 	auto res = componentData.find(id);
 	if (res != componentData.end()) {
@@ -59,6 +61,13 @@ inline CompDataType * const CompController<CompDataType>::getComponent(uint32_t 
 	else {
 		return nullptr;
 	}
+}
+
+template<typename CompDataType>
+CompDataType& CompController<CompDataType>::getComponent(uint32_t id) 
+{
+	assert(isRegistered(id));
+	return componentData.find(id).second;
 }
 
 template<typename CompDataType>
@@ -71,8 +80,10 @@ struct CompControllerLUT {
 	void deregisterEntity(uint32_t id);
 	/* returns true if an entity with the given id is registered in the ComponentController, O(log2(n)) */
 	bool isRegistered(uint32_t);
-	/* returns a pointer to the componentData of the given entity. If the given id is not registered nullptr will be returned, O(log2(n)) */
-	CompDataType* const getComponent(uint32_t id);
+	/* returns a pointer to the componentData of the given entity. If the given id is not registered nullptr will be returned, O(1) */
+	CompDataType* const getComponentPtr(uint32_t id);
+	/* returns a reference to the componentData of a given entity. UNCHECKED! CALL isRegistered BEFORE USE!, O(1) */
+	CompDataType& getComponent(uint32_t id);
 	std::vector<std::pair<bool, CompDataType>> componentData;
 };
 
@@ -112,9 +123,19 @@ inline bool CompControllerLUT<CompDataType>::isRegistered(uint32_t id)
 }
 
 template<typename CompDataType>
-inline CompDataType* const CompControllerLUT<CompDataType>::getComponent(uint32_t id)
+inline CompDataType* const CompControllerLUT<CompDataType>::getComponentPtr(uint32_t id)
 {
-	assert(id < componentData.size());	//cannot get component of entitiy that has no memory space
-	assert(componentData[id].first);	//cannot return component of id that is not registered
-	return &componentData[id].second;
+	if (isRegistered(id)) {
+		return &componentData[id].second;
+	}
+	else {
+		return nullptr;
+	}
+}
+
+template<typename CompDataType>
+CompDataType& CompControllerLUT<CompDataType>::getComponent(uint32_t id)
+{
+	assert(isRegistered(id));
+	return componentData[id].second;
 }

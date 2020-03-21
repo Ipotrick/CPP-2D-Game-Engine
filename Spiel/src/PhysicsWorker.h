@@ -8,6 +8,7 @@
 #include "robin_hood.h"
 #include "QuadTree.h"
 #include "Timing.h"
+#include "World.h"
 
 struct PhysicsSyncData {
 	PhysicsSyncData() : run{ true }, mut{}, cond{}, mut2{}, cond2{}, insertReady{0}  {}
@@ -35,7 +36,6 @@ struct PhysicsSharedData {
 	std::vector<std::pair<uint32_t, Collidable*>>* statCollidables;
 	int beginStat;
 	int endStat;
-	float deltaTime;
 	std::vector<CollisionResponse> * collisionResponses;
 	std::vector<CollisionInfo> * collisionInfos;
 	std::vector<Quadtree>* qtrees;

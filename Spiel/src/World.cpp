@@ -4,8 +4,10 @@ std::vector<Drawable> World::getDrawableVec()
 {
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
-	for (auto iterA = drawableCompCtrl.componentData.begin(); iterA != drawableCompCtrl.componentData.end(); ++iterA) {
-		res.push_back(buildDrawable(iterA->first, *getEntityPtr(iterA->first), iterA->second));
+	for (int id = 1; id < drawableCompCtrl.componentData.size(); id++) {
+		if (drawableCompCtrl.isRegistered(id)) {
+			res.push_back(buildDrawable(id, *getEntityPtr(id), drawableCompCtrl.getComponent(id)));
+		}
 	}
 	return res;
 }
@@ -53,8 +55,9 @@ void World::spawnEntity(Entity const& ent_, CompDataDrawable const& draw_) {
 	drawableCompCtrl.registerEntity(lastID, draw_);
 }
 
-void World::spawnSolidEntity(Entity const& ent_, CompDataSolidBody solid, CompDataDrawable const& draw_)
+void World::spawnSolidEntity(Entity ent_, CompDataDrawable const& draw_, CompDataSolidBody solid)
 {
+	ent_.solid = true;
 	if (emptySlots.size() > 0) {
 		uint32_t id = emptySlots.front();
 		emptySlots.pop();
@@ -70,7 +73,7 @@ void World::spawnSolidEntity(Entity const& ent_, CompDataSolidBody solid, CompDa
 
 	drawableCompCtrl.registerEntity(lastID, draw_);
 	if (solid.momentOfInertia == 0.0f) {
-		solid.momentOfInertia = 1.0f / 12.0f * solid.mass * powf(std::max(ent_.getSize().x, ent_.getSize().y), 2) * 10;	//calculate moment of inertia I = 1/12 * m * l^2
+		solid.momentOfInertia = 1.0f / 12.0f * solid.mass * powf(std::max(ent_.getSize().x, ent_.getSize().y), 2) * 2;	//calculate moment of inertia I = 1/12 * m * l^2
 	}
 	solidBodyCompCtrl.registerEntity(lastID, solid);
 }
@@ -105,6 +108,10 @@ void World::deregisterDespawnedEntities()
 	}
 }
 
-uint32_t const World::getSize() {
+uint32_t const World::getEntCount() {
 	return entities.size() - emptySlots.size();
+}
+
+uint32_t const World::getEntMemSize() {
+	return entities.size();
 }

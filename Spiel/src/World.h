@@ -30,18 +30,23 @@ public:
 	
 	/* returns entity with the given if IF it exists, otherwise a nullptr is returned, O(1) */
 	Entity * const getEntityPtr(uint32_t id_);
-	/* returns memory space at id slot, O(1) */
-	std::pair<bool, Entity> operator[](uint32_t id_);
+	/* returns reference to the entitiy with the given id. UNCHECKED, O(1) */
+	Entity& getEntity(uint32_t id);
+	/* returnes if entitiy exists or not */
+	bool doesEntExist(uint32_t id);
 	/* creates Copy of given entity inside the entity map, O(1) */
 	void spawnEntity(Entity const& ent_, CompDataDrawable const& draw_);
 	/* creates Copy of given entity inside the entity map, O(1) */
-	void spawnSolidEntity(Entity const& ent_, CompDataSolidBody solid, CompDataDrawable const& draw_);
+	void spawnSolidEntity(Entity ent_, CompDataDrawable const& draw_, CompDataSolidBody solid);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
 	void despawn(uint32_t entitiy_id);
-	/* returnes the last ID */
+	/* returnes the id of the most rescently spawned entity .
+		if 0 is returnsed, there are no entities spawned yet */
 	uint32_t const getLastID();
 	/* returns count of entities */
-	uint32_t const getSize();
+	uint32_t const getEntCount();
+	/* returns the size of the vector that holds the entities */
+	uint32_t const getEntMemSize();
 
 private:
 	/* INNER ENGINE FUNCTIONS: */
@@ -56,8 +61,8 @@ private:
 public:
 	/* engine ComponentController list */
 	CompControllerLUT<CompDataSolidBody> solidBodyCompCtrl;
+	CompControllerLUT<CompDataDrawable>	drawableCompCtrl;
 	/* game ComponentController list */
-	CompController<CompDataDrawable>	drawableCompCtrl;
 	CompController<CompDataLight>		lightCompCtrl;
 	CompController<CompDataHealth>		healthCompCtrl;
 	CompController<CompDataAge>			ageCompCtrl;
@@ -74,6 +79,11 @@ private:
 	std::vector<int> despawnList;
 };
 
+inline bool World::doesEntExist(uint32_t id) {
+	assert(id < entities.size());
+	return entities[id].first;
+}
+
 inline Entity *const World::getEntityPtr(uint32_t id_) {
 	if (id_ < entities.size() && entities[id_].first) {
 		return &entities[id_].second;
@@ -83,14 +93,13 @@ inline Entity *const World::getEntityPtr(uint32_t id_) {
 	}
 }
 
-inline std::pair<bool, Entity> World::operator[](uint32_t id_)
-{
-	assert(id_ < entities.size());	//out of vector bounds
-	return entities[id_];
+inline Entity& World::getEntity(uint32_t id) {
+	assert(id < entities.size());
+	assert(doesEntExist(id));
+	return entities[id].second;
 }
 
 inline uint32_t const World::getLastID() {
-	assert(lastID > 0);	//DO NOT CALL THIS FUNCTION WITH 0 ENTITIES
 	return lastID;
 }
 
