@@ -45,7 +45,8 @@ public:
 		dynamic{ dynamic_ },
 		velocity{ velocity_ },
 		solid{ false },
-		angleVelocity{ 0.f }
+		angleVelocity{ 0.f },
+		particle{ false }
 	{
 	}
 
@@ -54,9 +55,10 @@ public:
 		size{ c.getSize() },
 		form{ c.getForm() },
 		dynamic{ c.isDynamic() },
-		velocity{c.velocity},
+		velocity{c.getVel() },
 		solid{ c.isSolid() },
-		angleVelocity{ c.angleVelocity }
+		angleVelocity{ c.getAnglVel() },
+		particle{ c.isParticle() }
 	{
 	}
 
@@ -67,6 +69,7 @@ public:
 	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
 	inline bool isDynamic() const { return dynamic; }
 	inline bool isSolid() const { return solid; }
+	inline bool isParticle() const { return particle; }
 
 	inline Collidable* getCollidablePtr() { return this; }
 	inline Collidable const* getConstCollidablePtr() const { return this; }
@@ -78,6 +81,7 @@ public:
 	vec2 velocity;
 	float angleVelocity;
 	bool solid;
+	bool particle;
 protected:
 	bool dynamic;
 public:

@@ -25,10 +25,14 @@ void PhysicsWorker::operator()()
 
 		// build qtrees
 		for (int i = beginStat; i < endStat; i++) {
-			qtrees->at(physicsData->id).insert(statCollidables->at(i));
+			if (!(*statCollidables)[i].second->isParticle()) {	//never check for collisions against particles
+				qtrees->at(physicsData->id).insert((*statCollidables)[i]);
+			}
 		}
 		for (int i = beginDyn; i < endDyn; i++) {
-			qtrees->at(physicsData->id).insert(dynCollidables->at(i));
+			if (!(*dynCollidables)[i].second->isParticle()) {	//never check for collisions against particles
+				qtrees->at(physicsData->id).insert((*dynCollidables)[i]);
+			}
 		}
 
 		// re sync with others after inserting
@@ -43,6 +47,8 @@ void PhysicsWorker::operator()()
 				syncData->cond2.wait(switch_lock, [&]() { return syncData->insertReady == 0; });
 			}
 		}
+
+		collisionInfos->reserve(dynCollidables->size() / 10.f);
 		
 		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 		for (int i = beginDyn; i < endDyn; i++) {
@@ -56,7 +62,8 @@ void PhysicsWorker::operator()()
 
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
-				if (coll.first != other.first) {
+				//do not check collisions against particles or between an entity with itself
+				if (coll.first != other.first) {	
 
 					auto newTestResult = checkForCollision(coll.second, other.second, coll.second->isSolid() && other.second->isSolid());
 

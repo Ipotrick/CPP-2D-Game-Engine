@@ -44,3 +44,5 @@ public:
 	CursorManipData cursorManipData;
 	void cursorManipFunc();
 };
+
+void testEventReaction(std::string_view, uint32_t);
