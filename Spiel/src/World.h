@@ -85,7 +85,8 @@ inline bool World::doesEntExist(uint32_t id) {
 }
 
 inline Entity *const World::getEntityPtr(uint32_t id_) {
-	if (id_ < entities.size() && entities[id_].first) {
+	assert(id_ < entities.size());
+	if (entities[id_].first) {
 		return &entities[id_].second;
 	}
 	else {
