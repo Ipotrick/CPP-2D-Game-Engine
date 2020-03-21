@@ -16,7 +16,7 @@ public:
 			}
 		}
 
-		auto entity = world.getEntity(id);
+		auto& entity = world.getEntity(id);
 
 		if (engine.keyPressed(KEY::W)) {
 			//entity->acceleration += rotate(vec2(0.0f, 10.0f), entity->rotation);
