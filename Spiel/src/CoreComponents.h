@@ -33,3 +33,38 @@ struct CompDataDrawable : public CompData {
 	{
 	}
 };
+
+// compositMaster4 component
+
+struct CompDataComposit4 : public CompData {
+	struct Slave {
+		Slave() : id{ 0 }, relativePos{ 0,0 }, relativeRota{0.f} {}
+
+		Slave(uint32_t id_, vec2 relativePos_, float relativeRota_) : 
+			id{id_},
+			relativePos{relativePos_},
+			relativeRota{ relativeRota_ }
+		{}
+
+		uint32_t id;
+		vec2 relativePos;
+		float relativeRota;
+	};
+
+	Slave slaves[4];
+
+	CompDataComposit4() {
+		Slave slave(0, vec2(0,0), 0);
+		slaves[0] = slave;
+		slaves[1] = slave;
+		slaves[2] = slave;
+		slaves[3] = slave;
+	}
+
+	CompDataComposit4(Slave slaves_[]) {
+		slaves[0] = slaves_[0];
+		slaves[1] = slaves_[1];
+		slaves[2] = slaves_[2];
+		slaves[3] = slaves_[3];
+	}
+};

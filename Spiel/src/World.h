@@ -35,9 +35,13 @@ public:
 	/* returnes if entitiy exists or not */
 	bool doesEntExist(uint32_t id);
 	/* creates Copy of given entity inside the entity map, O(1) */
-	void spawnEntity(Entity const& ent_, CompDataDrawable const& draw_);
+	void spawnEntity(Entity const& ent, CompDataDrawable const& draw);
 	/* creates Copy of given entity inside the entity map, O(1) */
-	void spawnSolidEntity(Entity ent_, CompDataDrawable const& draw_, CompDataSolidBody solid);
+	void spawnSolidEntity(Entity ent, CompDataDrawable const& draw, CompDataSolidBody solid);
+	/* adds a slave entity to an owner entity */
+	void spawnSlave(Entity ent, CompDataDrawable const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota);
+	/* adds a slave entity to an owner entity, that contributes to the entities hitbox */
+	void spawnSolidSlave(Entity ent, CompDataDrawable const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
 	void despawn(uint32_t entitiy_id);
 	/* returnes the id of the most rescently spawned entity .
@@ -62,15 +66,13 @@ public:
 	/* engine ComponentController list */
 	CompControllerLUT<CompDataSolidBody> solidBodyCompCtrl;
 	CompControllerLUT<CompDataDrawable>	drawableCompCtrl;
+	CompController< CompDataComposit4> composit4CompCtrl;
 	/* game ComponentController list */
 	CompController<CompDataLight>		lightCompCtrl;
 	CompController<CompDataHealth>		healthCompCtrl;
 	CompController<CompDataAge>			ageCompCtrl;
 	CompController<CompDataPlayer>		playerCompCtrl;
 	CompController<CompDataBullet>		bulletCompCtrl;
-	CompController<CompDataTrigger>		triggerCompCtrl;
-	CompController<CompDataOwner>		ownerCompCtrl;
-	CompController<CompDataSlave>		slaveCompCtrl;
 private:
 	std::vector<std::pair<bool, Entity>> entities;
 	std::queue<uint32_t> emptySlots;

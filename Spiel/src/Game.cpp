@@ -5,10 +5,7 @@ Game::Game() :
 	playerScript{ world.playerCompCtrl, *this },
 	healthScript{ world.healthCompCtrl, *this },
 	ageScript   { world.ageCompCtrl,    *this },
-	bulletScript{ world.bulletCompCtrl, *this },
-	triggerScript{ world.triggerCompCtrl, *this },
-	ownerScript{ world.ownerCompCtrl, *this },
-	slaveScript{ world.slaveCompCtrl, *this } 
+	bulletScript{ world.bulletCompCtrl, *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
@@ -21,16 +18,23 @@ Game::Game() :
 }
 
 void Game::create() {
-	events.subscribeToEvent("playerHit", &testEventReaction, 0);
 
 	camera.zoom = 1 / 5.0f;
 
-	vec2 scaleEnt = { 0.4f, 1.0f };
+	vec2 scaleEnt = { 0.4f, 0.8f };
 	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, vec2(3,0)));
 	auto cDraw = CompDataDrawable(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
 	cEnt.rotation = 0.0;
 	world.spawnSolidEntity(cEnt, cDraw, CompDataSolidBody(0.5f, 70.0f));
 	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
+	auto playerID = world.getLastID();
+	world.composit4CompCtrl.registerEntity(playerID, CompDataComposit4());
+	
+	auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt), Form::CIRCLE, true, vec2(3, 0)));
+	auto slaveD = CompDataDrawable(vec4(1, 1, 1, 1), vec2(scaleEnt), 0.59f, Form::CIRCLE, true);
+	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 90);
+	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 90);
+
 
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, true));
@@ -54,12 +58,7 @@ void Game::create() {
 		world.spawnSolidEntity(wallC, wallD, CompDataSolidBody(0.3f, 1'000'000'000'000'000.0f));
 	}
 
-	Entity loadTrigC = Entity(vec2(14, 0), 0, Collidable(vec2(0.4f, 1), Form::RECTANGLE, true));
-	CompDataDrawable loadTrigD = CompDataDrawable(vec4(1, 0, 0, 1), vec2(0.4f, 1), 0.49f, Form::RECTANGLE);
-	world.spawnEntity(loadTrigC, loadTrigD);
-	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
-
-	int num = 10000;
+	int num = 0;
 
 	vec2 scale = vec2(0.08f, 0.08f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0,0)));
@@ -126,12 +125,9 @@ void Game::update(World& world, float deltaTime) {
 	healthScript.executeAll( world, deltaTime);
 	ageScript.executeAll(    world, deltaTime);
 	bulletScript.executeAll( world, deltaTime);
-	triggerScript.executeAll(world, deltaTime);
-	ownerScript.executeAll(  world, deltaTime);
-	slaveScript.executeAll(  world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -232,7 +228,7 @@ void Game::cursorManipFunc()
 			CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
-				auto solid = CompDataSolidBody(0.9f, 2.5f);
+				auto solid = CompDataSolidBody(0.2f, 2.5f);
 				solid.momentOfInertia = 0.1f;
 				world.spawnSolidEntity(trashEntC, trashEntD, solid);
 				world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));

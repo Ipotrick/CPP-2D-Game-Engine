@@ -2,8 +2,8 @@
 #include <string_view>
 #include <functional>
 
-/*  an event function MUST be statis of free.
-	the input types for an event function are (event name, id(variable use)) and the retun type is a bool.
+/*  an event function MUST be static or free.
+	the input types for an event function are (event name, id(variable use)) and the return type is a bool.
 	the return bool is used to specify if the function wants to be unsubscribed right after beeing called in a trigger.
 	return true : unsubscribe after call, return false : keep me subscribed*/
 using eventTriggerFuncPtrType = bool (*)(std::string_view, uint32_t);
