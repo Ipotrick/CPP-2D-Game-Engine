@@ -173,7 +173,7 @@ void Game::cursorManipFunc()
 		if (cursorManipData.locked) {
 			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
 			if (controlledEnt != nullptr) {
-				controlledEnt->velocity = cursor->position - cursorManipData.oldCursorPos;
+				controlledEnt->velocity = 0;
 				if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
 					float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - controlledEnt->position));
 					float cursorNewRot = getAngle(normalize(cursor->position - controlledEnt->position));
@@ -249,7 +249,7 @@ void Game::cursorManipFunc()
 			}
 		}
 	}
-	cursorManipData.oldCursorPos = cursor->position;
+	cursorManipData.oldCursorPos = getPosWorldSpace(getCursorPos());
 }
 
 void testEventReaction(std::string_view name, uint32_t id) {
