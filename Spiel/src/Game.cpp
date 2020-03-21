@@ -8,7 +8,7 @@ Game::Game() :
 	bulletScript{ world.bulletCompCtrl, *this },
 	triggerScript{ world.triggerCompCtrl, *this },
 	ownerScript{ world.ownerCompCtrl, *this },
-	slaveScript{ world.slaveCompCtrl, *this }
+	slaveScript{ world.slaveCompCtrl, *this } 
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
@@ -21,7 +21,7 @@ Game::Game() :
 }
 
 void Game::create() {
-	//events.subscribeToEvent("playerHit", &testEventReaction, 0);
+	events.subscribeToEvent("playerHit", &testEventReaction, 0);
 
 	camera.zoom = 1 / 5.0f;
 
@@ -59,7 +59,7 @@ void Game::create() {
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 100;
+	int num = 10000;
 
 	vec2 scale = vec2(0.08f, 0.08f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0,0)));
@@ -131,7 +131,7 @@ void Game::update(World& world, float deltaTime) {
 	slaveScript.executeAll(  world, deltaTime);
 
 	//display performance statistics
-	std::cout << getPerfInfo(5) << '\n';
+	//std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -252,6 +252,3 @@ void Game::cursorManipFunc()
 	cursorManipData.oldCursorPos = getPosWorldSpace(getCursorPos());
 }
 
-void testEventReaction(std::string_view name, uint32_t id) {
-	std::cout << "player got hit" << std::endl;
-}
