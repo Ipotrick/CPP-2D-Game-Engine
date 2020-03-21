@@ -8,7 +8,7 @@ Game::Game() :
 	bulletScript{ world.bulletCompCtrl, *this },
 	triggerScript{ world.triggerCompCtrl, *this },
 	ownerScript{ world.ownerCompCtrl, *this },
-	slaveScript{ world.slaveCompCtrl, *this } 
+	slaveScript{ world.slaveCompCtrl, *this } //ngr
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
