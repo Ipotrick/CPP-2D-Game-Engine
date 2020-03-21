@@ -58,20 +58,8 @@ void World::spawnEntity(Entity const& ent_, CompDataDrawable const& draw_) {
 void World::spawnSolidEntity(Entity ent_, CompDataDrawable const& draw_, CompDataSolidBody solid)
 {
 	ent_.solid = true;
-	if (emptySlots.size() > 0) {
-		uint32_t id = emptySlots.front();
-		emptySlots.pop();
-		entities[id].first = true;
-		entities[id].second = ent_;
-		lastID = id;
-	}
-	else {
-		entities.push_back({ true,ent_ });
-		lastID = nexBacktID;
-		nexBacktID++;
-	}
+	spawnEntity(ent_, draw_);
 
-	drawableCompCtrl.registerEntity(lastID, draw_);
 	if (solid.momentOfInertia == 0.0f) {
 		solid.momentOfInertia = 1.0f / 12.0f * solid.mass * powf(std::max(ent_.getSize().x, ent_.getSize().y), 2) * 2;	//calculate moment of inertia I = 1/12 * m * l^2
 	}

@@ -17,12 +17,12 @@ namespace Physics {
 
 struct CollisionTestResult {
 	vec2 posChange;
-	vec2 collisionNormal;
-	vec2 collisionPos;
-	float clippingDist;
-	bool collided;
+vec2 collisionNormal;
+vec2 collisionPos;
+float clippingDist;
+bool collided;
 
-	CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f } {}
+CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f } {}
 };
 
 struct CollisionInfo {
@@ -40,7 +40,7 @@ struct CollisionResponse {
 };
 
 __forceinline float dynamicCollision3(float v1, float m1, float v2, float m2, float e) {
-	return (e*m2*(v2 - v1) + m1* v1 + m2* v2)/(m1 + m2);
+	return (e * m2 * (v2 - v1) + m1 * v1 + m2 * v2) / (m1 + m2);
 }
 
 __forceinline vec2 dynamicCollision2d3(vec2 const& v1, float const& m1, vec2 const& v2, float const& m2, vec2 const& cNV, float e) {
@@ -58,10 +58,10 @@ inline float fastAngle(vec2 v) {
 	return atan2(dot(v, vec2(1, 0)), cross(v, vec2(1, 0)));
 }
 
-__forceinline std::pair<std::pair<vec2, float>,std::pair< vec2, float>> dynamicCollision2d4(Collidable const& a, float const massA, float const inertiaA, Collidable b, float const massB, float const inertiaB, vec2 const& cNV, vec2 const& collPos, float e) {
+__forceinline std::pair<std::pair<vec2, float>, std::pair< vec2, float>> dynamicCollision2d4(Collidable const& a, float const massA, float const inertiaA, Collidable b, float const massB, float const inertiaB, vec2 const& cNV, vec2 const& collPos, float e) {
 	vec2 rAP = collPos - a.getPos();
 	vec2 rBP = collPos - b.getPos();
-	
+
 	//speed the Collidables have at the specifiy collision point
 	vec2 va = a.getVel() + rotate90(rAP) * a.getAnglVel() / RAD;
 	vec2 vb = b.getVel() + rotate90(rAP) * b.getAnglVel() / RAD;
@@ -78,7 +78,7 @@ __forceinline std::pair<std::pair<vec2, float>,std::pair< vec2, float>> dynamicC
 		//float wb2 = - cross(rBP, j * cNV) / inertiaB * RAD;
 		return { {j / massA * cNV, cross(rAP, j * cNV) / inertiaA * RAD}, {-j / massB * cNV,-cross(rBP, j * cNV) / inertiaB * RAD} };
 	}
-	
+
 	return { { vec2(0,0), 0 },{ vec2(0,0), 0 } };
 }
 
@@ -114,8 +114,8 @@ __forceinline float clippingDist(float minFirst, float  maxFirst, float  minSeco
 // primCollNormal is allways FROM other TO coll, dist is the dist TO push out, so dist > 0!
 inline vec2 calcPosChange(Collidable const* coll, Collidable const* other, float const dist, vec2 const& primCollNormal) {
 	if (other->isDynamic()) {
-		float bothRadii = coll->getBoundsRadius() + other->getBoundsRadius();
-		float bPart = other->getBoundsRadius() / bothRadii;
+		float bothAreas = coll->getSurfaceArea() + other->getSurfaceArea();
+		float bPart = other->getSurfaceArea() / bothAreas;
 		float collDirV1 = dot(coll->velocity, primCollNormal);
 		float collDirV2 = dot(other->velocity, primCollNormal);
 		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f) {

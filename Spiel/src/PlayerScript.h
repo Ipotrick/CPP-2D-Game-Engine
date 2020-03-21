@@ -51,7 +51,7 @@ public:
 			uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 			for (uint64_t i = 0; i < bullets; i++) {
 				
-				vec2 bullCollVel = world.getEntity(id).getPos() + bulletVel * rotate(vec2(0, 1), world.getEntity(id).getRota() + velOffsetRota);
+				vec2 bullCollVel = world.getEntity(id).getVel() + bulletVel * rotate(vec2(0, 1), world.getEntity(id).getRota() + velOffsetRota);
 
 				Collidable bullColl = Collidable(bulletSize, Form::CIRCLE, true, bullCollVel);
 				Entity bullC = Entity(world.getEntity(id).getPos() + rotate(vec2(-world.getEntity(id).getSize().y, 0) / 1.9f, world.getEntity(id).rotation + 270), 0, bullColl);

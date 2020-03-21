@@ -43,6 +43,11 @@ public:
 
 	CursorManipData cursorManipData;
 	void cursorManipFunc();
+
+	static bool testEventReaction(std::string_view, uint32_t);
 };
 
-void testEventReaction(std::string_view, uint32_t);
+inline bool Game::testEventReaction(std::string_view name, uint32_t id) {
+	std::cout << "player got hit" << std::endl;
+	return false;
+}
