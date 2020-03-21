@@ -21,6 +21,8 @@ Game::Game() :
 }
 
 void Game::create() {
+	//events.subscribeToEvent("playerHit", &testEventReaction, 0);
+
 	camera.zoom = 1 / 5.0f;
 
 	vec2 scaleEnt = { 0.4f, 1.0f };
@@ -57,15 +59,15 @@ void Game::create() {
 	world.spawnEntity(loadTrigC, loadTrigD);
 	world.triggerCompCtrl.registerEntity(world.getLastID(), CompDataTrigger(1));
 
-	int num = 10000;
+	int num = 100;
 
 	vec2 scale = vec2(0.08f, 0.08f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0,0)));
 	CompDataDrawable trashEntD = CompDataDrawable(vec4(0, 0, 0, 1), scale, 0.5f, Form::CIRCLE, true);
-	auto trashSolid = CompDataSolidBody(0.9f, 0.5f);
+	auto trashSolid = CompDataSolidBody(0.99f, 0.5f);
 	trashSolid.momentOfInertia = 0.1f;
 	for (int i = 0; i < num; i++) {
-		if (i % 2 ||true) {
+		if (i % 4 || true) {
 			trashEntC.form = Form::CIRCLE;
 			trashEntD.form = Form::CIRCLE;
 		}
@@ -129,7 +131,7 @@ void Game::update(World& world, float deltaTime) {
 	slaveScript.executeAll(  world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -171,7 +173,7 @@ void Game::cursorManipFunc()
 		if (cursorManipData.locked) {
 			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
 			if (controlledEnt != nullptr) {
-				controlledEnt->velocity = 0;
+				controlledEnt->velocity = cursor->position - cursorManipData.oldCursorPos;
 				if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
 					float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - controlledEnt->position));
 					float cursorNewRot = getAngle(normalize(cursor->position - controlledEnt->position));
@@ -248,4 +250,8 @@ void Game::cursorManipFunc()
 		}
 	}
 	cursorManipData.oldCursorPos = cursor->position;
+}
+
+void testEventReaction(std::string_view name, uint32_t id) {
+	std::cout << "player got hit" << std::endl;
 }

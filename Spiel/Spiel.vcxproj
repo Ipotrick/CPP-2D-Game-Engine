@@ -26,6 +26,7 @@
     <ClInclude Include="src\CoreComponents.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\Entity.h" />
+    <ClInclude Include="src\EventHandler.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
     <ClInclude Include="src\glmath.h" />
@@ -44,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\main.cpp" />
