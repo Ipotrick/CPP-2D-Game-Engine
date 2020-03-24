@@ -2,17 +2,17 @@
 
 Game::Game() : 
 	Engine("Test", 1600, 900), 
-	playerScript{ world.playerCompCtrl, *this },
-	healthScript{ world.healthCompCtrl, *this },
-	ageScript   { world.ageCompCtrl,    *this },
-	bulletScript{ world.bulletCompCtrl, *this }
+	playerScript{ world.getCtrl<Player>(), *this },
+	healthScript{ world.getCtrl<Health>(), *this },
+	ageScript   { world.getCtrl<Age>(),    *this },
+	bulletScript{ world.getCtrl<Bullet>(), *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
 
 	vec2 scaleMouse = { 0.2,0.2 };
 	auto cCursor = Entity(vec2(0, 0), 0, Collidable(scaleMouse, Form::RECTANGLE, true));
-	auto dCursor = CompDataDrawable(vec4(1, 0, 0, 1), scaleMouse, 1.0f, Form::RECTANGLE);
+	auto dCursor = Draw(vec4(1, 0, 0, 1), scaleMouse, 1.0f, Form::RECTANGLE);
 	world.spawnEntity(cCursor, dCursor);
 	cursorID = world.getLastID();
 }
@@ -23,24 +23,23 @@ void Game::create() {
 
 	vec2 scaleEnt = { 0.4f, 0.8f };
 	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, vec2(3,0)));
-	auto cDraw = CompDataDrawable(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
+	auto cDraw = Draw(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
 	cEnt.rotation = 0.0;
-	world.spawnSolidEntity(cEnt, cDraw, CompDataSolidBody(0.5f, 70.0f));
-	world.playerCompCtrl.registerEntity(world.getLastID(), CompDataPlayer());
+	world.spawnSolidEntity(cEnt, cDraw, SolidBody(0.5f, 70.0f));
+	world.addComp<Player>(world.getLastID(), Player());
 	auto playerID = world.getLastID();
-	world.composit4CompCtrl.registerEntity(playerID, CompDataComposit4());
+	world.addComp<Composit<4>>(playerID, Composit<4>());
 	
 	auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt), Form::CIRCLE, true, vec2(3, 0)));
-	auto slaveD = CompDataDrawable(vec4(1, 1, 1, 1), vec2(scaleEnt), 0.59f, Form::CIRCLE, true);
+	auto slaveD = Draw(vec4(0, 0, 0, 1), vec2(scaleEnt), 0.59f, Form::CIRCLE, true);
 	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 90);
 	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 90);
 
-
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, true));
-	CompDataDrawable portalD = CompDataDrawable(vec4(1, 0, 0, 0.5f), vec2(3,3), 0.3f, Form::CIRCLE);
+	Draw portalD = Draw(vec4(1, 0, 0, 0.5f), vec2(3, 3), 0.3f, Form::CIRCLE);
 	world.spawnEntity(portalC, portalD);
-	attractorID = world.getLastID();
+	attractorID = world.getLastID(); 
 
 	portalC.size = vec2(3, 3);
 	portalC.position = vec2(4, 4);
@@ -50,34 +49,34 @@ void Game::create() {
 	pusherID = world.getLastID();
 
 	Entity wallC = Entity(vec2(0,0), 0, Collidable(vec2(0.4f, 10), Form::RECTANGLE, false, vec2(0,0)));
-	CompDataDrawable wallD = CompDataDrawable(vec4(0, 0, 0, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE, true);
+	Draw wallD = Draw(vec4(0, 0, 0, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE, true);
 	for (int i = 0; i < 4; i++) {
 		float rotation = 90.0f * i;
 		wallC.position = rotate(vec2(-5.f, 0), rotation);
 		wallC.rotation = rotation;
-		world.spawnSolidEntity(wallC, wallD, CompDataSolidBody(0.3f, 1'000'000'000'000'000.0f));
+		world.spawnSolidEntity(wallC, wallD, SolidBody(0.3f, 1'000'000'000'000'000.0f));
 	}
 
-	int num = 0;
+	int num = 3000;
 
 	vec2 scale = vec2(0.08f, 0.08f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0,0)));
-	CompDataDrawable trashEntD = CompDataDrawable(vec4(0, 0, 0, 1), scale, 0.5f, Form::CIRCLE, true);
-	auto trashSolid = CompDataSolidBody(0.99f, 0.5f);
-	trashSolid.momentOfInertia = 0.1f;
+	Draw trashEntD = Draw(vec4(1, 102.0f / 255.0f, 0, 1), scale, 0.5f, Form::CIRCLE, true);
+	auto slaveEntC = trashEntC;
+	trashEntC.form = Form::RECTANGLE;
+	auto slaveEntD = trashEntD;
+	slaveEntD.color = vec4(0,0,0, 1);
+	slaveEntD.drawingPrio += 0.01f;
+	slaveEntD.form = Form::RECTANGLE;
+	auto trashSolid = SolidBody(0.1f, 0.5f);
+	trashSolid.momentOfInertia = 0.11f;
 	for (int i = 0; i < num; i++) {
-		if (i % 4 || true) {
-			trashEntC.form = Form::CIRCLE;
-			trashEntD.form = Form::CIRCLE;
-		}
-		else {
-			trashEntC.form = Form::RECTANGLE;
-			trashEntD.form = Form::RECTANGLE;
-		}
+
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
 
 		world.spawnSolidEntity(trashEntC, trashEntD, trashSolid);
-		world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
+		world.addComp<Health>(world.getLastID(), Health(100));
+		world.spawnSolidSlave(slaveEntC, slaveEntD, world.getLastID(), vec2(0.04f, 0), 0);
 	}
 }
 
@@ -127,7 +126,7 @@ void Game::update(World& world, float deltaTime) {
 	bulletScript.executeAll( world, deltaTime);
 
 	//display performance statistics
-	std::cout << getPerfInfo(5) << '\n';
+	//std::cout << getPerfInfo(5) << '\n';
 	
 	auto attractor = world.getEntityPtr(attractorID);
 	auto pusher = world.getEntityPtr(pusherID);
@@ -164,7 +163,7 @@ void Game::cursorManipFunc()
 	cursor->position = getPosWorldSpace(getCursorPos());
 	cursor->rotation = camera.rotation;
 	cursor->size = vec2(1, 1) / camera.zoom / 100.0f;
-	world.drawableCompCtrl.getComponentPtr(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
+	world.getCompPtr<Draw>(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
 		if (cursorManipData.locked) {
 			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
@@ -189,7 +188,7 @@ void Game::cursorManipFunc()
 						relativeYMovement *= -1;
 					}
 					controlledEnt->size = controlledEnt->size + vec2(relativeXMovement, relativeYMovement) * 2;
-					world.drawableCompCtrl.getComponentPtr(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
+					world.getCompPtr<Draw>(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
 					cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
 				}
 				else {	//move
@@ -201,7 +200,7 @@ void Game::cursorManipFunc()
 			auto [begin, end] = getCollisionInfos(cursorID);
 			auto iterWIthHighestDrawPrio = begin;
 			for (auto iter = begin; iter != end; ++iter) {
-				if (world.drawableCompCtrl.getComponentPtr(iter->idB)->drawingPrio > world.drawableCompCtrl.getComponentPtr(iterWIthHighestDrawPrio->idB)->drawingPrio) {	//higher drawprio found
+				if (world.getCompPtr<Draw>(iter->idB)->drawingPrio > world.getCompPtr<Draw>(iterWIthHighestDrawPrio->idB)->drawingPrio) {	//higher drawprio found
 					iterWIthHighestDrawPrio = iter;
 				}
 			}
@@ -225,23 +224,23 @@ void Game::cursorManipFunc()
 		if (keyPressed(KEY::U)) {
 			vec2 scale = vec2(0.08f, 0.08f);
 			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, true, vec2(0, 0)));
-			CompDataDrawable trashEntD = CompDataDrawable(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
+			Draw trashEntD = Draw(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
-				auto solid = CompDataSolidBody(0.2f, 2.5f);
+				auto solid = SolidBody(0.2f, 2.5f);
 				solid.momentOfInertia = 0.1f;
 				world.spawnSolidEntity(trashEntC, trashEntD, solid);
-				world.healthCompCtrl.registerEntity(world.getLastID(), CompDataHealth(100));
+				world.addComp<Health>(world.getLastID(), Health(100));
 			}
 		}
 
 		if (keyPressed(KEY::I)) {
 			vec2 scale = vec2(0.5f, 0.5f);
 			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, false, vec2(0, 0)));
-			CompDataDrawable trashEntD = CompDataDrawable(vec4(0, 0, 0, 1), scale, 0.5f, Form::RECTANGLE);
+			Draw trashEntD = Draw(vec4(0, 0, 0, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
-				world.spawnSolidEntity(trashEntC, trashEntD, CompDataSolidBody(0.00f, 100000000000000000.f));
+				world.spawnSolidEntity(trashEntC, trashEntD, SolidBody(0.00f, 100000000000000000.f));
 			}
 		}
 	}

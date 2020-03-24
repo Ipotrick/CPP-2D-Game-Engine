@@ -37,6 +37,7 @@ struct PhysicsSharedData {
 	int beginStat;
 	int endStat;
 	std::vector<CollisionResponse> * collisionResponses;
+	std::vector<CollisionResponse>* collisionResponses2;
 	std::vector<CollisionInfo> * collisionInfos;
 	std::vector<Quadtree>* qtrees;
 };
