@@ -122,7 +122,8 @@ private:
 	std::vector<std::thread> physicsThreads;
 	uint32_t qtreeCapacity;
 
-	void updateCompComposit4();
+	template<int N>
+	void syncCompositPhysics(CompController<Composit<N>> & composit);
 
 	std::shared_ptr<Window> window;
 

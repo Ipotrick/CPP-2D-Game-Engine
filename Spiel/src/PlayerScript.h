@@ -4,11 +4,11 @@
 #include "Engine.h"
 
 
-class PlayerScript : public ScriptController<CompDataPlayer, CompController< CompDataPlayer>> {
+class PlayerScript : public ScriptController<Player, CompController< Player>> {
 public:
-	PlayerScript(CompController< CompDataPlayer>& cmpCtrl_, Engine& engine_) : ScriptController<CompDataPlayer, CompController< CompDataPlayer>>(cmpCtrl_, engine_) {}
+	PlayerScript(CompController< Player>& cmpCtrl_, Engine& engine_) : ScriptController<Player, CompController< Player>>(cmpCtrl_, engine_) {}
 
-	inline void executeSample(uint32_t id, CompDataPlayer& data, World& world, float deltaTime) override {
+	inline void executeSample(uint32_t id, Player& data, World& world, float deltaTime) override {
 		auto [begin, end] = engine.getCollisionInfos(id);
 		for( auto iter = begin; iter != end; ++iter) {
 			if (engine.world.getEntity(iter->idB).isSolid()) {
@@ -56,9 +56,9 @@ public:
 				Collidable bullColl = Collidable(bulletSize, Form::CIRCLE, true, bullCollVel);
 				Entity bullC = Entity(world.getEntity(id).getPos() + rotate(vec2(-world.getEntity(id).getSize().y, 0) / 1.9f, world.getEntity(id).rotation + 270), 0, bullColl);
 				bullC.particle = true;
-				CompDataDrawable bullD = CompDataDrawable(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
-				world.spawnSolidEntity(bullC ,bullD, CompDataSolidBody(1, 0.00001f));
-				world.bulletCompCtrl.registerEntity(world.getLastID(), CompDataBullet(10 * scale));
+				Draw bullD = Draw(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
+				world.spawnSolidEntity(bullC ,bullD, SolidBody(1, 0.00001f));
+				world.addComp<Bullet>(world.getLastID(), Bullet(10 * scale));
 			}
 		}
 	}

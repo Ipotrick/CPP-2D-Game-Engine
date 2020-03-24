@@ -6,7 +6,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10 },// 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10000 },// 10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -188,6 +188,7 @@ void Engine::run() {
 			{
 				Timer<> t(new_updateTime);
 				update(world, getDeltaTimeSafe());
+				world.slaveOwnerDespawn();
 				world.deregisterDespawnedEntities();
 				world.executeDespawns();
 			}
@@ -274,7 +275,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
 		qtrees.emplace_back(Quadtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity));
 	}
-	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
+	std::vector<CollisionResponse> collisionResponses(world.entities.size());
 	t1.stop();
 
 	/* check for collisions */
@@ -359,8 +360,8 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		auto* other = world.getEntityPtr(collInfo.idB);
 
 		if (coll->isSolid() && other->isSolid()) {
-			CompDataSolidBody* solidColl = world.solidBodyCompCtrl.getComponentPtr(collInfo.idA);
-			CompDataSolidBody* solidOther = world.solidBodyCompCtrl.getComponentPtr(collInfo.idB);
+			SolidBody* solidColl = world.getCompPtr<SolidBody>(collInfo.idA);
+			SolidBody* solidOther = world.solidBodyCompCtrl.getComponentPtr(collInfo.idB);
 			// owner stands in place for the slave for a collision response execution
 			if (coll->isSlave() || other->isSlave()) {
 				if (coll->isSlave() && !other->isSlave()) {
@@ -400,24 +401,29 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		}
 	}
 
-	// execute physics changes in pos, vel, accel
-	int i = 0;
+	//apply dampened pushout of slave to owner
 	for (auto& coll : dynCollidables) {
-
 		//pushout owner too
-		if (coll.second->isSlave()) {
-			auto& owner = world.getEntity(coll.second->getOwnerID());
-			owner.position += collisionResponses.at(i).posChange;
+		if (coll.second->isSlave() && coll.second->isSolid()) {
+			uint32_t ownerID = coll.second->getOwnerID();
+
+			float slaveWeight = norm(collisionResponses[coll.first].posChange);
+			float ownerWeight = norm(collisionResponses[ownerID].posChange);
+			float normalizer = slaveWeight + ownerWeight;
+			if (normalizer > Physics::nullDelta) {
+				collisionResponses[ownerID].posChange = (slaveWeight * collisionResponses[coll.first].posChange + ownerWeight * collisionResponses[ownerID].posChange) / normalizer;
+			}
 		}
-
-		coll.second->position += coll.second->velocity * deltaTime_;
-		coll.second->rotation += coll.second->angleVelocity * deltaTime;
-		coll.second->position += collisionResponses.at(i).posChange;	//non solids have a pushout of 0
-
-		i++;
 	}
 
-	updateCompComposit4();
+	// execute physics changes in pos, rota
+	for (auto& coll : dynCollidables) {
+		coll.second->position += collisionResponses[coll.first].posChange;	//non solids have a pushout of 0
+		coll.second->position += coll.second->velocity * deltaTime_;
+		coll.second->rotation += coll.second->angleVelocity * deltaTime;
+	}
+
+	syncCompositPhysics<4>(world.composit4CompCtrl);
 	t3.stop();
 
 	/* submit debug drawables for physics */
@@ -427,13 +433,13 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	Physics::debugDrawables.clear();
 }
 
-void Engine::updateCompComposit4()
+template<int N>
+void Engine::syncCompositPhysics(CompController<Composit<N>> & composit)
 {
-	for (auto iter = world.composit4CompCtrl.componentData.begin(); iter != world.composit4CompCtrl.componentData.end(); ++iter) {
+	for (auto iter = composit.componentData.begin(); iter != composit.componentData.end(); ++iter) {
 		auto& owner = world.getEntity(iter->first);
-		auto& ownerSolid = world.solidBodyCompCtrl.getComponent(iter->first);
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < N; i++) {
 			if (iter->second.slaves[i].id != 0) {
 				auto slave = world.getEntityPtr(iter->second.slaves[i].id);
 				auto slaveComposidData = &iter->second.slaves[i];

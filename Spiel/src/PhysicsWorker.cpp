@@ -52,8 +52,8 @@ void PhysicsWorker::operator()()
 		
 		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 		for (int i = beginDyn; i < endDyn; i++) {
-			(*collisionResponses)[i].posChange = vec2(0,0);		//initialize posChange
 			auto& coll = dynCollidables->at(i);
+			(*collisionResponses)[coll.first].posChange = vec2(0, 0);
 			nearCollidables.clear();
 
 			for (int i = 0; i < physicsThreadCount; i++) {
@@ -70,11 +70,11 @@ void PhysicsWorker::operator()()
 					if (newTestResult.collided) {
 						collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 						//take average of pushouts with weights
-						float weightOld = norm((*collisionResponses)[i].posChange);
+						float weightOld = norm((*collisionResponses)[coll.first].posChange);
 						float weightNew = norm(newTestResult.posChange);
 						float normalizer = weightOld + weightNew;
 						if (normalizer > Physics::nullDelta) {
-							(*collisionResponses)[i].posChange = ((*collisionResponses)[i].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
+							(*collisionResponses)[coll.first].posChange = ((*collisionResponses)[coll.first].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
 						}
 					}
 				}

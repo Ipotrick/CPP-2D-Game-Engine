@@ -7,66 +7,51 @@
 
 //player component
 
-struct CompDataPlayer : public CompData {
-	CompDataPlayer() : bulletShotLapTimer{ 0.001f } {}
+struct Player : public CompData {
+	Player() : bulletShotLapTimer{ 0.001f } {}
 	LapTimer<> bulletShotLapTimer;
 };
 
 // health component
 
-struct CompDataHealth : public CompData {
-	CompDataHealth(int maxHealth_) :
+struct Health : public CompData {
+	Health(int maxHealth_) :
 		maxHealth{ maxHealth_ },
 		curHealth{ maxHealth_ }
 	{}
+
+	Health() : maxHealth{0}, curHealth{0} {}
 	int maxHealth;
 	int curHealth;
 };
 
 // age component
 
-struct CompDataAge : public CompData {
-	CompDataAge(float maxAge_) :
+struct Age : public CompData {
+	Age(float maxAge_) :
 		maxAge{ maxAge_ },
 		curAge{ 0.0f }
 	{}
+	Age() : maxAge{0}, curAge{0} {}
 	float maxAge;
 	float curAge;
 };
 
 //bullet component
 
-struct CompDataBullet : public CompData {
-	CompDataBullet(int damage_) :damage{ damage_ } {}
-
+struct Bullet : public CompData {
+	Bullet(int damage_) :damage{ damage_ } {}
+	Bullet() : damage {0} {}
 	int damage;
 	
 };
 
 //loading and event trigger component
-//0 = inactive, 1 = event trigger, 2, loading trigger
 
-struct CompDataTrigger : public CompData {
-	CompDataTrigger(int type_) :type{ type_ } {}
+struct Trigger : public CompData {
+	Trigger(int type_) :type{ type_ } {}
 
 	int type;
-
-};
-
-//owner component
-
-struct CompDataOwner : public CompData {
-	CompDataOwner(uint32_t slave_) :slave{ slave_ } {}
-
-	uint32_t slave;
-};
-
-//slave component
-
-struct CompDataSlave : public CompData {
-	CompDataSlave(uint32_t owner_) :owner{ owner_ } {}
-
-	uint32_t owner;
 
 };
 

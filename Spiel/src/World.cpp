@@ -38,7 +38,7 @@ std::vector<std::tuple<uint32_t, Collidable*>> World::getCollidablePtrVec()
 	return res;
 }
 
-void World::spawnEntity(Entity const& ent, CompDataDrawable const& draw) {
+void World::spawnEntity(Entity const& ent, Draw const& draw) {
 	if (emptySlots.size() > 0) {
 		uint32_t id = emptySlots.front();
 		emptySlots.pop();
@@ -55,7 +55,7 @@ void World::spawnEntity(Entity const& ent, CompDataDrawable const& draw) {
 	drawableCompCtrl.registerEntity(lastID, draw);
 }
 
-void World::spawnSolidEntity(Entity ent, CompDataDrawable const& draw, CompDataSolidBody solid)
+void World::spawnSolidEntity(Entity ent, Draw const& draw, SolidBody solid)
 {
 	ent.solid = true;
 	spawnEntity(ent, draw);
@@ -66,15 +66,15 @@ void World::spawnSolidEntity(Entity ent, CompDataDrawable const& draw, CompDataS
 	solidBodyCompCtrl.registerEntity(lastID, solid);
 }
 
-void World::spawnSlave(Entity ent, CompDataDrawable const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota) {
+void World::spawnSlave(Entity ent, Draw const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota) {
 	ent.ownerID = ownerID;
 	spawnEntity(ent, draw);
 
-	auto& playerComposit = composit4CompCtrl.getComponent(ownerID);
+	auto& ownerComposit = composit4CompCtrl.getComponent(ownerID);
 	//find free slaveSlot
 	int i = 0;
 	while (i < 4) {
-		if (playerComposit.slaves[i].id == 0) {
+		if (ownerComposit.slaves[i].id == 0) {
 			break;
 		}
 		else {
@@ -83,10 +83,10 @@ void World::spawnSlave(Entity ent, CompDataDrawable const& draw, uint32_t ownerI
 	}
 	assert(i < 4);	//spawned more slaves than can be hold
 
-	playerComposit.slaves[i] = CompDataComposit4::Slave(getLastID(), relativePos, relativeRota);
+	ownerComposit.slaves[i] = Composit<4>::Slave(getLastID(), relativePos, relativeRota);
 }
 
-void World::spawnSolidSlave(Entity ent, CompDataDrawable const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota) {
+void World::spawnSolidSlave(Entity ent, Draw const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota) {
 	ent.solid = true;
 	spawnSlave(ent, draw, ownerID, relativePos, relativeRota);
 }
@@ -105,25 +105,47 @@ void World::executeDespawns() {
 	despawnList.clear();
 }
 
-void World::deregisterDespawnedEntities() {
-	for (int entity_id : despawnList) {
-		if(entities[entity_id].first) {
-			solidBodyCompCtrl.deregisterEntity(entity_id);
-			drawableCompCtrl.deregisterEntity(entity_id);
-			composit4CompCtrl.deregisterEntity(entity_id);
-			lightCompCtrl.deregisterEntity(entity_id);
-			playerCompCtrl.deregisterEntity(entity_id);
-			healthCompCtrl.deregisterEntity(entity_id);
-			ageCompCtrl.deregisterEntity(entity_id);
-			bulletCompCtrl.deregisterEntity(entity_id);
+void World::slaveOwnerDespawn() {
+	despawnList.reserve(entities.size());	//make sure the iterator stays valid 
+	for (auto iter = despawnList.begin(); iter != despawnList.end(); ++iter) {
+		assert(entities[entity_id].first);
+		//if the ent is an owner it despawns its slaves on destruction
+		auto owner = composit4CompCtrl.getComponentPtr(*iter);
+		if (owner != nullptr) {
+			for (int i = 0; i < 4; ++i) {
+				despawn(owner->slaves[i].id);
+			}
+		}
+		//if ent is a slave it clears its refference of the owner on despawn
+		if (getEntity(*iter).isSlave()) {
+			auto owner = composit4CompCtrl.getComponentPtr(getEntity(*iter).getOwnerID());
+			for (int i = 0; i < 4; ++i) {
+				if (owner->slaves[i].id == *iter) {
+					owner->slaves[i].id = 0;
+					break;
+				}
+			}
 		}
 	}
 }
 
-uint32_t const World::getEntCount() {
+void World::deregisterDespawnedEntities() {
+	for (int entity_id : despawnList) {
+		solidBodyCompCtrl.deregisterEntity(entity_id);
+		drawableCompCtrl.deregisterEntity(entity_id); 
+		composit4CompCtrl.deregisterEntity(entity_id);
+		lightCompCtrl.deregisterEntity(entity_id);
+		playerCompCtrl.deregisterEntity(entity_id);
+		healthCompCtrl.deregisterEntity(entity_id);
+		ageCompCtrl.deregisterEntity(entity_id);
+		bulletCompCtrl.deregisterEntity(entity_id);
+	}
+}
+
+size_t const World::getEntCount() {
 	return entities.size() - emptySlots.size();
 }
 
-uint32_t const World::getEntMemSize() {
+size_t const World::getEntMemSize() {
 	return entities.size();
 }
