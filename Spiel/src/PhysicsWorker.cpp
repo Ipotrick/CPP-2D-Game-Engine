@@ -52,8 +52,8 @@ void PhysicsWorker::operator()()
 		
 		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 		for (int i = beginDyn; i < endDyn; i++) {
-			(*collisionResponses)[i].posChange = vec2(0,0);		//initialize posChange
 			auto& coll = dynCollidables->at(i);
+			(*collisionResponses)[coll.first].posChange = vec2(0, 0);
 			nearCollidables.clear();
 
 			for (int i = 0; i < physicsThreadCount; i++) {
@@ -62,19 +62,19 @@ void PhysicsWorker::operator()()
 
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
-				//do not check collisions against particles or between an entity with itself
-				if (coll.first != other.first) {	
+				//do not check against self or slave/owner owner/slave
+				if (coll.first != other.first && ((!coll.second->isSlave() && !other.second->isSlave()) || (coll.second->getOwnerID() != other.first && other.second->getOwnerID() != coll.first))) {
 
 					auto newTestResult = checkForCollision(coll.second, other.second, coll.second->isSolid() && other.second->isSolid());
 
 					if (newTestResult.collided) {
 						collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 						//take average of pushouts with weights
-						float weightOld = norm((*collisionResponses)[i].posChange);
+						float weightOld = norm((*collisionResponses)[coll.first].posChange);
 						float weightNew = norm(newTestResult.posChange);
 						float normalizer = weightOld + weightNew;
 						if (normalizer > Physics::nullDelta) {
-							(*collisionResponses)[i].posChange = ((*collisionResponses)[i].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
+							(*collisionResponses)[coll.first].posChange = ((*collisionResponses)[coll.first].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
 						}
 					}
 				}

@@ -6,7 +6,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10 },// 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10000 },// 10000 microseconds = 10 milliseond => 100 loops per second
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
@@ -188,6 +188,7 @@ void Engine::run() {
 			{
 				Timer<> t(new_updateTime);
 				update(world, getDeltaTimeSafe());
+				world.slaveOwnerDespawn();
 				world.deregisterDespawnedEntities();
 				world.executeDespawns();
 			}
@@ -274,7 +275,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		vec2 randOffsetMax = { +(rand() % 2000 / 1000.0f) + 1, +(rand() % 2000 / 1000.0f) + 1 };
 		qtrees.emplace_back(Quadtree(minPos - randOffsetMin, maxPos + randOffsetMax, qtreeCapacity));
 	}
-	std::vector<CollisionResponse> collisionResponses(dynCollidables.size());
+	std::vector<CollisionResponse> collisionResponses(world.entities.size());
 	t1.stop();
 
 	/* check for collisions */
@@ -359,9 +360,36 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		auto* other = world.getEntityPtr(collInfo.idB);
 
 		if (coll->isSolid() && other->isSolid()) {
-			auto solidColl = world.solidBodyCompCtrl.getComponentPtr(collInfo.idA);
-			auto solidOther = world.solidBodyCompCtrl.getComponentPtr(collInfo.idB);
-
+			SolidBody* solidColl = world.getCompPtr<SolidBody>(collInfo.idA);
+			SolidBody* solidOther = world.solidBodyCompCtrl.getComponentPtr(collInfo.idB);
+			// owner stands in place for the slave for a collision response execution
+			if (coll->isSlave() || other->isSlave()) {
+				if (coll->isSlave() && !other->isSlave()) {
+					solidColl = world.solidBodyCompCtrl.getComponentPtr(coll->getOwnerID());
+					coll = world.getEntityPtr(coll->getOwnerID());
+					assert(coll);
+					assert(solidColl);
+					
+				}
+				else if (!coll->isSlave() && other->isSlave()) {
+					solidOther = world.solidBodyCompCtrl.getComponentPtr(other->getOwnerID());
+					other = world.getEntityPtr(other->getOwnerID());
+					assert(other);
+					assert(solidOther);
+				}
+				else {
+					// both are slaves
+					solidColl = world.solidBodyCompCtrl.getComponentPtr(coll->getOwnerID());
+					coll = world.getEntityPtr(coll->getOwnerID());
+					solidOther = world.solidBodyCompCtrl.getComponentPtr(other->getOwnerID());
+					other = world.getEntityPtr(other->getOwnerID());
+					assert(coll);
+					assert(solidColl);
+					assert(other);
+					assert(solidOther);
+				}
+			}
+			
 			float elast = std::max(solidColl->elasticity, solidOther->elasticity);
 			auto [collChanges, otherChanges] = dynamicCollision2d4(*coll, solidColl->mass, solidColl->momentOfInertia, *other, solidOther->mass, solidOther->momentOfInertia, collInfo.collisionNormal, collInfo.collisionPos, elast);
 			coll->velocity += collChanges.first;
@@ -373,15 +401,29 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		}
 	}
 
-	// execute physics changes in pos, vel, accel
-	int i = 0;
+	//apply dampened pushout of slave to owner
 	for (auto& coll : dynCollidables) {
+		//pushout owner too
+		if (coll.second->isSlave() && coll.second->isSolid()) {
+			uint32_t ownerID = coll.second->getOwnerID();
+
+			float slaveWeight = norm(collisionResponses[coll.first].posChange);
+			float ownerWeight = norm(collisionResponses[ownerID].posChange);
+			float normalizer = slaveWeight + ownerWeight;
+			if (normalizer > Physics::nullDelta) {
+				collisionResponses[ownerID].posChange = (slaveWeight * collisionResponses[coll.first].posChange + ownerWeight * collisionResponses[ownerID].posChange) / normalizer;
+			}
+		}
+	}
+
+	// execute physics changes in pos, rota
+	for (auto& coll : dynCollidables) {
+		coll.second->position += collisionResponses[coll.first].posChange;	//non solids have a pushout of 0
 		coll.second->position += coll.second->velocity * deltaTime_;
 		coll.second->rotation += coll.second->angleVelocity * deltaTime;
-		coll.second->position += collisionResponses.at(i).posChange;	//non solids have a pushout of 0
-
-		i++;
 	}
+
+	syncCompositPhysics<4>(world.composit4CompCtrl);
 	t3.stop();
 
 	/* submit debug drawables for physics */
@@ -389,4 +431,26 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		submitDrawableWorldSpace(el);
 	}
 	Physics::debugDrawables.clear();
+}
+
+template<int N>
+void Engine::syncCompositPhysics(CompController<Composit<N>> & composit)
+{
+	for (auto iter = composit.componentData.begin(); iter != composit.componentData.end(); ++iter) {
+		auto& owner = world.getEntity(iter->first);
+
+		for (int i = 0; i < N; i++) {
+			if (iter->second.slaves[i].id != 0) {
+				auto slave = world.getEntityPtr(iter->second.slaves[i].id);
+				auto slaveComposidData = &iter->second.slaves[i];
+				slave->position = owner.getPos() + rotate(slaveComposidData->relativePos, owner.getRota());
+				slave->velocity = owner.getVel();
+				slave->rotation = owner.getRota() + slaveComposidData->relativeRota;
+				slave->angleVelocity = owner.getAnglVel();
+			}
+			else {
+				break;
+			}
+		}
+	}
 }

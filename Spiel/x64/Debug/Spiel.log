@@ -91,7 +91,7 @@ C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\BasicScripts.h(73,87): w
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\BasicScripts.h(85,77): warning C4305:  "Argument": Verkürzung von "double" in "float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(61,78): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(10,20): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(16,30): warning C4305:  "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(14,30): warning C4305:  "Argument": Verkürzung von "double" in "float"
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\utility(123,1): warning C4244:  "Initialisierung": Konvertierung von "_Ty" in "_Ty2", möglicher Datenverlust
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\utility(123,1): warning C4244:         with
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\utility(123,1): warning C4244:         [
@@ -167,8 +167,11 @@ C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(82): message :
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(82): message :         ]
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(591): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<double,std::ratio<1,1>>".
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
-  main.cpp
+  World.cpp
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(103,44): warning C4267:  "return": Konvertierung von "size_t" nach "const uint32_t", Datenverlust möglich
+  main.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(107,24): warning C4267:  "return": Konvertierung von "size_t" nach "const uint32_t", Datenverlust möglich
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\BasicScripts.h(73,87): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\BasicScripts.h(85,77): warning C4305:  "Argument": Verkürzung von "double" in "float"
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(61,78): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
@@ -198,5 +201,5 @@ C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.2
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
   Code wird generiert...
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(140): warning C4715:  "calcPosChange": Nicht alle Codepfade geben einen Wert zurück.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(138): warning C4715:  "calcPosChange": Nicht alle Codepfade geben einen Wert zurück.
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

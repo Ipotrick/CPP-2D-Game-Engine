@@ -122,6 +122,9 @@ private:
 	std::vector<std::thread> physicsThreads;
 	uint32_t qtreeCapacity;
 
+	template<int N>
+	void syncCompositPhysics(CompController<Composit<N>> & composit);
+
 	std::shared_ptr<Window> window;
 
 	std::chrono::microseconds new_deltaTime;
