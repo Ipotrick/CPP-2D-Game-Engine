@@ -22,6 +22,8 @@
 #include "PhysicsWorker.h"
 #include "Renderer.h"
 
+
+
 class Engine
 {
 public:
@@ -101,6 +103,9 @@ public:
 		physicsPoolData->rebuildStatQuadTrees = true;
 		rebuildStaticGrid = true;
 	}
+	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
+		the position of the cells can be calculated using the minPos and the cellSize member variables */
+	Grid const& getStaticGrid() { return staticGrid; }
 
 public:
 	World world;
@@ -130,42 +135,7 @@ private:
 	std::vector<std::thread> physicsThreads;
 	uint32_t qtreeCapacity;
 
-	class Grid {
-	public:
-		Grid() : 
-			minPos{ 0.0f, 0.0f },
-			sizeX{0},
-			cellSize{ 0.2f, 0.2f }
-		{}
-
-		inline bool at(int x, int y) {
-			assert(x * sizeX + y < data.size());
-			return data.at(x * sizeX + y);
-		}
-
-		inline void set(int x, int y, bool val = true) {
-			data.at(x * sizeX + y) = val;
-		}
-
-		inline void clear() { data.clear(); }
-		inline void resize(int x, int y) { 
-			sizeX = x;
-			sizeY = y;
-			data.clear();
-			data.resize(x * y);
-		}
-
-		inline std::pair<int, int> getSize() { return { sizeX, sizeY }; }
-		inline int getSizeX() { return sizeX; }
-		inline int getSizeY() { return sizeY; }
-
-		vec2 minPos;
-		vec2 cellSize;
-	private:
-		int sizeX;
-		int sizeY;
-		std::vector<bool> data;
-	};
+	
 
 	bool rebuildStaticGrid{ true };
 	Grid staticGrid;

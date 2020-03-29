@@ -496,6 +496,7 @@ void Engine::updateStaticGrid(World& world)
 		staticGrid.resize(xSize, ySize);
 
 		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;
+		nearCollidables.reserve(20);
 		for (int x = 0; x < staticGrid.getSizeX(); x++) {
 			for (int y = 0; y < staticGrid.getSizeY(); y++) {
 				vec2 pos = staticGrid.minPos + vec2(x, y) * staticGrid.cellSize;

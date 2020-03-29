@@ -15,6 +15,44 @@ namespace Physics {
 
 }
 
+class Grid {
+public:
+	Grid() :
+		minPos{ 0.0f, 0.0f },
+		sizeX{ 0 },
+		cellSize{ 0.2f, 0.2f }
+	{}
+
+	inline bool at(int x, int y) const {
+		assert(x * sizeX + y < data.size());
+		return data.at(x * sizeY + y);
+	}
+
+	inline void set(int x, int y, bool val = true) {
+		data.at(x * sizeY + y) = val;
+	}
+
+	inline void clear() { data.clear(); }
+	inline void resize(int x, int y) {
+		sizeX = x;
+		sizeY = y;
+		data.resize(x * y);
+	}
+
+	inline std::pair<int, int> getSize() const { return { sizeX, sizeY }; }
+	inline int getSizeX() const { return sizeX; }
+	inline int getSizeY() const { return sizeY; }
+	vec2 const getMinPos() const { return minPos; }
+	vec2 const getCellSize() const { return cellSize; }
+
+	vec2 minPos;
+	vec2 cellSize;
+private:
+	int sizeX;
+	int sizeY;
+	std::vector<bool> data;
+};
+
 struct CollisionTestResult {
 	vec2 posChange;
 	vec2 collisionNormal;
