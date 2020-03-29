@@ -4,38 +4,45 @@
 
 void PhysicsWorker::operator()()
 {
+	auto& world = *physicsPoolData->world;
 	auto& beginDyn = physicsData->beginDyn;
 	auto& endDyn = physicsData->endDyn;
-	auto& dynCollidables = physicsData->dynCollidables;
+	auto& dynCollidables = physicsPoolData->dynCollidables;
 	auto& beginStat = physicsData->beginStat;
 	auto& endStat = physicsData->endStat;
-	auto& statCollidables = physicsData->statCollidables;
-	auto& collisionResponses = physicsData->collisionResponses;
+	auto& statCollidables = physicsPoolData->statCollidables;
+	auto& collisionResponses = physicsPoolData->collisionResponses;
 	auto& collisionInfos = physicsData->collisionInfos;
-	auto& qtrees = physicsData->qtrees;
+	auto& qtreesDynamic = physicsPoolData->qtreesDynamic;
+	auto& qtreesStatic = physicsPoolData->qtreesStatic;
 
 	while (true) {
 		{
 			std::unique_lock<std::mutex> switch_lock(syncData->mut);
 			syncData->go.at(physicsData->id) = false;
 			syncData->cond.notify_all();
-			syncData->cond.wait(switch_lock, [&]() { return syncData->go.at(physicsData->id) ==  true; });	//wait for engine to give go sign
+			syncData->cond.wait(switch_lock, [&]() { return syncData->go.at(physicsData->id) == true; });	//wait for engine to give go sign
 			if (syncData->run == false) break;
 		}
 
-		// build qtrees
-		for (int i = beginStat; i < endStat; i++) {
-			if (!(*statCollidables)[i].second->isParticle()) {	//never check for collisions against particles
-				qtrees->at(physicsData->id).insert((*statCollidables)[i]);
+		// rebuild dyn qtree
+		if (physicsPoolData->rebuildDynQuadTrees) {
+			for (int i = beginDyn; i < endDyn; i++) {
+				if (!(*dynCollidables)[i].second->isParticle()) {	//never check for collisions against particles
+					qtreesDynamic->at(physicsData->id).insert((*dynCollidables)[i]);
+				}
 			}
 		}
-		for (int i = beginDyn; i < endDyn; i++) {
-			if (!(*dynCollidables)[i].second->isParticle()) {	//never check for collisions against particles
-				qtrees->at(physicsData->id).insert((*dynCollidables)[i]);
+		// rebuild stat qtree
+		if (physicsPoolData->rebuildStatQuadTrees) {
+			for (int i = beginStat; i < endStat; i++) {
+				if (!(*statCollidables)[i].second->isParticle()) {	//never check for collisions against particles
+					qtreesStatic->at(physicsData->id).insert((*statCollidables)[i]);
+				}
 			}
 		}
-
-		// re sync with others after inserting
+		
+		// re sync with others after inserting (building trees)
 		{
 			std::unique_lock<std::mutex> switch_lock(syncData->mut2);
 			syncData->insertReady++;
@@ -48,16 +55,22 @@ void PhysicsWorker::operator()()
 			}
 		}
 
-		collisionInfos->reserve(dynCollidables->size() / 10.f);
-		
+		collisionInfos->reserve(dynCollidables->size() / 10.f);	//try to avoid reallocations
+
 		std::vector<std::pair<uint32_t, Collidable*>> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 		for (int i = beginDyn; i < endDyn; i++) {
 			auto& coll = dynCollidables->at(i);
 			(*collisionResponses)[coll.first].posChange = vec2(0, 0);
 			nearCollidables.clear();
 
+			// querry dynamic entities
 			for (int i = 0; i < physicsThreadCount; i++) {
-				qtrees->at(i).querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
+				qtreesDynamic->at(i).querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
+			}
+
+			// querry static entities
+			for (int i = 0; i < physicsThreadCount; i++) {
+				qtreesStatic->at(i).querry(nearCollidables, coll.second->getPos(), coll.second->getBoundsSize());
 			}
 
 			//check for collisions and save the changes in velocity and position these cause

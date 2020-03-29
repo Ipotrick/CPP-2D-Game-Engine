@@ -35,6 +35,7 @@ struct Basis {
 
 
 class Collidable : virtual public Basis {
+	friend class World;
 public:
 	Collidable(vec2 size_, Form form_, bool dynamic_, vec2 velocity_ = vec2(0, 0)) :
 		Basis{},
@@ -65,7 +66,7 @@ public:
 	inline vec2 getVel() const { return velocity; }
 	inline float getAnglVel() const { return angleVelocity; }
 	inline uint32_t getOwnerID() const { return ownerID; }
-	inline bool isSlave() const { return ownerID; }
+	inline bool isSlave() const { return ownerID > 0; }
 	inline Form getForm() const { return form; }
 	inline vec2 getSize() const { return size; }
 	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
@@ -79,16 +80,14 @@ public:
 	vec2 getBoundsSize() const;
 	float getBoundsRadius() const;
 
-	friend class World;
-
 public:
 	vec2 size;
 	vec2 velocity;
 	float angleVelocity;
-	bool solid;
 	bool particle;
 	Form form;
 protected:
+	bool solid;
 	bool dynamic;
 	uint32_t ownerID;
 };

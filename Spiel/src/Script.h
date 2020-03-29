@@ -8,7 +8,7 @@ class ScriptController {
 public:
 	ScriptController(CompController& cmpCtrl_, Engine& engine_) : compController{ cmpCtrl_ }, engine{ engine_ } {}
 
-	/* calls "executeSample()" on every component in of the componentController that is given in constructor */
+	/* calls "executeSample" on every component in of the componentController that is given in constructor */
 	void executeAll(World& world, float deltaTime);
 	/* a custom script one has to set up, that prefferably only changes the sample component */
 	virtual void executeSample(uint32_t id, CompDataType& data, World& world, float deltaTime) = 0;

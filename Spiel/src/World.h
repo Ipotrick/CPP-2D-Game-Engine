@@ -33,11 +33,10 @@ struct Light {
 	vec4 color;
 };
 
-
 class World {
 public:
 
-	World() : nexBacktID{ 1 }, lastID{ 0 }, despawnList{}
+	World() : lastID{ 0 }, despawnList{}
 	{
 		entities.push_back({ false, Entity(0,0, Collidable(vec2(0,0), Form::CIRCLE, false, false)) });
 	}
@@ -60,10 +59,10 @@ public:
 	/* adds a slave entity to an owner entity, that contributes to the entities hitbox */
 	void spawnSolidSlave(Entity ent, Draw const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
-	void despawn(uint32_t entitiy_id);
+	void despawn(uint32_t id);
 
 	/* world utility */
-	/* returnes the id of the most rescently spawned entity .
+	/* returnes the id of the most rescently spawned entity.
 		if 0 is returnsed, there are no entities spawned yet, O(1) */
 	uint32_t const getLastID();
 	/* returns count of entities, O(1) */
@@ -80,7 +79,7 @@ public:
 	template<typename ComponentType> ComponentType & getComp(uint32_t id);
 	/* returnes constant pointer to the component data of one entity, O(1) */
 	template<typename ComponentType> ComponentType * const getCompPtr(uint32_t id);
-	/* returns bool whether or not the given entity has the component, O(1) */
+	/* returns bool whether or not the given entity has the component added/registered, O(1) */
 	template<typename ComponentType> bool hasComp(uint32_t id);
 	/* registeres a new component under the given id, O(1) (can be slow) */
 	template<typename ComponentType> void addComp(uint32_t id, ComponentType data);
@@ -91,9 +90,9 @@ private:
 	void slaveOwnerDespawn(); // slaves with dead owner get despawned, dead slaves cut their refference of themselfes to the owner
 	void deregisterDespawnedEntities();	// CALL BEFORE "executeDespawns"
 	void executeDespawns();
-	Drawable buildDrawable(uint32_t id_, Entity const& ent_, Draw const& draw_);
+	Drawable buildDrawable(uint32_t id, Entity const& ent, Draw const& draw);
 	std::vector<Drawable> getDrawableVec();
-	Light buildLight(uint32_t id, Entity const& ent_, CompDataLight const& light_);
+	Light buildLight(uint32_t id, Entity const& ent, CompDataLight const& light);
 	std::vector<Light> getLightVec();
 	std::vector<std::tuple<uint32_t, Collidable*>> getCollidablePtrVec();
 private:
@@ -111,9 +110,9 @@ private:
 
 	std::vector<std::pair<bool, Entity>> entities;
 	std::queue<uint32_t> emptySlots;
-	uint32_t nexBacktID;
 	uint32_t lastID;
-	std::vector<int> despawnList;
+	std::vector<uint32_t> despawnList;
+	bool staticSpawnOrDespawn{ false };
 };
 
 generateComponentAccessFunctionsLUT(SolidBody, solidBodyCompCtrl)
@@ -131,10 +130,10 @@ inline bool World::doesEntExist(uint32_t id) {
 	return entities[id].first;
 }
 
-inline Entity *const World::getEntityPtr(uint32_t id_) {
-	assert(id_ < entities.size());
-	if (entities[id_].first) {
-		return &entities[id_].second;
+inline Entity *const World::getEntityPtr(uint32_t id) {
+	assert(id < entities.size());
+	if (entities[id].first) {
+		return &entities[id].second;
 	}
 	else {
 		return nullptr;
@@ -152,7 +151,8 @@ inline uint32_t const World::getLastID() {
 }
 
 
-inline Drawable World::buildDrawable(uint32_t id_, Entity const& ent_, Draw const& draw_)
+inline Drawable World::buildDrawable(uint32_t id, Entity const& ent, Draw const& draw)
 {
-	return Drawable(id_, ent_.position, draw_.drawingPrio, draw_.scale, draw_.color, (Form)draw_.form, ent_.rotation, draw_.throwsShadow);
+	assert(id > 0);
+	return Drawable(id, ent.position, draw.drawingPrio, draw.scale, draw.color, (Form)draw.form, ent.rotation, draw.throwsShadow);
 }

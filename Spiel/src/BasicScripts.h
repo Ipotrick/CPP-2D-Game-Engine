@@ -21,6 +21,7 @@ public:
 			world.despawn(id);
 		}
 	}
+
 	inline void executeMeta(World& world, float deltaTime) {
 
 	}
@@ -85,7 +86,6 @@ public:
 	TriggerScript(CompController< Trigger>& cmpCtrl_, Engine& engine_) : ScriptController<Trigger, CompController< Trigger>>(cmpCtrl_, engine_), spawnTimer{ 0.001 } {}
 	LapTimer<> spawnTimer;
 
-
 	inline void executeSample(uint32_t id, Trigger& data, World& world, float deltaTime) override {
 		auto begin = world.getAllComps<Player>().begin();
 		auto end = world.getAllComps<Player>().end();
@@ -110,6 +110,7 @@ public:
 			}
 		}
 	}
+
 	inline void executeMeta(World& world, float deltaTime) {
 
 	}

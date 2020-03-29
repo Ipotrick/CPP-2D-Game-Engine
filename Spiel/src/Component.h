@@ -27,14 +27,12 @@ struct CompController {
 };
 
 template<typename CompDataType>
-inline void CompController<CompDataType>::registerEntity(uint32_t id, CompDataType const& newComponentData)
-{
+inline void CompController<CompDataType>::registerEntity(uint32_t id, CompDataType const& newComponentData) {
 	componentData.insert({ id, newComponentData });
 }
 
 template<typename ComponentDataType>
-void CompController<ComponentDataType>::deregisterEntity(uint32_t id)
-{
+void CompController<ComponentDataType>::deregisterEntity(uint32_t id) {
 	auto res = componentData.find(id);
 	if (res != componentData.end() && res->first == id) {
 		componentData.erase(res);
@@ -42,8 +40,7 @@ void CompController<ComponentDataType>::deregisterEntity(uint32_t id)
 }
 
 template<typename CompDataType>
-inline bool CompController<CompDataType>::isRegistered(uint32_t id)
-{
+inline bool CompController<CompDataType>::isRegistered(uint32_t id) {
 	auto res = componentData.find(id);
 	if (res != componentData.end() && res->first == id) {
 		return true;
@@ -52,8 +49,7 @@ inline bool CompController<CompDataType>::isRegistered(uint32_t id)
 }
 
 template<typename CompDataType>
-inline CompDataType * const CompController<CompDataType>::getComponentPtr(uint32_t id)
-{
+inline CompDataType * const CompController<CompDataType>::getComponentPtr(uint32_t id) {
 	auto res = componentData.find(id);
 	if (res != componentData.end()) {
 		return &res->second;
@@ -64,8 +60,7 @@ inline CompDataType * const CompController<CompDataType>::getComponentPtr(uint32
 }
 
 template<typename CompDataType>
-CompDataType& CompController<CompDataType>::getComponent(uint32_t id) 
-{
+CompDataType& CompController<CompDataType>::getComponent(uint32_t id)  {
 	assert(isRegistered(id));
 	return componentData[id];
 }
@@ -88,8 +83,7 @@ struct CompControllerLUT {
 };
 
 template<typename CompDataType>
-inline void CompControllerLUT<CompDataType>::registerEntity(uint32_t id, CompDataType const& newComponentData)
-{
+inline void CompControllerLUT<CompDataType>::registerEntity(uint32_t id, CompDataType const& newComponentData) {
 	if (id < componentData.size()) {
 		assert(componentData[id].first != true);	//cant register a registered entity
 		componentData[id].first = true;
