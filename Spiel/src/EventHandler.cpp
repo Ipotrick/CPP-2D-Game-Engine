@@ -1,7 +1,7 @@
 #include "EventHandler.h"
 
 bool operator==(EventSubscribtion const& a, EventSubscribtion const& b) {
-	return a.id == b.id && a.onEventTrigger == b.onEventTrigger;
+	return a.onEventTrigger == b.onEventTrigger && a.data == b.data;
 }
 
 void EventHandler::triggerEvent(std::string_view eventName) {
@@ -9,7 +9,7 @@ void EventHandler::triggerEvent(std::string_view eventName) {
 
 	if (event != eventMap.end()) {
 		for (auto iter = event->second.begin(); iter != event->second.end();) {
-			bool unsubscribe = iter->onEventTrigger(eventName, iter->id);
+			bool unsubscribe = iter->onEventTrigger(eventName, iter->data); 
 			if (unsubscribe) {
 				iter = event->second.erase(iter);
 			}
@@ -23,23 +23,23 @@ void EventHandler::triggerEvent(std::string_view eventName) {
 	}
 }
 
-void EventHandler::subscribeToEvent(std::string_view eventName, eventTriggerFuncPtrType onEventTrigger, uint32_t id) {
+void EventHandler::subscribeToEvent(std::string_view eventName, eventTriggerFuncPtrType onEventTrigger, void* data) {
 	//look if the event allready has a subscribtionList:
 	auto event = eventMap.find(eventName);
 	if (event != eventMap.end()) {
-		event->second.push_back(EventSubscribtion(onEventTrigger, id));
+		event->second.push_back(EventSubscribtion(onEventTrigger, data));
 	}
 	else {	//there is no event sublist yet
 		eventMap.insert({ eventName , std::vector<EventSubscribtion>() });
 		auto event = eventMap.find(eventName);
-		event->second.push_back(EventSubscribtion(onEventTrigger, id));
+		event->second.push_back(EventSubscribtion(onEventTrigger, data));
 	}
 }
 
-void EventHandler::unSubscribeFromEvent(std::string_view eventName, eventTriggerFuncPtrType onEventTrigger, uint32_t id) {
+void EventHandler::unSubscribeFromEvent(std::string_view eventName, eventTriggerFuncPtrType onEventTrigger, void* data) {
 	auto event = eventMap.find(eventName);
 	if (event != eventMap.end()) {
-		EventSubscribtion subToDelete = EventSubscribtion(onEventTrigger, id);
+		EventSubscribtion subToDelete = EventSubscribtion(onEventTrigger, data);
 		for (auto iter = event->second.begin(); iter != event->second.end(); ++iter) {
 			if (*iter == subToDelete) {
 				event->second.erase(iter);

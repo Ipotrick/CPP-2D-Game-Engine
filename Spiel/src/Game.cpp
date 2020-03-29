@@ -18,22 +18,21 @@ Game::Game() :
 }
 
 void Game::create() {
-
+	
 	camera.zoom = 1 / 5.0f;
 
 	vec2 scaleEnt = { 0.4f, 0.8f };
-	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, vec2(3,0)));
+	auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, vec2(0,0)));
 	auto cDraw = Draw(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
-	cEnt.rotation = 0.0;
 	world.spawnSolidEntity(cEnt, cDraw, SolidBody(0.5f, 70.0f));
 	world.addComp<Player>(world.getLastID(), Player());
 	auto playerID = world.getLastID();
 	world.addComp<Composit<4>>(playerID, Composit<4>());
 	
-	auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt), Form::CIRCLE, true, vec2(3, 0)));
-	auto slaveD = Draw(vec4(0, 0, 0, 1), vec2(scaleEnt), 0.59f, Form::CIRCLE, true);
-	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 90);
-	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 90);
+	auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt.x / sqrt(2)), Form::RECTANGLE, true, vec2(3, 0)));
+	auto slaveD = Draw(vec4(0, 0, 0, 1), vec2(scaleEnt.x / sqrt(2)), 0.59f, Form::RECTANGLE, true);
+	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 45);
+	world.spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 45);
 
 	vec2 scalePortal = { 28, 28 };
 	Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, true));
@@ -57,26 +56,28 @@ void Game::create() {
 		world.spawnSolidEntity(wallC, wallD, SolidBody(0.3f, 1'000'000'000'000'000.0f));
 	}
 
-	int num = 3000;
+	int num = 500;
 
-	vec2 scale = vec2(0.08f, 0.08f);
+	vec2 scale = vec2(0.05f, 0.05f);
 	Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0,0)));
-	Draw trashEntD = Draw(vec4(1, 102.0f / 255.0f, 0, 1), scale, 0.5f, Form::CIRCLE, true);
+	//trashEntC.particle = true;
+	Draw trashEntD = Draw(vec4(0,0, 0, 1), scale, 0.5f, Form::CIRCLE, true);
 	auto slaveEntC = trashEntC;
-	trashEntC.form = Form::RECTANGLE;
+	slaveEntC.form = Form::RECTANGLE;
 	auto slaveEntD = trashEntD;
 	slaveEntD.color = vec4(0,0,0, 1);
 	slaveEntD.drawingPrio += 0.01f;
 	slaveEntD.form = Form::RECTANGLE;
 	auto trashSolid = SolidBody(0.1f, 0.5f);
-	trashSolid.momentOfInertia = 0.11f;
+	trashSolid.momentOfInertia = 0.005f;
 	for (int i = 0; i < num; i++) {
 
 		trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
 
 		world.spawnSolidEntity(trashEntC, trashEntD, trashSolid);
 		world.addComp<Health>(world.getLastID(), Health(100));
-		world.spawnSolidSlave(slaveEntC, slaveEntD, world.getLastID(), vec2(0.04f, 0), 0);
+		world.addComp<Composit<4>>(world.getLastID(), Composit<4>());
+		world.spawnSolidSlave(slaveEntC, slaveEntD, world.getLastID(), vec2(0.025f, 0), 0);
 	}
 }
 
@@ -165,6 +166,7 @@ void Game::cursorManipFunc()
 	cursor->size = vec2(1, 1) / camera.zoom / 100.0f;
 	world.getCompPtr<Draw>(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
+		staticsChanged();
 		if (cursorManipData.locked) {
 			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
 			if (controlledEnt != nullptr) {
@@ -242,6 +244,7 @@ void Game::cursorManipFunc()
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
 				world.spawnSolidEntity(trashEntC, trashEntD, SolidBody(0.00f, 100000000000000000.f));
 			}
+			staticsChanged();
 		}
 	}
 	cursorManipData.oldCursorPos = getPosWorldSpace(getCursorPos());

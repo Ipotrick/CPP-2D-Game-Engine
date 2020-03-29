@@ -85,7 +85,7 @@ public:
 	/* returns aspect ration width/height of the window, O(1)*/
 	float getWindowAspectRatio();
 	/* transformes world space coordinates into relative window space coordinates */
-	vec2 getPosWorldSpace(vec2 windowSpacePos_);
+	vec2 getPosWorldSpace(vec2 windowSpacePos);
 
 					/* graphics utility */
 	/* submit a Drawable to be drawn relative to the window, O(1) */
@@ -96,6 +96,11 @@ public:
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
+	/* CALL THIS WHENEVER YOU MOVE/ ADD/ REMOVE STATIC ENTITIES, O(1) */
+	inline void staticsChanged() { 
+		physicsPoolData->rebuildStatQuadTrees = true;
+		rebuildStaticGrid = true;
+	}
 
 public:
 	World world;
@@ -107,20 +112,63 @@ public:
 private:
 	void commitTimeMessurements();
 	void physicsUpdate(World& world, float deltaTime);
+	void updateStaticGrid(World& world);
 
 private:
 	bool running;
 	uint32_t iteration;
 	float maxDeltaTime = 0.02f;
 
+	size_t oldWorldEntitiesCapacity;
 	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
-	std::vector<std::shared_ptr<PhysicsSharedData>> sharedPhysicsData;
-	std::shared_ptr<PhysicsSyncData> sharedPhysicsSyncData;
+	std::vector<std::shared_ptr<PhysicsPerThreadData>> physicsPerThreadData;
+	std::shared_ptr<PhysicsPoolData> physicsPoolData;
+	std::shared_ptr<PhysicsSharedSyncData> sharedPhysicsSyncData;
 	std::vector<std::thread> physicsThreads;
 	uint32_t qtreeCapacity;
+
+	class Grid {
+	public:
+		Grid() : 
+			minPos{ 0.0f, 0.0f },
+			sizeX{0},
+			cellSize{ 0.2f, 0.2f }
+		{}
+
+		inline bool at(int x, int y) {
+			assert(x * sizeX + y < data.size());
+			return data.at(x * sizeX + y);
+		}
+
+		inline void set(int x, int y, bool val = true) {
+			data.at(x * sizeX + y) = val;
+		}
+
+		inline void clear() { data.clear(); }
+		inline void resize(int x, int y) { 
+			sizeX = x;
+			sizeY = y;
+			data.clear();
+			data.resize(x * y);
+		}
+
+		inline std::pair<int, int> getSize() { return { sizeX, sizeY }; }
+		inline int getSizeX() { return sizeX; }
+		inline int getSizeY() { return sizeY; }
+
+		vec2 minPos;
+		vec2 cellSize;
+	private:
+		int sizeX;
+		int sizeY;
+		std::vector<bool> data;
+	};
+
+	bool rebuildStaticGrid{ true };
+	Grid staticGrid;
 
 	template<int N>
 	void syncCompositPhysics(CompController<Composit<N>> & composit);
@@ -141,6 +189,8 @@ private:
 	float physicsCollisionTime;
 	std::chrono::microseconds new_physicsExecuteTime;
 	float physicsExecuteTime;
+	std::chrono::microseconds new_staticGridBuildTime;
+	float staticGridBuildTime;
 	std::chrono::microseconds new_mainSyncTime;
 	float mainSyncTime;
 	std::chrono::microseconds new_mainWaitTime;

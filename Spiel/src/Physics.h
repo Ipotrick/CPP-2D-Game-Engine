@@ -17,12 +17,12 @@ namespace Physics {
 
 struct CollisionTestResult {
 	vec2 posChange;
-vec2 collisionNormal;
-vec2 collisionPos;
-float clippingDist;
-bool collided;
+	vec2 collisionNormal;
+	vec2 collisionPos;
+	float clippingDist;
+	bool collided;
 
-CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f } {}
+	CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f } {}
 };
 
 struct CollisionInfo {
@@ -65,21 +65,12 @@ __forceinline std::pair<std::pair<vec2, float>, std::pair< vec2, float>> dynamic
 	//speed the Collidables have at the specifiy collision point
 	vec2 va = a.getVel() + rotate90(rAP) * a.getAnglVel() / RAD;
 	vec2 vb = b.getVel() + rotate90(rAP) * b.getAnglVel() / RAD;
-	vec2 vAB = va - vb;
+	float vAB_collDir = dot(va - vb, cNV);
 
-	if (dot(vAB, cNV) < 0.0f) {	//are they even going into each other?
-
-		float j = (-(1.0f + e) * dot(vAB, cNV)) /
-			(dot(cNV, (cNV * (1 / massA + 1 / massB))) + powf(cross(rAP, cNV), 2) / inertiaA + powf(cross(rBP, cNV), 2) / inertiaB);
-
-		//vec2 va2 = j / massA * cNV;
-		//float wa2 = cross(rAP, j * cNV) / inertiaA * RAD;
-		//vec2 vb2 = - j / massB * cNV;
-		//float wb2 = - cross(rBP, j * cNV) / inertiaB * RAD;
-		return { {j / massA * cNV, cross(rAP, j * cNV) / inertiaA * RAD}, {-j / massB * cNV,-cross(rBP, j * cNV) / inertiaB * RAD} };
-	}
-
-	return { { vec2(0,0), 0 },{ vec2(0,0), 0 } };
+	float j = (-(1.0f + e) * vAB_collDir) /
+		(dot(cNV, (cNV * (1 / massA + 1 / massB))) + powf(cross(rAP, cNV), 2) / inertiaA + powf(cross(rBP, cNV), 2) / inertiaB);
+	j = std::max(0.0f, j);	// j < 0 => they are not going into each other => no coll response
+	return { {j / massA * cNV, cross(rAP, j * cNV) / inertiaA * RAD}, {-j / massB * cNV,-cross(rBP, j * cNV) / inertiaB * RAD} };
 }
 
 __forceinline float circleDist(vec2 const pos1, float rad1, vec2 const pos2, float rad2)
