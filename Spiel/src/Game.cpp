@@ -20,7 +20,7 @@ Game::Game() :
 void Game::create() {
 	
 	camera.zoom = 1 / 5.0f;
-	world.loadMap("shite");
+	world.loadMap("shit");
 }
 
 void Game::update(World& world, float deltaTime) {
