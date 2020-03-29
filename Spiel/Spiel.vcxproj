@@ -30,6 +30,7 @@
     <ClInclude Include="src\GameComponents.h" />
     <ClInclude Include="src\glmath.h" />
     <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\json.h" />
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\PhysicsWorker.h" />
     <ClInclude Include="src\PlayerScript.h" />
