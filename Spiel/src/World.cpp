@@ -149,3 +149,69 @@ size_t const World::getEntCount() {
 size_t const World::getEntMemSize() {
 	return entities.size();
 }
+
+void World::loadMap(std:: string_view mapname_) {
+	std::ifstream mapData("mapDateien.json");
+	if (mapData.good()) {
+
+	}
+	else
+	{
+
+		vec2 scaleEnt = { 0.4f, 0.8f };
+		auto cEnt = Entity(vec2(0, 0), 0.0f, Collidable(scaleEnt, Form::RECTANGLE, true, vec2(3, 0)));
+		auto cDraw = Draw(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE, true);
+		cEnt.rotation = 0.0;
+		spawnSolidEntity(cEnt, cDraw, SolidBody(0.5f, 70.0f));
+		addComp<Player>(getLastID(), Player());
+		auto playerID = getLastID();
+		addComp<Composit<4>>(playerID, Composit<4>());
+
+		auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt), Form::CIRCLE, true, vec2(3, 0)));
+		auto slaveD = Draw(vec4(0, 0, 0, 1), vec2(scaleEnt), 0.59f, Form::CIRCLE, true);
+		spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 90);
+		spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 90);
+
+		vec2 scalePortal = { 28, 28 };
+		Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, true));
+		Draw portalD = Draw(vec4(1, 0, 0, 0.5f), vec2(3, 3), 0.3f, Form::CIRCLE);
+		spawnEntity(portalC, portalD);
+
+		portalC.size = vec2(3, 3);
+		portalC.position = vec2(4, 4);
+		portalD.color = vec4(0, 0, 1, 0.5f);
+		portalD.drawingPrio = 0.31f;
+		spawnEntity(portalC, portalD);
+
+		Entity wallC = Entity(vec2(0, 0), 0, Collidable(vec2(0.4f, 10), Form::RECTANGLE, false, vec2(0, 0)));
+		Draw wallD = Draw(vec4(0, 0, 0, 1), vec2(0.4f, 10), 0.5f, Form::RECTANGLE, true);
+		for (int i = 0; i < 4; i++) {
+			float rotation = 90.0f * i;
+			wallC.position = rotate(vec2(-5.f, 0), rotation);
+			wallC.rotation = rotation;
+			spawnSolidEntity(wallC, wallD, SolidBody(0.3f, 1'000'000'000'000'000.0f));
+		}
+
+		int num = 3000;
+
+		vec2 scale = vec2(0.08f, 0.08f);
+		Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0, 0)));
+		Draw trashEntD = Draw(vec4(1, 102.0f / 255.0f, 0, 1), scale, 0.5f, Form::CIRCLE, true);
+		auto slaveEntC = trashEntC;
+		trashEntC.form = Form::RECTANGLE;
+		auto slaveEntD = trashEntD;
+		slaveEntD.color = vec4(0, 0, 0, 1);
+		slaveEntD.drawingPrio += 0.01f;
+		slaveEntD.form = Form::RECTANGLE;
+		auto trashSolid = SolidBody(0.1f, 0.5f);
+		trashSolid.momentOfInertia = 0.11f;
+		for (int i = 0; i < num; i++) {
+
+			trashEntC.position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
+
+			spawnSolidEntity(trashEntC, trashEntD, trashSolid);
+			addComp<Health>(getLastID(), Health(100));
+			spawnSolidSlave(slaveEntC, slaveEntD, getLastID(), vec2(0.04f, 0), 0);
+		}
+	}
+}

@@ -1,10 +1,12 @@
 #pragma once
 #include <algorithm>
+#include <fstream>
 
 #include <vector>
 #include <queue>
 
 #include "robin_hood.h"
+#include "json.h"
 
 #include "CoreComponents.h"
 #include "GameComponents.h"
@@ -84,6 +86,8 @@ public:
 	template<typename ComponentType> bool hasComp(uint32_t id);
 	/* registeres a new component under the given id, O(1) (can be slow) */
 	template<typename ComponentType> void addComp(uint32_t id, ComponentType data);
+
+	void loadMap(std::string_view);
 
 private:
 	/* INNER ENGINE FUNCTIONS: */
