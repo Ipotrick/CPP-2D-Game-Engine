@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Spiel",
-    "\\Spiel\\src"
+    "\\Spiel"
   ],
-  "SelectedNode": "\\Spiel\\src\\World.h",
+  "SelectedNode": "\\Spiel",
   "PreviewInSolutionExplorer": false
 }
