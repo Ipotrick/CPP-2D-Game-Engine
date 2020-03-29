@@ -39,6 +39,7 @@ std::vector<std::tuple<uint32_t, Collidable*>> World::getCollidablePtrVec()
 }
 
 void World::spawnEntity(Entity const& ent, Draw const& draw) {
+	if (!ent.isDynamic()) staticSpawnOrDespawn = true;
 	if (emptySlots.size() > 0) {
 		uint32_t id = emptySlots.front();
 		emptySlots.pop();
@@ -48,8 +49,7 @@ void World::spawnEntity(Entity const& ent, Draw const& draw) {
 	}
 	else {
 		entities.push_back({ true,ent });
-		lastID = nexBacktID;
-		nexBacktID++;
+		lastID = entities.size() - 1;
 	}
 
 	drawableCompCtrl.registerEntity(lastID, draw);
@@ -99,6 +99,7 @@ void World::despawn(uint32_t entitiy_id) {
 
 void World::executeDespawns() {
 	for (int entity_id : despawnList) {
+		if (!entities[entity_id].second.isDynamic()) staticSpawnOrDespawn = true;
 		entities[entity_id].first = false;
 		emptySlots.push(entity_id);
 	}
@@ -108,7 +109,7 @@ void World::executeDespawns() {
 void World::slaveOwnerDespawn() {
 	despawnList.reserve(entities.size());	//make sure the iterator stays valid 
 	for (auto iter = despawnList.begin(); iter != despawnList.end(); ++iter) {
-		assert(entities[entity_id].first);
+		assert(entities[*iter].first);
 		//if the ent is an owner it despawns its slaves on destruction
 		auto owner = composit4CompCtrl.getComponentPtr(*iter);
 		if (owner != nullptr) {
