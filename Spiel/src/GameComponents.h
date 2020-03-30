@@ -49,9 +49,13 @@ struct Bullet : public CompData {
 //loading and event trigger component
 
 struct Trigger : public CompData {
-	Trigger(int type_) :type{ type_ } {}
+	Trigger(int type_, std::string mapname_) :
+		type{ type_ },
+		mapname{mapname_}
+	{}
 
 	int type;
+	std::string mapname;
 
 };
 

@@ -1,10 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Spiel",
-    "\\Spiel\\shader",
-    "\\Spiel\\src"
+    "\\Spiel"
   ],
-  "SelectedNode": "\\Spiel\\src\\Game.cpp",
+  "SelectedNode": "\\Spiel",
   "PreviewInSolutionExplorer": false
 }
