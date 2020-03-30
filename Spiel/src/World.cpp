@@ -151,8 +151,8 @@ size_t const World::getEntMemSize() {
 	return entities.size();
 }
 
-void World::loadMap(std:: string_view mapname_) {
-	std::ifstream mapData("mapDateien.json");
+void World::loadMap(std:: string mapname_) {
+	std::ifstream mapData(mapname_);
 	if (mapData.good()) {
 
 	}
@@ -168,10 +168,10 @@ void World::loadMap(std:: string_view mapname_) {
 		auto playerID = getLastID();
 		addComp<Composit<4>>(playerID, Composit<4>());
 
-		auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt), Form::CIRCLE, true, vec2(3, 0)));
-		auto slaveD = Draw(vec4(0, 0, 0, 1), vec2(scaleEnt), 0.59f, Form::CIRCLE, true);
-		spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 90);
-		spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 90);
+		auto slaveC = Entity(vec2(0.5, 0), 0.0f, Collidable(vec2(scaleEnt.x* 1/sqrtf(2.0f)), Form::RECTANGLE, true, vec2(3, 0)));
+		auto slaveD = Draw(vec4(0, 0, 0, 1), vec2(scaleEnt.x * 1 / sqrtf(2.0f)), 0.59f, Form::RECTANGLE, true);
+		spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, -0.4), 45);
+		spawnSolidSlave(slaveC, slaveD, playerID, vec2(0, 0.4), 45);
 
 		vec2 scalePortal = { 28, 28 };
 		Entity portalC = Entity(vec2(-4, -4), 0, Collidable(scalePortal, Form::CIRCLE, true));
@@ -193,11 +193,11 @@ void World::loadMap(std:: string_view mapname_) {
 			spawnSolidEntity(wallC, wallD, SolidBody(0.3f, 1'000'000'000'000'000.0f));
 		}
 
-		int num = 3000;
+		int num = 20000;
 
-		vec2 scale = vec2(0.08f, 0.08f);
+		vec2 scale = vec2(0.05f, 0.05f);
 		Entity trashEntC = Entity(vec2(0, 0), 0.0f, Collidable(scale, Form::CIRCLE, true, vec2(0, 0)));
-		Draw trashEntD = Draw(vec4(1, 102.0f / 255.0f, 0, 1), scale, 0.5f, Form::CIRCLE, true);
+		Draw trashEntD = Draw(vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::CIRCLE, true);
 		auto slaveEntC = trashEntC;
 		trashEntC.form = Form::RECTANGLE;
 		auto slaveEntD = trashEntD;
@@ -212,7 +212,7 @@ void World::loadMap(std:: string_view mapname_) {
 
 			spawnSolidEntity(trashEntC, trashEntD, trashSolid);
 			addComp<Health>(getLastID(), Health(100));
-			spawnSolidSlave(slaveEntC, slaveEntD, getLastID(), vec2(0.04f, 0), 0);
+			//spawnSolidSlave(slaveEntC, slaveEntD, getLastID(), vec2(0.04f, 0), 0);
 		}
 	}
 }

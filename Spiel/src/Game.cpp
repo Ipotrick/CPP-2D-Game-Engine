@@ -69,7 +69,7 @@ void Game::update(World& world, float deltaTime) {
 	bulletScript.executeAll( world, deltaTime);
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << getPerfInfo(5) << '\n';
 }
 
 void Game::cursorManipFunc()

@@ -75,19 +75,22 @@ void PhysicsWorker::operator()()
 
 			//check for collisions and save the changes in velocity and position these cause
 			for (auto& other : nearCollidables) {
-				//do not check against self or slave/owner owner/slave
-				if (coll.first != other.first && ((!coll.second->isSlave() && !other.second->isSlave()) || (coll.second->getOwnerID() != other.first && other.second->getOwnerID() != coll.first))) {
+				//do not check against self 
+				if (coll.first != other.first) {
+					//do not check against slave/owner owner/slave
+					if (((!coll.second->isSlave() && !other.second->isSlave()) || (coll.second->getOwnerID() != other.first && other.second->getOwnerID() != coll.first))) {
 
-					auto newTestResult = checkForCollision(coll.second, other.second, coll.second->isSolid() && other.second->isSolid());
+						auto newTestResult = checkForCollision(coll.second, other.second, coll.second->isSolid() && other.second->isSolid());
 
-					if (newTestResult.collided) {
-						collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
-						//take average of pushouts with weights
-						float weightOld = norm((*collisionResponses)[coll.first].posChange);
-						float weightNew = norm(newTestResult.posChange);
-						float normalizer = weightOld + weightNew;
-						if (normalizer > Physics::nullDelta) {
-							(*collisionResponses)[coll.first].posChange = ((*collisionResponses)[coll.first].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
+						if (newTestResult.collided) {
+							collisionInfos->push_back(CollisionInfo(coll.first, other.first, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
+							//take average of pushouts with weights
+							float weightOld = norm((*collisionResponses)[coll.first].posChange);
+							float weightNew = norm(newTestResult.posChange);
+							float normalizer = weightOld + weightNew;
+							if (normalizer > Physics::nullDelta) {
+								(*collisionResponses)[coll.first].posChange = ((*collisionResponses)[coll.first].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
+							}
 						}
 					}
 				}

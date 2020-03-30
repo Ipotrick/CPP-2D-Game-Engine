@@ -22,6 +22,7 @@
 #include "PhysicsWorker.h"
 #include "Renderer.h"
 
+#define DEBUG_STATIC_GRID
 
 
 class Engine
@@ -100,11 +101,10 @@ public:
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
 	/* CALL THIS WHENEVER YOU MOVE/ ADD/ REMOVE STATIC ENTITIES, O(1) */
 	inline void staticsChanged() { 
-		physicsPoolData->rebuildStatQuadTrees = true;
-		rebuildStaticGrid = true;
+		rebuildStaticData = true;
 	}
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
-		the position of the cells can be calculated using the minPos and the cellSize member variables */
+		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
 	Grid const& getStaticGrid() { return staticGrid; }
 
 public:
@@ -117,13 +117,18 @@ public:
 private:
 	void commitTimeMessurements();
 	void physicsUpdate(World& world, float deltaTime);
+	template<int N>
+	void syncCompositPhysics(CompController<Composit<N>>& composit);
 	void updateStaticGrid(World& world);
 
 private:
+	// meta
 	bool running;
 	uint32_t iteration;
 	float maxDeltaTime = 0.02f;
+	bool rebuildStaticData{ true };
 
+	// physics
 	size_t oldWorldEntitiesCapacity;
 	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;
@@ -135,16 +140,10 @@ private:
 	std::vector<std::thread> physicsThreads;
 	uint32_t qtreeCapacity;
 
-	
-
-	bool rebuildStaticGrid{ true };
+	// AI
 	Grid staticGrid;
 
-	template<int N>
-	void syncCompositPhysics(CompController<Composit<N>> & composit);
-
-	std::shared_ptr<Window> window;
-
+	// perf
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
 	std::chrono::microseconds new_mainTime;
@@ -171,11 +170,14 @@ private:
 	float renderTime;
 	std::chrono::microseconds new_renderSyncTime;
 	float renderSyncTime;
-	
+
+	// window
+	std::shared_ptr<Window> window;
 	std::shared_ptr<RendererSharedData> sharedRenderData;
 	std::thread renderThread;
 	RenderBuffer renderBufferA;
 
+	// render
 	std::vector<Drawable> windowSpaceDrawables;
 	std::vector<Drawable> worldSpaceDrawables;
 };

@@ -86,7 +86,7 @@ public:
 	/* registeres a new component under the given id, O(1) (can be slow) */
 	template<typename ComponentType> void addComp(uint32_t id, ComponentType data);
 
-	void loadMap(std::string_view);
+	void loadMap(std::string);
 
 private:
 	/* INNER ENGINE FUNCTIONS: */
@@ -102,6 +102,9 @@ private:
 private:
 	/* DO NOT USE THESE DIRECTLY! USE THE COMPONENT UTILITY TEMPLATES */
 	/* engine ComponentController list */
+	CompControllerLUT <Base>		baseCompCrtl;
+	CompControllerLUT <Movement>	movementCompCtrl;
+	CompControllerLUT <Collider>	colliderCompCtrl;
 	CompControllerLUT<SolidBody>	solidBodyCompCtrl;
 	CompControllerLUT<Draw>			drawableCompCtrl;
 	CompController<Composit<4>>		composit4CompCtrl;
@@ -119,6 +122,9 @@ private:
 	bool staticSpawnOrDespawn{ false };
 };
 
+generateComponentAccessFunctionsLUT(Base, baseCompCrtl)
+generateComponentAccessFunctionsLUT(Movement, movementCompCtrl)
+generateComponentAccessFunctionsLUT(Collider, colliderCompCtrl)
 generateComponentAccessFunctionsLUT(SolidBody, solidBodyCompCtrl)
 generateComponentAccessFunctionsLUT(Draw, drawableCompCtrl)
 

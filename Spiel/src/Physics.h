@@ -20,7 +20,13 @@ public:
 	Grid() :
 		minPos{ 0.0f, 0.0f },
 		sizeX{ 0 },
-		cellSize{ 0.2f, 0.2f }
+		cellSize{ 0.1f, 0.1f }
+	{}
+
+	Grid(vec2 cellSize_) :
+		minPos{ 0.0f, 0.0f },
+		sizeX{ 0 },
+		cellSize{ cellSize_ }
 	{}
 
 	inline bool at(int x, int y) const {

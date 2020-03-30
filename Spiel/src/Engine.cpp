@@ -37,7 +37,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	windowSpaceDrawables{},
 	physicsThreadCount{ std::thread::hardware_concurrency() - 1},
 	qtreeCapacity{ 5 },
-	staticGrid{}
+	staticGrid{ {0.2f, 0.2f} }
 {
 	window->initialize();
 	renderThread = std::thread(Renderer(sharedRenderData, window));
@@ -184,8 +184,9 @@ void Engine::run() {
 	while (running) {
 		Timer<> loopTimer(new_deltaTime);
 		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY, &new_mainWaitTime);
-		commitTimeMessurements();
 		glfwPollEvents();
+		commitTimeMessurements();
+		rebuildStaticData = false; // reset flag
 		sharedRenderData->cond.notify_one();	// wake up rendering thread
 		{
 			Timer<> mainTimer(new_mainTime);
@@ -199,10 +200,7 @@ void Engine::run() {
 			if (world.entities.capacity() != oldWorldEntitiesCapacity || world.staticSpawnOrDespawn) {
 				world.staticSpawnOrDespawn = false; // reset flag
 				oldWorldEntitiesCapacity = world.entities.capacity();
-				// when entities reallocate, the physics need to rebuild the quadtrees
-				physicsPoolData->rebuildDynQuadTrees = true;
-				physicsPoolData->rebuildStatQuadTrees = true;
-				rebuildStaticGrid = true;
+				rebuildStaticData = true;
 			}
 			{
 				Timer<> t(new_physicsTime);
@@ -258,17 +256,20 @@ void Engine::run() {
 	destroy();
 }
 
+
 void Engine::physicsUpdate(World& world_, float deltaTime_)
 {
 	Timer<> t1(new_physicsPrepareTime);
 
 	physicsPoolData->rebuildDynQuadTrees = true; // allways rebuild dynamic quadtree
-	// only rebuild static quadtree if either new static entitites are spawned/ removed/ moved or the world entity vector reallocated
+	if (rebuildStaticData) physicsPoolData->rebuildStatQuadTrees = true; // only rebuild static quadtree if static Entities changed
 
 	std::vector<std::pair<uint32_t, Collidable *>> dynCollidables;
 	dynCollidables.reserve(world.entities.size());
 	std::vector<std::pair<uint32_t, Collidable*>> statCollidables;
 	statCollidables.reserve(world.entities.size());
+
+	std::vector<CollisionResponse> collisionResponses(world.entities.size());
 	vec2 maxPosDynamic{ 0,0 }, minPosDynamic{ 0,0 };
 	vec2 maxPosStatic{ 0,0 }, minPosStatic{ 0,0 };
 	for (int id = 1; id < world.getEntMemSize(); id++) {
@@ -291,34 +292,6 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		}
 	}
 	
-	// rebuild dynamic quadtrees
-	std::shared_ptr<std::vector<Quadtree>> qtreesDynamic;
-	if (physicsPoolData->rebuildDynQuadTrees) {
-		qtreesDynamic = std::make_shared< std::vector<Quadtree>>();
-		qtreesDynamic->reserve(physicsThreadCount);
-		for (unsigned i = 0; i < physicsThreadCount; i++) {
-			vec2 randOffsetMin = { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			vec2 randOffsetMax = { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			qtreesDynamic->emplace_back(Quadtree(minPosDynamic - randOffsetMin, maxPosDynamic + randOffsetMax, qtreeCapacity));
-		}
-	}
-	// rebuild static quadtrees
-	std::shared_ptr<std::vector<Quadtree>> qtreesStatic;
-	if (physicsPoolData->rebuildStatQuadTrees) {
-		qtreesStatic = std::make_shared< std::vector<Quadtree>>();
-		qtreesStatic->reserve(physicsThreadCount);
-		for (unsigned i = 0; i < physicsThreadCount; i++) {
-			vec2 randOffsetMin = { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			vec2 randOffsetMax = { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			qtreesStatic->emplace_back(Quadtree(minPosStatic - randOffsetMin, maxPosStatic + randOffsetMax, qtreeCapacity));
-		}
-	}
-
-	std::vector<CollisionResponse> collisionResponses(world.entities.size());
-	t1.stop();
-
-	/* check for collisions */
-	Timer<> t2(new_physicsCollisionTime);
 	/* split the entities between threads */
 	float splitStepDyn = (float)dynCollidables.size() / (float)(physicsThreadCount);
 	std::vector<std::array<int ,2>> rangesDyn(physicsThreadCount);
@@ -334,13 +307,41 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 
 	// give physics workers their info
+	// write physics pool data
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 	physicsPoolData->dynCollidables = &dynCollidables;
 	physicsPoolData->statCollidables = &statCollidables;
 	physicsPoolData->collisionResponses = &collisionResponses;
 	physicsPoolData->world = &world;
-	if (physicsPoolData->rebuildDynQuadTrees) physicsPoolData->qtreesDynamic = qtreesDynamic; // reassign dynamic quadtrees
-	if (physicsPoolData->rebuildStatQuadTrees) physicsPoolData->qtreesStatic = qtreesStatic; // reassign static quadtrees
+	if (physicsPoolData->rebuildDynQuadTrees) {
+		// make new quadtrees and replace old ones
+		std::shared_ptr<std::vector<Quadtree>> qtreesDynamic;
+		if (physicsPoolData->rebuildDynQuadTrees) {
+			qtreesDynamic = std::make_shared< std::vector<Quadtree>>();
+			qtreesDynamic->reserve(physicsThreadCount);
+			for (unsigned i = 0; i < physicsThreadCount; i++) {
+				vec2 randOffsetMin = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
+				vec2 randOffsetMax = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
+				qtreesDynamic->emplace_back(Quadtree(minPosDynamic - randOffsetMin, maxPosDynamic + randOffsetMax, qtreeCapacity));
+			}
+		}
+		physicsPoolData->qtreesDynamic = qtreesDynamic; // replace dynamic quadtrees
+	}
+	if (physicsPoolData->rebuildStatQuadTrees) { 
+		// make new quadtrees and replace old ones
+		std::shared_ptr<std::vector<Quadtree>> qtreesStatic;
+		if (physicsPoolData->rebuildStatQuadTrees) {
+			qtreesStatic = std::make_shared< std::vector<Quadtree>>();
+			qtreesStatic->reserve(physicsThreadCount);
+			for (unsigned i = 0; i < physicsThreadCount; i++) {
+				vec2 randOffsetMin = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
+				vec2 randOffsetMax = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
+				qtreesStatic->emplace_back(Quadtree(minPosStatic - randOffsetMin, maxPosStatic + randOffsetMax, qtreeCapacity));
+			}
+		}
+		physicsPoolData->qtreesStatic = qtreesStatic; // replace static quadtrees
+	}
+	// write physics individual data
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		auto& pData = physicsPerThreadData[i];
 		pData->beginDyn = rangesDyn[i][0];
@@ -349,6 +350,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		pData->endStat = rangesStat[i][1];
 		pData->collisionInfos = &collisionInfosSplit[i];
 	}
+	t1.stop();
+	/* check for collisions */
+	Timer<> t2(new_physicsCollisionTime);
 
 	{	// start physics threads
 		std::unique_lock switch_lock(sharedPhysicsSyncData->mut);
@@ -356,7 +360,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 			sharedPhysicsSyncData->go.at(i) = true;
 		}
 		sharedPhysicsSyncData->cond.notify_all();
-		//wait for physics threads to finish
+		// wait for physics threads to finish
 		sharedPhysicsSyncData->cond.wait(switch_lock, [&]() { 
 			/* wenn alle false sind wird true returned */
 			for (unsigned i = 0; i < physicsThreadCount; i++) {
@@ -370,8 +374,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 	physicsPoolData->rebuildDynQuadTrees = false;
 	physicsPoolData->rebuildStatQuadTrees = false;
-	t2.stop();
 
+	t2.stop();
+	// execute physics
 	Timer<> t3(new_physicsExecuteTime);
 	//store all collisioninfos in one vector
 	collInfos.clear();
@@ -380,7 +385,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		collInfos.insert(collInfos.end(), collInfoSplit.begin(), collInfoSplit.end());
 	}
 
-	//build hastable for first and last iterator element of collisioninfo
+	// build hashtables for first and last iterator element of collisioninfo
 	collInfoBegins.clear();
 	collInfoEnds.clear();
 	uint32_t lastIDA{};
@@ -443,9 +448,9 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 		}
 	}
 
-	//apply dampened pushout of slave to owner
+	// apply dampened pushout of slave to owner
 	for (auto& coll : dynCollidables) {
-		//pushout owner too
+		// pushout owner too
 		if (coll.second->isSlave() && coll.second->isSolid()) {
 			uint32_t ownerID = coll.second->getOwnerID();
 
@@ -460,7 +465,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	// execute physics changes in pos, rota
 	for (auto& coll : dynCollidables) {
-		coll.second->position += collisionResponses[coll.first].posChange;	//non solids have a pushout of 0
+		coll.second->position += collisionResponses[coll.first].posChange;	// non solids have a pushout of 0
 		coll.second->position += coll.second->velocity * deltaTime_;
 		coll.second->rotation += coll.second->angleVelocity * deltaTime;
 	}
@@ -468,7 +473,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	syncCompositPhysics<4>(world.composit4CompCtrl);
 	t3.stop();
 
-	/* submit debug drawables for physics */
+	// submit debug drawables for physics
 	for (auto& el : Physics::debugDrawables) {
 		submitDrawableWorldSpace(el);
 	}
@@ -477,8 +482,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 void Engine::updateStaticGrid(World& world)
 {
-	if (rebuildStaticGrid) {
-		rebuildStaticGrid = false;
+	if (rebuildStaticData) {
 		vec2 staticGridMinPos = vec2(0,0);
 		vec2 staticGridMaxPos = vec2(0, 0);
 		for (int i = 0; i < physicsThreadCount; i++) {
@@ -521,7 +525,8 @@ void Engine::updateStaticGrid(World& world)
 			}
 		}
 	}
-	Drawable d = Drawable(0, staticGrid.minPos, 0.1f, staticGrid.cellSize, vec4(1, 1, 1, 1), Form::RECTANGLE, 0.0f);
+#ifdef DEBUG_STATIC_GRID
+	Drawable d = Drawable(0, staticGrid.minPos, 0.1f, staticGrid.cellSize, vec4(1, 1, 0, 1), Form::RECTANGLE, 0.0f);
 	for (int i = 0; i < staticGrid.getSizeX(); i++) {
 		for (int j = 0; j < staticGrid.getSizeY(); j++) {
 			d.position = staticGrid.minPos + vec2(i,0) * staticGrid.cellSize.x + vec2(0,j) * staticGrid.cellSize.y;
@@ -530,6 +535,7 @@ void Engine::updateStaticGrid(World& world)
 			}
 		}
 	}
+#endif
 }
 
 template<int N>

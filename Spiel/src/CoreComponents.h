@@ -1,21 +1,55 @@
- 
 #include "glmath.h"
 #include "Component.h"
 #include "Timing.h"
 #include "Entity.h"
 
+// basis component
+
+struct Base : public CompData {
+	vec2 position;
+	float rotation;
+	Base(vec2&& pos_ = { 0,0 }, float&& rota_ = 0.0f) :
+		position{ pos_ },
+		rotation{ rota_ } {}
+};
+
+// movement component
+
+struct Movement : public CompData {
+	vec2 velocity;
+	float angleVelocity;
+	Movement(vec2 && vel_ = { 0,0 }, float && anglVel_ = 0.0f) :
+		velocity{ vel_ },
+		angleVelocity{ anglVel_ } {}
+};
+
+// collider component
+
+struct Collider : public CompData {
+	vec2 size;
+	Form form;
+	bool active;
+	bool particle;
+	Collider(vec2 && size_ = { 1,1 }, Form && form_ = Form::CIRCLE, bool && active_ = false, bool && particle_ = false) :
+		size{ 1,1 }, form{ Form::CIRCLE },
+		active{ active_ },
+		particle{ particle_ } {}
+};
+
 // solidBody component
 
 struct SolidBody : public CompData {
-
 	float elasticity;
 	float mass;
 	float momentOfInertia;
 	SolidBody(float elasticity_, float mass_) : elasticity{ elasticity_ }, mass{ mass_ }, momentOfInertia{0.f} {}
-	SolidBody() : elasticity{ 0.f }, mass{ 0.f }, momentOfInertia{ 0.f } {}
+	SolidBody() : 
+		elasticity{ 0.f }, 
+		mass{ 0.f }, 
+		momentOfInertia{ 0.f } {}
 };
 
-// drawable component
+// draw component
 
 struct Draw : public CompData {
 	vec4 color;
