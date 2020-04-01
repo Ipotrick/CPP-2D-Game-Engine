@@ -57,9 +57,6 @@
     <ClInclude Include="src\GameComponents.h">
       <Filter>_Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\Component.h">
-      <Filter>_Component</Filter>
-    </ClInclude>
     <ClInclude Include="src\Script.h">
       <Filter>_Script</Filter>
     </ClInclude>
@@ -98,6 +95,9 @@
     </ClInclude>
     <ClInclude Include="src\json.h">
       <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ECS.h">
+      <Filter>_Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

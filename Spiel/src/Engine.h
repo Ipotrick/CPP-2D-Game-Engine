@@ -43,7 +43,6 @@ public:
 	virtual void update(World& world, float deltaTime) = 0;
 	/* specify what happenes once for destruction */
 	virtual void destroy() = 0;
-
 	
 
 					/*-- general statistics utility --*/
@@ -118,7 +117,7 @@ private:
 	void commitTimeMessurements();
 	void physicsUpdate(World& world, float deltaTime);
 	template<int N>
-	void syncCompositPhysics(CompController<Composit<N>>& composit);
+	void syncCompositPhysics();
 	void updateStaticGrid(World& world);
 
 private:

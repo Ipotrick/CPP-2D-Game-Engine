@@ -8,31 +8,42 @@
 #include "robin_hood.h"
 #include "json.h"
 
+#include "ECS.h"
 #include "CoreComponents.h"
 #include "GameComponents.h"
 #include "Entity.h"
 #include "glmath.h"
 
-#define generateComponentAccessFunctionsLUT(CompName, CtrlName) \
-template<> inline CompName& World::getComp<CompName>(uint32_t id) { return CtrlName.getComponent(id); }\
-template<> inline CompName* const World::getCompPtr<CompName>(uint32_t id) { return CtrlName.getComponentPtr(id); }\
-template<> inline bool World::hasComp<CompName>(uint32_t id) { return CtrlName.isRegistered(id); }\
-template<> inline void World::addComp<CompName>(uint32_t id, CompName data) { CtrlName.registerEntity(id, data); }
-
-#define generateComponentAccessFunctions(CompName, CtrlName) \
-template<> inline robin_hood::unordered_map<uint32_t, CompName>& World::getAllComps<CompName>() { return CtrlName.componentData; }\
-template<> inline CompController<CompName>& World::getCtrl<CompName>() { return CtrlName; } \
-template<> inline CompName& World::getComp<CompName>(uint32_t id) { return CtrlName.getComponent(id); }\
-template<> inline CompName* const World::getCompPtr<CompName>(uint32_t id) { return CtrlName.getComponentPtr(id); }\
-template<> inline bool World::hasComp<CompName>(uint32_t id) { return CtrlName.isRegistered(id); }\
-template<> inline void World::addComp<CompName>(uint32_t id, CompName data) { CtrlName.registerEntity(id, data); }
-
 struct Light {
-	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{pos}, radius{rad}, id{id_}, color{col} {}
+	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
 	vec2 position;
 	float radius;
 	uint32_t id;
 	vec4 color;
+};
+
+#define GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, CompStorage, storageType) \
+template<> inline auto& view<CompType>() { return CompStorage; } \
+template<> inline CompType& getComp<CompType>(uint32_t id) { return CompStorage.getComponent(id); }\
+template<> inline bool hasComp<CompType>(uint32_t id) { return CompStorage.isRegistrated(id); }\
+template<> inline void addComp<CompType>(uint32_t id, CompType data) { CompStorage.registrate(id, data); } \
+template<> inline void addComp<CompType>(uint32_t id) { CompStorage.registrate(id, CompType()); }
+
+#define generateComponentAccessFunctionsExtern(CompType, CompStorage, storageType) \
+template<> inline auto& World::view<CompType>() { return CompStorage; } \
+template<> inline CompType& World::getComp<CompType>(uint32_t id) { return CompStorage.getComponent(id); }\
+template<> inline bool World::hasComp<CompType>(uint32_t id) { return CompStorage.isRegistrated(id); }\
+template<> inline void World::addComp<CompType>(uint32_t id, CompType data) { CompStorage.registrate(id, data); } \
+template<> inline void World::addComp<CompType>(uint32_t id) { CompStorage.registrate(id, CompType()); }
+
+#define GENERATE_COMPONENT_CODE(CompType, StorageType, Num) \
+private: ComponentStorage<CompType, StorageType> compStorage ## Num; \
+public: GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, compStorage ## Num, storageType)
+
+
+struct Ent {
+	Ent(bool valid_ = false) : valid{ valid_ } {}
+	bool valid;
 };
 
 class World {
@@ -40,129 +51,84 @@ public:
 
 	World() : lastID{ 0 }, despawnList{}
 	{
-		entities.push_back({ false, Entity(0,0, Collidable(vec2(0,0), Form::CIRCLE, false, false)) });
+		entities.push_back({ false });
 	}
 	
 	/* entity access utility */
-	/* returns entity with the given if IF it exists, otherwise a nullptr is returned, O(1) */
-	Entity * const getEntityPtr(uint32_t id_);
-	/* returns reference to the entitiy with the given id. UNCHECKED, O(1) */
-	Entity& getEntity(uint32_t id);
 	/* returnes if entitiy exists or not, O(1) */
-	bool doesEntExist(uint32_t id);
-
+	bool doesEntExist(ent_id_t id);
 	/* entity create/destruct utility */
-	/* creates Copy of given entity inside the entity map, O(1) */
-	void spawnEntity(Entity const& ent, Draw const& draw);
-	/* creates Copy of given entity inside the entity map, O(1) */
-	void spawnSolidEntity(Entity ent, Draw const& draw, SolidBody solid);
-	/* adds a slave entity to an owner entity */
-	void spawnSlave(Entity ent, Draw const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota);
-	/* adds a slave entity to an owner entity, that contributes to the entities hitbox */
-	void spawnSolidSlave(Entity ent, Draw const& draw, uint32_t ownerID, vec2 relativePos, float relativeRota);
+	/* creates blank entity and returns its id */
+	ent_id_t createEnt();
+	/* enslaves the first ent to the second */
+	void enslaveEntTo(ent_id_t slave, ent_id_t owner, vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
-	void despawn(uint32_t id);
+	void despawn(ent_id_t id);
 
 	/* world utility */
 	/* returnes the id of the most rescently spawned entity.
 		if 0 is returnsed, there are no entities spawned yet, O(1) */
-	uint32_t const getLastID();
+	ent_id_t const getLastID();
 	/* returns count of entities, O(1) */
 	size_t const getEntCount();
 	/* returns the size of the vector that holds the entities, O(1) */
 	size_t const getEntMemSize();
 
 	/* Component access utility */
-	/* returns refference to the component controller, O(1) */
-	template<typename ComponentType> CompController<ComponentType>& getCtrl();
-	/* returnes container of all component data of a component, O(1) */
-	template<typename ComponentType> robin_hood::unordered_map<uint32_t, ComponentType>& getAllComps();
+	/* returnes reference to a safe virtual container or "view" to the given components */
+	template<typename CompType> auto& view();
 	/* returnes refference the component data of one entitiy, O(1) */
-	template<typename ComponentType> ComponentType & getComp(uint32_t id);
-	/* returnes constant pointer to the component data of one entity, O(1) */
-	template<typename ComponentType> ComponentType * const getCompPtr(uint32_t id);
+	template<typename CompType> CompType& getComp(ent_id_t id);
 	/* returns bool whether or not the given entity has the component added/registered, O(1) */
-	template<typename ComponentType> bool hasComp(uint32_t id);
-	/* registeres a new component under the given id, O(1) (can be slow) */
-	template<typename ComponentType> void addComp(uint32_t id, ComponentType data);
+	template<typename CompType> bool hasComp(ent_id_t id);
+	/* registeres a new component under the given id, O(1) */
+	template<class CompType> void addComp(ent_id_t id, CompType data);
+	/*registeres a new component under the given id, O(1) */
+	template<class CompType> void addComp(ent_id_t id);
 
 	void loadMap(std::string);
-
+private:
+	GENERATE_COMPONENT_CODE(Base, storage_index_t, 0)
+	GENERATE_COMPONENT_CODE(Movement, storage_index_t, 1)
+	GENERATE_COMPONENT_CODE(Collider, storage_index_t, 2)
+	GENERATE_COMPONENT_CODE(SolidBody, storage_index_t, 3)
+	GENERATE_COMPONENT_CODE(Draw, storage_index_t, 4)
+	GENERATE_COMPONENT_CODE(Slave, storage_index_t, 5)
+	GENERATE_COMPONENT_CODE(Composit<4>, storage_index_t, 6)
+	GENERATE_COMPONENT_CODE(CompDataLight, storage_index_t, 7)
+	GENERATE_COMPONENT_CODE(Health, storage_index_t, 8)
+	GENERATE_COMPONENT_CODE(Age, storage_index_t, 9)
+	GENERATE_COMPONENT_CODE(Player, storage_index_t, 10)
+	GENERATE_COMPONENT_CODE(Bullet, storage_index_t, 11)
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	friend class Engine;
 	void slaveOwnerDespawn(); // slaves with dead owner get despawned, dead slaves cut their refference of themselfes to the owner
 	void deregisterDespawnedEntities();	// CALL BEFORE "executeDespawns"
 	void executeDespawns();
-	Drawable buildDrawable(uint32_t id, Entity const& ent, Draw const& draw);
+	Drawable buildDrawable(ent_id_t id, Draw const& draw);
 	std::vector<Drawable> getDrawableVec();
-	Light buildLight(uint32_t id, Entity const& ent, CompDataLight const& light);
-	std::vector<Light> getLightVec();
-	std::vector<std::tuple<uint32_t, Collidable*>> getCollidablePtrVec();
 private:
-	/* DO NOT USE THESE DIRECTLY! USE THE COMPONENT UTILITY TEMPLATES */
-	/* engine ComponentController list */
-	CompControllerLUT <Base>		baseCompCrtl;
-	CompControllerLUT <Movement>	movementCompCtrl;
-	CompControllerLUT <Collider>	colliderCompCtrl;
-	CompControllerLUT<SolidBody>	solidBodyCompCtrl;
-	CompControllerLUT<Draw>			drawableCompCtrl;
-	CompController<Composit<4>>		composit4CompCtrl;
-	/* game ComponentController list */
-	CompController<CompDataLight>	lightCompCtrl;
-	CompController<Health>			healthCompCtrl;
-	CompController<Age>				ageCompCtrl;
-	CompController<Player>			playerCompCtrl;
-	CompController<Bullet>			bulletCompCtrl;
 
-	std::vector<std::pair<bool, Entity>> entities;
-	std::queue<uint32_t> emptySlots;
-	uint32_t lastID;
-	std::vector<uint32_t> despawnList;
+	std::vector<Ent> entities;
+	std::queue<ent_id_t> emptySlots;
+	ent_id_t lastID;
+	std::vector<ent_id_t> despawnList;
 	bool staticSpawnOrDespawn{ false };
 };
 
-generateComponentAccessFunctionsLUT(Base, baseCompCrtl)
-generateComponentAccessFunctionsLUT(Movement, movementCompCtrl)
-generateComponentAccessFunctionsLUT(Collider, colliderCompCtrl)
-generateComponentAccessFunctionsLUT(SolidBody, solidBodyCompCtrl)
-generateComponentAccessFunctionsLUT(Draw, drawableCompCtrl)
 
-generateComponentAccessFunctions(Composit<4>, composit4CompCtrl)
-generateComponentAccessFunctions(CompDataLight, lightCompCtrl)
-generateComponentAccessFunctions(Age, ageCompCtrl)
-generateComponentAccessFunctions(Player, playerCompCtrl)
-generateComponentAccessFunctions(Bullet, bulletCompCtrl)
-generateComponentAccessFunctions(Health, healthCompCtrl)
-
-inline bool World::doesEntExist(uint32_t id) {
+inline bool World::doesEntExist(ent_id_t id) {
 	assert(id < entities.size());
-	return entities[id].first;
+	return entities[id].valid;
 }
 
-inline Entity *const World::getEntityPtr(uint32_t id) {
-	assert(id < entities.size());
-	if (entities[id].first) {
-		return &entities[id].second;
-	}
-	else {
-		return nullptr;
-	}
-}
-
-inline Entity& World::getEntity(uint32_t id) {
-	assert(id < entities.size());
-	assert(doesEntExist(id));
-	return entities[id].second;
-}
-
-inline uint32_t const World::getLastID() {
+inline ent_id_t const World::getLastID() {
 	return lastID;
 }
 
-
-inline Drawable World::buildDrawable(uint32_t id, Entity const& ent, Draw const& draw)
+inline Drawable World::buildDrawable(ent_id_t id, Draw const& draw)
 {
 	assert(id > 0);
-	return Drawable(id, ent.position, draw.drawingPrio, draw.scale, draw.color, (Form)draw.form, ent.rotation, draw.throwsShadow);
+	return Drawable(id, getComp<Base>(id).position, draw.drawingPrio, draw.scale, draw.color, (Form)draw.form, getComp<Base>(id).rotation, draw.throwsShadow);
 }

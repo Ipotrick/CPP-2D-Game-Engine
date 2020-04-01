@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glmath.h"
-#include "Component.h"
+#include "ECS.h"
 #include "Timing.h"
 #include "Entity.h"
 

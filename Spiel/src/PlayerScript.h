@@ -4,41 +4,43 @@
 #include "Engine.h"
 
 
-class PlayerScript : public ScriptController<Player, CompController< Player>> {
+class PlayerScript : public ScriptController<Player> {
 public:
-	PlayerScript(CompController< Player>& cmpCtrl_, Engine& engine_) : ScriptController<Player, CompController< Player>>(cmpCtrl_, engine_) {}
+	PlayerScript(Engine& engine_) : ScriptController<Player>(engine_) {}
 
-	inline void executeSample(uint32_t id, Player& data, World& world, float deltaTime) override {
-		auto [begin, end] = engine.getCollisionInfos(id);
+	inline void executeSample(uint32_t entity, Player& data, World& world, float deltaTime) override {
+		auto [begin, end] = engine.getCollisionInfos(entity);
 		for( auto iter = begin; iter != end; ++iter) {
-			if (engine.world.getEntity(iter->idB).isSolid()) {
+			if (engine.world.hasComp<SolidBody>(iter->idB)) {
 				engine.events.triggerEvent("playerHit");
 			}
 		}
 
-		auto& entity = world.getEntity(id);
+		auto& baseEnt = world.getComp<Base>(entity);
+		auto& movEnt = world.getComp<Movement>(entity);
+		auto& collEnt = world.getComp<Collider>(entity);
 
 		if (engine.keyPressed(KEY::W)) {
 			//entity->acceleration += rotate(vec2(0.0f, 10.0f), entity->rotation);
-			entity.velocity += rotate(vec2(0.0f, 10.0f), entity.rotation) * deltaTime;
+			movEnt.velocity += rotate(vec2(0.0f, 10.0f), baseEnt.rotation) * deltaTime;
 		}
 		if (engine.keyPressed(KEY::A)) {
 			//entity->acceleration += rotate(vec2(-10.0f, 0.0f), entity->rotation);
-			entity.velocity += rotate(vec2(-10.0f, 0.0f), entity.rotation) * deltaTime;
+			movEnt.velocity += rotate(vec2(-10.0f, 0.0f), baseEnt.rotation) * deltaTime;
 		}
 		if (engine.keyPressed(KEY::S)) {
 			//entity->acceleration += rotate(vec2(0.0f, -10.0f), entity->rotation);
-			entity.velocity += rotate(vec2(0.0f, -10.0f), entity.rotation) * deltaTime;
+			movEnt.velocity += rotate(vec2(0.0f, -10.0f), baseEnt.rotation) * deltaTime;
 		}
 		if (engine.keyPressed(KEY::D)) {
 			//entity->acceleration += rotate(vec2(10.0f, 0.0f), entity->rotation);
-			entity.velocity += rotate(vec2(10.0f, 0.0f), entity.rotation) * deltaTime;
+			movEnt.velocity += rotate(vec2(10.0f, 0.0f), baseEnt.rotation) * deltaTime;
 		}
 		if (engine.keyPressed(KEY::Q)) {
-			entity.angleVelocity += 700.0f * deltaTime;
+			movEnt.angleVelocity += 700.0f * deltaTime;
 		} 
 		else if (engine.keyPressed(KEY::E)) {
-			entity.angleVelocity -= 700.0f * deltaTime;
+			movEnt.angleVelocity -= 700.0f * deltaTime;
 		}
 		else {
 
@@ -47,17 +49,18 @@ public:
 			float scale = rand() % 10 * 0.1f + 0.5f;
 			vec2 bulletSize = vec2(0.05f, 0.05f) * scale;
 			float bulletVel = 10.0f;
-			float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
 			uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 			for (uint64_t i = 0; i < bullets; i++) {
-				
-				vec2 bullCollVel = world.getEntity(id).getVel() + bulletVel * rotate(vec2(0, 1), world.getEntity(id).getRota() + velOffsetRota);
-
-				Collidable bullColl = Collidable(bulletSize, Form::CIRCLE, true, bullCollVel);
-				Entity bullC = Entity(world.getEntity(id).getPos() + rotate(vec2(-world.getEntity(id).getSize().y, 0) / 1.9f, world.getEntity(id).rotation + 270), 0, bullColl);
-				bullC.particle = true;
-				Draw bullD = Draw(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
-				world.spawnSolidEntity(bullC ,bullD, SolidBody(1, 0.00001f));
+				float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
+				vec2 bullCollVel = world.getComp<Movement>(entity).velocity +bulletVel * rotate(vec2(0, 1), world.getComp<Base>(entity).rotation + velOffsetRota);
+				Collider bulletCollider = Collider(bulletSize, Form::CIRCLE, true, true);
+				Draw bulletDraw = Draw(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
+				auto bullet = world.createEnt();
+				world.addComp<Base>(bullet, Base(world.getComp<Base>(entity).position + rotate(vec2(-collEnt.size.y, 0) / 1.9f, baseEnt.rotation + 270)));
+				world.addComp<Movement>(bullet, Movement(bullCollVel, 0));
+				world.addComp<SolidBody>(bullet, SolidBody(0.9f, 0.01f, 1));
+				world.addComp<Draw>(bullet, bulletDraw);
+				world.addComp<Collider>(bullet, bulletCollider);
 				world.addComp<Bullet>(world.getLastID(), Bullet(10 * scale));
 			}
 		}

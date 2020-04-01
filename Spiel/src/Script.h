@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Component.h"
+#include "ECS.h"
 #include "World.h"
 
-template<typename CompDataType, class CompController>
+template<typename CompDataType>
 class ScriptController {
 public:
-	ScriptController(CompController& cmpCtrl_, Engine& engine_) : compController{ cmpCtrl_ }, engine{ engine_ } {}
+	ScriptController(Engine& engine_) : engine{ engine_ } {}
 
 	/* calls "executeSample" on every component in of the componentController that is given in constructor */
 	void executeAll(World& world, float deltaTime);
@@ -15,14 +15,14 @@ public:
 	/* a custom preperation script that is called in executeAll before calling exeuteSample on evey comp. Can be left empty if there is no need to prepare anything */
 	virtual void executeMeta(World& world, float deltaTime) = 0;
 protected:
-	CompController& compController;
 	Engine& engine;
 };
 
-template<typename CompDataType, class CompController>
-inline void ScriptController<CompDataType, CompController>::executeAll(World& world, float deltaTime) {
+template<typename CompDataType>
+inline void ScriptController<CompDataType>::executeAll(World& world, float deltaTime) {
 	executeMeta(world, deltaTime);
-	for (auto& comp : compController.componentData) {
-		executeSample(comp.first, comp.second, world, deltaTime);
+	auto& view = world.view<CompDataType>();
+	for (auto iter = view.begin(); iter != view.end(); ++iter) {
+		executeSample(iter.id(), *iter, world, deltaTime);
 	}
 }

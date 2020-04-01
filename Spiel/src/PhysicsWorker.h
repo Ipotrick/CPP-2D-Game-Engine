@@ -11,7 +11,9 @@
 #include "World.h"
 
 struct PhysicsSharedSyncData {
-	PhysicsSharedSyncData() : run{ true }, mut{}, cond{}, mut2{}, cond2{}, insertReady{0}  {}
+	PhysicsSharedSyncData() : run{ true }, mut{}, cond{}, mut2{}, cond2{}, insertReady{0}  {
+
+	}
 	bool run;
 
 	//phase 1 sync
@@ -30,13 +32,13 @@ struct PhysicsSharedSyncData {
 
 struct PhysicsPoolData {
 	World* world;
-	std::vector<std::pair<uint32_t, Collidable*>>* dynCollidables;
-	std::vector<std::pair<uint32_t, Collidable*>>* statCollidables;
+	std::vector<std::pair<uint32_t, std::pair<Base&, Collider&>>>* dynCollidables;
+	std::vector<std::pair<uint32_t, std::pair<Base&, Collider&>>>* statCollidables;
 	std::vector<CollisionResponse>* collisionResponses;
 	bool rebuildDynQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree>> qtreesDynamic;
+	std::shared_ptr<std::vector<Quadtree2>> qtreesDynamic;
 	bool rebuildStatQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree>> qtreesStatic;
+	std::shared_ptr<std::vector<Quadtree2>> qtreesStatic;
 };
 
 struct PhysicsPerThreadData {

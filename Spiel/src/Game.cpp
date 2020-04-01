@@ -2,29 +2,32 @@
 
 Game::Game() : 
 	Engine("Test", 1600, 900), 
-	playerScript{ world.getCtrl<Player>(), *this },
-	healthScript{ world.getCtrl<Health>(), *this },
-	ageScript   { world.getCtrl<Age>(),    *this },
-	bulletScript{ world.getCtrl<Bullet>(), *this }
+	playerScript{ *this },
+	healthScript{ *this },
+	ageScript   { *this },
+	bulletScript{ *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
 
-	vec2 scaleMouse = { 0.2,0.2 };
-	auto cCursor = Entity(vec2(0, 0), 0, Collidable(scaleMouse, Form::RECTANGLE, true));
-	auto dCursor = Draw(vec4(1, 0, 0, 1), scaleMouse, 1.0f, Form::RECTANGLE);
-	world.spawnEntity(cCursor, dCursor);
-	cursorID = world.getLastID();
+	vec2 cursorScale = { 0.2,0.2 };
+
+	Collider cursorCollider(cursorScale, Form::CIRCLE, true);
+	Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
+	auto cursor = world.createEnt();
+	world.addComp<Base>(cursor);
+	world.addComp<Collider>(cursor, cursorCollider);
+	world.addComp<Draw>(cursor, cursorDraw);
+
+	cursorID = cursor;
 }
 
 void Game::create() {
-	
 	camera.zoom = 1 / 5.0f;
 	world.loadMap("shit");
 }
 
 void Game::update(World& world, float deltaTime) {
-	
 	submitDrawableWindowSpace(Drawable(0, vec2(0, 0), 0, vec2(2,2), vec4(0.5, 0.5, 0.5, 1), Form::RECTANGLE, 0));
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
@@ -74,27 +77,33 @@ void Game::update(World& world, float deltaTime) {
 
 void Game::cursorManipFunc()
 {
-	auto* cursor = world.getEntityPtr(cursorID);
-	cursor->position = getPosWorldSpace(getCursorPos());
-	cursor->rotation = camera.rotation;
-	cursor->size = vec2(1, 1) / camera.zoom / 100.0f;
-	world.getCompPtr<Draw>(cursorID)->scale = vec2(1, 1) / camera.zoom / 100.0f;
+	auto& baseCursor = world.getComp<Base>(cursorID);
+	auto& colliderCursor = world.getComp<Collider>(cursorID);
+	baseCursor.position = getPosWorldSpace(getCursorPos());
+
+	baseCursor.rotation = camera.rotation;
+	colliderCursor.size = vec2(1, 1) / camera.zoom / 100.0f;
+
+	world.getComp<Draw>(cursorID).scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
 		staticsChanged();
 		if (cursorManipData.locked) {
-			auto* controlledEnt = world.getEntityPtr(cursorManipData.lockedID);
-			if (controlledEnt != nullptr) {
-				controlledEnt->velocity = cursor->position - cursorManipData.oldCursorPos;
+			
+			if (world.doesEntExist(cursorManipData.lockedID)) {
+				auto& movControlled = world.getComp<Movement>(cursorManipData.lockedID);
+				auto& baseControlled = world.getComp<Base>(cursorManipData.lockedID);
+				auto& colliderControlled = world.getComp<Collider>(cursorManipData.lockedID);
+				world.getComp<Movement>(cursorManipData.lockedID) = baseCursor.position - cursorManipData.oldCursorPos;
 				if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
-					float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - controlledEnt->position));
-					float cursorNewRot = getAngle(normalize(cursor->position - controlledEnt->position));
+					float cursorOldRot = getAngle(normalize(cursorManipData.oldCursorPos - baseControlled.position));
+					float cursorNewRot = getAngle(normalize(baseCursor.position - baseControlled.position));
 					float diff = cursorNewRot - cursorOldRot;
-					controlledEnt->rotation += diff;
-					cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
+					baseControlled.rotation += diff;
+					cursorManipData.lockedIDDist = baseControlled.position - baseCursor.position;
 				}
 				else if (keyPressed(KEY::LEFT_CONTROL)) {	//scale
-					vec2 ControlledEntRelativeCoordVec = rotate(vec2(1, 0), controlledEnt->rotation);
-					vec2 cursormovement = cursor->position - cursorManipData.oldCursorPos;
+					vec2 ControlledEntRelativeCoordVec = rotate(vec2(1, 0), baseControlled.rotation);
+					vec2 cursormovement = baseCursor.position - cursorManipData.oldCursorPos;
 					float relativeXMovement = dot(cursormovement, ControlledEntRelativeCoordVec);
 					if (dot(-cursorManipData.lockedIDDist, ControlledEntRelativeCoordVec) < 0) {
 						relativeXMovement *= -1;
@@ -103,12 +112,12 @@ void Game::cursorManipFunc()
 					if (dot(-cursorManipData.lockedIDDist, rotate(ControlledEntRelativeCoordVec, 90)) < 0) {
 						relativeYMovement *= -1;
 					}
-					controlledEnt->size = controlledEnt->size + vec2(relativeXMovement, relativeYMovement) * 2;
-					world.getCompPtr<Draw>(cursorManipData.lockedID)->scale += vec2(relativeXMovement, relativeYMovement) * 2;
-					cursorManipData.lockedIDDist = controlledEnt->getPos() - cursor->getPos();
+					colliderControlled.size = colliderControlled.size + vec2(relativeXMovement, relativeYMovement) * 2;
+					world.getComp<Draw>(cursorManipData.lockedID).scale += vec2(relativeXMovement, relativeYMovement) * 2;
+					cursorManipData.lockedIDDist = baseControlled.position - baseCursor.position;
 				}
 				else {	//move
-					controlledEnt->position = cursor->getPos() + cursorManipData.lockedIDDist;
+					baseControlled.position = baseCursor.position + cursorManipData.lockedIDDist;
 				}
 			}
 		}
@@ -116,13 +125,13 @@ void Game::cursorManipFunc()
 			auto [begin, end] = getCollisionInfos(cursorID);
 			auto iterWIthHighestDrawPrio = begin;
 			for (auto iter = begin; iter != end; ++iter) {
-				if (world.getCompPtr<Draw>(iter->idB)->drawingPrio > world.getCompPtr<Draw>(iterWIthHighestDrawPrio->idB)->drawingPrio) {	//higher drawprio found
+				if (world.getComp<Draw>(iter->idB).drawingPrio > world.getComp<Draw>(iterWIthHighestDrawPrio->idB).drawingPrio) {	//higher drawprio found
 					iterWIthHighestDrawPrio = iter;
 				}
 			}
 			if (begin != end) {
 				cursorManipData.lockedID = iterWIthHighestDrawPrio->idB;
-				cursorManipData.lockedIDDist = world.getEntityPtr(iterWIthHighestDrawPrio->idB)->getPos() - cursor->getPos();
+				cursorManipData.lockedIDDist = world.getComp<Base>(iterWIthHighestDrawPrio->idB).position - baseCursor.position;
 				cursorManipData.locked = true;
 			}
 		}
@@ -139,24 +148,34 @@ void Game::cursorManipFunc()
 		// spawns:
 		if (keyPressed(KEY::U)) {
 			vec2 scale = vec2(0.08f, 0.08f);
-			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, true, vec2(0, 0)));
-			Draw trashEntD = Draw(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
+			Collider trashCollider = Collider(scale, Form::RECTANGLE, true);
+			Draw trashDraw = Draw(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
+			SolidBody trashSolidBody(0.2f, 2.5f, 0.1f);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
-				auto solid = SolidBody(0.2f, 2.5f);
-				solid.momentOfInertia = 0.1f;
-				world.spawnSolidEntity(trashEntC, trashEntD, solid);
+				auto solid = SolidBody(0.2f, 2.5f, 0.1f);
+				auto trash = world.createEnt();
+				world.addComp<Base>(trash, Base(baseCursor.position, 0));
+				world.addComp<Movement>(trash);
+				world.addComp<SolidBody>(trash, trashSolidBody);
+				world.addComp<Collider>(trash, trashCollider);
+				world.addComp<Draw>(trash, trashDraw);
 				world.addComp<Health>(world.getLastID(), Health(100));
 			}
 		}
 
 		if (keyPressed(KEY::I)) {
 			vec2 scale = vec2(0.5f, 0.5f);
-			Entity trashEntC = Entity(cursor->position, 0.0f, Collidable(scale, Form::RECTANGLE, false, vec2(0, 0)));
-			Draw trashEntD = Draw(vec4(0, 0, 0, 1), scale, 0.5f, Form::RECTANGLE);
+			Collider trashCollider(scale, Form::RECTANGLE, false);
+			SolidBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale));
+			Draw trashDraw = Draw(vec4(0, 0, 0, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
-				world.spawnSolidEntity(trashEntC, trashEntD, SolidBody(0.00f, 100000000000000000.f));
+				auto trash = world.createEnt();
+				world.addComp<Base>(trash, Base(cursorManipData.oldCursorPos, 0));
+				world.addComp<Collider>(trash, trashCollider);
+				world.addComp<SolidBody>(trash, trashSolidBody);
+				world.addComp<Draw>(trash, trashDraw);
 			}
 			staticsChanged();
 		}

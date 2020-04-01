@@ -15,6 +15,51 @@ namespace Physics {
 
 }
 
+class CollidableAdapter {
+public:
+	CollidableAdapter(vec2 const& pos_, float const& rota_, vec2 const& vel_, vec2 const& size_, Form const& form_, bool dyn_) :
+		position{ pos_ },
+		rotation{ rota_ },
+		velocity{ vel_ },
+		size{ size_ },
+		form{ form_ },
+		dynamic{ dyn_ }
+	{}
+
+	
+	inline vec2 const& getPos() const { return position; }
+	inline float getRota() const { return rotation; }
+	inline vec2 const& getVel() const { return velocity; }
+	inline vec2 const& getSize() const { return size;  }
+	inline Form getForm() const { return form; }
+	inline bool isDynamic() const { return dynamic; }
+
+	inline float getRadius() const { return size.r * 0.5f; }
+	inline float getSurfaceArea() const { return size.x * size.y; }
+	inline vec2 getBoundsSize() const {
+		if (form == Form::CIRCLE) {
+			return vec2(getBoundsRadius() * 2);
+		} else {
+			return vec2(getBoundsRadius() * 2);
+		}
+	}
+
+	inline float getBoundsRadius() const {
+		if (form == Form::CIRCLE) {
+			return size.r / 2.0f;
+		} else {
+			return sqrtf((size.x * size.x + size.y * size.y)) / 2.0f;
+		}
+	}
+private:
+	vec2  position;
+	float rotation;
+	vec2  velocity;
+	vec2  size;
+	Form  form;
+	bool  dynamic;
+};
+
 class Grid {
 public:
 	Grid() :
@@ -83,6 +128,30 @@ struct CollisionResponse {
 	vec2 posChange;
 };
 
+inline float calcMomentOfIntertia(float mass, vec2 size) {
+	return mass * std::max(size.x, size.y) * std::max(size.x, size.y) / 12.0f * 2;
+}
+
+
+inline vec2 boundsSize(Form form, vec2 size, float rotation = 0.0f) {
+	if (form == Form::CIRCLE) {
+		return size;
+	}
+	else {
+		vec2 max{ 0,0 }; vec2 min{ 0,0 };
+		for (int i = -0.5f; i < 0.51f; i += 1.0f) {
+			for (int j = -0.5f; j < 0.51f; j += 1.0f) {
+				vec2 point = rotate({ size.x * i, size.y * j }, rotation);
+				max.x = std::max(max.x, point.x);
+				max.y = std::max(max.y, point.y);
+				min.x = std::min(min.x, point.x);
+				min.y = std::min(min.y, point.y);
+			}
+		}
+		return max - min;
+	}
+}
+
 __forceinline float dynamicCollision3(float v1, float m1, float v2, float m2, float e) {
 	return (e * m2 * (v2 - v1) + m1 * v1 + m2 * v2) / (m1 + m2);
 }
@@ -102,6 +171,7 @@ inline float fastAngle(vec2 v) {
 	return atan2(dot(v, vec2(1, 0)), cross(v, vec2(1, 0)));
 }
 
+/*
 __forceinline std::pair<std::pair<vec2, float>, std::pair< vec2, float>> dynamicCollision2d4(Collidable const& a, float const massA, float const inertiaA, Collidable b, float const massB, float const inertiaB, vec2 const& cNV, vec2 const& collPos, float e) {
 	vec2 rAP = collPos - a.getPos();
 	vec2 rBP = collPos - b.getPos();
@@ -109,6 +179,22 @@ __forceinline std::pair<std::pair<vec2, float>, std::pair< vec2, float>> dynamic
 	//speed the Collidables have at the specifiy collision point
 	vec2 va = a.getVel() + rotate90(rAP) * a.getAnglVel() / RAD;
 	vec2 vb = b.getVel() + rotate90(rAP) * b.getAnglVel() / RAD;
+	float vAB_collDir = dot(va - vb, cNV);
+
+	float j = (-(1.0f + e) * vAB_collDir) /
+		(dot(cNV, (cNV * (1 / massA + 1 / massB))) + powf(cross(rAP, cNV), 2) / inertiaA + powf(cross(rBP, cNV), 2) / inertiaB);
+	j = std::max(0.0f, j);	// j < 0 => they are not going into each other => no coll response
+	return { {j / massA * cNV, cross(rAP, j * cNV) / inertiaA * RAD}, {-j / massB * cNV,-cross(rBP, j * cNV) / inertiaB * RAD} };
+}*/
+
+inline std::pair<std::pair<vec2, float>, std::pair< vec2, float>> dynamicCollision2d5(	vec2 const& posA, vec2 const& velA, float const anglVelA, float const massA, float const inertiaA, 
+																						vec2 const& posB, vec2 const velB, float const anglVelB, float const massB, float const inertiaB, vec2 const& cNV, vec2 const& collPos, float e) {
+	vec2 rAP = collPos - posA;
+	vec2 rBP = collPos - posB;
+
+	//speed the Collidables have at the specifiy collision point
+	vec2 va = velA + rotate90(rAP) * anglVelA / RAD;
+	vec2 vb = velB + rotate90(rAP) * anglVelB / RAD;
 	float vAB_collDir = dot(va - vb, cNV);
 
 	float j = (-(1.0f + e) * vAB_collDir) /
@@ -147,12 +233,12 @@ __forceinline float clippingDist(float minFirst, float  maxFirst, float  minSeco
 }
 
 // primCollNormal is allways FROM other TO coll, dist is the dist TO push out, so dist > 0!
-inline vec2 calcPosChange(Collidable const* coll, Collidable const* other, float const dist, vec2 const& primCollNormal) {
+inline vec2 calcPosChange(CollidableAdapter const* coll, CollidableAdapter const* other, float const dist, vec2 const& primCollNormal) {
 	if (other->isDynamic()) {
 		float bothAreas = coll->getSurfaceArea() + other->getSurfaceArea();
 		float bPart = other->getSurfaceArea() / bothAreas;
-		float collDirV1 = dot(coll->velocity, primCollNormal);
-		float collDirV2 = dot(other->velocity, primCollNormal);
+		float collDirV1 = dot(coll->getVel(), primCollNormal);
+		float collDirV2 = dot(other->getVel(), primCollNormal);
 		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f) {
 			//they move into each other
 			if (collDirV2 < 0) {
@@ -172,7 +258,7 @@ inline vec2 calcPosChange(Collidable const* coll, Collidable const* other, float
 	}
 }
 
-inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll, Collidable const* other, bool bothSolid)  {
+inline CollisionTestResult circleCircleCollisionCheck(CollidableAdapter const* coll, CollidableAdapter const* other, bool bothSolid)  {
 	CollisionTestResult result = CollisionTestResult();
 	float dist = circleDist(coll->getPos(), coll->getRadius(), other->getPos(), other->getRadius());
 
@@ -191,7 +277,7 @@ inline CollisionTestResult circleCircleCollisionCheck(Collidable const* coll, Co
 	return result;
 }
 
-inline std::tuple<bool, float, float, vec2> partialSATCollision(Collidable const* coll, Collidable const* other)
+inline std::tuple<bool, float, float, vec2> partialSATCollision(CollidableAdapter const* coll, CollidableAdapter const* other)
 {
 	float resRotation = 0.0f;
 	float minClippingDist = 10000000000000.0f;
@@ -244,7 +330,7 @@ inline std::tuple<bool, float, float, vec2> partialSATCollision(Collidable const
 	return std::tuple(true, resRotation, minClippingDist, collisionPos);
 }
 
-inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* coll, Collidable const* other, bool bothSolid)
+inline CollisionTestResult rectangleRectangleCollisionCheck(CollidableAdapter const* coll, CollidableAdapter const* other, bool bothSolid)
 {
 	CollisionTestResult result = CollisionTestResult();
 	auto [partialResult1, rotation1, dist1, collPos1] = partialSATCollision(coll, other);
@@ -272,7 +358,7 @@ inline CollisionTestResult rectangleRectangleCollisionCheck(Collidable const* co
 	return result;
 }
 
-inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circle, Collidable const* rect, bool bothSolid, bool isCirclePrimary) {
+inline CollisionTestResult checkCircleRectangleCollision(CollidableAdapter const* circle, CollidableAdapter const* rect, bool bothSolid, bool isCirclePrimary) {
 	CollisionTestResult result = CollisionTestResult();
 
 	auto const& rotation = rect->getRota();
@@ -328,7 +414,7 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 		result.collided = true;
 		result.clippingDist = dist;
 		result.collisionPos = rotate(clampedCirclePos, rotation);
-		Collidable const* coll; Collidable const* other; vec2 primCollNormal; 
+		CollidableAdapter const* coll; CollidableAdapter const* other; vec2 primCollNormal;
 		if (isCirclePrimary) {
 			coll = circle; other = rect; primCollNormal = backRotatedCollNormal;
 		}
@@ -345,12 +431,12 @@ inline CollisionTestResult checkCircleRectangleCollision(Collidable const* circl
 	return result;
 }
 
-inline bool isOverlappingAABB(Collidable const* a, Collidable const* b) {
+inline bool isOverlappingAABB(CollidableAdapter const* a, CollidableAdapter const* b) {
 	return fabs(b->getPos().x - a->getPos().x) <= fabs(b->getBoundsSize().x + a->getBoundsSize().x) * 0.5f &&
 	fabs(b->getPos().y - a->getPos().y) <= fabs(b->getBoundsSize().y + a->getBoundsSize().y) * 0.5f;
 }
 
-inline CollisionTestResult checkForCollision(Collidable const* coll_, Collidable const* other_, bool bothSolid) {
+inline CollisionTestResult checkForCollision(CollidableAdapter const* coll_, CollidableAdapter const* other_, bool bothSolid) {
 	//pretest with AABB
 	if (isOverlappingAABB(coll_, other_)) {
 		if (coll_->getForm() == Form::CIRCLE) {

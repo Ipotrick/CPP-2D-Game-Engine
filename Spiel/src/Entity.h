@@ -10,6 +10,11 @@ enum class Form : uint8_t{
 	RECTANGLE = 0x01
 };
 
+inline std::ostream& operator<<(std::ostream& ios, Form form) {
+	ios << ((bool)form ? "Rectangle" : "Circle");
+	return ios;
+}
+
 struct Basis {
 	/* x y world coordinates, z depth*/
 	vec2 position;
@@ -34,87 +39,6 @@ struct Basis {
 
 
 
-class Collidable : virtual public Basis {
-	friend class World;
-public:
-	Collidable(vec2 size_, Form form_, bool dynamic_, vec2 velocity_ = vec2(0, 0)) :
-		Basis{},
-		size{ size_ },
-		form{ form_ },
-		dynamic{ dynamic_ },
-		velocity{ velocity_ },
-		solid{ false },
-		angleVelocity{ 0.f },
-		ownerID{ 0 },
-		particle{ false }
-	{
-	}
-
-	Collidable(Collidable const& c) :
-		Basis{c.getPos(), c.getRota()},
-		size{ c.getSize() },
-		form{ c.getForm() },
-		dynamic{ c.isDynamic() },
-		velocity{c.getVel() },
-		solid{ c.isSolid() },
-		angleVelocity{ c.getAnglVel() },
-		ownerID{ c.getOwnerID() },
-		particle{ c.isParticle() }
-	{
-	}
-
-	inline vec2 getVel() const { return velocity; }
-	inline float getAnglVel() const { return angleVelocity; }
-	inline uint32_t getOwnerID() const { return ownerID; }
-	inline bool isSlave() const { return ownerID > 0; }
-	inline Form getForm() const { return form; }
-	inline vec2 getSize() const { return size; }
-	inline float getRadius() const { assert(form == Form::CIRCLE); return size.r / 2; }
-	inline float getSurfaceArea() const { return size.x * size.y; }
-	inline bool isDynamic() const { return dynamic; }
-	inline bool isSolid() const { return solid; }
-	inline bool isParticle() const { return particle; }
-
-	inline Collidable* getCollidablePtr() { return this; }
-	inline Collidable const* getConstCollidablePtr() const { return this; }
-	vec2 getBoundsSize() const;
-	float getBoundsRadius() const;
-
-public:
-	vec2 size;
-	vec2 velocity;
-	float angleVelocity;
-	bool particle;
-	Form form;
-protected:
-	bool solid;
-	bool dynamic;
-	uint32_t ownerID;
-};
-
-inline vec2 Collidable::getBoundsSize() const {
-	if (form == Form::CIRCLE)
-	{
-		return vec2(getBoundsRadius() * 2);
-	}
-	else
-	{
-		return vec2(getBoundsRadius() * 2);
-	}
-}
-
-inline float Collidable::getBoundsRadius() const {
-	if (form == Form::CIRCLE) {
-		return size.r / 2.0f;
-	}
-	else {
-
-		return sqrtf((size.x * size.x + size.y * size.y)) / 2.0f;
-	}
-}
-
-
-
 class Drawable : virtual public Basis {
 public:
 	vec4 color;
@@ -134,16 +58,4 @@ public:
 		throwsShadow{ throwsShadow_ }
 	{
 	}
-};
-
-
-
-class Entity : public Collidable {
-public: 
-	Entity(vec2 pos_, float rota_, Collidable collide_) :
-		Collidable(collide_),
-		Basis(pos_, rota_)
-	{}
-
-public:
 };

@@ -1,5 +1,5 @@
 #include "glmath.h"
-#include "Component.h"
+#include "ECS.h"
 #include "Timing.h"
 #include "Entity.h"
 
@@ -8,7 +8,7 @@
 struct Base : public CompData {
 	vec2 position;
 	float rotation;
-	Base(vec2&& pos_ = { 0,0 }, float&& rota_ = 0.0f) :
+	Base(vec2 pos_ = { 0,0 }, float rota_ = 0.0f) :
 		position{ pos_ },
 		rotation{ rota_ } {}
 };
@@ -18,7 +18,7 @@ struct Base : public CompData {
 struct Movement : public CompData {
 	vec2 velocity;
 	float angleVelocity;
-	Movement(vec2 && vel_ = { 0,0 }, float && anglVel_ = 0.0f) :
+	Movement(vec2 vel_ = { 0,0 }, float anglVel_ = 0.0f) :
 		velocity{ vel_ },
 		angleVelocity{ anglVel_ } {}
 };
@@ -28,11 +28,12 @@ struct Movement : public CompData {
 struct Collider : public CompData {
 	vec2 size;
 	Form form;
-	bool active;
+	bool dynamic;
 	bool particle;
-	Collider(vec2 && size_ = { 1,1 }, Form && form_ = Form::CIRCLE, bool && active_ = false, bool && particle_ = false) :
-		size{ 1,1 }, form{ Form::CIRCLE },
-		active{ active_ },
+	Collider(vec2 size_ = { 1,1 }, Form form_ = Form::CIRCLE, bool dynamic_ = false, bool particle_ = false) :
+		size{ size_ }, 
+		form{ form_ },
+		dynamic{ dynamic_ },
 		particle{ particle_ } {}
 };
 
@@ -42,11 +43,13 @@ struct SolidBody : public CompData {
 	float elasticity;
 	float mass;
 	float momentOfInertia;
-	SolidBody(float elasticity_, float mass_) : elasticity{ elasticity_ }, mass{ mass_ }, momentOfInertia{0.f} {}
+	SolidBody(float elasticity_, float mass_, float mOI_) : elasticity{ elasticity_ }, mass{ mass_ }, momentOfInertia{ mOI_ } {}
 	SolidBody() : 
 		elasticity{ 0.f }, 
 		mass{ 0.f }, 
-		momentOfInertia{ 0.f } {}
+		momentOfInertia{ 0.f } {
+		
+	}
 };
 
 // draw component
@@ -66,6 +69,15 @@ struct Draw : public CompData {
 		throwsShadow{ throwsShadow_ }
 	{
 	}
+};
+
+// slave component
+
+struct Slave {
+	Slave(uint32_t id_ = 0) :
+		ownerID{ id_ } {}
+
+	uint32_t ownerID;
 };
 
 // composit component
