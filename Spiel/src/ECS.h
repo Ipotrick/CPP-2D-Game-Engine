@@ -45,6 +45,16 @@ public:
 	inline iterator end();
 };
 
+/*
+	pros:
+		-low memory usage
+	cons: 
+		-fast access time
+		-unordered, accessing OTHER components in a loop is not that cache friendly
+		-no interloop comp registration
+		-no interloop comp deregistration
+		violating these limitations will mass up the iterators
+*/
 template<typename CompType>
 class ComponentStorage<CompType, storage_hash_t> {
 public:
@@ -55,7 +65,7 @@ public:
 	}
 	inline void deregistrate(ent_id_t entity) {
 		auto res = storage.find(entity);
-		if (res != storage.end() && res->first == entity) {
+		if (res != storage.end()) {
 			storage.erase(res);
 		}
 	}
@@ -81,8 +91,9 @@ public:
 		typedef CompType& reference;
 		typedef CompType* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(typename storage_t::iterator storIter) : iter{storIter} {}
+		iterator(typename storage_t::iterator storIter, storage_t& stor_) : iter{ storIter }, storage{ stor_ } {}
 		self_type operator++(int junk) {
+			assert(iter != storage.end());
 			++iter;
 			return *this;
 		}
@@ -92,9 +103,11 @@ public:
 			return me;
 		}
 		reference operator*() {
+			assert(iter != storage.end());
 			return iter->second;
 		}
 		pointer operator->() {
+			assert(iter != storage.end());
 			return &(iter->second);
 		}
 		bool operator==(const self_type& rhs) {
@@ -106,13 +119,25 @@ public:
 		ent_id_t id() { return iter->first; }
 	private:
 		typename storage_t::iterator iter;
+		storage_t& storage;
 	};
-	inline iterator begin() { return iterator(storage.begin()); }
-	inline iterator end() { return iterator(storage.end()); }
+	inline iterator begin() { return iterator(storage.begin(), storage); }
+	inline iterator end() { return iterator(storage.end(), storage); }
 private:
-	typename storage_t storage;
+	storage_t storage;
 };
 
+/*
+	pros:
+		instant access
+		instant deregistration
+		very fast registration
+		linear iteration, super cache friendly
+		iterators NEVER get invalidated
+	cons:
+		very high memory usage
+
+*/
 template<typename CompType>
 class ComponentStorage<CompType, storage_index_t>{
 public:
@@ -162,6 +187,7 @@ public:
 		typedef std::forward_iterator_tag iterator_category;
 		iterator(ent_id_t entity_, storage_t& storage_) : entity{ entity_ }, storage{ storage_ } {}
 		self_type operator++(int dummy) {
+			assert(entity < storage.size());
 			++entity;
 			while (entity < storage.size() && storage[entity].first == false) ++entity; //skip non valid entries
 			return *this;
