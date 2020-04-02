@@ -1,11 +1,17 @@
 #include "World.h"
 #include "Physics.h"
 
+Drawable World::buildDrawable(ent_id_t id, Draw const& draw)
+{
+	assert(id > 0);
+	return Drawable(id, getComp<Base>(id).position, draw.drawingPrio, draw.scale, draw.color, (Form)draw.form, getComp<Base>(id).rotation, draw.throwsShadow);
+}
+
 std::vector<Drawable> World::getDrawableVec()
 {
 	std::vector<Drawable> res;
 	res.reserve(entities.size());
-	for (auto iter = view<Draw>().begin(); iter != view<Draw>().end(); ++iter) {
+	for (auto iter = getAll<Draw>().begin(); iter != getAll<Draw>().end(); ++iter) {
 		res.push_back(buildDrawable(iter.id(), *iter));
 	}
 	return res;
@@ -43,30 +49,31 @@ void World::enslaveEntTo(ent_id_t slave, ent_id_t owner, vec2 relativePos, float
 	}
 	assert(i < 4);	//spawned more slaves than can be hold
 
-	ownerComposit.slaves[i] = Composit<4>::Slave(getLastID(), relativePos, relativeRota);
+	ownerComposit.slaves[i] = Composit<4>::Slave(getLastEntID(), relativePos, relativeRota);
 	if (!hasComp<Slave>(slave)) addComp<Slave>(slave);
 	getComp<Slave>(slave) = Slave(owner);
 }
 
 void World::despawn(ent_id_t entitiy_id) {
-	if (entitiy_id < entities.size() && entities[entitiy_id].valid) {
+	if (entitiy_id < entities.size() && !entities[entitiy_id].despawnQueued) {
+		assert(entities[entitiy_id].valid);
+		entities[entitiy_id].despawnQueued = true;
 		despawnList.push_back(entitiy_id);
 	}
 }
 
 void World::executeDespawns() {
-	std::cout << "empty slots before: " << emptySlots.size() << std::endl;
 	for (ent_id_t entity : despawnList) {
 		if (hasComp<Collider>(entity) && !hasComp<Movement>(entity)) { staticSpawnOrDespawn = true; }
 		entities[entity].valid = false;
+		entities[entity].despawnQueued = false;
 		emptySlots.push(entity);
 	}
-	std::cout << "empty slots: " << emptySlots.size() << std::endl << std::endl;
 	despawnList.clear();
 }
 
 void World::slaveOwnerDespawn() {
-	despawnList.reserve(entities.size());	//make sure the iterator stays valid 
+	despawnList.reserve(entities.size());	//make sure the iterator stays valid
 	for (auto iter = despawnList.begin(); iter != despawnList.end(); ++iter) {
 		assert(entities[*iter].valid);
 		//if the ent is an owner it despawns its slaves on destruction
@@ -105,6 +112,7 @@ void World::deregisterDespawnedEntities() {
 		compStorage9.deregistrate(entity);
 		compStorage10.deregistrate(entity);
 		compStorage11.deregistrate(entity);
+		compStorage12.deregistrate(entity);
 	}
 }
 
@@ -124,26 +132,22 @@ void World::loadMap(std:: string mapname_) {
 	else
 	{
 		vec2 scaleEnt = { 0.4f, 0.8f };
-		
+
 		auto player = createEnt();
 		addComp<Base>(player, Base({ 0,0 }, 0));
-		addComp<Movement>(player, Movement(0.0f,0.0f));
+		addComp<Movement>(player, Movement(3.0f, 0.0f));
 		addComp<Draw>(player, Draw(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE));
 		addComp<Collider>(player, Collider(scaleEnt, Form::RECTANGLE, true));
 		addComp<SolidBody>(player, SolidBody(0.5f, 70, calcMomentOfIntertia(70, scaleEnt)));
 		addComp<Player>(player, Player());
 		addComp<Composit<4>>(player, Composit<4>());
 
-		vec2		slaveSlave = vec2(scaleEnt.x * 1 / sqrtf(2.0f));
-		Collider	slaveCollider(slaveSlave, Form::RECTANGLE, true);
-		Draw		slaveDraw(vec4(0, 0, 0, 1), slaveSlave, 0.49f, Form::RECTANGLE);
-
 		auto slave = createEnt();
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
 		addComp<SolidBody>(slave);
-		addComp<Collider>(slave, slaveCollider);
-		addComp<Draw>(slave, slaveDraw);
+		addComp<Collider>(slave, Collider({scaleEnt.x}, Form::CIRCLE, true));
+		addComp<Draw>(slave, Draw(vec4(0, 0, 0, 1), {scaleEnt.x}, 0.49f, Form::CIRCLE));
 		enslaveEntTo(slave, player, vec2(0, -0.4f), 45.0f);
 
 		slave = createEnt();
@@ -151,9 +155,19 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Movement>(slave);
 		addComp<SolidBody>(slave);
 		addComp<Slave>(slave);
-		addComp<Collider>(slave, slaveCollider);
-		addComp<Draw>(slave, slaveDraw);
+		addComp<Collider>(slave, Collider({ scaleEnt.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE, true));
+		addComp<Draw>(slave, Draw(vec4(1,1,1,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.49f, Form::RECTANGLE));
 		enslaveEntTo(slave, player, vec2(0, 0.4f), 45.0f);
+
+		vec2 scaleEnemy{ 0.4f, 0.4f };
+		auto enemy = createEnt();
+		addComp<Base>(enemy, Base({ 0,0 }, 0));
+		addComp<Movement>(enemy, Movement(3.0f, 0.0f));
+		addComp<Draw>(enemy, Draw(vec4(0, 1, 1, 1), scaleEnemy, 0.6f, Form::RECTANGLE));
+		addComp<Collider>(enemy, Collider(scaleEnemy * 2, Form::CIRCLE, true));
+		addComp<SolidBody>(enemy, SolidBody(0.5f, 70, calcMomentOfIntertia(70, scaleEnemy)));
+		addComp<Health>(enemy, Health(100));
+		addComp<Enemy>(enemy, player);
 
 		Collider	wallCollider(vec2(0.4f, 10.0f), Form::RECTANGLE, false);
 		SolidBody	wallSolidBody(0.3f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, vec2(0.4f, 10)));
@@ -171,7 +185,7 @@ void World::loadMap(std:: string mapname_) {
 		vec2 scale = vec2(0.05f, 0.05f);
 		Collider trashCollider = Collider(scale, Form::CIRCLE, true);
 		Draw trashDraw = Draw(vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::CIRCLE, true);
-		SolidBody trashSolidBody(0.5f, 1.0f, 0.1f);
+		SolidBody trashSolidBody(0.99f, 1.0f, 0.1f);
 		for (int i = 0; i < num; i++) {
 
 			vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
@@ -181,7 +195,7 @@ void World::loadMap(std:: string mapname_) {
 			addComp<Collider>(trash, trashCollider);
 			addComp<Draw>(trash, trashDraw);
 			addComp<SolidBody>(trash, trashSolidBody);
-			addComp<Health>(getLastID(), Health(100));
+			addComp<Health>(getLastEntID(), Health(100));
 		}
 	}
 }

@@ -29,7 +29,6 @@ public:
 
 public:
 	PlayerScript	playerScript;
-	
 	HealthScript	healthScript;
 	AgeScript		ageScript;
 	BulletScript	bulletScript;

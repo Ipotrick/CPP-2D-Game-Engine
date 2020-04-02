@@ -104,7 +104,7 @@ public:
 	}
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
-	Grid const& getStaticGrid() { return staticGrid; }
+	Grid<bool> const& getStaticGrid() { return staticGrid; }
 
 public:
 	World world;
@@ -140,7 +140,7 @@ private:
 	uint32_t qtreeCapacity;
 
 	// AI
-	Grid staticGrid;
+	Grid<bool> staticGrid;
 
 	// perf
 	std::chrono::microseconds new_deltaTime;

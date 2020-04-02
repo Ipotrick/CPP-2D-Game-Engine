@@ -8,7 +8,8 @@ class HealthScript : public ScriptController<Health> {
 public:
 	HealthScript(Engine& engine_) : ScriptController<Health>(engine_) {}
 
-	inline void executeSample(uint32_t id, Health& data, World& world, float deltaTime) override {
+	inline void executeSample(uint32_t id, Health& data, float deltaTime) override {
+		World& world = engine.world;
 		auto [begin, end] = engine.getCollisionInfos(id);
 		bool gotHitByBullet{ false };
 		for (auto iter = begin; iter != end; ++iter) {
@@ -22,7 +23,7 @@ public:
 		}
 	}
 
-	inline void executeMeta(World& world, float deltaTime) {
+	inline void executeMeta(float deltaTime) override {
 
 	}
 };
@@ -33,15 +34,15 @@ class AgeScript : public ScriptController<Age> {
 public:
 	AgeScript(Engine& engine_) : ScriptController<Age>(engine_) {}
 
-	inline void executeSample(uint32_t id, Age& data, World& world, float deltaTime) override {
+	inline void executeSample(uint32_t id, Age& data, float deltaTime) override {
 
 		data.curAge += deltaTime;
 
 		if (data.curAge > data.maxAge) {
-			world.despawn(id);
+			engine.world.despawn(id);
 		}
 	}
-	inline void executeMeta(World& world, float deltaTime) {
+	inline void executeMeta(float deltaTime) override {
 
 	}
 };
@@ -52,7 +53,9 @@ class BulletScript : public ScriptController<Bullet> {
 public:
 	BulletScript(Engine& engine_) : ScriptController<Bullet>(engine_) {}
 
-	inline void executeSample(uint32_t id, Bullet& data, World& world, float deltaTime) override {
+	inline void executeSample(uint32_t id, Bullet& data, float deltaTime) override {
+		assert(engine.world.doesEntExist(id));
+		World& world = engine.world;
 		auto [begin, end] = engine.getCollisionInfos(id);
 		bool foundCollisionWithMortal{ false };
 		for (auto iter = begin; iter != end; ++iter) {
@@ -72,14 +75,15 @@ public:
 				world.getComp<Draw>(newEnt).scale *= 0.5f;
 				world.addComp<Collider>(newEnt, world.getComp<Collider>(id));
 				world.getComp<Collider>(newEnt).size *= 0.5f;
-				world.addComp<Bullet>(newEnt, world.getComp<Bullet>(id));
-				world.getComp<Bullet>(newEnt).damage *= 0.5f;
+				Bullet bulletDummy = world.getComp<Bullet>(id);
+				bulletDummy.damage *= 0.5f;
+				delayedAddComp.push_back({ newEnt, bulletDummy });
 				world.addComp<SolidBody>(newEnt, world.getComp<SolidBody>(id));
 			}
 			world.despawn(id);
 		}
 	}
-	inline void executeMeta(World& world, float deltaTime) {
+	inline void executeMeta(float deltaTime) override {
 
 	}
 };

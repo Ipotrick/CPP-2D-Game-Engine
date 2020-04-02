@@ -65,3 +65,10 @@ struct CompDataLight : public CompData {
 	CompDataLight(vec4 col_ = vec4(1,1,1,1)) :color{col_} {}
 	vec4 color;
 };
+
+// enemy component
+
+struct Enemy : public CompData {
+	Enemy(ent_id_t tar_ = 0) : target{ tar_} {}
+	ent_id_t target;
+};

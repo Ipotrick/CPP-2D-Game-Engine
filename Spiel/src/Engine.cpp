@@ -6,7 +6,7 @@
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10000 },// 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 100 },// 10000 microseconds = 10 milliseond => 100 loops per second
 	oldWorldEntitiesCapacity{ 0 },
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
@@ -259,32 +259,32 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	if (rebuildStaticData) physicsPoolData->rebuildStatQuadTrees = true; // only rebuild static quadtree if static Entities changed
 
 	// allocate memory for colliders
-	std::vector<std::pair<uint32_t, std::pair<Base&, Collider&>>> dynCollidables;
-	dynCollidables.reserve(world.entities.size() / 2);
-	std::vector<std::pair<uint32_t, std::pair<Base&, Collider&>>> statCollidables;
-	statCollidables.reserve(world.entities.size() / 2);
+	std::vector<uint32_t> dynCollidables;
+	dynCollidables.reserve(world.entities.size());
+	std::vector<uint32_t> statCollidables;
+	statCollidables.reserve(world.entities.size());
 
 	std::vector<CollisionResponse> collisionResponses(world.entities.size());
-	vec2 maxPosDynamic{ 0,0 }, minPosDynamic{ 0,0 };
-	vec2 maxPosStatic{ 0,0 }, minPosStatic{ 0,0 };
-	for (auto iter = world.view<Collider>().begin(); iter != world.view<Collider>().end(); ++iter) {
+	vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
+	vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
+	for (auto iter = world.getAll<Collider>().begin(); iter != world.getAll<Collider>().end(); ++iter) {
 		auto& collider = *iter;
 		auto colliderID = iter.id();
 		auto& baseCollider = world.getComp<Base>(colliderID);
 
-		if (collider.dynamic) {
-			dynCollidables.push_back({ colliderID, {baseCollider, collider} });
-			maxPosDynamic.x = std::max(maxPosDynamic.x, baseCollider.position.x);
-			maxPosDynamic.y = std::max(maxPosDynamic.y, baseCollider.position.y);
-			minPosDynamic.x = std::min(minPosDynamic.x, baseCollider.position.x);
-			minPosDynamic.y = std::min(minPosDynamic.y, baseCollider.position.y);
+		if (world.hasComp<Movement>(colliderID) || collider.dynamic) {
+			dynCollidables.push_back(colliderID);
+			dynMaxPos.x = std::max(dynMaxPos.x, baseCollider.position.x);
+			dynMaxPos.y = std::max(dynMaxPos.y, baseCollider.position.y);
+			dynMinPos.x = std::min(dynMinPos.x, baseCollider.position.x);
+			dynMinPos.y = std::min(dynMinPos.y, baseCollider.position.y);
 		}
-		else {
-			statCollidables.push_back({ colliderID, {baseCollider, collider} });
-			maxPosStatic.x = std::max(maxPosStatic.x, baseCollider.position.x);
-			maxPosStatic.y = std::max(maxPosStatic.y, baseCollider.position.y);
-			minPosStatic.x = std::min(minPosStatic.x, baseCollider.position.x);
-			minPosStatic.y = std::min(minPosStatic.y, baseCollider.position.y);
+		else if (world.hasComp<SolidBody>(colliderID)) {
+			statCollidables.push_back(colliderID);
+			statMaxPos.x = std::max(statMaxPos.x, baseCollider.position.x);
+			statMaxPos.y = std::max(statMaxPos.y, baseCollider.position.y);
+			statMinPos.x = std::min(statMinPos.x, baseCollider.position.x);
+			statMinPos.y = std::min(statMinPos.y, baseCollider.position.y);
 		}
 	}
 	
@@ -304,36 +304,32 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	// give physics workers their info
 	// write physics pool data
-	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 	physicsPoolData->dynCollidables = &dynCollidables;
 	physicsPoolData->statCollidables = &statCollidables;
 	physicsPoolData->collisionResponses = &collisionResponses;
 	physicsPoolData->world = &world;
 	if (physicsPoolData->rebuildDynQuadTrees) {
 		// make new quadtrees and replace old ones
-		std::shared_ptr<std::vector<Quadtree2>> qtreesDynamic;
-		qtreesDynamic = std::make_shared< std::vector<Quadtree2>>();
+		std::shared_ptr<std::vector<Quadtree>> qtreesDynamic;
+		qtreesDynamic = std::make_shared< std::vector<Quadtree>>();
 		qtreesDynamic->reserve(physicsThreadCount);
 		for (unsigned i = 0; i < physicsThreadCount; i++) {
-			vec2 randOffsetMin = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			vec2 randOffsetMax = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			qtreesDynamic->emplace_back(Quadtree2(minPosDynamic - randOffsetMin, maxPosDynamic + randOffsetMax, qtreeCapacity));
+			qtreesDynamic->emplace_back(Quadtree(dynMinPos, dynMaxPos, qtreeCapacity));
 		}
 		physicsPoolData->qtreesDynamic = qtreesDynamic; // replace dynamic quadtrees
 	}
 	if (physicsPoolData->rebuildStatQuadTrees) { 
 		// make new quadtrees and replace old ones
-		std::shared_ptr<std::vector<Quadtree2>> qtreesStatic;
-		qtreesStatic = std::make_shared< std::vector<Quadtree2>>();
+		std::shared_ptr<std::vector<Quadtree>> qtreesStatic;
+		qtreesStatic = std::make_shared< std::vector<Quadtree>>();
 		qtreesStatic->reserve(physicsThreadCount);
 		for (unsigned i = 0; i < physicsThreadCount; i++) {
-			vec2 randOffsetMin = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			vec2 randOffsetMax = vec2(0, 0); // { +(rand() % 1000 / 2000.0f) + 1, +(rand() % 1000 / 2000.0f) + 1 };
-			qtreesStatic->emplace_back(Quadtree2(minPosStatic - randOffsetMin, maxPosStatic + randOffsetMax, qtreeCapacity));
+			qtreesStatic->emplace_back(Quadtree(statMinPos, statMaxPos, qtreeCapacity));
 		}
 		physicsPoolData->qtreesStatic = qtreesStatic; // replace static quadtrees
 	}
 	// write physics individual data
+	std::vector<std::vector<CollisionInfo>> collisionInfosSplit(physicsThreadCount);
 	for (unsigned i = 0; i < physicsThreadCount; i++) {
 		auto& pData = physicsPerThreadData[i];
 		pData->beginDyn = rangesDyn[i][0];
@@ -444,7 +440,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 
 	// apply dampened collision response pushout of slave to owner
-	for (auto movable = world.view<Movement>().begin(); movable != world.view<Movement>().end(); ++movable) {
+	for (auto movable = world.getAll<Movement>().begin(); movable != world.getAll<Movement>().end(); ++movable) {
 		if (world.hasComp<Slave>(movable.id())) {
 			auto slave = world.getComp<Slave>(movable.id());
 			float slaveWeight = norm(collisionResponses[movable.id()].posChange);
@@ -457,7 +453,7 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 	}
 
 	// execute physics changes in pos, rota
-	for (auto movable = world.view<Movement>().begin(); movable != world.view<Movement>().end(); ++movable) {
+	for (auto movable = world.getAll<Movement>().begin(); movable != world.getAll<Movement>().end(); ++movable) {
 		auto & base = world.getComp<Base>(movable.id());
 		base.position += collisionResponses[movable.id()].posChange;
 		base.position += movable->velocity * deltaTime_;
@@ -534,7 +530,7 @@ void Engine::updateStaticGrid(World& world)
 template<int N>
 void Engine::syncCompositPhysics()
 {
-	auto & view = world.view<Composit<N>>();
+	auto & view = world.getAll<Composit<N>>();
 	for (auto iter = view.begin(); iter != view.end(); ++iter) {
 		auto& baseOwner = world.getComp<Base>(iter.id());
 		auto& movOwner = world.getComp<Movement>(iter.id());
