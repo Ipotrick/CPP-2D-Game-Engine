@@ -8,13 +8,16 @@ class PlayerScript : public ScriptController<Player> {
 public:
 	PlayerScript(Engine& engine_) : ScriptController<Player>(engine_) {}
 
-	inline void executeSample(uint32_t entity, Player& data, World& world, float deltaTime) override {
+	inline void executeSample(uint32_t entity, Player& data, float deltaTime) override {
+		World& world = engine.world;
 		auto [begin, end] = engine.getCollisionInfos(entity);
 		for( auto iter = begin; iter != end; ++iter) {
 			if (engine.world.hasComp<SolidBody>(iter->idB)) {
 				engine.events.triggerEvent("playerHit");
 			}
 		}
+
+		std::cout << "id: " << entity << std::endl;
 
 		auto& baseEnt = world.getComp<Base>(entity);
 		auto& movEnt = world.getComp<Movement>(entity);
@@ -45,27 +48,32 @@ public:
 		else {
 
 		}
+		
 		if (engine.keyPressed(KEY::F)) {
+			auto baseEnt = world.getComp<Base>(entity);
+			auto movEnt = world.getComp<Movement>(entity);
+			auto collEnt = world.getComp<Collider>(entity);
+
 			float scale = rand() % 10 * 0.1f + 0.5f;
 			vec2 bulletSize = vec2(0.05f, 0.05f) * scale;
 			float bulletVel = 10.0f;
 			uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 			for (uint64_t i = 0; i < bullets; i++) {
 				float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-				vec2 bullCollVel = world.getComp<Movement>(entity).velocity +bulletVel * rotate(vec2(0, 1), world.getComp<Base>(entity).rotation + velOffsetRota);
+				vec2 bullCollVel = movEnt.velocity +bulletVel * rotate(vec2(0, 1), baseEnt.rotation + velOffsetRota);
 				Collider bulletCollider = Collider(bulletSize, Form::CIRCLE, true, true);
 				Draw bulletDraw = Draw(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
 				auto bullet = world.createEnt();
-				world.addComp<Base>(bullet, Base(world.getComp<Base>(entity).position + rotate(vec2(-collEnt.size.y, 0) / 1.9f, baseEnt.rotation + 270)));
+				world.addComp<Base>(bullet, Base(baseEnt.position + rotate(vec2(-collEnt.size.y, 0) / 1.5f, baseEnt.rotation + 270)));
 				world.addComp<Movement>(bullet, Movement(bullCollVel, 0));
 				world.addComp<SolidBody>(bullet, SolidBody(0.9f, 0.01f, 1));
 				world.addComp<Draw>(bullet, bulletDraw);
 				world.addComp<Collider>(bullet, bulletCollider);
-				world.addComp<Bullet>(world.getLastID(), Bullet(10 * scale));
+				world.addComp<Bullet>(world.getLastEntID(), Bullet(10 * scale));
 			}
 		}
 	}
-	inline void executeMeta(World& world, float deltaTime) {
+	inline void executeMeta(float deltaTime) override {
 
 	}
 };

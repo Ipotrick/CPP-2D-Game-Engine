@@ -32,13 +32,13 @@ struct PhysicsSharedSyncData {
 
 struct PhysicsPoolData {
 	World* world;
-	std::vector<std::pair<uint32_t, std::pair<Base&, Collider&>>>* dynCollidables;
-	std::vector<std::pair<uint32_t, std::pair<Base&, Collider&>>>* statCollidables;
+	std::vector<uint32_t>* dynCollidables;
+	std::vector<uint32_t>* statCollidables;
 	std::vector<CollisionResponse>* collisionResponses;
 	bool rebuildDynQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree2>> qtreesDynamic;
+	std::shared_ptr<std::vector<Quadtree>> qtreesDynamic;
 	bool rebuildStatQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree2>> qtreesStatic;
+	std::shared_ptr<std::vector<Quadtree>> qtreesStatic;
 };
 
 struct PhysicsPerThreadData {

@@ -57,17 +57,77 @@ VSLANG = 1031
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  World.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(142,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(142,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(143,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(143,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(23,31): warning C4267:  "=": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(201,1): warning C4267:  "Argument": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(201): message :  beim Kompilieren der Klasse Vorlage-Memberfunktion "ComponentStorage<Draw,0>::iterator ComponentStorage<Draw,0>::end(void)"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(8): message :  Siehe Verweis auf die gerade kompilierte Instanziierung "ComponentStorage<Draw,0>::iterator ComponentStorage<Draw,0>::end(void)" der Funktions-Vorlage.
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(95): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Draw,0>".
+  Engine.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005:  "APIENTRY": Makro-Neudefinition
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3.h(123): message :  Siehe vorherige Definition von "APIENTRY"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(478,21): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(496,44): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(496,41): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(500,23): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(521,42): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(521,80): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227,1): warning C4267:  "Argument": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227): message :  beim Kompilieren der Klasse Vorlage-Memberfunktion "ComponentStorage<Collider,0>::iterator ComponentStorage<Collider,0>::end(void)"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(270): message :  Siehe Verweis auf die gerade kompilierte Instanziierung "ComponentStorage<Collider,0>::iterator ComponentStorage<Collider,0>::end(void)" der Funktions-Vorlage.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(103): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Collider,0>".
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(591): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<double,std::ratio<1,1>>".
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
+  Game.cpp
 C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\BasicScripts.h(79,1): warning C4244:  "*=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(72,59): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(10,20): warning C4305:  "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(13,31): warning C4305:  "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(89,19): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(90,19): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(91,18): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(92,18): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(98,12): warning C4244:  "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
+  PhysicsWorker.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(99,12): warning C4244:  "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(31,30): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(42,31): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(65,51): warning C4244:  "Argument": Konvertierung von "float" in "const unsigned __int64", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(69,29): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(87,23): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+  Renderer.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(92,23): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+  World.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(29,31): warning C4267:  "=": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227,1): warning C4267:  "Argument": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227): message :  beim Kompilieren der Klasse Vorlage-Memberfunktion "ComponentStorage<Draw,0>::iterator ComponentStorage<Draw,0>::end(void)"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(14): message :  Siehe Verweis auf die gerade kompilierte Instanziierung "ComponentStorage<Draw,0>::iterator ComponentStorage<Draw,0>::end(void)" der Funktions-Vorlage.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(105): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Draw,0>".
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(591): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<double,std::ratio<1,1>>".
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
+  main.cpp
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,14): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(146,43): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(147,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\BasicScripts.h(79,1): warning C4244:  "*=": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(72,59): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
+  Code wird generiert...
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(10,20): warning C4305:  "Argument": Verkürzung von "double" in "float"
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

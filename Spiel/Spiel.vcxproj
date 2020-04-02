@@ -49,7 +49,9 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PhysicsWorker.cpp" />
+    <ClCompile Include="src\QuadTree.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>

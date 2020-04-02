@@ -29,22 +29,22 @@ void PhysicsWorker::operator()()
 			// rebuild dyn qtree
 			if (physicsPoolData->rebuildDynQuadTrees) {
 				for (int i = beginDyn; i < endDyn; i++) {
-					if (!dynCollidables->at(i).second.second.particle) {	//never check for collisions against particles
+					if (!world.getComp<Collider>(dynCollidables->at(i)).particle) {	//never check for collisions against particles
 						PosSize aabb(
-							dynCollidables->at(i).second.first.position,
-							dynCollidables->at(i).second.second.size);
-						qtreesDynamic->at(physicsData->id).insert({ dynCollidables->at(i).first, aabb });
+							world.getComp<Base>(dynCollidables->at(i)).position,
+							world.getComp<Collider>(dynCollidables->at(i)).size);
+						qtreesDynamic->at(physicsData->id).insert({ dynCollidables->at(i), aabb });
 					}
 				}
 			}
 			// rebuild stat qtree
 			if (physicsPoolData->rebuildStatQuadTrees) {
 				for (int i = beginStat; i < endStat; i++) {
-					if (!statCollidables->at(i).second.second.particle) {	//never check for collisions against particles
+					if (!world.getComp<Collider>(statCollidables->at(i)).particle) {	//never check for collisions against particles
 						PosSize aabb(
-							statCollidables->at(i).second.first.position,
-							statCollidables->at(i).second.second.size);
-						qtreesStatic->at(physicsData->id).insert({ statCollidables->at(i).first, aabb });
+							world.getComp<Base>(statCollidables->at(i)).position,
+							world.getComp<Collider>(statCollidables->at(i)).size);
+						qtreesStatic->at(physicsData->id).insert({ statCollidables->at(i), aabb });
 					}
 				}
 			}
@@ -68,20 +68,20 @@ void PhysicsWorker::operator()()
 			nearCollidables.reserve(10);
 			for (int i = beginDyn; i < endDyn; i++) {
 
-				auto& coll = dynCollidables->at(i);
-				auto& baseColl = world.getComp<Base>(coll.first);
-				auto& colliderColl = world.getComp<Collider>(coll.first);
-				(*collisionResponses)[coll.first].posChange = vec2(0, 0);
+				auto& collID = dynCollidables->at(i);
+				auto& baseColl = world.getComp<Base>(collID);
+				auto& colliderColl = world.getComp<Collider>(collID);
+				(*collisionResponses)[collID].posChange = vec2(0, 0);
 				nearCollidables.clear();
 
-				vec2 collVel = (world.hasComp<Movement>(coll.first) ? world.getComp<Movement>(coll.first).velocity : vec2(0, 0));
+				vec2 collVel = (world.hasComp<Movement>(collID) ? world.getComp<Movement>(collID).velocity : vec2(0, 0));
 
-				CollidableAdapter collAdapter = CollidableAdapter(world.getComp<Base>(coll.first).position, 
-					world.getComp<Base>(coll.first).rotation, 
+				CollidableAdapter collAdapter = CollidableAdapter(world.getComp<Base>(collID).position, 
+					world.getComp<Base>(collID).rotation, 
 					collVel,
-					world.getComp<Collider>(coll.first).size, 
-					world.getComp<Collider>(coll.first).form, 
-					world.getComp<Collider>(coll.first).dynamic);
+					world.getComp<Collider>(collID).size, 
+					world.getComp<Collider>(collID).form, 
+					world.getComp<Collider>(collID).dynamic);
 
 				// querry dynamic entities
 				for (int i = 0; i < physicsThreadCount; i++) {
@@ -96,29 +96,32 @@ void PhysicsWorker::operator()()
 				//check for collisions and save the changes in velocity and position these cause
 				for (auto& otherID : nearCollidables) {
 					//do not check against self 
-					if (coll.first != otherID) {
+					if (collID != otherID) {
 						// check if one is a slave
 						bool areCollidersRelated{ false };
-						if (world.hasComp<Slave>(coll.first)) {
-							if (world.getComp<Slave>(coll.first).ownerID == otherID) areCollidersRelated = true;
+						if (world.hasComp<Slave>(collID) && world.hasComp<Slave>(otherID)) {	//same owner no collision check
+							if (world.getComp<Slave>(collID).ownerID == world.getComp<Slave>(otherID).ownerID) areCollidersRelated = true;
+						}
+						else if (world.hasComp<Slave>(collID)) {
+							if (world.getComp<Slave>(collID).ownerID == otherID) areCollidersRelated = true;
 						}
 						else if (world.hasComp<Slave>(otherID)){
-							if (world.getComp<Slave>(otherID).ownerID == coll.first) areCollidersRelated = true;
+							if (world.getComp<Slave>(otherID).ownerID == collID) areCollidersRelated = true;
 						}
 						//do not check for collision when the colliders are related (slave/owner)
 						if (!areCollidersRelated) {
 							vec2 velOther = (world.hasComp<Movement>(otherID) ? world.getComp<Movement>(otherID).velocity : vec2(0,0));
 							CollidableAdapter otherAdapter = CollidableAdapter(world.getComp<Base>(otherID).position, world.getComp<Base>(otherID).rotation, velOther, world.getComp<Collider>(otherID).size, world.getComp<Collider>(otherID).form, world.getComp<Collider>(otherID).dynamic);
-							auto newTestResult = checkForCollision(&collAdapter, &otherAdapter, world.hasComp<SolidBody>(coll.first) && world.hasComp<SolidBody>(otherID));
+							auto newTestResult = checkForCollision(&collAdapter, &otherAdapter, world.hasComp<SolidBody>(collID) && world.hasComp<SolidBody>(otherID));
 
 							if (newTestResult.collided) {
-								collisionInfos->push_back(CollisionInfo(coll.first, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
+								collisionInfos->push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 								//take average of pushouts with weights
-								float weightOld = norm((*collisionResponses)[coll.first].posChange);
+								float weightOld = norm((*collisionResponses)[collID].posChange);
 								float weightNew = norm(newTestResult.posChange);
 								float normalizer = weightOld + weightNew;
 								if (normalizer > Physics::nullDelta) {
-									(*collisionResponses)[coll.first].posChange = ((*collisionResponses)[coll.first].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
+									(*collisionResponses)[collID].posChange = ((*collisionResponses)[collID].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
 								}
 							}
 						}

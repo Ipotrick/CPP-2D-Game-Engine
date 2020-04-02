@@ -66,10 +66,69 @@ void Game::update(World& world, float deltaTime) {
 	cursorManipFunc();
 	
 	//execute scripts
-	playerScript.executeAll( world, deltaTime);
-	healthScript.executeAll( world, deltaTime);
-	ageScript.executeAll(    world, deltaTime);
-	bulletScript.executeAll( world, deltaTime);
+	playerScript.executeAll( deltaTime);
+	healthScript.executeAll( deltaTime);
+	ageScript.executeAll(    deltaTime);
+	bulletScript.executeAll( deltaTime);
+
+	for (auto ent : world.view<Collider, SolidBody>()) {
+		if (!world.hasComp<Movement>(ent)) {
+			std::cout << " I am a Wall, with the id: " << ent << std::endl;
+		}
+	}
+
+	for (auto enemy : world.view<Enemy, Base, Movement>()) {
+		assert(world.doesEntExist(enemy));
+		auto& enemyComp = world.getComp<Enemy>(enemy);
+		auto& targetPos = world.getComp<Base>(enemyComp.target).position;
+		auto& enemyPos = world.getComp<Base>(enemy).position;
+		auto& targetSpeed = world.getComp<Movement>(enemyComp.target).velocity;
+		auto& enemySpeed = world.getComp<Movement>(enemy).velocity;
+
+		auto staticGrid = getStaticGrid();
+		int targetGridX = ceilf((targetPos - staticGrid.minPos).x / staticGrid.cellSize.x);
+		int targetGridY = ceilf((targetPos - staticGrid.minPos).y / staticGrid.cellSize.y);
+		int enemyGridX = ceilf((enemyPos - staticGrid.minPos).x / staticGrid.cellSize.x);
+		int enemyGridY = ceilf((enemyPos - staticGrid.minPos).y / staticGrid.cellSize.y);
+		auto d = Drawable(0, vec2(targetGridX * staticGrid.cellSize.x + staticGrid.minPos.x, targetGridY * staticGrid.cellSize.y + staticGrid.minPos.y), 0.7f, staticGrid.cellSize, vec4(1, 0, 0, 1), Form::RECTANGLE, 0);
+		submitDrawableWorldSpace(d);
+
+		// guesses distance in grid uniform dist
+		auto h = [&](std::pair<int, int> node) -> float {
+			float x = node.first - targetGridX;
+			float y = node.second - targetGridY;
+			return sqrtf(x * x + y * y);
+		};
+
+		struct Node {
+			Node(float dist_ = 0.0f, int x_ = -1, int y_ = -1) : dist{ dist_ }, x{ x_ }, y{ y_ } {}
+			float dist;
+			int x;
+			int y;
+		};
+
+		// float: distance, pair<int,int>: last node (-1,-1) => no last node
+		Grid<Node> nodeGrid;
+		nodeGrid.resize(staticGrid.getSizeX(), staticGrid.getSizeY(), { 0.0f, -1,-1 });
+		std::vector<std::pair<int, int>> frontier;
+		frontier.push_back({ enemyGridX, enemyGridY });
+		bool foundWay{ false };
+		int iteration{ 0 };
+		int const maxIteration{ 0 };
+		while (!foundWay && iteration < maxIteration && !frontier.empty()) {
+			// expand best node in frontier
+			std::pair<int, int> bestNode = frontier.front();
+			for (auto iter = std::next(frontier.begin()); iter != frontier.end(); ++iter) {
+				if (nodeGrid.at(iter->first, iter->second).dist < nodeGrid.at(bestNode.first, bestNode.second).dist) {
+					bestNode = *iter;
+				}
+			}
+
+			// get best expansion node
+			Node bestExpansionNode;
+
+		}
+	}
 
 	//display performance statistics
 	std::cout << getPerfInfo(5) << '\n';
@@ -160,7 +219,7 @@ void Game::cursorManipFunc()
 				world.addComp<SolidBody>(trash, trashSolidBody);
 				world.addComp<Collider>(trash, trashCollider);
 				world.addComp<Draw>(trash, trashDraw);
-				world.addComp<Health>(world.getLastID(), Health(100));
+				world.addComp<Health>(world.getLastEntID(), Health(100));
 			}
 		}
 
