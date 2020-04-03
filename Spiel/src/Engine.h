@@ -7,9 +7,16 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
+// makro definitions:
+#define DEBUG_STATIC_GRID
+
+// ------------------
+
 #include "robin_hood.h"
 
 #include "Timing.h"
+#include "BaseTypes.h"
+#include "RenderTypes.h"
 #include "QuadTree.h"
 #include "Physics.h"
 #include "input.h"
@@ -17,12 +24,9 @@
 #include "Camera.h"
 #include "EventHandler.h"
 #include "World.h"
-#include "Entity.h"
 
 #include "PhysicsWorker.h"
 #include "Renderer.h"
-
-#define DEBUG_STATIC_GRID
 
 
 class Engine

@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Script.h"
-#include "Engine.h"
-
 
 class HealthScript : public ScriptController<Health> {
 public:
@@ -76,7 +74,7 @@ public:
 				world.addComp<Collider>(newEnt, world.getComp<Collider>(id));
 				world.getComp<Collider>(newEnt).size *= 0.5f;
 				Bullet bulletDummy = world.getComp<Bullet>(id);
-				bulletDummy.damage *= 0.5f;
+				bulletDummy.damage /= 2;
 				delayedAddComp.push_back({ newEnt, bulletDummy });
 				world.addComp<SolidBody>(newEnt, world.getComp<SolidBody>(id));
 			}

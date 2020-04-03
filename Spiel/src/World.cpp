@@ -26,7 +26,7 @@ ent_id_t World::createEnt() {
 	}
 	else {
 		entities.push_back({ true });
-		lastID = entities.size() - 1;
+		lastID = static_cast<ent_id_t>(entities.size() - 1);
 	}
 	return lastID;
 }
@@ -185,7 +185,7 @@ void World::loadMap(std:: string mapname_) {
 		vec2 scale = vec2(0.05f, 0.05f);
 		Collider trashCollider = Collider(scale, Form::CIRCLE, true);
 		Draw trashDraw = Draw(vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::CIRCLE, true);
-		SolidBody trashSolidBody(0.99f, 1.0f, 0.1f);
+		SolidBody trashSolidBody(0.90f, 1.0f, 0.1f);
 		for (int i = 0; i < num; i++) {
 
 			vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };

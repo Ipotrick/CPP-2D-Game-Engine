@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Script.h"
-#include "Engine.h"
 
 
 class PlayerScript : public ScriptController<Player> {
@@ -16,8 +15,6 @@ public:
 				engine.events.triggerEvent("playerHit");
 			}
 		}
-
-		std::cout << "id: " << entity << std::endl;
 
 		auto& baseEnt = world.getComp<Base>(entity);
 		auto& movEnt = world.getComp<Movement>(entity);

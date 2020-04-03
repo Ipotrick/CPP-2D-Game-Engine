@@ -8,19 +8,11 @@
 #include "robin_hood.h"
 #include "json.h"
 
+#include "BaseTypes.h"
+#include "RenderTypes.h"
 #include "ECS.h"
 #include "CoreComponents.h"
 #include "GameComponents.h"
-#include "Entity.h"
-#include "glmath.h"
-
-struct Light {
-	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
-	vec2 position;
-	float radius;
-	uint32_t id;
-	vec4 color;
-};
 
 #define GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, CompStorage, storageType) \
 template<> inline auto& getAll<CompType>() { return CompStorage; } \

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "glmath.h"
-#include "ECS.h"
 #include "Timing.h"
-#include "Entity.h"
+#include "BaseTypes.h"
+#include "ECS.h"
 
 //player component
 

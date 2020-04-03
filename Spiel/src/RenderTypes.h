@@ -1,19 +1,6 @@
 #pragma once
 
-#include <algorithm> 
-#include <atomic>
-
-#include "glmath.h"
-
-enum class Form : uint8_t{
-	CIRCLE = 0x00,
-	RECTANGLE = 0x01
-};
-
-inline std::ostream& operator<<(std::ostream& ios, Form form) {
-	ios << ((bool)form ? "Rectangle" : "Circle");
-	return ios;
-}
+#include "BaseTypes.h"
 
 struct Basis {
 	/* x y world coordinates, z depth*/
@@ -49,7 +36,7 @@ public:
 	bool throwsShadow;
 
 	Drawable(uint32_t id_, vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, Form form_, float rotation_, bool throwsShadow_ = false) :
-		Basis(vec2(position_.x, position_.y), rotation_), 
+		Basis(vec2(position_.x, position_.y), rotation_),
 		drawingPrio{ drawingPrio_ },
 		scale{ scale_ },
 		color{ color_ },
@@ -58,4 +45,13 @@ public:
 		throwsShadow{ throwsShadow_ }
 	{
 	}
+};
+
+
+struct Light {
+	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
+	vec2 position;
+	float radius;
+	uint32_t id;
+	vec4 color;
 };

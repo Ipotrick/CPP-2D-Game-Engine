@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BaseTypes.h" />
     <ClInclude Include="src\BasicScripts.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\CoreComponents.h" />
     <ClInclude Include="src\ECS.h" />
     <ClInclude Include="src\Engine.h" />
-    <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\EventHandler.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
@@ -32,10 +32,12 @@
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\json.h" />
     <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\PhysicsTypes.h" />
     <ClInclude Include="src\PhysicsWorker.h" />
     <ClInclude Include="src\PlayerScript.h" />
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\RenderTypes.h" />
     <ClInclude Include="src\robin_hood.h" />
     <ClInclude Include="src\Script.h" />
     <ClInclude Include="src\ScriptInclude.h" />
