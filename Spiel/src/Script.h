@@ -1,7 +1,5 @@
 #pragma once
-
-#include "ECS.h"
-#include "World.h"
+#include "Engine.h"
 
 template<typename CompType>
 class ScriptController {

@@ -73,17 +73,16 @@ void Game::update(World& world, float deltaTime) {
 
 	for (auto ent : world.view<Collider, SolidBody>()) {
 		if (!world.hasComp<Movement>(ent)) {
-			std::cout << " I am a Wall, with the id: " << ent << std::endl;
 		}
 	}
 
 	for (auto enemy : world.view<Enemy, Base, Movement>()) {
 		assert(world.doesEntExist(enemy));
-		auto& enemyComp = world.getComp<Enemy>(enemy);
-		auto& targetPos = world.getComp<Base>(enemyComp.target).position;
-		auto& enemyPos = world.getComp<Base>(enemy).position;
+		auto& enemyComp =	world.getComp<Enemy>(enemy);
+		auto& targetPos =	world.getComp<Base>(enemyComp.target).position;
+		auto& enemyPos =	world.getComp<Base>(enemy).position;
 		auto& targetSpeed = world.getComp<Movement>(enemyComp.target).velocity;
-		auto& enemySpeed = world.getComp<Movement>(enemy).velocity;
+		auto& enemySpeed =	world.getComp<Movement>(enemy).velocity;
 
 		auto staticGrid = getStaticGrid();
 		int targetGridX = ceilf((targetPos - staticGrid.minPos).x / staticGrid.cellSize.x);
@@ -131,7 +130,7 @@ void Game::update(World& world, float deltaTime) {
 	}
 
 	//display performance statistics
-	std::cout << getPerfInfo(5) << '\n';
+	//std::cout << getPerfInfo(5) << '\n';
 }
 
 void Game::cursorManipFunc()

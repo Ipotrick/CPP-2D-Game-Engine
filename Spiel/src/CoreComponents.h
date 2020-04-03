@@ -1,7 +1,7 @@
+#include "BaseTypes.h"
 #include "glmath.h"
 #include "ECS.h"
 #include "Timing.h"
-#include "Entity.h"
 
 // basis component
 

@@ -28,7 +28,7 @@ void PhysicsWorker::operator()()
 		if (physicsPoolData->dynCollidables) {
 			// rebuild dyn qtree
 			if (physicsPoolData->rebuildDynQuadTrees) {
-				for (int i = beginDyn; i < endDyn; i++) {
+				for (ent_id_t i = beginDyn; i < endDyn; i++) {
 					if (!world.getComp<Collider>(dynCollidables->at(i)).particle) {	//never check for collisions against particles
 						PosSize aabb(
 							world.getComp<Base>(dynCollidables->at(i)).position,
@@ -39,7 +39,7 @@ void PhysicsWorker::operator()()
 			}
 			// rebuild stat qtree
 			if (physicsPoolData->rebuildStatQuadTrees) {
-				for (int i = beginStat; i < endStat; i++) {
+				for (ent_id_t i = beginStat; i < endStat; i++) {
 					if (!world.getComp<Collider>(statCollidables->at(i)).particle) {	//never check for collisions against particles
 						PosSize aabb(
 							world.getComp<Base>(statCollidables->at(i)).position,
@@ -62,11 +62,11 @@ void PhysicsWorker::operator()()
 				}
 			}
 
-			collisionInfos->reserve(dynCollidables->size() / 10.f);	//try to avoid reallocations
+			collisionInfos->reserve(static_cast<size_t>(dynCollidables->size() / 10.f));	//try to avoid reallocations
 
 			std::vector<uint32_t> nearCollidables;	//reuse heap memory for all dyn collidable collisions
 			nearCollidables.reserve(10);
-			for (int i = beginDyn; i < endDyn; i++) {
+			for (ent_id_t i = beginDyn; i < endDyn; i++) {
 
 				auto& collID = dynCollidables->at(i);
 				auto& baseColl = world.getComp<Base>(collID);
@@ -84,12 +84,12 @@ void PhysicsWorker::operator()()
 					world.getComp<Collider>(collID).dynamic);
 
 				// querry dynamic entities
-				for (int i = 0; i < physicsThreadCount; i++) {
+				for (unsigned i = 0; i < physicsThreadCount; i++) {
 					qtreesDynamic->at(i).querry(nearCollidables, baseColl.position, boundsSize(colliderColl.form, colliderColl.size, baseColl.rotation));
 				}
 
 				// querry static entities
-				for (int i = 0; i < physicsThreadCount; i++) {
+				for (unsigned i = 0; i < physicsThreadCount; i++) {
 					qtreesStatic->at(i).querry(nearCollidables, baseColl.position, boundsSize(colliderColl.form, colliderColl.size, baseColl.rotation));
 				}
 

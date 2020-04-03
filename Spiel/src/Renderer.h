@@ -10,13 +10,12 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
-#include "Camera.h"
-#include "Window.h"
-#include "Entity.h"
-#include "World.h"
 #include "Timing.h"
-#include "glmath.h"
-#include "Physics.h"
+#include "BaseTypes.h"
+#include "RenderTypes.h"
+#include "PhysicsTypes.h"
+#include "Camera.h"
+#include "window.h"
 
 static unsigned int compileShader(unsigned int type_, const std::string source_) {
 	unsigned id = glCreateShader(type_);

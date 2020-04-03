@@ -35,7 +35,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	sharedRenderData{ std::make_shared<RendererSharedData>() },
 	renderBufferA{},
 	windowSpaceDrawables{},
-	physicsThreadCount{ std::thread::hardware_concurrency() - 1},
+	physicsThreadCount{ std::thread::hardware_concurrency() - 1 },
 	qtreeCapacity{ 5 },
 	staticGrid{ {0.2f, 0.2f} },
 	rebuildStaticData{ true }
@@ -475,7 +475,7 @@ void Engine::updateStaticGrid(World& world)
 	if (rebuildStaticData) {
 		vec2 staticGridMinPos = vec2(0,0);
 		vec2 staticGridMaxPos = vec2(0, 0);
-		for (int i = 0; i < physicsThreadCount; i++) {
+		for (unsigned i = 0; i < physicsThreadCount; i++) {
 			auto treeMin = physicsPoolData->qtreesStatic->at(i).getPosition() - physicsPoolData->qtreesStatic->at(i).getSize() * 0.5f;
 			auto treeMax = physicsPoolData->qtreesStatic->at(i).getPosition() + physicsPoolData->qtreesStatic->at(i).getSize() * 0.5f;
 			if (treeMin.x < staticGridMinPos.x) staticGridMinPos.x = treeMin.x;
@@ -497,7 +497,7 @@ void Engine::updateStaticGrid(World& world)
 				vec2 size = staticGrid.cellSize;
 				CollidableAdapter collAdapter = CollidableAdapter(pos, 0, 0, size, Form::RECTANGLE, true);
 
-				for (int i = 0; i < physicsThreadCount; i++) {
+				for (unsigned i = 0; i < physicsThreadCount; i++) {
 					physicsPoolData->qtreesStatic->at(i).querry(nearCollidables, pos, size);
 				}
 

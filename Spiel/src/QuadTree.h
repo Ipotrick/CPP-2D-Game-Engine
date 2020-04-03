@@ -5,8 +5,8 @@
 #include <vector>
 #include <array>
 
-#include "glmath.h"
-#include "Entity.h"
+#include "BaseTypes.h"
+#include "RenderTypes.h"
 
 struct PosSize {
 	PosSize(vec2 pos_, vec2 size_) :
