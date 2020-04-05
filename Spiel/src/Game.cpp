@@ -1,7 +1,7 @@
 #include "Game.h"
 
 Game::Game() : 
-	Engine("Test", 1600, 900), 
+	Engine("Test", 1600, 900),
 	playerScript{ *this },
 	healthScript{ *this },
 	ageScript   { *this },
