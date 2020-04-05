@@ -30,7 +30,6 @@
     <ClInclude Include="src\GameComponents.h" />
     <ClInclude Include="src\glmath.h" />
     <ClInclude Include="src\Input.h" />
-    <ClInclude Include="src\json.h" />
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\PhysicsTypes.h" />
     <ClInclude Include="src\PhysicsWorker.h" />
@@ -38,7 +37,6 @@
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\RenderTypes.h" />
-    <ClInclude Include="src\robin_hood.h" />
     <ClInclude Include="src\Script.h" />
     <ClInclude Include="src\ScriptInclude.h" />
     <ClInclude Include="src\Timing.h" />
@@ -195,7 +193,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
