@@ -15,8 +15,9 @@ public:
 		height{ height_ },
 		width{ width_ }
 	{
-		
+		initialize();
 	}
+private:
 
 	int initialize() {
 		if (!glfwInit()) {

@@ -7,11 +7,10 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	running{ true },
 	iteration{ 0 },
 	minimunLoopTime{ 100 },// 10000 microseconds = 10 milliseond => 100 loops per second
-	oldWorldEntitiesCapacity{ 0 },
 	deltaTime{ 0.0 },
 	mainTime{ 0.0 },
 	updateTime{ 0.0 },
-	physicsTime{ 0.0 },
+	physicsTime{ 0.0 },	// TODO REFACTOR ALL TIME DATA INTO STRUCT
 	physicsPrepareTime{ 0.0 },
 	physicsCollisionTime{ 0.0 },
 	physicsExecuteTime{ 0.0 },
@@ -32,20 +31,13 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	new_mainWaitTime{ 0 },
 	collInfos{},
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
-	sharedRenderData{ std::make_shared<RendererSharedData>() },
-	renderBufferA{},
+	renderer{ window },
 	windowSpaceDrawables{},
 	physicsThreadCount{ std::thread::hardware_concurrency() - 1 },
-	qtreeCapacity{ 5 },
+	qtreeCapacity{ 7 },
 	staticGrid{ {0.2f, 0.2f} },
 	rebuildStaticData{ true }
 {
-	window->initialize();
-	renderThread = std::thread(Renderer(sharedRenderData, window));
-	SetThreadPriority(renderThread.native_handle(), 0);
-	renderThread.detach();
-	windowSpaceDrawables.reserve(50);
-
 	physicsPerThreadData = std::vector<std::shared_ptr<PhysicsPerThreadData>>(physicsThreadCount);
 	physicsPoolData = std::make_shared<PhysicsPoolData>(PhysicsPoolData());
 	physicsPoolData->world = &world;
@@ -64,10 +56,7 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 }
 
 Engine::~Engine() {
-	{
-		std::lock_guard<std::mutex> l(sharedRenderData->mut);
-		sharedRenderData->run = false;
-	}
+	renderer.end();
 	{
 		std::lock_guard<std::mutex> l(sharedPhysicsSyncData->mut);
 		sharedPhysicsSyncData->run = false;
@@ -183,80 +172,52 @@ void Engine::run() {
 	create();
 
 	while (running) {
-		Timer<> loopTimer(new_deltaTime);
+		Timer loopTimer(new_deltaTime);
 		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY, &new_mainWaitTime);
 		glfwPollEvents();
 		commitTimeMessurements();
 		rebuildStaticData = false; // reset flag
-		sharedRenderData->cond.notify_one();	// wake up rendering thread
 		{
-			Timer<> mainTimer(new_mainTime);
+			Timer mainTimer(new_mainTime);
+			renderer.startRendering();
 			{
-				Timer<> t(new_updateTime);
+				Timer t(new_updateTime);
 				update(world, getDeltaTimeSafe());
 				world.slaveOwnerDespawn();
 				world.deregisterDespawnedEntities();
 				world.executeDespawns();
-			}
-			if (world.entities.capacity() != oldWorldEntitiesCapacity || world.staticSpawnOrDespawn) {
-				world.staticSpawnOrDespawn = false; // reset flag
-				oldWorldEntitiesCapacity = world.entities.capacity();
-				rebuildStaticData = true;
+				if (world.didStaticsChange()) rebuildStaticData = true;
 			}
 			{
-				Timer<> t(new_physicsTime);
+				Timer t(new_physicsTime);
 				physicsUpdate(world, getDeltaTimeSafe());
 			}
 			{
-				Timer<> t(new_staticGridBuildTime);
+				Timer t(new_staticGridBuildTime);
 				updateStaticGrid(world);
 			}
 			{
-				Timer<> t(new_renderBufferPushTime);
-				renderBufferA.camera = Camera();
-				renderBufferA.windowSpaceDrawables.clear();
-				renderBufferA.worldSpaceDrawables.clear();
-				
-				for (auto& d : windowSpaceDrawables) renderBufferA.windowSpaceDrawables.push_back(d);
-				auto puffer = world.getDrawableVec();
-				renderBufferA.worldSpaceDrawables.insert(renderBufferA.worldSpaceDrawables.end(), puffer.begin(), puffer.end());
-				for (auto& d : worldSpaceDrawables) renderBufferA.worldSpaceDrawables.push_back(d);
-				renderBufferA.camera = camera;
-			
-				windowSpaceDrawables.clear();
-				worldSpaceDrawables.clear();
+				Timer t(new_renderBufferPushTime);
+				rendererUpdate(world);
 			}
 		}
-		
-		{	
-			Timer<> t(new_mainSyncTime);
-			std::unique_lock<std::mutex> switch_lock(sharedRenderData->mut);
-			sharedRenderData->cond.wait(switch_lock, [&]() { return sharedRenderData->ready == true; });	// wait for rendering thread to finish
-			sharedRenderData->ready = false;																// reset renderers ready flag
-			sharedRenderData->renderBufferB = renderBufferA;												// push Drawables and camera
-			new_renderTime = sharedRenderData->new_renderTime;	// save render time
-			new_renderSyncTime = sharedRenderData->new_renderSyncTime;
-			// light data
-			//sharedRenderData->lights = world.getLightVec();
-
-			if (sharedRenderData->run == false) {
-				running = false;
-			}
+		if (glfwWindowShouldClose(window->glfwWindow)) { // if window closes the program ends
+			running = false;
 		}
-
 		iteration++;
 	}
 
 	destroy();
 }
 
-
+// TODO REFACTOR INTO SUB FUNCTIONS
+// TODO MAYBE seperate physics and collision detection
 void Engine::physicsUpdate(World& world_, float deltaTime_)
 {
 	Timer<> t1(new_physicsPrepareTime);
 
 	physicsPoolData->rebuildDynQuadTrees = true; // allways rebuild dynamic quadtree
-	if (rebuildStaticData) physicsPoolData->rebuildStatQuadTrees = true; // only rebuild static quadtree if static Entities changed
+	physicsPoolData->rebuildStatQuadTrees = rebuildStaticData; // only rebuild static quadtree if static Entities changed
 
 	// allocate memory for colliders
 	std::vector<uint32_t> dynCollidables;
@@ -393,71 +354,71 @@ void Engine::physicsUpdate(World& world_, float deltaTime_)
 
 	// execute inelastic collisions 
 	for (auto& collInfo : collInfos) {
-		uint32_t collID = collInfo.idA;
-		uint32_t otherID = collInfo.idB;
+		uint32_t entA = collInfo.idA;
+		uint32_t entB = collInfo.idB;
 
-		if (world.hasComp<SolidBody>(collID) && world.hasComp<SolidBody>(otherID)) { //check if both are solid
+		if (world.hasComp<SolidBody>(entA) & world.hasComp<SolidBody>(entB)) { //check if both are solid
 
 			// owner stands in place for the slave for a collision response execution
-			if (world.hasComp<Slave>(collID) | world.hasComp<Slave>(otherID)) {
-				if (world.hasComp<Slave>(collID) && !world.hasComp<Slave>(otherID)) {
-					collID = world.getComp<Slave>(collID).ownerID;
+			if (world.hasComp<Slave>(entA) | world.hasComp<Slave>(entB)) {
+				if (world.hasComp<Slave>(entA) && !world.hasComp<Slave>(entB)) {
+					entA = world.getComp<Slave>(entA).ownerID;
 				}
-				else if (!world.hasComp<Slave>(collID) && world.hasComp<Slave>(otherID)) {
-					otherID = world.getComp<Slave>(otherID).ownerID;
+				else if (!world.hasComp<Slave>(entA) && world.hasComp<Slave>(entB)) {
+					entB = world.getComp<Slave>(entB).ownerID;
 				}
 				else {
 					// both are slaves
-					collID = world.getComp<Slave>(collID).ownerID;
-					otherID = world.getComp<Slave>(otherID).ownerID;
+					entA = world.getComp<Slave>(entA).ownerID;
+					entB = world.getComp<Slave>(entB).ownerID;
 				}
 			}
 
-			if (world.hasComp<SolidBody>(collID) && world.hasComp<SolidBody>(otherID)) { // recheck if the owners are solid
-				auto& solidColl = world.getComp<SolidBody>(collID);
-				auto& baseColl = world.getComp<Base>(collID);
-				auto& movColl = world.getComp<Movement>(collID);
-				auto& solidOther = world.getComp<SolidBody>(otherID);
-				auto& baseOther = world.getComp<Base>(otherID);
+			if (world.hasComp<SolidBody>(entA) & world.hasComp<SolidBody>(entB)) { // recheck if the owners are solid
+				auto& solidA = world.getComp<SolidBody>(entA);
+				auto& baseA = world.getComp<Base>(entA);
+				auto& moveA = world.getComp<Movement>(entA);
+				auto& solidB = world.getComp<SolidBody>(entB);
+				auto& baseB = world.getComp<Base>(entB);
 				Movement dummy = Movement();
-				Movement& movOther = (world.hasComp<Movement>(otherID) ? world.getComp<Movement>(otherID) : dummy);
+				Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
 
-				auto& collidOther = world.getComp<Collider>(otherID);
+				auto& collidB = world.getComp<Collider>(entB);
 
-				float elast = std::max(solidColl.elasticity, solidOther.elasticity);
-				//auto [collChanges, otherChanges] = dynamicCollision2d4(*coll, solidColl.mass, solidColl.momentOfInertia, *other, solidOther.mass, solidOther.momentOfInertia, collInfo.collisionNormal, collInfo.collisionPos, elast);
-				auto [collChanges, otherChanges] = dynamicCollision2d5(baseColl.position, movColl.velocity, movColl.angleVelocity, solidColl.mass, solidColl.momentOfInertia,
-					baseOther.position, movOther.velocity, movOther.angleVelocity, solidOther.mass, solidOther.momentOfInertia,
+				float elast = std::max(solidA.elasticity, solidB.elasticity);
+				auto [collChanges, otherChanges] = dynamicCollision2d5(
+					baseA.position, moveA.velocity, moveA.angleVelocity, solidA.mass, solidA.momentOfInertia,
+					baseB.position, moveB.velocity, moveB.angleVelocity, solidB.mass, solidB.momentOfInertia,
 					collInfo.collisionNormal, collInfo.collisionPos, elast);
-				movColl.velocity += collChanges.first;
-				movColl.angleVelocity += collChanges.second;
-				if (collidOther.dynamic) {
-					movOther.velocity += otherChanges.first;
-					movOther.angleVelocity += otherChanges.second;
+				moveA.velocity += collChanges.first;
+				moveA.angleVelocity += collChanges.second;
+				if (collidB.dynamic) {
+					moveB.velocity += otherChanges.first;
+					moveB.angleVelocity += otherChanges.second;
 				}
 			}
 		}
 	}
 
 	// apply dampened collision response pushout of slave to owner
-	for (auto movable = world.getAll<Movement>().begin(); movable != world.getAll<Movement>().end(); ++movable) {
-		if (world.hasComp<Slave>(movable.id())) {
-			auto slave = world.getComp<Slave>(movable.id());
-			float slaveWeight = norm(collisionResponses[movable.id()].posChange);
-			float ownerWeight = norm(collisionResponses[slave.ownerID].posChange);
-			float normalizer = slaveWeight + ownerWeight;
-			if (normalizer > Physics::nullDelta) {
-				collisionResponses[slave.ownerID].posChange = (slaveWeight * collisionResponses[movable.id()].posChange + ownerWeight * collisionResponses[slave.ownerID].posChange) / normalizer;
-			}
+	for (auto slaveEnt : world.view<Slave, Movement>()) {
+		auto slave = world.getComp<Slave>(slaveEnt);
+		auto slaveMov = world.getComp<Movement>(slaveEnt);
+		float slaveWeight = norm(collisionResponses[slaveEnt].posChange);
+		float ownerWeight = norm(collisionResponses[slave.ownerID].posChange);
+		float normalizer = slaveWeight + ownerWeight;
+		if (normalizer > Physics::nullDelta) {
+			collisionResponses[slave.ownerID].posChange = (slaveWeight * collisionResponses[slaveEnt].posChange + ownerWeight * collisionResponses[slave.ownerID].posChange) / normalizer;
 		}
 	}
 
 	// execute physics changes in pos, rota
-	for (auto movable = world.getAll<Movement>().begin(); movable != world.getAll<Movement>().end(); ++movable) {
-		auto & base = world.getComp<Base>(movable.id());
-		base.position += collisionResponses[movable.id()].posChange;
-		base.position += movable->velocity * deltaTime_;
-		base.rotation += movable->angleVelocity * deltaTime_;
+	for (auto ent : world.view<Movement, Base>()) {
+		auto& move = world.getComp<Movement>(ent);
+		auto& base = world.getComp<Base>(ent);
+		base.position += collisionResponses[ent].posChange;
+		base.position += move.velocity * deltaTime_;
+		base.rotation += move.angleVelocity * deltaTime_;
 	}
 
 	syncCompositPhysics<4>();
@@ -525,6 +486,30 @@ void Engine::updateStaticGrid(World& world)
 		}
 	}
 #endif
+}
+
+Drawable&& buildDrawable(World& world, ent_id_t entity) {
+	return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotation, world.getComp<Draw>(entity).throwsShadow));
+}
+
+void Engine::rendererUpdate(World& world)
+{
+	renderer.waitTillFinished();
+	for (auto ent : world.view<Base,Draw>()) {
+		renderer.submit(buildDrawable(world, ent));
+	}
+	for (auto d : worldSpaceDrawables) {
+		renderer.submit(d);
+	}
+	worldSpaceDrawables.clear();
+	for (auto winD : windowSpaceDrawables) {
+		renderer.submitWindowSpace(winD);
+	}
+	windowSpaceDrawables.clear();
+	renderer.setCamera(camera);
+
+	new_renderTime = renderer.getRenderingTime();
+	new_renderSyncTime = renderer.getwaitedTime();
 }
 
 template<int N>

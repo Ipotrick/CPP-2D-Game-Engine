@@ -9,7 +9,6 @@
 #include "json.h"
 
 #include "BaseTypes.h"
-#include "RenderTypes.h"
 #include "ECS.h"
 #include "CoreComponents.h"
 #include "GameComponents.h"
@@ -46,7 +45,7 @@ class SingleView;
 class World {
 public:
 
-	World() : lastID{ 0 }, despawnList{}
+	World() : lastID{ 0 }, despawnList{}, oldCapacity{0}
 	{
 		entities.push_back({ false });
 	}
@@ -71,6 +70,8 @@ public:
 	size_t const getEntCount();
 	/* returns the size of the vector that holds the entities, O(1) */
 	size_t const getEntMemSize();
+	/* returns wheter or not static entities changed */
+	bool didStaticsChange();
 
 	/* Component access utility */
 	/* returnes reference to a safe virtual container of the given components one can iterate over. the iterator also holds the entity id of the compoenent it points to, O(1) */
@@ -111,9 +112,8 @@ private:
 	void slaveOwnerDespawn(); // slaves with dead owner get despawned, dead slaves cut their refference of themselfes to the owner
 	void deregisterDespawnedEntities();	// CALL BEFORE "executeDespawns"
 	void executeDespawns();
-	Drawable buildDrawable(ent_id_t id, Draw const& draw);
-	std::vector<Drawable> getDrawableVec();
 private:
+	size_t oldCapacity;
 	std::vector<Ent> entities;
 	std::queue<ent_id_t> emptySlots;
 	ent_id_t lastID;

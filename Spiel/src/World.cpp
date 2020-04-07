@@ -1,22 +1,6 @@
 #include "World.h"
 #include "Physics.h"
 
-Drawable World::buildDrawable(ent_id_t id, Draw const& draw)
-{
-	assert(id > 0);
-	return Drawable(id, getComp<Base>(id).position, draw.drawingPrio, draw.scale, draw.color, (Form)draw.form, getComp<Base>(id).rotation, draw.throwsShadow);
-}
-
-std::vector<Drawable> World::getDrawableVec()
-{
-	std::vector<Drawable> res;
-	res.reserve(entities.size());
-	for (auto iter = getAll<Draw>().begin(); iter != getAll<Draw>().end(); ++iter) {
-		res.push_back(buildDrawable(iter.id(), *iter));
-	}
-	return res;
-}
-
 ent_id_t World::createEnt() {
 	if (!emptySlots.empty()) {
 		ent_id_t id = emptySlots.front();
@@ -122,6 +106,18 @@ size_t const World::getEntCount() {
 
 size_t const World::getEntMemSize() {
 	return entities.size();
+}
+
+bool World::didStaticsChange()
+{
+	if (entities.capacity() != oldCapacity || staticSpawnOrDespawn) {
+		staticSpawnOrDespawn = false; // reset flag
+		oldCapacity = entities.capacity();
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void World::loadMap(std:: string mapname_) {

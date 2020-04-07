@@ -99,6 +99,9 @@
     <ClInclude Include="src\PhysicsTypes.h">
       <Filter>_Physics</Filter>
     </ClInclude>
+    <ClInclude Include="src\RenderingWorker.h">
+      <Filter>_Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
@@ -130,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="src\QuadTree.cpp">
       <Filter>_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RenderingWorker.cpp">
+      <Filter>_Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

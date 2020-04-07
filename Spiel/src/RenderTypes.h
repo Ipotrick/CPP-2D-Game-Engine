@@ -1,6 +1,11 @@
 #pragma once
 
+#include <vector>
+#include <string>
+
 #include "BaseTypes.h"
+#include "Camera.h"
+#include "Window.h"
 
 struct Basis {
 	/* x y world coordinates, z depth*/
@@ -54,4 +59,10 @@ struct Light {
 	float radius;
 	uint32_t id;
 	vec4 color;
+};
+
+struct RenderBuffer {
+	std::vector<Drawable> worldSpaceDrawables;
+	std::vector<Drawable> windowSpaceDrawables;
+	Camera camera;
 };

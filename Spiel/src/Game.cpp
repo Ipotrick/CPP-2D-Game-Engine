@@ -28,7 +28,7 @@ void Game::create() {
 }
 
 void Game::update(World& world, float deltaTime) {
-	submitDrawableWindowSpace(Drawable(0, vec2(0, 0), 0, vec2(2,2), vec4(0.5, 0.5, 0.5, 1), Form::RECTANGLE, 0));
+	submitDrawableWindowSpace(Drawable(0, vec2(0, 0), 0, vec2(2,2), vec4(0.1, 0.1, 0.1, 1), Form::RECTANGLE, 0));
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();

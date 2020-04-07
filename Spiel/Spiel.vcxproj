@@ -36,6 +36,7 @@
     <ClInclude Include="src\PlayerScript.h" />
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\RenderingWorker.h" />
     <ClInclude Include="src\RenderTypes.h" />
     <ClInclude Include="src\Script.h" />
     <ClInclude Include="src\ScriptInclude.h" />
@@ -53,6 +54,7 @@
     <ClCompile Include="src\PhysicsWorker.cpp" />
     <ClCompile Include="src\QuadTree.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\RenderingWorker.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -1,14 +1,4 @@
-//=============================================================================
-//
-//   Exercise code for the lecture "Introduction to Computer Graphics"
-//     by Prof. Mario Botsch, Bielefeld University
-//
-//   Copyright (C) by Computer Graphics Group, Bielefeld University
-//
-//=============================================================================
-#ifndef GL_MATH_H
-#define GL_MATH_H
-//=============================================================================
+#pragma once
 
 #include <iostream>
 #include <assert.h>
@@ -21,202 +11,120 @@
 #include <algorithm>
 #endif
 
-
-//=============================================================================
-
-
-/// \file glmath.h Implements the vector and matrix classes and their mathematical operations.
-
-
-//=============================================================================
-
-
 class mat4;
-
-
-//=============================================================================
-
 
 inline float deg2rad(const float deg) { return deg/180.0f*(float)M_PI; }
 inline float rad2deg(const float rad) { return rad*180.0f/(float)M_PI; }
 
-
-//=============================================================================
-
 class vec2
 {
 public:
-
-	/// this union allows us to access vector elements by either x,y,z or r,g,b,
-	/// but we have to store only three floats.
 	union
 	{
-		/// XYZ coordinates
-		struct
-		{
-			float x; ///< x coordinate
-			float y; ///< y coordinate
+		struct {
+			float x;
+			float y;
 		};
 
-		/// RGB color components
-		struct
-		{
-			float r; ///< red component
-			float g; ///< green component
+		struct {
+			float r;
+			float _;
 		};
 	};
-
-
 public:
-
-	/// default constructor
-	vec2() {}
-
-	/// construct with scalar value that is assigned to x, y, and z
+	vec2() = default;
 	vec2(float _s) : x(_s), y(_s) {}
-
-	/// construct with x,y,z values
 	vec2(float _x, float _y) : x(_x), y(_y) {}
 
-	/// return pointer to array/vector (for passing it to OpenGL)
 	const float* data() const { return &x; }
 
-	/// read/write the _i'th vector component (_i from 0 to 2)
-	float& operator[](unsigned int _i)
-	{
-		assert(_i < 2);
-		return (&x)[_i];
+	float& operator[](unsigned i) {
+		assert(i < 2);
+		return (&x)[i];
 	}
 
-	/// read the _i'th vector component (_i from 0 to 2)
-	const float operator[](unsigned int _i) const
-	{
-		assert(_i < 2);
-		return (&x)[_i];
+	float const operator[](unsigned i) const {
+		assert(i < 2);
+		return (&x)[i];
 	}
 
-
-	/// multiply this vector by a scalar \c s
-	vec2& operator*=(const float s)
-	{
+	vec2& operator*=(float const s) {
 		x *= s;
 		y *= s;
 		return *this;
 	}
 
-	/// divide this vector by a scalar \c s
-	vec2& operator/=(const float s)
-	{
+	vec2& operator/=(float const s) {
 		x /= s;
 		y /= s;
 		return *this;
 	}
 
-	/// component-wise multiplication of this vector with vector \c v
-	vec2& operator*=(const vec2& v)
-	{
+	vec2& operator*=(vec2 const& v) {
 		x *= v.x;
 		y *= v.y;
 		return *this;
 	}
 
-	/// subtract vector \c v from this vector
-	vec2& operator-=(const vec2& v)
-	{
+	vec2& operator-=(vec2 const& v) {
 		x -= v.x;
 		y -= v.y;
 		return *this;
 	}
 
-	/// add vector \c v to this vector
-	vec2& operator+=(const vec2& v)
-	{
+	vec2& operator+=(const vec2& v) {
 		x += v.x;
 		y += v.y;
 		return *this;
 	}
 };
 
-
-//-----------------------------------------------------------------------------
-
-
-/// unary minus: turn v into -v
-inline const vec2 operator-(const vec2& v)
-{
-	return vec2(-v.x, -v.y);
+inline vec2 const operator-(vec2 const& v) {
+	return { -v.x, -v.y };
 }
 
-/// multiply vector \c v by scalar \c s
-inline const vec2 operator*(const float s, const vec2& v)
-{
-	return vec2(s * v.x,
-		s * v.y);
+inline vec2 const operator*(float const s, vec2 const& v) {
+	return {s * v.x, s * v.y };
 }
 
-/// multiply vector \c v by scalar \c s
-inline const vec2 operator*(const vec2& v, const float s)
-{
-	return vec2(s * v.x,
-		s * v.y);
+inline vec2 const operator*(const vec2& v, const float s) {
+	return { s * v.x, s * v.y };
 }
 
-/// component-wise multiplication of vectors \c v0 and \c v1
-inline const vec2 operator*(const vec2& v0, const vec2& v1)
-{
-	return vec2(v0.x * v1.x,
-		v0.y * v1.y);
+inline vec2 const operator*(const vec2& v0, const vec2& v1) {
+	return { v0.x * v1.x, v0.y * v1.y };
 }
 
-/// divide vector \c v by scalar \c s
-inline const vec2 operator/(const vec2& v, const float s)
-{
-	return vec2(v.x / s,
-		v.y / s);
+inline vec2 const operator/(vec2 const& v, float const s) {
+	return { v.x / s, v.y / s };
 }
 
-inline const vec2 operator/(const vec2& v0, const vec2& v1)
-{
-	return vec2(v0.x / v1.x, v0.y / v1.y);
+inline vec2 const operator/(vec2 const& v0, vec2 const& v1) {
+	return { v0.x / v1.x, v0.y / v1.y };
 }
 
-/// add two vectors \c v0 and \c v1
-inline const vec2 operator+(const vec2& v0, const vec2& v1)
-{
-	return vec2(v0.x + v1.x,
-		v0.y + v1.y);
+inline vec2 const operator+(vec2 const& v0, vec2 const& v1) {
+	return { v0.x + v1.x, v0.y + v1.y };
 }
 
-/// subtract vector \c v1 from vector \c v0
-inline const vec2 operator-(const vec2& v0, const vec2& v1)
-{
-	return vec2(v0.x - v1.x,
-		v0.y - v1.y);
+inline vec2 const operator-(vec2 const& v0, vec2 const& v1) {
+	return vec2(v0.x - v1.x, v0.y - v1.y);
 }
 
-/// compute the component-wise minimum of vectors \c v0 and \c v1
-inline const vec2 min(const vec2& v0, const vec2& v1)
-{
-	return vec2(std::min(v0.x, v1.x),
-		std::min(v0.y, v1.y));
+inline vec2 const min(vec2 const& v0, vec2 const& v1) {
+	return { std::min(v0.x, v1.x), std::min(v0.y, v1.y) };
 }
 
-/// compute the component-wise maximum of vectors \c v0 and \c v1
-inline const vec2 max(const vec2& v0, const vec2& v1)
-{
-	return vec2(std::max(v0.x, v1.x),
-		std::max(v0.y, v1.y));
+inline vec2 const max(vec2 const& v0, vec2 const& v1) {
+	return {std::max(v0.x, v1.x), std::max(v0.y, v1.y) };
 }
 
-/// compute the Euclidean norm (length) of a vector \c v
-inline const float norm(const vec2& v)
-{
+// slow! (uses sqrt)
+inline float const norm(vec2 const& v) {
 	return sqrt(v.x * v.x + v.y * v.y);
 }
 
-/// normalize vector \c v by dividing it by its norm
-inline const vec2 normalize(const vec2& v)
-{
+inline vec2 const normalize(vec2 const& v) {
 	const float n = norm(v);
 	if (n != 0.0)
 	{
@@ -226,40 +134,31 @@ inline const vec2 normalize(const vec2& v)
 	return v;
 }
 
-/// compute the distance between vectors \c v0 and \c v1
-inline const float distance(const vec2& v0, const vec2& v1)
-{
+inline float const distance(vec2 const& v0, vec2 const& v1) {
 	return norm(v0 - v1);
 }
 
-/// compute the Euclidean dot product of \c v0 and \c v1
-inline const float dot(const vec2& v0, const vec2& v1)
-{
+// compute the dot product
+inline const float dot(vec2 const& v0, vec2 const& v1) {
 	return (v0.x * v1.x + v0.y * v1.y);
 }
 
-/// compute the cross product of \c v0 and \c v1
-inline const float cross(const vec2& v0, const vec2& v1)
-{
+// compute the cross product
+inline float const cross(vec2 const& v0, vec2 const& v1) {
 	return v0.x * v1.y - v0.y * v1.x;
 }
 
-/// reflect vector \c v at normal \c n
-inline const vec2 reflect(const vec2& v, const vec2& n)
-{
+// reflect vector v at normal n
+inline vec2 const reflect(vec2 const& v, vec2 const& n) {
 	return v - (2.0f * dot(n, v)) * n;
 }
 
-/// read the space-separated components of a vector from a stream
-inline std::istream& operator>>(std::istream& is, vec2& v)
-{
+inline std::istream& operator>>(std::istream& is, vec2& v) {
 	is >> v.x >> v.y;
 	return is;
 }
 
-/// output a vector by printing its comma-separated compontens
-inline std::ostream& operator<<(std::ostream& os, const vec2& v)
-{
+inline std::ostream& operator<<(std::ostream& os, const vec2& v) {
 	os << '(' << v.x << ", " << v.y << ')';
 	return os;
 }
@@ -274,8 +173,7 @@ inline vec2 rotate90(vec2 const& vec) {
 	return {-vec.y, vec.x};
 }
 
-inline float getAngle(vec2 v)
-{
+inline float getAngle(vec2 v) {
 	if (v.y == 0.0f)
 		return v.x < 0.0f ? 180.0f : 0.0f;
 	else if (v.x == 0)
@@ -303,99 +201,75 @@ inline float getAngle(vec2 v)
 class vec3
 {
 public:
-
-    /// this union allows us to access vector elements by either x,y,z or r,g,b,
-    /// but we have to store only three floats.
     union
     {
-        /// XYZ coordinates
         struct
         {
-            float x; ///< x coordinate
-            float y; ///< y coordinate
-            float z; ///< z coordinate
+            float x; // x coordinate
+            float y; // y coordinate
+            float z; // z coordinate
         };
 
-        /// RGB color components
         struct
         {
-            float r; ///< red component
-            float g; ///< green component
-            float b; ///< blue component
+            float r; // red component
+            float g; // green component
+            float b; // blue component
         };
     };
 
-
 public:
+	vec3() = default;
 
-    /// default constructor
-    vec3() {}
-
-    /// construct with scalar value that is assigned to x, y, and z
-    vec3(float _s) : x(_s), y(_s), z(_s) {}
+    vec3(float s) : x(s), y(s), z(s) {}
 
 	vec3(vec2 vec2_) :x{vec2_.x}, y{vec2_.y}, z{0} {}
 
-    /// construct with x,y,z values
     vec3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
 
-    /// return pointer to array/vector (for passing it to OpenGL)
+	// openGL access func
     const float* data() const { return &x; }
 
-    /// read/write the _i'th vector component (_i from 0 to 2)
-    float& operator[](unsigned int _i)
-    {
-        assert(_i < 3);
-        return (&x)[_i];
+    float& operator[](unsigned i) {
+        assert(i < 3);
+        return (&x)[i];
     }
 
-    /// read the _i'th vector component (_i from 0 to 2)
-    const float operator[](unsigned int _i) const
+    const float operator[](unsigned i) const
     {
-        assert(_i < 3);
-        return (&x)[_i];
+        assert(i < 3);
+        return (&x)[i];
     }
 
-
-    /// multiply this vector by a scalar \c s
-    vec3& operator*=(const float s)
-    {
+    vec3& operator*=(float const s) {
         x *= s;
         y *= s;
         z *= s;
         return *this;
     }
 
-    /// divide this vector by a scalar \c s
-    vec3& operator/=(const float s)
-    {
+    vec3& operator/=(float const s) {
         x /= s;
         y /= s;
         z /= s;
         return *this;
     }
 
-    /// component-wise multiplication of this vector with vector \c v
-    vec3& operator*=(const vec3& v)
-    {
+    vec3& operator*=(vec3 const& v) {
         x *= v.x;
         y *= v.y;
         z *= v.z;
         return *this;
     }
 
-    /// subtract vector \c v from this vector
-    vec3& operator-=(const vec3& v)
-    {
+    vec3& operator-=(vec3 const& v) {
         x -= v.x;
         y -= v.y;
         z -= v.z;
         return *this;
     }
 
-    /// add vector \c v to this vector
-    vec3& operator+=(const vec3& v)
-    {
+    vec3& operator+=(vec3 const& v) {
         x += v.x;
         y += v.y;
         z += v.z;
@@ -403,78 +277,52 @@ public:
     }
 };
 
-
-//-----------------------------------------------------------------------------
-
-
-/// unary minus: turn v into -v
-inline const vec3 operator-(const vec3& v)
-{
+inline vec3 const operator-(vec3 const& v) {
     return vec3(-v.x, -v.y, -v.z);
 }
 
-/// multiply vector \c v by scalar \c s
-inline const vec3 operator*(const float s, const vec3& v )
-{
-    return vec3(s * v.x,
-                s * v.y,
-                s * v.z);
+inline vec3 const operator*(float const s,  vec3 const& v ) {
+	return { s * v.x, s * v.y, s * v.z };
 }
 
-/// multiply vector \c v by scalar \c s
-inline const vec3 operator*(const vec3& v, const float s)
-{
-    return vec3(s * v.x,
-                s * v.y,
-                s * v.z);
+inline vec3 const operator*(vec3 const& v, float const s) {
+	return { s * v.x, s * v.y, s * v.z };
 }
 
-/// component-wise multiplication of vectors \c v0 and \c v1
-inline const vec3 operator*(const vec3& v0, const vec3& v1)
-{
-    return vec3(v0.x * v1.x,
-                v0.y * v1.y,
-                v0.z * v1.z);
+inline vec3 const operator*(vec3 const& v0, vec3 const& v1) {
+	return { v0.x * v1.x, v0.y * v1.y, v0.z * v1.z };
 }
 
-/// divide vector \c v by scalar \c s
-inline const vec3 operator/(const vec3& v, const float s)
-{
-    return vec3(v.x / s,
-                v.y / s,
-                v.z / s);
+inline vec3 const operator/(vec3 const& v, float const s) {
+	return { v.x / s,
+				v.y / s,
+				v.z / s };
 }
 
-/// add two vectors \c v0 and \c v1
-inline const vec3 operator+(const vec3& v0, const vec3& v1)
-{
-    return vec3(v0.x + v1.x,
-                v0.y + v1.y,
-                v0.z + v1.z);
+inline vec3 const operator+(vec3 const& v0, vec3 const& v1) {
+	return { v0.x + v1.x,
+				v0.y + v1.y,
+				v0.z + v1.z };
 }
 
-/// subtract vector \c v1 from vector \c v0
-inline const vec3 operator-(const vec3& v0, const vec3& v1)
-{
-    return vec3(v0.x - v1.x,
-                v0.y - v1.y,
-                v0.z - v1.z);
+inline vec3 const operator-(vec3 const& v0, vec3 const& v1) {
+	return { v0.x - v1.x,
+				v0.y - v1.y,
+				v0.z - v1.z };
 }
 
-/// compute the component-wise minimum of vectors \c v0 and \c v1
-inline const vec3 min(const vec3& v0, const vec3& v1)
-{
-    return vec3(std::min(v0.x, v1.x),
-                std::min(v0.y, v1.y),
-                std::min(v0.z, v1.z));
+// compute the component-wise minimum
+inline vec3 const min(vec3 const& v0, vec3 const& v1) {
+	return { std::min(v0.x, v1.x),
+				std::min(v0.y, v1.y),
+				std::min(v0.z, v1.z) };
 }
 
-/// compute the component-wise maximum of vectors \c v0 and \c v1
-inline const vec3 max(const vec3& v0, const vec3& v1)
-{
-    return vec3(std::max(v0.x, v1.x),
-                std::max(v0.y, v1.y),
-                std::max(v0.z, v1.z));
+// compute the component-wise maximum
+inline vec3 const max(vec3 const& v0, vec3 const& v1) {
+	return { std::max(v0.x, v1.x),
+				std::max(v0.y, v1.y),
+				std::max(v0.z, v1.z) };
 }
 
 /// compute the Euclidean norm (length) of a vector \c v
@@ -496,42 +344,33 @@ inline const vec3 normalize(const vec3& v)
     return v;
 }
 
-/// compute the distance between vectors \c v0 and \c v1
-inline const float distance(const vec3& v0, const vec3& v1)
-{
+inline float const distance(vec3 const& v0, vec3 const& v1) {
     return norm(v0-v1);
 }
 
-/// compute the Euclidean dot product of \c v0 and \c v1
-inline const float dot(const vec3& v0, const vec3& v1)
-{
+// compute the Euclidean dot product
+inline float const dot(vec3 const& v0, vec3 const& v1) {
     return (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);
 }
 
-/// compute the cross product of \c v0 and \c v1
-inline const vec3 cross(const vec3& v0, const vec3& v1)
-{
-    return vec3(v0.y*v1.z - v0.z*v1.y,
-                v0.z*v1.x - v0.x*v1.z,
-                v0.x*v1.y - v0.y*v1.x);
+// compute the cross product of \c v0 and \c v1
+inline vec3 const cross(vec3 const& v0, vec3 const& v1) {
+	return { v0.y * v1.z - v0.z * v1.y,
+				v0.z * v1.x - v0.x * v1.z,
+				v0.x * v1.y - v0.y * v1.x };
 }
 
-/// reflect vector \c v at normal \c n
-inline const vec3 reflect(const vec3& v, const vec3& n)
-{
+// reflect vector v at normal n
+inline vec3 const reflect(vec3 const& v, vec3 const& n) {
     return v - (2.0f * dot(n,v)) * n;
 }
 
-/// read the space-separated components of a vector from a stream
-inline std::istream& operator>>(std::istream& is, vec3& v)
-{
+inline std::istream& operator>>(std::istream& is, vec3& v) {
     is >> v.x >> v.y >> v.z;
     return is;
 }
 
-/// output a vector by printing its comma-separated compontens
-inline std::ostream& operator<<(std::ostream& os, const vec3& v)
-{
+inline std::ostream& operator<<(std::ostream& os,  vec3 const& v) {
     os << '(' << v.x << ", " << v.y << ", " << v.z << ')';
     return os;
 }
@@ -861,9 +700,3 @@ vec4 operator*(const mat4& m, const vec4& v0);
 
 /// print matrix to output stream
 std::ostream& operator<<(std::ostream& os, const mat4& m);
-
-
-//=============================================================================
-#endif
-//=============================================================================
-
