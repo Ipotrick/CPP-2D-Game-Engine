@@ -123,6 +123,7 @@ private:
 	template<int N>
 	void syncCompositPhysics();
 	void updateStaticGrid(World& world);
+	void rendererUpdate(World& world);
 
 private:
 	// meta
@@ -132,7 +133,6 @@ private:
 	bool rebuildStaticData{ true };
 
 	// physics
-	size_t oldWorldEntitiesCapacity;
 	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;
 	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
@@ -146,7 +146,7 @@ private:
 	// AI
 	Grid<bool> staticGrid;
 
-	// perf
+	// perf TODO REFACTOR INTO OWN STRUCT
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
 	std::chrono::microseconds new_mainTime;
@@ -176,11 +176,9 @@ private:
 
 	// window
 	std::shared_ptr<Window> window;
-	std::shared_ptr<RendererSharedData> sharedRenderData;
-	std::thread renderThread;
-	RenderBuffer renderBufferA;
 
 	// render
+	Renderer renderer;
 	std::vector<Drawable> windowSpaceDrawables;
 	std::vector<Drawable> worldSpaceDrawables;
 };
