@@ -104,7 +104,7 @@ private:
 	GENERATE_COMPONENT_CODE(Bullet, storage_hash_t, 11)
 	GENERATE_COMPONENT_CODE(Enemy, storage_hash_t, 12)
 private:
-	
+	//
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	friend class Engine;
