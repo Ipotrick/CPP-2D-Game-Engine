@@ -118,7 +118,7 @@ struct CollisionTestResult {
 	float clippingDist;
 	bool collided;
 
-	CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f } {}
+	CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f }, collisionNormal{ 1,0 } {}
 };
 
 struct CollisionInfo {

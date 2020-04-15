@@ -106,4 +106,4 @@ inline bool isOverlappingAABB(CollidableAdapter const* a, CollidableAdapter cons
 	fabs(b->getPos().y - a->getPos().y) <= fabs(b->getBoundsSize().y + a->getBoundsSize().y) * 0.5f;
 }
 
-CollisionTestResult checkForCollision(CollidableAdapter const* coll_, CollidableAdapter const* other_, bool bothSolid);
+CollisionTestResult checkForCollision(CollidableAdapter const* coll_, CollidableAdapter const* other_);

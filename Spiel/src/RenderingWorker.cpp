@@ -56,6 +56,7 @@ void RenderingWorker::initiate()
 		}
 	}
 
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
 
 	auto vertexShader = readShader(vertexShaderPath);
 	auto fragmentShader = readShader(fragmentShaderPath);
@@ -69,115 +70,64 @@ void RenderingWorker::initiate()
 	glEnable(GL_BLEND);
 	// change blending type to transparency blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	texHandler.initialize();
 }
 
 void RenderingWorker::operator()()
 {
 	initiate();
-
-	float positions[8] =
+	
+	float positions[16] =
 	{
-		-0.5,0.5,
-		0.5,0.5,
-		-0.5,-0.5,
-		0.5,-0.5
+		-0.5, 0.5, 0.0f, 1.0f,
+		0.5,0.5, 1.0f, 1.0f,
+		-0.5,-0.5, 0.0f, 0.0f,
+		0.5,-0.5, 1.0f, 0.0f
 	};
-	unsigned int buffer;
+	GLuint buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 16 * sizeof(float), positions, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	auto& worldDrawables = data->renderBuffer.worldSpaceDrawables;
-	auto& windowDrawables = data->renderBuffer.windowSpaceDrawables;
-	auto& camera = data->renderBuffer.camera;
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (const void*)(sizeof(float) * 2));
+	
 	while (data->run) {
-		{	// wait for main
-			Timer<> t(data->new_renderSyncTime);
-			std::unique_lock<std::mutex> switch_lock(data->mut);
-			data->ready = true;
-			data->cond.notify_one();
-			data->cond.wait(switch_lock, [&]() { return data->ready == false; });
-		}
-
-		{	// process renderdata
+		auto& drawables = data->renderBuffer->drawables;
+		auto& camera = data->renderBuffer->camera;
+		{	
 			Timer<> t(data->new_renderTime);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
-
-			std::sort(worldDrawables.begin(), worldDrawables.end(),
-				[](Drawable const& a, Drawable const& b) {
-					return a.drawingPrio < b.drawingPrio;
+			// add texture Refs
+			textureRefMap.clear();
+			for (auto& tex : data->renderBuffer->newTextureRefs) {
+				if (!texHandler.isTextureLoaded(tex.second.textureName)) {
+					// load all not loaded  textures from file
+					auto success = texHandler.loadTexture(tex.second.textureName);
+					assert(success);
 				}
-			);
-			std::sort(windowDrawables.begin(), windowDrawables.end(),
-				[](Drawable const& a, Drawable const& b) {
-					return a.drawingPrio < b.drawingPrio;
-				}
-			);
-
-			//render game objects that can be lit and/or shadowed (drawprio <0.9)
-			glUseProgram(shader);
-			/*glBindBuffer(GL_ARRAY_BUFFER, buffer);
-			glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(float), positions, GL_STATIC_DRAW);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);*/
-			auto iterWorld = worldDrawables.begin();
-			auto iterWindow = windowDrawables.begin();
-			while (!(iterWorld == worldDrawables.end()) || !(iterWindow == windowDrawables.end())) {
-				if (!(iterWorld == worldDrawables.end()) && !(iterWindow == windowDrawables.end())) {	// there are world AND window drawables left
-					if (iterWorld->drawingPrio < iterWindow->drawingPrio) {	// decide wich to draw considering drawingprio
-						if (iterWorld->drawingPrio >= 0.9f) break;
-						drawWorldSpace(*iterWorld++, viewProjectionMatrix);
-					}
-					else {
-						if (iterWindow->drawingPrio >= 0.9f) break;
-						drawWindowSpace(*iterWindow++);
-					}
-				}
-				else if (!(iterWorld == worldDrawables.end())) {	// there are world drawables left
-					if (iterWorld->drawingPrio >= 0.9f) break;
-					drawWorldSpace(*iterWorld++, viewProjectionMatrix);
-				}
-				else {	// there are window drawables left
-					if (iterWindow->drawingPrio >= 0.9f) break;
-					drawWindowSpace(*iterWindow++);
-				}
+				textureRefMap.insert({ tex.first, tex.second });
 			}
 
-			// render lightmap
-			glUseProgram(shadowShader);
-			// TODO: change blending modus to additive
-			// TODO: change active framebuffer to lightbuffer
+			mat4 viewProjectionMatrix = mat4::scale(camera.zoom) * mat4::scale(camera.frustumBend) * mat4::rotate_z(-camera.rotation) * mat4::translate(-camera.position);
 
-			// TODO: loop: for every light
-				// TODO: compute visibility area
-				// TODO: render visibility area for sencil buffer test
-				// TODO: render light into light buffer WITH sencil buffer test to not generate light in shadow
+			std::sort(drawables.begin(), drawables.end(),
+				[](Drawable const& a, Drawable const& b) {
+					return a.drawingPrio < b.drawingPrio;
+				}
+			);
 
-			// TODO: add ambient light to the light framebuffer
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// TODO: blend(multiply) light buffer with rendered world buffer
-
-			// render game objects that can NOT be lit and/or shadowed (drawprio >= 0.9)
-			// TODO: change active framebuffer to mainbuffer
-			// TODO: change blending back to transparency blending
 			glUseProgram(shader);
-			while (!(iterWorld == worldDrawables.end()) || !(iterWindow == windowDrawables.end())) {
-				if (!(iterWorld == worldDrawables.end()) && !(iterWindow == windowDrawables.end())) {	// there are world AND window drawables left
-					if (iterWorld->drawingPrio > iterWindow->drawingPrio) {	// decide wich to draw considering drawingprio
-						drawWorldSpace(*iterWorld++, viewProjectionMatrix);
-					}
-					else {
-						drawWindowSpace(*iterWindow++);
-					}
+			glBindBuffer(GL_ARRAY_BUFFER, buffer);
+			for (auto const& drawable : drawables) {
+				if (drawable.isInWindowSpace()) {
+					drawDrawable(drawable, mat4::identity());
 				}
-				else if (!(iterWorld == worldDrawables.end())) {	// there are world drawables left
-					drawWorldSpace(*iterWorld++, viewProjectionMatrix);
-				}
-				else {	// there are window drawables left
-					drawWindowSpace(*iterWindow++);
+				else {
+					drawDrawable(drawable, viewProjectionMatrix);
 				}
 			}
 
@@ -195,11 +145,15 @@ void RenderingWorker::operator()()
 				glViewport(0, 0, window->width, window->height);
 				window->width = width;
 				window->height = height;
-
-				if (glfwWindowShouldClose(window->glfwWindow)) {
-					data->run = false;
-				}
 			}
+		}
+
+		{	// wait for main
+			Timer<> t(data->new_renderSyncTime);
+			std::unique_lock<std::mutex> switch_lock(data->mut);
+			data->ready = true;
+			data->cond.notify_one();
+			data->cond.wait(switch_lock, [&]() { return data->ready == false; });
 		}
 	}
 
@@ -228,28 +182,54 @@ std::string RenderingWorker::readShader(std::string path_)
 	return ss.str();
 }
 
-void RenderingWorker::drawWorldSpace(Drawable const& d, mat4 const& viewProjectionMatrix)
+void RenderingWorker::drawDrawable(Drawable const& d, mat4 const& viewProjectionMatrix)
 {
+	constexpr int texSlot{ 0 };
+	if (textureRefMap.contains(d.id)) {
+		if (texHandler.isTextureLoaded(textureRefMap[d.id].textureName)) {
+			glUniform1i(10, texSlot);	// set unifrom of texture to slot 0
+			bindTexture(textureRefMap[d.id].textureName, texSlot);
+		}
+		else { 
+			glUniform1i(10, texSlot);	// set unifrom of texture to slot 0
+			bindTexture("default", texSlot);
+		}
+	}
+	else {
+		glUniform1i(10, texSlot);	// set unifrom of texture to slot 0
+		bindTexture("white", texSlot);
+	}
+
 	mat4 modelMatrix = mat4::translate(vec3(d.position.x, d.position.y, 1 - d.drawingPrio)) * mat4::rotate_z(d.rotation) * mat4::scale(vec3(d.scale.x, d.scale.y, 1));
-	glUniformMatrix4fv(1, 1, GL_FALSE, modelMatrix.data());
-	glUniformMatrix4fv(6, 1, GL_FALSE, viewProjectionMatrix.data());
-	glUniform4fv(2, 1, d.color.data());
-	glUniform1i(3, (d.form == Form::CIRCLE ? 1 : 0));
-	glUniform2fv(4, 1, d.position.data());
-	glUniform1f(5, d.scale.r / 2.0f);
+	glUniformMatrix4fv(3, 1, GL_FALSE, modelMatrix.data());
+	glUniformMatrix4fv(4, 1, GL_FALSE, viewProjectionMatrix.data());
+	glUniform4fv(5, 1, d.color.data());
+	glUniform1i(6, (d.form == Form::CIRCLE ? 1 : 0));
+	glUniform2fv(7, 1, d.position.data());
+	glUniform1f(8, d.scale.r / 2.0f);
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glDrawArrays(GL_TRIANGLES, 1, 4);
 }
 
-void RenderingWorker::drawWindowSpace(Drawable const& d)
+void RenderingWorker::bindTexture(GLuint texID, int slot)
 {
-	mat4 modelMatrix = mat4::translate(d.position) * mat4::rotate_z(d.rotation) * mat4::scale(vec3(d.scale));
-	glUniformMatrix4fv(1, 1, GL_FALSE, (modelMatrix).data());
-	glUniformMatrix4fv(6, 1, GL_FALSE, mat4::identity().data());
-	glUniform4fv(2, 1, d.color.data());
-	glUniform1i(3, (d.form == Form::CIRCLE ? 1 : 0));
-	glUniform2fv(4, 1, d.position.data());
-	glUniform1f(5, d.scale.r / 2.0f);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawArrays(GL_TRIANGLES, 1, 4);
+#ifdef _DEBUG
+	int maxTexCount;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexCount);
+	assert(slot < maxTexCount);
+#endif
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, texID);
+}
+
+void RenderingWorker::bindTexture(std::string_view name, int slot)
+{
+#ifdef _DEBUG
+	int maxTexCount;
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexCount);
+	assert(slot < maxTexCount);
+#endif
+	assert(texHandler.isTextureLoaded(name)); 
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, texHandler.getTexture(name).openglTexID);
 }

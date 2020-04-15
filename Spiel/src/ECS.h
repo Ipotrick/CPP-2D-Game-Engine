@@ -14,8 +14,8 @@ using ent_id_t = uint32_t;
 
 using storage_t = int;
 
-constexpr storage_t storage_index_t = 0;
-constexpr storage_t storage_hash_t = 1;
+constexpr storage_t direct_indexing = 0;
+constexpr storage_t hasing = 1;
 
 template<typename CompType, storage_t storageType>
 class ComponentStorage {
@@ -25,6 +25,7 @@ public:
 	inline bool isRegistrated(ent_id_t entity) const;
 	inline CompType& getComponent(ent_id_t entity);
 	inline CompType const& getComponent(ent_id_t entity) const;
+	inline size_t size() const;
 	
 	class iterator {
 	public:
@@ -56,7 +57,7 @@ public:
 		violating these limitations will mass up the iterators
 */
 template<typename CompType>
-class ComponentStorage<CompType, storage_hash_t> {
+class ComponentStorage<CompType, hasing> {
 public:
 	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
 
@@ -84,6 +85,7 @@ public:
 		assert(isRegistrated(entity));
 		return storage[entity];
 	}
+	inline size_t size() const { return storage.size(); }
 	class iterator {
 	public:
 		typedef iterator self_type;
@@ -139,7 +141,7 @@ private:
 
 */
 template<typename CompType>
-class ComponentStorage<CompType, storage_index_t>{
+class ComponentStorage<CompType, direct_indexing>{
 public:
 	using storage_t = std::vector<std::pair<bool, CompType>>;
 
@@ -178,6 +180,7 @@ public:
 		assert(isRegistrated(entity));
 		return storage[entity].second;
 	}
+	inline size_t size() const { return storage.size(); }
 	class iterator {
 	public:
 		typedef iterator self_type;

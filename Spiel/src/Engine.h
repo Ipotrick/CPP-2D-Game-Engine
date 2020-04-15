@@ -8,13 +8,17 @@
 #include "GLFW/glfw3.h"
 
 // makro definitions:
-#define DEBUG_STATIC_GRID
+//#define DEBUG_STATIC_GRID
+//#define DEBUG_QUADTREE
+//#define DEBUG_QUADTREE2
+//#define DEBUG_PATHFINDING
 
 // ------------------
 
 #include "robin_hood.h"
 
 #include "Timing.h"
+#include "Perf.h"
 #include "BaseTypes.h"
 #include "RenderTypes.h"
 #include "QuadTree.h"
@@ -54,14 +58,6 @@ public:
 	inline float getDeltaTime() { return deltaTime; }
 	/* returns deltatime or the lowest allowed sim time difference, O(1)*/
 	inline float getDeltaTimeSafe() { return std::min(deltaTime, maxDeltaTime); }
-	/* returns physics + update + bufferSwapTime, O(1) */
-	inline float getMainTime() { return mainTime; }
-	/* returns time it took to process the last update task, O(1)*/
-	inline float getUpdateTime() { return updateTime; }
-	/* returns time it took to process the last physics task, O(1) */
-	inline float getPhysicsTime() { return physicsTime; }
-	/* returns time it took to render, O(1) */
-	inline float getRenderTime() { return renderTime; }
 	/* returns the number of past iterations , O(1)*/ 
 	inline uint32_t getIteration() { return iteration; }
 	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
@@ -94,18 +90,17 @@ public:
 	vec2 getPosWorldSpace(vec2 windowSpacePos);
 
 					/* graphics utility */
-	/* submit a Drawable to be drawn relative to the window, O(1) */
-	void submitDrawableWindowSpace(Drawable d_);
-	/* submit a Drawable to be drawn relative to the world, O(1) */
-	void submitDrawableWorldSpace(Drawable d_);
-				
+	/*  submit a Drawable to be drawn relative to the window, O(1)  */
+	void submitDrawable(Drawable && d_);
+	void submitDrawable(Drawable const& d_);
+	/* attach a texture to a submited Drawable */
+	void attachTexture(uint32_t drawableID, std::string_view name, vec2 min = { 0,0 }, vec2 max = { 1,1 });
+
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(ent_id_t id_);
 	/* CALL THIS WHENEVER YOU MOVE/ ADD/ REMOVE STATIC ENTITIES, O(1) */
-	inline void staticsChanged() { 
-		rebuildStaticData = true;
-	}
+	inline void staticsChanged() {  rebuildStaticData = true; }
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
 	Grid<bool> const& getStaticGrid() { return staticGrid; }
@@ -115,28 +110,27 @@ public:
 	EventHandler events;
 	Camera camera;
 
-	std::chrono::microseconds minimunLoopTime;
+	uint32_t freeDrawableID{ 0x80000000 };
 
 private:
-	void commitTimeMessurements();
 	void physicsUpdate(World& world, float deltaTime);
-	template<int N>
-	void syncCompositPhysics();
+	template<int N> void syncCompositPhysics();
 	void updateStaticGrid(World& world);
 	void rendererUpdate(World& world);
 
 private:
 	// meta
+	std::chrono::microseconds minimunLoopTime;
 	bool running;
 	uint32_t iteration;
-	float maxDeltaTime = 0.02f;
-	bool rebuildStaticData{ true };
+	float maxDeltaTime;
 
 	// physics
+	bool rebuildStaticData;
 	unsigned physicsThreadCount;
 	std::vector<CollisionInfo> collInfos;
-	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
-	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
+	robin_hood::unordered_map<ent_id_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
+	robin_hood::unordered_map<ent_id_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
 	std::vector<std::shared_ptr<PhysicsPerThreadData>> physicsPerThreadData;
 	std::shared_ptr<PhysicsPoolData> physicsPoolData;
 	std::shared_ptr<PhysicsSharedSyncData> sharedPhysicsSyncData;
@@ -146,47 +140,27 @@ private:
 	// AI
 	Grid<bool> staticGrid;
 
-	// perf TODO REFACTOR INTO OWN STRUCT
+	// perf
+	PerfLogger perfLog;
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
-	std::chrono::microseconds new_mainTime;
-	float mainTime;
-	std::chrono::microseconds new_updateTime;
-	float updateTime;
-	std::chrono::microseconds new_physicsTime;
-	float physicsTime;
-	std::chrono::microseconds new_physicsPrepareTime;
-	float physicsPrepareTime;
-	std::chrono::microseconds new_physicsCollisionTime;
-	float physicsCollisionTime;
-	std::chrono::microseconds new_physicsExecuteTime;
-	float physicsExecuteTime;
-	std::chrono::microseconds new_staticGridBuildTime;
-	float staticGridBuildTime;
-	std::chrono::microseconds new_mainSyncTime;
-	float mainSyncTime;
-	std::chrono::microseconds new_mainWaitTime;
-	float mainWaitTime;
-	std::chrono::microseconds new_renderBufferPushTime;
-	float renderBufferPushTime;
-	std::chrono::microseconds new_renderTime;
-	float renderTime;
-	std::chrono::microseconds new_renderSyncTime;
-	float renderSyncTime;
 
 	// window
 	std::shared_ptr<Window> window;
 
 	// render
 	Renderer renderer;
-	std::vector<Drawable> windowSpaceDrawables;
-	std::vector<Drawable> worldSpaceDrawables;
 };
 
-inline void Engine::submitDrawableWindowSpace(Drawable d_) {
-	windowSpaceDrawables.emplace_back(d_);
+inline void Engine::submitDrawable(Drawable && d) {
+	renderer.submit(std::move(d));
 }
 
-inline void Engine::submitDrawableWorldSpace(Drawable d_) {
-	worldSpaceDrawables.emplace_back(d_);
+inline void Engine::submitDrawable(Drawable const& d) {
+	renderer.submit(d);
+}
+
+inline void Engine::attachTexture(uint32_t drawableID, std::string_view name, vec2 min, vec2 max)
+{
+	renderer.attachTex(drawableID, name, min, max);
 }

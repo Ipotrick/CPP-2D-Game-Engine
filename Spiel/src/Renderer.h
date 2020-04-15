@@ -21,12 +21,18 @@ public:
 
 	// waits till the worker thread is finished
 	void waitTillFinished();
+	// swaps front and backbuffer
+	// can only be called when renderer is ready, so allways call waitTillFinished before
+	void flushSubmissions();
 	// allways call waitTillFinished once after rendering before calling this function
 	void submit(Drawable const& d);
 	void submit(Drawable && d);
 	// allways call waitTillFinished once after rendering before calling this function
 	void submitWindowSpace(Drawable const& d);
 	void submitWindowSpace(Drawable && d);
+	// attaches Texture to a drawable
+	void attachTex(uint32_t drawableID, std::string_view texName, vec2 min = { 0,0 }, vec2 max = { 1,1 });
+	void attachTex(uint32_t drawableID, TextureRef const& texRef);
 	// allways call waitTillFinished once after rendering before calling this function
 	void setCamera(Camera const& cam);
 	// allways call waitTillFinished once after rendering before calling this function
@@ -40,8 +46,13 @@ public:
 	// returns the time spend rendering
 	inline std::chrono::microseconds getRenderingTime() { return renderingTime ; }
 	// returns the time spend waiting for the worker to finish
-	inline std::chrono::microseconds getwaitedTime() { return syncTime; }
+	inline std::chrono::microseconds getWaitedTime() { return syncTime; }
 private:
+	bool wasWaitCalled{ false };
+	bool wasFushCalled{ false };
+	bool wasEndCalled{ false };
+	std::shared_ptr<RenderBuffer> frontBuffer;
+
 	std::shared_ptr<Window> window;
 	std::shared_ptr<RenderingSharedData> workerSharedData;
 	std::thread workerThread;
@@ -50,26 +61,28 @@ private:
 };
 
 inline void Renderer::submit(Drawable const& d) {
-	assert(workerSharedData->ready);	// ONLY SUBMIT WHEN WORKER IS WAITING
-	workerSharedData->renderBuffer.worldSpaceDrawables.push_back(d);
+	frontBuffer->drawables.push_back(d);
 }
 
 inline void Renderer::submit(Drawable && d) {
-	assert(workerSharedData->ready);	// ONLY SUBMIT WHEN WORKER IS WAITING
-	workerSharedData->renderBuffer.worldSpaceDrawables.emplace_back(d);
+#ifdef _DEBUG
+	auto d_ = d;
+	frontBuffer->drawables.push_back(d_);
+#else
+	frontBuffer->drawables.push_back(d);
+#endif
 }
 
-inline void Renderer::submitWindowSpace(Drawable const& d) {
-	assert(workerSharedData->ready);	// ONLY SUBMIT WHEN WORKER IS WAITING
-	workerSharedData->renderBuffer.windowSpaceDrawables.push_back(d);
+inline void Renderer::attachTex(uint32_t drawableID, std::string_view texName, vec2 min, vec2 max)
+{
+	frontBuffer->newTextureRefs.push_back({ drawableID, TextureRef(texName, min, max) });
 }
 
-inline void Renderer::submitWindowSpace(Drawable && d) {
-	assert(workerSharedData->ready);	// ONLY SUBMIT WHEN WORKER IS WAITING
-	workerSharedData->renderBuffer.windowSpaceDrawables.emplace_back(d);
+inline void Renderer::attachTex(uint32_t drawableID, TextureRef const& texRef)
+{
+	frontBuffer->newTextureRefs.push_back({ drawableID, texRef });
 }
 
 inline void Renderer::setCamera(Camera const& cam) {
-	assert(workerSharedData->ready);	// ONLY SUBMIT WHEN WORKER IS WAITING
-	workerSharedData->renderBuffer.camera = cam;
+	frontBuffer->camera = cam;
 }

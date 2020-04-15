@@ -4,37 +4,43 @@
  
 #include <vector>
 #include <queue>
+#include <bitset>
 
 #include "robin_hood.h"
 #include "json.h"
 
 #include "BaseTypes.h"
+#include "RenderTypes.h"
 #include "ECS.h"
 #include "CoreComponents.h"
 #include "GameComponents.h"
 
 #define GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, CompStorage, storageType) \
-template<> inline auto& getAll<CompType>() { return CompStorage; } \
-template<> inline CompType& getComp<CompType>(uint32_t id) { return CompStorage.getComponent(id); }\
-template<> inline bool hasComp<CompType>(uint32_t id) { return CompStorage.isRegistrated(id); }\
-template<> inline void addComp<CompType>(uint32_t id, CompType data) { CompStorage.registrate(id, data); } \
-template<> inline void addComp<CompType>(uint32_t id) { CompStorage.registrate(id, CompType()); }
-
-#define generateComponentAccessFunctionsExtern(CompType, CompStorage, storageType) \
-template<> inline auto& World::getAll<CompType>() { return CompStorage; } \
-template<> inline CompType& World::getComp<CompType>(uint32_t id) { return CompStorage.getComponent(id); }\
-template<> inline bool World::hasComp<CompType>(uint32_t id) { return CompStorage.isRegistrated(id); }\
-template<> inline void World::addComp<CompType>(uint32_t id, CompType data) { CompStorage.registrate(id, data); } \
-template<> inline void World::addComp<CompType>(uint32_t id) { CompStorage.registrate(id, CompType()); }
+template<> __forceinline auto& getAll<CompType>() { return CompStorage; } \
+template<> __forceinline CompType& getComp<CompType>(uint32_t id) { return CompStorage.getComponent(id); }\
+template<> __forceinline bool hasComp<CompType>(uint32_t id) { return CompStorage.isRegistrated(id); }\
+template<> __forceinline void addComp<CompType>(uint32_t id, CompType data) { CompStorage.registrate(id, data); } \
+template<> __forceinline void addComp<CompType>(uint32_t id) { CompStorage.registrate(id, CompType()); }
 
 #define GENERATE_COMPONENT_CODE(CompType, StorageType, Num) \
 private: ComponentStorage<CompType, StorageType> compStorage ## Num; \
 public: GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, compStorage ## Num, storageType)
 
-struct Ent {
-	Ent(bool valid_ = false) : valid{ valid_ }, despawnQueued{ false } {}
-	bool valid;
-	bool despawnQueued;
+class Ent {
+public:
+	Ent(bool valid) : flags{} {
+		flags[0] = valid;
+		flags[1] = 0;
+	}
+	__forceinline void setValid(bool valid) {  flags[0] = valid; }
+	__forceinline bool isValid() { return flags[0]; }
+	__forceinline void setDespawnMark(bool mark) { flags[1] = mark; }
+	__forceinline bool isDespawnMarked() { return flags[1]; }
+
+private:
+	// flag 0: valid
+	// flag 1: despawnMark
+	std::bitset<2> flags;
 };
 
 template<typename First, typename Second, typename ... CompTypes>
@@ -43,6 +49,10 @@ template<typename CompType>
 class SingleView;
 
 class World {
+	template<typename First, typename Second, typename ... CompTypes>
+	friend class MultiView;
+	template<typename CompType>
+	friend class SingleView;
 public:
 
 	World() : lastID{ 0 }, despawnList{}, oldCapacity{0}
@@ -91,19 +101,21 @@ public:
 
 	void loadMap(std::string);
 private:
-	GENERATE_COMPONENT_CODE(Base, storage_index_t, 0)
-	GENERATE_COMPONENT_CODE(Movement, storage_index_t, 1)
-	GENERATE_COMPONENT_CODE(Collider, storage_index_t, 2)
-	GENERATE_COMPONENT_CODE(SolidBody, storage_index_t, 3)
-	GENERATE_COMPONENT_CODE(Draw, storage_index_t, 4)
-	GENERATE_COMPONENT_CODE(Slave, storage_index_t, 5)
-	GENERATE_COMPONENT_CODE(Composit<4>, storage_hash_t, 6)
-	GENERATE_COMPONENT_CODE(CompDataLight, storage_hash_t, 7)
-	GENERATE_COMPONENT_CODE(Health, storage_hash_t, 8)
-	GENERATE_COMPONENT_CODE(Age, storage_hash_t, 9)
-	GENERATE_COMPONENT_CODE(Player, storage_hash_t, 10)
-	GENERATE_COMPONENT_CODE(Bullet, storage_hash_t, 11)
-	GENERATE_COMPONENT_CODE(Enemy, storage_hash_t, 12)
+	GENERATE_COMPONENT_CODE(Base, direct_indexing, 0)
+	GENERATE_COMPONENT_CODE(Movement, direct_indexing, 1)
+	GENERATE_COMPONENT_CODE(Collider, direct_indexing, 2)
+	GENERATE_COMPONENT_CODE(SolidBody, direct_indexing, 3)
+	GENERATE_COMPONENT_CODE(Draw, direct_indexing, 4)
+	GENERATE_COMPONENT_CODE(TextureRef, direct_indexing, 5)
+	GENERATE_COMPONENT_CODE(Slave, direct_indexing, 6)
+	GENERATE_COMPONENT_CODE(Composit<4>, hasing, 7)
+	GENERATE_COMPONENT_CODE(CompDataLight, hasing, 8)
+	GENERATE_COMPONENT_CODE(Health, hasing, 9)
+	GENERATE_COMPONENT_CODE(Age, hasing, 10)
+	GENERATE_COMPONENT_CODE(Player, hasing, 11)
+	GENERATE_COMPONENT_CODE(Bullet, hasing, 12)
+	GENERATE_COMPONENT_CODE(Enemy, hasing, 13)
+	GENERATE_COMPONENT_CODE(MoveField, hasing, 14)
 private:
 	//
 private:
@@ -123,7 +135,7 @@ private:
 
 // ---------- hasComps implementation --------------------------------------
 
-namespace {
+namespace _HasCompsTesterImpl {
 	template<typename... CompTypes>
 	struct HasCompsTester {
 		HasCompsTester(ent_id_t entity, World& world) {
@@ -148,7 +160,7 @@ namespace {
 
 template<typename... CompTypes>
 inline bool World::hasComps(ent_id_t entity) {
-	HasCompsTester<CompTypes...> tester(entity, *this);
+	_HasCompsTesterImpl::HasCompsTester<CompTypes...> tester(entity, *this);
 	return tester.result;
 }
 
@@ -157,7 +169,9 @@ inline bool World::hasComps(ent_id_t entity) {
 template<typename First, typename Second, typename ... CompTypes>
 class MultiView {
 public:
-	MultiView(World& wrld) : world{ wrld }, endID{ static_cast<ent_id_t>(world.getEntMemSize()) } {}
+	MultiView(World& wrld) : world{ wrld }, endID{ static_cast<ent_id_t>(world.getEntMemSize()) } {
+
+	}
 	template<typename First, typename Second, typename ... CompTypes>
 	class iterator {
 	public:
@@ -167,12 +181,13 @@ public:
 		typedef ent_id_t* pointer;
 		typedef std::forward_iterator_tag iterator_category;
 
-		iterator(ent_id_t ent, MultiView& vw) : entity{ ent }, view{ vw } {}
+		iterator(ent_id_t ent, MultiView& vw) : entity{ ent }, view{ vw } {
+		}
 		inline self_type operator++(int junk) {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
 			entity++;
-			while (!(view.world.hasComp<First>(entity) && view.world.hasComp<Second>(entity) && view.world.hasComps<CompTypes...>(entity)) && entity < view.endID) entity++;
+			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.hasComp<First>(entity) && view.world.hasComp<Second>(entity) && view.world.hasComps<CompTypes...>(entity))) entity++;
 			assert(entity <= view.endID);
 			return *this;
 		}
@@ -222,7 +237,11 @@ inline MultiView<First, Second, CompTypes...> World::view() {
 template<typename CompType>
 class SingleView {
 public:
-	SingleView(World& wrld) : world{ wrld }, endID{ static_cast<ent_id_t>(world.getEntMemSize()) } {}
+	SingleView(World& wrld) : world{ wrld }, endID{ static_cast<ent_id_t>(world.getEntMemSize()) } {
+#ifdef _DEBUG
+		componentStorageSizeOnCreate = world.getAll<CompType>().size();
+#endif
+	}
 	template<typename CompType>
 	class iterator {
 	public:
@@ -236,8 +255,9 @@ public:
 		inline self_type operator++(int junk) {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
+			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			entity++;
-			while (!view.world.hasComp<CompType>(entity) && entity < view.endID) entity++;
+			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.hasComp<CompType>(entity))) entity++;
 			assert(entity <= view.endID);
 			return *this;
 		}
@@ -249,11 +269,13 @@ public:
 		inline reference operator*() {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
+			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			return entity;
 		}
 		inline pointer operator->() {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
+			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			return &entity;
 		}
 		inline bool operator==(const self_type& rhs) {
@@ -275,6 +297,9 @@ public:
 private:
 	World& world;
 	ent_id_t endID;
+#ifdef _DEBUG
+	size_t componentStorageSizeOnCreate;
+#endif
 };
 
 template<typename CompType>
@@ -285,7 +310,7 @@ inline SingleView<CompType> World::view() {
 // -------------------------------------------------------------------------
 
 inline bool World::doesEntExist(ent_id_t entity) {
-	return (entity < entities.size() ? entities[entity].valid : false);
+	return (entity < entities.size() ? entities[entity].isValid() : false);
 }
 
 inline ent_id_t const World::getLastEntID() {
