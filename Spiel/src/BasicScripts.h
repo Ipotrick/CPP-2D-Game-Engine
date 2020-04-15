@@ -8,7 +8,7 @@ public:
 
 	inline void executeSample(uint32_t id, Health& data, float deltaTime) override {
 		World& world = engine.world;
-		auto [begin, end] = engine.getCollisionInfos(id);
+		auto [begin, end] = engine.getCollisions(id);
 		bool gotHitByBullet{ false };
 		for (auto iter = begin; iter != end; ++iter) {
 			if (world.hasComp<Bullet>(iter->idB)) {
@@ -54,7 +54,7 @@ public:
 	inline void executeSample(uint32_t id, Bullet& data, float deltaTime) override {
 		assert(engine.world.doesEntExist(id));
 		World& world = engine.world;
-		auto [begin, end] = engine.getCollisionInfos(id);
+		auto [begin, end] = engine.getCollisions(id);
 		bool foundCollisionWithMortal{ false };
 		for (auto iter = begin; iter != end; ++iter) {
 			if (world.hasComp<Health>(iter->idB)) {

@@ -28,6 +28,9 @@
     <Filter Include="_shader">
       <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_stbi">
+      <UniqueIdentifier>{41d0503f-0ab4-475c-ada3-0170b6a27b2f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
@@ -90,9 +93,6 @@
     <ClInclude Include="src\ECS.h">
       <Filter>_Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\RenderTypes.h">
-      <Filter>_Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\BaseTypes.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -101,6 +101,18 @@
     </ClInclude>
     <ClInclude Include="src\RenderingWorker.h">
       <Filter>_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Perf.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureHandler.h">
+      <Filter>_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderTypes.h">
+      <Filter>_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libraries\stb_image\stb_image.h">
+      <Filter>_stbi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -136,6 +148,12 @@
     </ClCompile>
     <ClCompile Include="src\RenderingWorker.cpp">
       <Filter>_Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureHandler.cpp">
+      <Filter>_Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
+      <Filter>_stbi</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,5 @@
 #include "QuadTree.h"
-
+/*
 void Quadtree::printContcoll(int i) const {
 	for (int j = 0; j < i; j++) std::cout << "  ";
 	std::cout << "tree " << ": \n";
@@ -131,34 +131,6 @@ void Quadtree::insert(std::pair<uint32_t, PosSize> coll)
 	}
 }
 
-void Quadtree::querry(std::vector<uint32_t>& rVec, vec2 pos, vec2 size) const
-{
-	if (hasSubTrees == true)
-	{
-		auto [inUl, inUr, inDl, inDr] = isInSubtree(pos, size);
-
-		if (inUl)
-		{
-			ul->querry(rVec, pos, size);
-		}
-		if (inUr)
-		{
-			ur->querry(rVec, pos, size);
-		}
-		if (inDl)
-		{
-			dl->querry(rVec, pos, size);
-		}
-		if (inDr)
-		{
-			dr->querry(rVec, pos, size);
-		}
-	}
-	rVec.reserve(rVec.size() + collidables.size());
-	for (auto& coll : collidables) {
-		rVec.push_back(coll.first);
-	}
-}
 
 void Quadtree::querryWithDrawables(std::vector<uint32_t>& rVec, vec2 pos, vec2 size, std::vector<Drawable>& drawables) const
 {
@@ -190,7 +162,7 @@ void Quadtree::querryWithDrawables(std::vector<uint32_t>& rVec, vec2 pos, vec2 s
 		drawables.push_back(Drawable(0, pos, 0.1f, size, vec4(1, 1, 1, 1), Form::RECTANGLE, 0.0f));
 	}
 	rVec.reserve(rVec.size() + collidables.size());
-	for (auto& coll : collidables) {
+	for (auto coll : collidables) {
 		rVec.push_back(coll.first);
 	}
 }
@@ -204,3 +176,31 @@ void Quadtree::clear() {
 		dr->clear();
 	}
 }
+
+void Quadtree::querry(std::vector<uint32_t>& rVec, PosSize const& posSize) const
+{
+	if (hasSubTrees == true)
+	{
+		auto [inUl, inUr, inDl, inDr] = isInSubtree(posSize.pos, posSize.size);
+
+		if (inUl)
+		{
+			ul->querry(rVec, posSize);
+		}
+		if (inUr)
+		{
+			ur->querry(rVec, posSize);
+		}
+		if (inDl)
+		{
+			dl->querry(rVec, posSize);
+		}
+		if (inDr)
+		{
+			dr->querry(rVec, posSize);
+		}
+	}
+	for (auto coll : collidables) {
+		rVec.push_back(coll.first);
+	}
+}*/

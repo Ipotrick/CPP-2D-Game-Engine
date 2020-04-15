@@ -28,12 +28,10 @@ struct Movement : public CompData {
 struct Collider : public CompData {
 	vec2 size;
 	Form form;
-	bool dynamic;
 	bool particle;
-	Collider(vec2 size_ = { 1,1 }, Form form_ = Form::CIRCLE, bool dynamic_ = false, bool particle_ = false) :
+	Collider(vec2 size_ = { 1,1 }, Form form_ = Form::CIRCLE, bool particle_ = false) :
 		size{ size_ }, 
 		form{ form_ },
-		dynamic{ dynamic_ },
 		particle{ particle_ } {}
 };
 
@@ -74,10 +72,10 @@ struct Draw : public CompData {
 // slave component
 
 struct Slave {
+	uint32_t ownerID;
 	Slave(uint32_t id_ = 0) :
 		ownerID{ id_ } {}
 
-	uint32_t ownerID;
 };
 
 // composit component
@@ -111,4 +109,18 @@ struct Composit : public CompData {
 			slaves[i] = slaves_[i];
 		}
 	}
+};
+
+// moveField component
+
+struct MoveField : public CompData {
+	MoveField(vec2 const& mvdr = {1,0}, float frc = 0.0f, float accel = 0.0f) :
+		movdir{ mvdr },
+		force{ frc },
+		acceleration{ accel }
+	{ }
+
+	vec2 movdir;
+	float force;
+	float acceleration;
 };

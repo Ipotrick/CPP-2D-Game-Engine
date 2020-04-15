@@ -5,6 +5,8 @@ APPDATA = C:\Users\Patrick\AppData\Roaming
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
+COMPLUS_InstallRoot = 
+COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -23,7 +25,7 @@ OneDriveConsumer = C:\Users\Patrick\OneDrive
 OS = Windows_NT
 Path = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\mingw64\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JDK11\bin;C:\Program Files\Maven\bin;;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
-PkgDefApplicationConfigFile = C:\Users\Patrick\AppData\Local\Temp\dev851F.tmp
+PkgDefApplicationConfigFile = C:\Users\Patrick\AppData\Local\Microsoft\VisualStudio\16.0_2d768764\devenv.exe.config
 PROCESSOR_ARCHITECTURE = x86
 PROCESSOR_ARCHITEW6432 = AMD64
 PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 158 Stepping 10, GenuineIntel
@@ -52,70 +54,11 @@ VisualStudioVersion = 16.0
 VSAPPIDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
 VSAPPIDNAME = devenv.exe
 VSLANG = 1031
-VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  Engine.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005:  "APIENTRY": Makro-Neudefinition
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3.h(123): message :  Siehe vorherige Definition von "APIENTRY"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(478,21): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(496,44): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(496,41): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(500,23): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(521,42): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(521,80): warning C4244:  "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227,1): warning C4267:  "Argument": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227): message :  beim Kompilieren der Klasse Vorlage-Memberfunktion "ComponentStorage<Collider,0>::iterator ComponentStorage<Collider,0>::end(void)"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(270): message :  Siehe Verweis auf die gerade kompilierte Instanziierung "ComponentStorage<Collider,0>::iterator ComponentStorage<Collider,0>::end(void)" der Funktions-Vorlage.
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(95): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Collider,0>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(591): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<double,std::ratio<1,1>>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
-  Game.cpp
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(69,59): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(10,20): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(13,31): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(88,19): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(89,19): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(90,18): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(91,18): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(97,12): warning C4244:  "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
-  Physics.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(98,12): warning C4244:  "Initialisierung": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-  PhysicsWorker.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(31,30): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(42,31): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(65,51): warning C4244:  "Argument": Konvertierung von "float" in "const unsigned __int64", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(69,29): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(87,23): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-  QuadTree.cpp
-  Renderer.cpp
+  RenderingWorker.cpp
   World.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(92,23): warning C4018:  "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(29,31): warning C4267:  "=": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227,1): warning C4267:  "Argument": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(227): message :  beim Kompilieren der Klasse Vorlage-Memberfunktion "ComponentStorage<Draw,0>::iterator ComponentStorage<Draw,0>::end(void)"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(14): message :  Siehe Verweis auf die gerade kompilierte Instanziierung "ComponentStorage<Draw,0>::iterator ComponentStorage<Draw,0>::end(void)" der Funktions-Vorlage.
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(97): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Draw,0>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(591): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<double,std::ratio<1,1>>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(169): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::duration<__int64,std::nano>".
-  main.cpp
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\chrono(570): message :  Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::chrono::time_point<std::chrono::steady_clock,std::chrono::steady_clock::duration>".
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,15): warning C4244:  "Initialisierung": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.h(21,44): warning C4244:  "+=": Konvertierung von "float" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(69,59): warning C4244:  "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
   Code wird generiert...
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(10,20): warning C4305:  "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Physics.cpp(26): warning C4715:  "calcPosChange": Nicht alle Codepfade geben einen Wert zurück.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(138,91): warning C4305:  "Argument": Verkürzung von "double" in "float"
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

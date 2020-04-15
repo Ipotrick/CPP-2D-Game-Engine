@@ -8,15 +8,14 @@ Game::Game() :
 	bulletScript{ *this }
 {
 	auto size = getWindowSize();
-	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1));
+	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1.0f));
 
-	vec2 cursorScale = { 0.2,0.2 };
-
-	Collider cursorCollider(cursorScale, Form::CIRCLE, true);
-	Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
 	auto cursor = world.createEnt();
+	vec2 cursorScale = { 0.2f,0.2f };
 	world.addComp<Base>(cursor);
+	Collider cursorCollider(cursorScale, Form::CIRCLE, true);
 	world.addComp<Collider>(cursor, cursorCollider);
+	Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
 	world.addComp<Draw>(cursor, cursorDraw);
 
 	cursorID = cursor;
@@ -28,7 +27,8 @@ void Game::create() {
 }
 
 void Game::update(World& world, float deltaTime) {
-	submitDrawableWindowSpace(Drawable(0, vec2(0, 0), 0, vec2(2,2), vec4(0.1, 0.1, 0.1, 1), Form::RECTANGLE, 0));
+	submitDrawable(Drawable(++freeDrawableID, vec2(0, 0), 0, vec2(2,2), vec4(1, 1, 1, 0.5), Form::RECTANGLE, 0, true));
+
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();
@@ -71,10 +71,6 @@ void Game::update(World& world, float deltaTime) {
 	ageScript.executeAll(    deltaTime);
 	bulletScript.executeAll( deltaTime);
 
-	for (auto ent : world.view<Collider, SolidBody>()) {
-		if (!world.hasComp<Movement>(ent)) {
-		}
-	}
 
 	for (auto enemy : world.view<Enemy, Base, Movement>()) {
 		assert(world.doesEntExist(enemy));
@@ -89,9 +85,10 @@ void Game::update(World& world, float deltaTime) {
 		int targetGridY = ceilf((targetPos - staticGrid.minPos).y / staticGrid.cellSize.y);
 		int enemyGridX = ceilf((enemyPos - staticGrid.minPos).x / staticGrid.cellSize.x);
 		int enemyGridY = ceilf((enemyPos - staticGrid.minPos).y / staticGrid.cellSize.y);
+#ifdef DEBUG_PATHFINDING
 		auto d = Drawable(0, vec2(targetGridX * staticGrid.cellSize.x + staticGrid.minPos.x, targetGridY * staticGrid.cellSize.y + staticGrid.minPos.y), 0.7f, staticGrid.cellSize, vec4(1, 0, 0, 1), Form::RECTANGLE, 0);
 		submitDrawableWorldSpace(d);
-
+#endif
 		// guesses distance in grid uniform dist
 		auto h = [&](std::pair<int, int> node) -> float {
 			float x = node.first - targetGridX;
@@ -180,7 +177,7 @@ void Game::cursorManipFunc()
 			}
 		}
 		else {
-			auto [begin, end] = getCollisionInfos(cursorID);
+			auto [begin, end] = getCollisions(cursorID);
 			auto iterWIthHighestDrawPrio = begin;
 			for (auto iter = begin; iter != end; ++iter) {
 				if (world.getComp<Draw>(iter->idB).drawingPrio > world.getComp<Draw>(iterWIthHighestDrawPrio->idB).drawingPrio) {	//higher drawprio found
@@ -206,7 +203,7 @@ void Game::cursorManipFunc()
 		// spawns:
 		if (keyPressed(KEY::U)) {
 			vec2 scale = vec2(0.08f, 0.08f);
-			Collider trashCollider = Collider(scale, Form::RECTANGLE, true);
+			Collider trashCollider = Collider(scale, Form::RECTANGLE);
 			Draw trashDraw = Draw(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
 			SolidBody trashSolidBody(0.2f, 2.5f, 0.1f);
 
@@ -224,7 +221,7 @@ void Game::cursorManipFunc()
 
 		if (keyPressed(KEY::I)) {
 			vec2 scale = vec2(0.5f, 0.5f);
-			Collider trashCollider(scale, Form::RECTANGLE, false);
+			Collider trashCollider(scale, Form::RECTANGLE);
 			SolidBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale));
 			Draw trashDraw = Draw(vec4(0, 0, 0, 1), scale, 0.5f, Form::RECTANGLE);
 

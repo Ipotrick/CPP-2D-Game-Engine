@@ -3,7 +3,7 @@
 #include <iostream>
 #include <assert.h>
 #include <math.h>
-
+#include <xmmintrin.h>
 
 #ifdef _WIN32
 #define M_PI 3.14159265f
@@ -35,6 +35,7 @@ public:
 	vec2() = default;
 	vec2(float _s) : x(_s), y(_s) {}
 	vec2(float _x, float _y) : x(_x), y(_y) {}
+	vec2(int x_, int y_) : x{ static_cast<float>(x_) }, y{ static_cast<float>(y_) } {}
 
 	const float* data() const { return &x; }
 
@@ -121,7 +122,7 @@ inline vec2 const max(vec2 const& v0, vec2 const& v1) {
 
 // slow! (uses sqrt)
 inline float const norm(vec2 const& v) {
-	return sqrt(v.x * v.x + v.y * v.y);
+	return sqrtf(v.x * v.x + v.y * v.y);
 }
 
 inline vec2 const normalize(vec2 const& v) {
