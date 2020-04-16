@@ -103,3 +103,16 @@ bool TextureHandler::loadTexture(std::string_view name)
 	}
 	return success;
 }
+
+void TextureHandler::refreshRefMap(std::vector<std::pair<uint32_t, TextureRef>>& texRefs)
+{
+	textureRefMap.clear();
+	for (auto& tex : texRefs) {
+		if (!isTextureLoaded(tex.second.textureName)) {
+			// load all not loaded  textures from file
+			auto success = loadTexture(tex.second.textureName);
+			assert(success);
+		}
+		textureRefMap.insert({ tex.first, tex.second });
+	}
+}

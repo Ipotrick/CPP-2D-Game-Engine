@@ -29,6 +29,52 @@ mat3::mat3(const mat4& m4)
             (*this)(i,j) = m4(i,j);
 }
 
+mat3 mat3::identity()
+{
+	mat3 mat;
+	mat(0, 0) = 1; mat(0, 1) = 0; mat(0, 2) = 0;
+	mat(1, 0) = 0; mat(1, 1) = 1; mat(1, 2) = 0;
+	mat(2, 0) = 0; mat(2, 2) = 0; mat(2, 2) = 1;
+
+	return mat;
+}
+
+mat3 mat3::translate(const vec2& t)
+{
+	mat3 mat;
+	mat(0, 0) = 1; mat(0, 1) = 0; mat(0, 2) = t.x;
+	mat(1, 0) = 0; mat(1, 1) = 1; mat(1, 2) = t.y;
+	mat(2, 0) = 0; mat(2, 1) = 0; mat(2, 2) = 1;
+	return mat;
+}
+
+mat3 mat3::scale(float factor)
+{
+	mat3 mat;
+	mat(0, 0) = factor; mat(0, 1) = 0;       mat(0, 2) = 0;
+	mat(1, 0) = 0;       mat(1, 1) = factor; mat(1, 2) = 0;
+	mat(2, 0) = 0;       mat(2, 1) = 0;       mat(2, 2) = 1;
+	return mat;
+}
+
+mat3 mat3::scale(vec2 scale)
+{
+	mat3 mat;
+	mat(0, 0) = scale.x; mat(0, 1) = 0;       mat(0, 2) = 0;
+	mat(1, 0) = 0;       mat(1, 1) = scale.y; mat(1, 2) = 0;
+	mat(2, 0) = 0;       mat(2, 1) = 0;       mat(2, 2) = 1;
+	return mat;
+}
+
+mat3 mat3::rotate(float angle)
+{
+	mat3 mat;
+	mat(0, 0) = cosf(angle / RAD); mat(0, 1) = -sinf(angle / RAD); mat(0, 2) = 0;
+	mat(1, 0) = sinf(angle / RAD); mat(1, 1) = cosf(angle / RAD); mat(1, 2) = 0;
+	mat(2, 0) = 0;                 mat(2, 1) = 0;                  mat(2, 2) = 1;
+	return mat;
+}
+
 
 //-----------------------------------------------------------------------------
 

@@ -142,17 +142,19 @@ void World::loadMap(std:: string mapname_) {
 		auto player = createEnt();
 		addComp<Base>(player, Base({ 0,0 }, 0));
 		addComp<Movement>(player, Movement(3.0f, 0.0f));
-		addComp<Draw>(player, Draw(vec4(0, 0, 0, 1), scaleEnt, 0.6f, Form::RECTANGLE));
+		addComp<Draw>(player, Draw(vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE));
 		addComp<Collider>(player, Collider(scaleEnt, Form::RECTANGLE));
 		addComp<SolidBody>(player, SolidBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt)));
 		addComp<Player>(player, Player());
+		addComp<TextureRef>(player, TextureRef("test.png", vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
 		
 		auto slave = createEnt();
 		addComp<Base>(slave, Base({ 0,0 }, 0));
 		addComp<Movement>(slave);
 		addComp<SolidBody>(slave, SolidBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt)));
 		addComp<Collider>(slave, Collider({scaleEnt.x}, Form::CIRCLE));
-		addComp<Draw>(slave, Draw(vec4(0, 0, 0, 1), {scaleEnt.x}, 0.49f, Form::CIRCLE));
+		addComp<Draw>(slave, Draw(vec4(1, 1, 1, 1), {scaleEnt.x}, 0.49f, Form::CIRCLE));
+		addComp<TextureRef>(slave, TextureRef("test.png"));
 		enslaveEntTo(slave, player, vec2(0.0f, -0.4f), 45.0f);
 
 		slave = createEnt();
@@ -161,7 +163,8 @@ void World::loadMap(std:: string mapname_) {
 		addComp<SolidBody>(slave);
 		addComp<Slave>(slave);
 		addComp<Collider>(slave, Collider({ scaleEnt.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE));
-		addComp<Draw>(slave, Draw(vec4(0,0,0,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.49f, Form::RECTANGLE));
+		addComp<Draw>(slave, Draw(vec4(1,1,1,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.49f, Form::RECTANGLE));
+		addComp<TextureRef>(slave, TextureRef("test.png"));
 		enslaveEntTo(slave, player, vec2(0.0f, 0.4f), 45.0f);
 
 		vec2 scaleEnemy{ 1.4f, 1.4f };
@@ -173,7 +176,7 @@ void World::loadMap(std:: string mapname_) {
 		addComp<SolidBody>(enemy, SolidBody(0.5f, 70, calcMomentOfIntertia(70, scaleEnemy)));
 		addComp<Health>(enemy, Health(100));
 		addComp<Enemy>(enemy, player);
-		addComp<TextureRef>(enemy, TextureRef("test.png"));
+		addComp<TextureRef>(enemy, TextureRef("Pingu.png"));
 
 		Collider	wallCollider(vec2(0.4f, 10.0f), Form::RECTANGLE);
 		SolidBody	wallSolidBody(0.3f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, vec2(0.4f, 10.0f)));
