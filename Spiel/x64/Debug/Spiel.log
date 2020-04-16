@@ -54,11 +54,10 @@ VisualStudioVersion = 16.0
 VSAPPIDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
 VSAPPIDNAME = devenv.exe
 VSLANG = 1031
+VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  RenderingWorker.cpp
   World.cpp
-  Code wird generiert...
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(138,91): warning C4305:  "Argument": Verkürzung von "double" in "float"
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

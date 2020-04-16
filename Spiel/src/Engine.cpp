@@ -528,7 +528,7 @@ void Engine::rendererUpdate(World& world)
 		renderer.submit(buildWorldSpaceDrawable(world, ent));
 	}
 	for (auto ent : world.view<TextureRef>()) {
-		renderer.attachTex(ent, world.getComp<TextureRef>(ent).textureName);
+		renderer.attachTex(ent, world.getComp<TextureRef>(ent));
 	}
 	renderer.setCamera(camera);
 

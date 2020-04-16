@@ -109,8 +109,8 @@ public:
 	Quadtree2(vec2 minPos_, vec2 maxPos_, uint16_t capacity_) :
 		nextFreeIndex{ 1 }
 	{
-		auto size = maxPos_ - minPos_;
-		auto pos = (maxPos_ - minPos_) / 2 + minPos_;
+		size = maxPos_ - minPos_;
+		pos = (maxPos_ - minPos_) / 2 + minPos_;
 		trees.reserve(100);
 		trees.emplace_back(size.x, size.y, pos.x, pos.y, capacity_);
 	}
@@ -129,8 +129,12 @@ public:
 		querryDebugAll(0, draw, color, 0);
 	}
 
-	inline vec2 getPosition() const { return trees[0].pos; }
-	inline vec2 getSize() const { return trees[0].size; }
+	inline vec2 getPosition() const { return pos; }
+	inline vec2 getSize() const { return size; }
+
+private:
+	vec2 pos;
+	vec2 size;
 
 private:
 
@@ -143,8 +147,8 @@ private:
 		};
 	}
 
-	inline bool isOverlappingAABB2(vec2 const& posA, vec2 const& sizeA, vec2 const& posB, vec2 const& sizeB) const {
-		return fabs(posB.x - posA.x) <= fabs(sizeB.x + sizeA.x) * 0.5f &&
+	__forceinline bool isOverlappingAABB2(vec2 const& posA, vec2 const& sizeA, vec2 const& posB, vec2 const& sizeB) const {
+		return fabs(posB.x - posA.x) <= fabs(sizeB.x + sizeA.x) * 0.5f &
 			fabs(posB.y - posA.y) <= fabs(sizeB.y + sizeA.y) * 0.5f;
 	}
 
@@ -255,21 +259,19 @@ inline void Quadtree2::insert(std::pair<uint32_t, PosSize> coll, uint32_t thisID
 inline void Quadtree2::querry(std::vector<uint32_t>& rVec, PosSize const& posSize, uint32_t thisID) const {
 	if (trees[thisID].hasSubTrees())
 	{
-		auto [inUl, inUr, inDl, inDr] = isInSubtrees(trees[thisID].firstSubTree, posSize);
-
-		if (inUl)
+		if (isOverlappingAABB2(posSize.pos, posSize.size, trees[trees[thisID].firstSubTree].pos, trees[trees[thisID].firstSubTree].size))
 		{
 			querry(rVec, posSize, trees[thisID].firstSubTree);
 		}
-		if (inUr)
+		if (isOverlappingAABB2(posSize.pos, posSize.size, trees[trees[thisID].firstSubTree + 1].pos, trees[trees[thisID].firstSubTree + 1].size))
 		{
 			querry(rVec, posSize, trees[thisID].firstSubTree+1);
 		}
-		if (inDl)
+		if (isOverlappingAABB2(posSize.pos, posSize.size, trees[trees[thisID].firstSubTree + 2].pos, trees[trees[thisID].firstSubTree + 2].size))
 		{
 			querry(rVec, posSize, trees[thisID].firstSubTree+2);
 		}
-		if (inDr)
+		if (isOverlappingAABB2(posSize.pos, posSize.size, trees[trees[thisID].firstSubTree + 3].pos, trees[trees[thisID].firstSubTree + 3].size))
 		{
 			querry(rVec, posSize, trees[thisID].firstSubTree+3);
 		}

@@ -618,6 +618,18 @@ public:
     /// read access to element (i,j)
     float operator()(const int i, const int j) const { return data_[i+j*3]; }
 
+
+	/// return identity matrix
+	static mat3 identity();
+	/// return translation matrix
+	static mat3 translate(const vec2& t);
+	// return scaling matrix
+	static mat3 scale(float factor);
+	// return scaling matrix
+	static mat3 scale(vec2 scale);
+	/// return matrix for rotation
+	static mat3 rotate(float angle);
+
     /// pointer to data (for passing it to OpenGL)
     const float* data() const { return data_; }
 };
@@ -628,6 +640,40 @@ public:
 
 /// return matrix product m0*m1
 mat3 operator*(const mat3& m0, const mat3& m1);
+
+
+/// return matrix-vector product m*v
+inline vec3 operator*(const mat3& m, const vec3& v0) {
+	vec3 v;
+
+	for (int i = 0; i < 3; ++i)
+	{
+		v[i] = 0.0;
+		for (int j = 0; j < 3; ++j)
+		{
+			v[i] += m(i, j) * v0[j];
+		}
+	}
+
+	return v;
+}
+
+/// return matrix-vector product m*v
+inline vec2 operator*(const mat3& m, const vec2& v0) {
+	vec2 v;
+
+	for (int i = 0; i < 2; ++i)
+	{
+		v[i] = 0.0;
+		for (int j = 0; j < 2; ++j)
+		{
+			v[i] += m(i, j) * v0[j];
+		}
+		v[i] += m(i, 2) * 1;
+	}
+
+	return v;
+}
 
 /// return transposed matrix
 mat3 transpose(const mat3& m);
