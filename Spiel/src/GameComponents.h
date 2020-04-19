@@ -5,7 +5,7 @@
 
 #include "ECS.h"
 
-//player component
+// player component
 
 struct Player : public CompData {
 	Player() : bulletShotLapTimer{ 0.001f } {}
@@ -37,7 +37,7 @@ struct Age : public CompData {
 	float curAge;
 };
 
-//bullet component
+// bullet component
 
 struct Bullet : public CompData {
 	Bullet(int damage_) :damage{ damage_ } {}
@@ -46,7 +46,7 @@ struct Bullet : public CompData {
 	
 };
 
-//loading and event trigger component
+// loading and event trigger component
 
 struct Trigger : public CompData {
 	Trigger(int type_, std::string mapname_) :

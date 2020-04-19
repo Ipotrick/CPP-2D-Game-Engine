@@ -84,21 +84,22 @@ void World::slaveOwnerDespawn() {
 
 void World::deregisterDespawnedEntities() {
 	for (ent_id_t entity : despawnList) {
-		compStorage0.deregistrate(entity);
-		compStorage1.deregistrate(entity);
-		compStorage2.deregistrate(entity);
-		compStorage3.deregistrate(entity);
-		compStorage4.deregistrate(entity);
-		compStorage5.deregistrate(entity);
-		compStorage6.deregistrate(entity);
-		compStorage7.deregistrate(entity);
-		compStorage8.deregistrate(entity);
-		compStorage9.deregistrate(entity);
-		compStorage10.deregistrate(entity);
-		compStorage11.deregistrate(entity);
-		compStorage12.deregistrate(entity);
-		compStorage13.deregistrate(entity);
-		compStorage14.deregistrate(entity);
+		compStorage0.remove(entity);
+		compStorage1.remove(entity);
+		compStorage2.remove(entity);
+		compStorage3.remove(entity);
+		compStorage4.remove(entity);
+		compStorage5.remove(entity);
+		compStorage6.remove(entity);
+		compStorage7.remove(entity);
+		compStorage8.remove(entity);
+		compStorage9.remove(entity);
+		compStorage10.remove(entity);
+		compStorage11.remove(entity);
+		compStorage12.remove(entity);
+		compStorage13.remove(entity);
+		compStorage14.remove(entity);
+		compStorage15.remove(entity);
 	}
 }
 
@@ -136,35 +137,35 @@ void World::loadMap(std:: string mapname_) {
 			addComp<Base>(forceField, Base({ 0,0 }, 0));
 			addComp<Collider>(forceField, Collider({ 10, 10 }, Form::RECTANGLE, true));
 			addComp<Draw>(forceField, Draw(vec4(1, 0, 0, 0.2), vec2(10, 10), 0.4f, Form::RECTANGLE));
-			addComp<MoveField>(forceField, MoveField(vec2(0, -1), 0, 3.3f));
+			addComp<FrictionEffector>(forceField, FrictionEffector(4, 4));
 		}
+		u_physics.friction = 1.0f;
 		
-		auto player = createEnt();
+		auto player = createEnt(); 
 		addComp<Base>(player, Base({ 0,0 }, 0));
 		addComp<Movement>(player, Movement(3.0f, 0.0f));
 		addComp<Draw>(player, Draw(vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE));
 		addComp<Collider>(player, Collider(scaleEnt, Form::RECTANGLE));
-		addComp<SolidBody>(player, SolidBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt)));
+		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt)));
 		addComp<Player>(player, Player());
-		addComp<TextureRef>(player, TextureRef("test.png", vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
 		
 		auto slave = createEnt();
 		addComp<Base>(slave, Base({ 0,0 }, 0));
 		addComp<Movement>(slave);
-		addComp<SolidBody>(slave, SolidBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt)));
+		addComp<PhysicsBody>(slave, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt)));
 		addComp<Collider>(slave, Collider({scaleEnt.x}, Form::CIRCLE));
-		addComp<Draw>(slave, Draw(vec4(1, 1, 1, 1), {scaleEnt.x}, 0.49f, Form::CIRCLE));
-		addComp<TextureRef>(slave, TextureRef("test.png"));
+		addComp<Draw>(slave, Draw(vec4(0, 0, 0, 1), {scaleEnt.x}, 0.49f, Form::CIRCLE));
+		//addComp<TextureRef>(slave, TextureRef("test.png"));
 		enslaveEntTo(slave, player, vec2(0.0f, -0.4f), 45.0f);
 
 		slave = createEnt();
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
-		addComp<SolidBody>(slave);
+		addComp<PhysicsBody>(slave);
 		addComp<Slave>(slave);
 		addComp<Collider>(slave, Collider({ scaleEnt.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE));
-		addComp<Draw>(slave, Draw(vec4(1,1,1,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.49f, Form::RECTANGLE));
-		addComp<TextureRef>(slave, TextureRef("test.png"));
+		addComp<Draw>(slave, Draw(vec4(0,0,0,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.49f, Form::RECTANGLE));
+		//addComp<TextureRef>(slave, TextureRef("test.png"));
 		enslaveEntTo(slave, player, vec2(0.0f, 0.4f), 45.0f);
 
 		vec2 scaleEnemy{ 1.4f, 1.4f };
@@ -173,37 +174,47 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Movement>(enemy, Movement(3.0f, 0.0f));
 		addComp<Draw>(enemy, Draw(vec4(1, 1, 1, 1), scaleEnemy, 0.6f, Form::RECTANGLE));
 		addComp<Collider>(enemy, Collider(scaleEnemy, Form::RECTANGLE));
-		addComp<SolidBody>(enemy, SolidBody(0.5f, 70, calcMomentOfIntertia(70, scaleEnemy)));
+		addComp<PhysicsBody>(enemy, PhysicsBody(0.5f, 70, calcMomentOfIntertia(70, scaleEnemy)));
 		addComp<Health>(enemy, Health(100));
 		addComp<Enemy>(enemy, player);
-		addComp<TextureRef>(enemy, TextureRef("Pingu.png"));
+		addComp<TextureRef>(enemy, TextureRef("test.png", vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
 
 		Collider	wallCollider(vec2(0.4f, 10.0f), Form::RECTANGLE);
-		SolidBody	wallSolidBody(0.3f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, vec2(0.4f, 10.0f)));
+		PhysicsBody	wallSolidBody(0.3f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, vec2(0.4f, 10.0f)));
 		Draw		wallDraw = Draw(vec4(0, 0, 0, 1), vec2(0.4f, 10.0f), 0.5f, Form::RECTANGLE, true);
 		for (int i = 0; i < 4; i++) {
 			auto wall = createEnt();
-			addComp<Collider>(wall, wallCollider);
-			addComp<SolidBody>(wall, wallSolidBody);
-			addComp<Draw>(wall, wallDraw);
 			float rotation = 90.0f * i;
 			addComp<Base>(wall, Base(rotate(vec2(-5.f, 0.0f), rotation), rotation));
+			addComp<Collider>(wall, wallCollider);
+			addComp<PhysicsBody>(wall, wallSolidBody);
+			addComp<Draw>(wall, wallDraw);
+			//addComp<TextureRef>(wall, TextureRef("test.png",vec2(0,0), vec2(1,25)));
 		}
 
 		int num = 10000;
-		vec2 scale = vec2(0.05f, 0.05f);
-		Collider trashCollider = Collider(scale, Form::CIRCLE);
-		Draw trashDraw = Draw(vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::CIRCLE, true);
-		SolidBody trashSolidBody(0.90f, 1.0f, calcMomentOfIntertia(4.0f, scale));
+		vec2 scale = vec2(0.04f, 0.04f);
+		Collider trashCollider = Collider(scale, Form::RECTANGLE);
+		Draw trashDraw = Draw(vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
+		PhysicsBody trashSolidBody(0.9f, 1.0f, 0.4);
 		for (int i = 0; i < num; i++) {
+			if (i % 2) {
+				trashCollider.form = Form::CIRCLE;
+				trashDraw.form = Form::CIRCLE;
+			}
+			else {
+				//trashCollider.form = Form::RECTANGLE;
+				//trashDraw.form = Form::RECTANGLE;
+			}
+
 
 			vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
 			auto trash = createEnt();
 			addComp<Base>(trash, Base(position, 0.0f));
-			addComp<Movement>(trash);
+			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 			addComp<Collider>(trash, trashCollider);
 			addComp<Draw>(trash, trashDraw);
-			addComp<SolidBody>(trash, trashSolidBody);
+			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(getLastEntID(), Health(100));
 		}
 	}

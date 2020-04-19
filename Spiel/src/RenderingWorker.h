@@ -6,6 +6,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
+
 #include "RenderTypes.h"
 #include "TextureHandler.h"
 
@@ -102,9 +103,9 @@ private:
 
 	int maxTextureSlots{};
 
-	static size_t const maxRectCount{ 1000 };	// max Rectangle Count
-	static size_t const maxVertexCount{ maxRectCount * 4 };
-	static size_t const maxIndicesCount{ maxRectCount * 6 };
+	size_t const maxRectCount{ 1000 };	// max Rectangle Count
+	size_t const maxVertexCount{ maxRectCount * 4 };
+	size_t const maxIndicesCount{ maxRectCount * 6 };
 	uint32_t verteciesBuffer{ 0 };
 	float* verteciesRawBuffer{ nullptr };
 	uint32_t* indices{ nullptr };

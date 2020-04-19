@@ -17,14 +17,22 @@
 
 #define GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, CompStorage, storageType) \
 template<> __forceinline auto& getAll<CompType>() { return CompStorage; } \
-template<> __forceinline CompType& getComp<CompType>(uint32_t id) { return CompStorage.getComponent(id); }\
-template<> __forceinline bool hasComp<CompType>(uint32_t id) { return CompStorage.isRegistrated(id); }\
-template<> __forceinline void addComp<CompType>(uint32_t id, CompType data) { CompStorage.registrate(id, data); } \
-template<> __forceinline void addComp<CompType>(uint32_t id) { CompStorage.registrate(id, CompType()); }
+template<> __forceinline CompType& getComp<CompType>(ent_id_t entity) { return CompStorage.get(entity); }\
+template<> __forceinline bool hasComp<CompType>(ent_id_t entity) { return CompStorage.contains(entity); }\
+template<> __forceinline void addComp<CompType>(ent_id_t entity, CompType data) { CompStorage.insert(entity, data); } \
+template<> __forceinline void addComp<CompType>(ent_id_t entity) { CompStorage.insert(entity, CompType()); } \
+template<> __forceinline void remComp<CompType>(ent_id_t entity) { CompStorage.remove(entity); }
 
 #define GENERATE_COMPONENT_CODE(CompType, StorageType, Num) \
 private: ComponentStorage<CompType, StorageType> compStorage ## Num; \
 public: GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, compStorage ## Num, storageType)
+
+struct PhysicsUniforms {
+	float friction{ 0 };
+	vec2  linearEffectDir{ 0 };
+	float linearEffectAccel{ 0 };
+	float linearEffectForce{ 0 };
+};
 
 class Ent {
 public:
@@ -61,17 +69,17 @@ public:
 	}
 	
 	/* returnes if entitiy exists or not, O(1) */
-	bool doesEntExist(ent_id_t id);
+	bool doesEntExist(ent_id_t entity);
 	/* entity create/destruct utility */
-	/* creates blank entity and returns its id, O(1) */
+	/* creates blank entity and returns its entity, O(1) */
 	ent_id_t createEnt();
 	/* enslaves the first ent to the second, ~O(1) */
 	void enslaveEntTo(ent_id_t slave, ent_id_t owner, vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
-	void despawn(ent_id_t id);
+	void despawn(ent_id_t entity);
 
 	/* world utility */
-	/* returnes the id of the most rescently spawned entity.
+	/* returnes the entity of the most rescently spawned entity.
 		if 0 is returnsed, there are no entities spawned yet.
 		Try to not use this function and use the return value of create() instead
 		, O(1) */
@@ -84,40 +92,43 @@ public:
 	bool didStaticsChange();
 
 	/* Component access utility */
-	/* returnes reference to a safe virtual container of the given components one can iterate over. the iterator also holds the entity id of the compoenent it points to, O(1) */
+	/* returnes reference to a safe virtual container of the given components one can iterate over. the iterator also holds the entity entity of the compoenent it points to, O(1) */
 	template<typename CompType> auto& getAll();
 	/* returnes refference the component data of one entitiy, ~O(1) */
-	template<typename CompType> CompType& getComp(ent_id_t id);
+	template<typename CompType> CompType& getComp(ent_id_t entity);
 	/* returns bool whether or not the given entity has the component added/registered, ~O(1) */
-	template<typename CompType> bool hasComp(ent_id_t id);
+	template<typename CompType> bool hasComp(ent_id_t entity);
 	template<typename ... CompTypes> bool hasComps(ent_id_t entity);
-	/* registeres a new component under the given id, ~O(1) */
-	template<typename CompType> void addComp(ent_id_t id, CompType data);
-	/*registeres a new component under the given id, ~O(1) */
-	template<typename CompType> void addComp(ent_id_t id);
+	/* adds a new Compoenent to an entity, ~O(1) */
+	template<typename CompType> void addComp(ent_id_t entity, CompType data);
+	/* adds a new Compoenent to an entity, ~O(1) */
+	template<typename CompType> void addComp(ent_id_t entity);
+	/* removes a component from the entity */
+	template<typename CompType> void remComp(ent_id_t entity);
 	/* returnes a View, and iterable object that only iterates over the entities with the given Components */
 	template<typename First, typename Second, typename ... CompTypes> MultiView<First, Second, CompTypes...> view();
 	template<typename CompType> SingleView<CompType> view();
 
 	void loadMap(std::string);
+public:
+	PhysicsUniforms u_physics;
 private:
 	GENERATE_COMPONENT_CODE(Base, direct_indexing, 0)
 	GENERATE_COMPONENT_CODE(Movement, direct_indexing, 1)
 	GENERATE_COMPONENT_CODE(Collider, direct_indexing, 2)
-	GENERATE_COMPONENT_CODE(SolidBody, direct_indexing, 3)
-	GENERATE_COMPONENT_CODE(Draw, direct_indexing, 4)
-	GENERATE_COMPONENT_CODE(TextureRef, direct_indexing, 5)
-	GENERATE_COMPONENT_CODE(Slave, direct_indexing, 6)
-	GENERATE_COMPONENT_CODE(Composit<4>, hasing, 7)
-	GENERATE_COMPONENT_CODE(CompDataLight, hasing, 8)
-	GENERATE_COMPONENT_CODE(Health, hasing, 9)
-	GENERATE_COMPONENT_CODE(Age, hasing, 10)
-	GENERATE_COMPONENT_CODE(Player, hasing, 11)
-	GENERATE_COMPONENT_CODE(Bullet, hasing, 12)
-	GENERATE_COMPONENT_CODE(Enemy, hasing, 13)
-	GENERATE_COMPONENT_CODE(MoveField, hasing, 14)
-private:
-	//
+	GENERATE_COMPONENT_CODE(PhysicsBody, direct_indexing, 3)
+	GENERATE_COMPONENT_CODE(LinearEffector, hashing, 4)
+	GENERATE_COMPONENT_CODE(FrictionEffector, hashing, 5)
+	GENERATE_COMPONENT_CODE(Draw, direct_indexing, 6)
+	GENERATE_COMPONENT_CODE(TextureRef, direct_indexing, 7)
+	GENERATE_COMPONENT_CODE(Slave, direct_indexing, 8)
+	GENERATE_COMPONENT_CODE(Composit<4>, hashing, 9)
+	GENERATE_COMPONENT_CODE(CompDataLight, hashing, 10)
+	GENERATE_COMPONENT_CODE(Health, hashing, 11)
+	GENERATE_COMPONENT_CODE(Age, hashing, 12)
+	GENERATE_COMPONENT_CODE(Player, hashing, 13)
+	GENERATE_COMPONENT_CODE(Bullet, hashing, 14)
+	GENERATE_COMPONENT_CODE(Enemy, hashing, 15)
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	friend class Engine;

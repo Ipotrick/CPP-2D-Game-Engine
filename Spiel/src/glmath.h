@@ -48,6 +48,16 @@ public:
 		assert(i < 2);
 		return (&x)[i];
 	}
+    
+    bool operator==(vec2 const& other) const {
+        return x == other.x 
+            && y == other.y;
+    }
+
+    bool operator!=(vec2 const& other) const {
+        return x != other.x
+            || y != other.y;
+    }
 
 	vec2& operator*=(float const s) {
 		x *= s;

@@ -11,7 +11,7 @@ public:
 		World& world = engine.world;
 		auto [begin, end] = engine.getCollisions(entity);
 		for( auto iter = begin; iter != end; ++iter) {
-			if (engine.world.hasComp<SolidBody>(iter->idB)) {
+			if (engine.world.hasComp<PhysicsBody>(iter->idB)) {
 				engine.events.triggerEvent("playerHit");
 			}
 		}
@@ -46,17 +46,17 @@ public:
 
 			float scale = rand() % 10 * 0.1f + 0.5f;
 			vec2 bulletSize = vec2(0.05f, 0.05f) * scale;
-			float bulletVel = 10.0f;
+			float bulletVel = 5.0f;
 			uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 			for (uint64_t i = 0; i < bullets; i++) {
 				float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-				vec2 bullCollVel = movEnt.velocity +bulletVel * rotate(vec2(0, 1), baseEnt.rotation + velOffsetRota);
+				vec2 bullCollVel = movEnt.velocity + (bulletVel + (rand() % 1000 / 1000.0f)) * rotate(vec2(0, 1), baseEnt.rotation + velOffsetRota);
 				Collider bulletCollider = Collider(bulletSize, Form::CIRCLE, true);
 				Draw bulletDraw = Draw(vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
 				auto bullet = world.createEnt();
 				world.addComp<Base>(bullet, Base(baseEnt.position + rotate(vec2(-collEnt.size.y, 0.0f) / 1.5f, baseEnt.rotation + 270)));
 				world.addComp<Movement>(bullet, Movement(bullCollVel, 0));
-				world.addComp<SolidBody>(bullet, SolidBody(0.9f, 0.01f, 1));
+				world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1));
 				world.addComp<Draw>(bullet, bulletDraw);
 				world.addComp<Collider>(bullet, bulletCollider);
 				world.addComp<Bullet>(world.getLastEntID(), Bullet(10.0f * scale));

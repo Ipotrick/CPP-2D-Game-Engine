@@ -11,12 +11,12 @@ Game::Game() :
 	camera.frustumBend = (vec2(1 / getWindowAspectRatio(), 1.0f));
 
 	auto cursor = world.createEnt();
-	vec2 cursorScale = { 0.2f,0.2f };
+	vec2 cursorScale = { 0.1f,0.1f };
 	world.addComp<Base>(cursor);
 	Collider cursorCollider(cursorScale, Form::CIRCLE, true);
 	world.addComp<Collider>(cursor, cursorCollider);
-	Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
-	world.addComp<Draw>(cursor, cursorDraw);
+	//Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
+	//world.addComp<Draw>(cursor, cursorDraw);
 
 	cursorID = cursor;
 }
@@ -139,7 +139,7 @@ void Game::cursorManipFunc()
 	baseCursor.rotation = camera.rotation;
 	colliderCursor.size = vec2(1, 1) / camera.zoom / 100.0f;
 
-	world.getComp<Draw>(cursorID).scale = vec2(1, 1) / camera.zoom / 100.0f;
+	//world.getComp<Draw>(cursorID).scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
 		staticsChanged();
 		if (cursorManipData.locked) {
@@ -205,32 +205,33 @@ void Game::cursorManipFunc()
 			vec2 scale = vec2(0.08f, 0.08f);
 			Collider trashCollider = Collider(scale, Form::RECTANGLE);
 			Draw trashDraw = Draw(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
-			SolidBody trashSolidBody(0.2f, 2.5f, 0.1f);
+			PhysicsBody trashSolidBody(0.2f, 2.5f, 0.1f);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
-				auto solid = SolidBody(0.2f, 2.5f, 0.1f);
 				auto trash = world.createEnt();
 				world.addComp<Base>(trash, Base(baseCursor.position, 0));
 				world.addComp<Movement>(trash);
-				world.addComp<SolidBody>(trash, trashSolidBody);
+				world.addComp<PhysicsBody>(trash, trashSolidBody);
 				world.addComp<Collider>(trash, trashCollider);
 				world.addComp<Draw>(trash, trashDraw);
 				world.addComp<Health>(world.getLastEntID(), Health(100));
+				world.addComp<TextureRef>(trash, TextureRef("test.png", vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
 			}
 		}
 
 		if (keyPressed(KEY::I)) {
 			vec2 scale = vec2(0.5f, 0.5f);
 			Collider trashCollider(scale, Form::RECTANGLE);
-			SolidBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale));
-			Draw trashDraw = Draw(vec4(0, 0, 0, 1), scale, 0.5f, Form::RECTANGLE);
+			PhysicsBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale));
+			Draw trashDraw = Draw(vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
 				auto trash = world.createEnt();
 				world.addComp<Base>(trash, Base(cursorManipData.oldCursorPos, 0));
 				world.addComp<Collider>(trash, trashCollider);
-				world.addComp<SolidBody>(trash, trashSolidBody);
+				world.addComp<PhysicsBody>(trash, trashSolidBody);
 				world.addComp<Draw>(trash, trashDraw);
+				world.addComp<TextureRef>(trash, TextureRef("test.png", vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
 			}
 			staticsChanged();
 		}

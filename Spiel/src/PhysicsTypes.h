@@ -8,7 +8,6 @@
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
-	constexpr float pushoutFactor = 1.01f;
 
 	inline std::vector<Drawable> debugDrawables;
 }
@@ -35,30 +34,13 @@ public:
 
 	inline float getRadius() const { return size.r * 0.5f; }
 	inline float getSurfaceArea() const { return size.x * size.y; }
-	inline vec2 getBoundsSize() const {
-		if (form == Form::CIRCLE) {
-			return vec2(getBoundsRadius() * 2);
-		}
-		else {
-			return vec2(getBoundsRadius() * 2);
-		}
-	}
-
-	inline float getBoundsRadius() const {
-		if (form == Form::CIRCLE) {
-			return size.r / 2.0f;
-		}
-		else {
-			return sqrtf((size.x * size.x + size.y * size.y)) / 2.0f;
-		}
-	}
 private:
-	vec2  position;
-	float rotation;
-	vec2  velocity;
-	vec2  size;
-	Form  form;
-	bool  dynamic;
+	vec2 const position;
+	float const rotation;
+	vec2 const velocity;
+	vec2 const size;
+	Form const form;
+	bool const dynamic;
 };
 
 template<typename T>

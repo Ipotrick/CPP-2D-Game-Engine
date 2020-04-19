@@ -15,16 +15,16 @@ using ent_id_t = uint32_t;
 using storage_t = int;
 
 constexpr storage_t direct_indexing = 0;
-constexpr storage_t hasing = 1;
+constexpr storage_t hashing = 1;
 
 template<typename CompType, storage_t storageType>
 class ComponentStorage {
 public:
-	inline void registrate(ent_id_t entity, CompType const& comp);
-	inline void deregistrate(ent_id_t entity);
-	inline bool isRegistrated(ent_id_t entity) const;
-	inline CompType& getComponent(ent_id_t entity);
-	inline CompType const& getComponent(ent_id_t entity) const;
+	inline void insert(ent_id_t entity, CompType const& comp);
+	inline void remove(ent_id_t entity);
+	inline bool contains(ent_id_t entity) const;
+	inline CompType& get(ent_id_t entity);
+	inline CompType& operator[](ent_id_t ent);
 	inline size_t size() const;
 	
 	class iterator {
@@ -57,32 +57,28 @@ public:
 		violating these limitations will mass up the iterators
 */
 template<typename CompType>
-class ComponentStorage<CompType, hasing> {
+class ComponentStorage<CompType, hashing> {
 public:
 	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
 
-	inline void registrate(ent_id_t entity, CompType const& comp) {
+	inline void insert(ent_id_t entity, CompType const& comp) {
 		storage.insert({ entity, comp });
 	}
-	inline void deregistrate(ent_id_t entity) {
+	inline void remove(ent_id_t entity) {
 		auto res = storage.find(entity);
 		if (res != storage.end()) {
 			storage.erase(res);
 		}
 	}
-	inline bool isRegistrated(ent_id_t entity) const {
-		auto res = storage.find(entity);
-		if (res != storage.end() && res->first == entity) {
-			return true;
-		}
-		return false;
+	inline bool contains(ent_id_t entity) const {
+		return storage.contains(entity);
 	}
-	inline CompType& getComponent(ent_id_t entity) {
-		assert(isRegistrated(entity));
+	inline CompType& get(ent_id_t entity) {
+		assert(contains(entity));
 		return storage[entity];
 	}
-	inline CompType const& getComponent(ent_id_t entity) const {
-		assert(isRegistrated(entity));
+	inline CompType& operator[](ent_id_t entity) {
+		assert(contains(entity));
 		return storage[entity];
 	}
 	inline size_t size() const { return storage.size(); }
@@ -145,7 +141,7 @@ class ComponentStorage<CompType, direct_indexing>{
 public:
 	using storage_t = std::vector<std::pair<bool, CompType>>;
 
-	inline void registrate(ent_id_t entity, CompType const& comp) {
+	inline void insert(ent_id_t entity, CompType const& comp) {
 		if (entity < storage.size()) {
 			assert(storage[entity].first != true);	//cant register a registered entity
 			storage[entity].first = true;
@@ -159,12 +155,12 @@ public:
 			storage.push_back({ true, comp });
 		}
 	}
-	inline void deregistrate(ent_id_t entity) {
+	inline void remove(ent_id_t entity) {
 		if (entity < storage.size()) {
 			storage[entity].first = false;
 		}
 	}
-	inline bool isRegistrated(ent_id_t entity) const {
+	inline bool contains(ent_id_t entity) const {
 		if (entity < storage.size()) {
 			return storage[entity].first;
 		}
@@ -172,12 +168,12 @@ public:
 			return false;
 		}
 	}
-	inline CompType& getComponent(ent_id_t entity) {
-		assert(isRegistrated(entity));
+	inline CompType& get(ent_id_t entity) {
+		assert(contains(entity));
 		return storage[entity].second;
 	}
-	inline CompType const& getComponent(ent_id_t entity) const {
-		assert(isRegistrated(entity));
+	inline CompType& operator[](ent_id_t entity) {
+		assert(contains(entity));
 		return storage[entity].second;
 	}
 	inline size_t size() const { return storage.size(); }
@@ -208,10 +204,10 @@ public:
 			assert(entity < storage.size());
 			return &storage[entity].second;
 		}
-		bool operator==(const self_type& rhs) {
+		bool operator==(self_type const& rhs) {
 			return entity == entity;
 		}
-		bool operator!=(const self_type& rhs) {
+		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
 		ent_id_t id() {

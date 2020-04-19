@@ -31,15 +31,21 @@ struct PhysicsSharedSyncData {
 };
 
 struct PhysicsPoolData {
-	World* world;
+	PhysicsPoolData(World& wrld, size_t qtreeCapacity) :
+		world{ wrld },
+		qtreeDynamic(0, 0, qtreeCapacity, wrld),
+		qtreeStatic(0, 0, qtreeCapacity, wrld)
+	{}
+
+	World& world;
 	std::vector<uint32_t>* sensorCollidables;
 	std::vector<uint32_t>* dynCollidables;
 	std::vector<uint32_t>* statCollidables;
 	std::vector<CollisionResponse>* collisionResponses;
 	bool rebuildDynQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree2>> qtreesDynamic;
+	Quadtree2 qtreeDynamic;
 	bool rebuildStatQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree2>> qtreesStatic;
+	Quadtree2 qtreeStatic;
 };
 
 struct PhysicsPerThreadData {
@@ -70,18 +76,18 @@ struct PhysicsWorker {
 };
 
 inline bool PhysicsWorker::areEntsRelated(ent_id_t collID, ent_id_t otherID) {
-	if (physicsPoolData->world->hasComp<Slave>(collID) && physicsPoolData->world->hasComp<Slave>(otherID)) {	//same owner no collision check
-		if (physicsPoolData->world->getComp<Slave>(collID).ownerID == physicsPoolData->world->getComp<Slave>(otherID).ownerID) {
+	if (physicsPoolData->world.hasComp<Slave>(collID) && physicsPoolData->world.hasComp<Slave>(otherID)) {	//same owner no collision check
+		if (physicsPoolData->world.getComp<Slave>(collID).ownerID == physicsPoolData->world.getComp<Slave>(otherID).ownerID) {
 			return true;
 		}
 	}
-	else if (physicsPoolData->world->hasComp<Slave>(collID)) {
-		if (physicsPoolData->world->getComp<Slave>(collID).ownerID == otherID) {
+	else if (physicsPoolData->world.hasComp<Slave>(collID)) {
+		if (physicsPoolData->world.getComp<Slave>(collID).ownerID == otherID) {
 			return true;
 		}
 	}
-	else if (physicsPoolData->world->hasComp<Slave>(otherID)) {
-		if (physicsPoolData->world->getComp<Slave>(otherID).ownerID == collID) {
+	else if (physicsPoolData->world.hasComp<Slave>(otherID)) {
+		if (physicsPoolData->world.getComp<Slave>(otherID).ownerID == collID) {
 			return true;
 		}
 	}

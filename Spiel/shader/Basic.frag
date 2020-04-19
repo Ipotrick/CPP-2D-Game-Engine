@@ -18,7 +18,12 @@ void main()
 		float relativeRadiusToCenter = length(relativePosToCenter);
 		if (relativeRadiusToCenter < 1.0f) {
 			//inner part of circle
-			color = a_color * texture2D(texSampler[texID], v_texCoord);
+			if (a_texID >= 0) {
+				color = a_color * texture2D(texSampler[texID], v_texCoord);
+			}
+			else {
+				color = a_color;
+			}
 		}
 		else{
 			// corner/outer part of circle
@@ -26,6 +31,11 @@ void main()
 		}
 	}
 	else{
-		color = a_color * texture2D(texSampler[texID], v_texCoord);
+		if (a_texID >= 0) {
+			color = a_color * texture2D(texSampler[texID], v_texCoord);
+		}
+		else { 
+			color = a_color;
+		}
 	}
 }

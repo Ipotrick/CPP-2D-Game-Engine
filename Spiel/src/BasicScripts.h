@@ -76,7 +76,7 @@ public:
 				Bullet bulletDummy = world.getComp<Bullet>(id);
 				bulletDummy.damage /= 2;
 				delayedAddComp.push_back({ newEnt, bulletDummy });
-				world.addComp<SolidBody>(newEnt, world.getComp<SolidBody>(id));
+				world.addComp<PhysicsBody>(newEnt, world.getComp<PhysicsBody>(id));
 			}
 			world.despawn(id);
 		}

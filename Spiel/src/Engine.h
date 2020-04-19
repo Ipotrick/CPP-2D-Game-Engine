@@ -12,6 +12,7 @@
 //#define DEBUG_QUADTREE
 //#define DEBUG_QUADTREE2
 //#define DEBUG_PATHFINDING
+#define DEBUG_COLLIDER_SLEEP
 
 // ------------------
 
@@ -51,7 +52,6 @@ public:
 	virtual void update(World& world, float deltaTime) = 0;
 	/* specify what happenes once for destruction */
 	virtual void destroy() = 0;
-	
 
 					/*-- general statistics utility --*/
 	/* returns time difference to last physics dispatch, O(1)*/
@@ -65,21 +65,21 @@ public:
 
 					/*-- input utility --*/
 	/* returns the status(KEYSTATUS) of a given key_(KEY), O(1) (mutex locking) */
-	InputStatus getKeyStatus(KEY key_);
+	InputStatus getKeyStatus(KEY key);
 	/* returns if a given key_ is pressed, O(1) (mutex locking) */
-	bool keyPressed(KEY key_);
+	bool keyPressed(KEY key);
 	/* returns if a given key_ is released, O(1) (mutex locking) */
-	bool keyReleased(KEY key_);
+	bool keyReleased(KEY key);
 	/* returns if a given key_ is repeating, O(1) (mutex locking) */
-	bool keyRepeating(KEY key_);
+	bool keyRepeating(KEY key);
 	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
 	vec2 getCursorPos();
 	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
-	InputStatus getButtonStatus(BUTTON but_);
+	InputStatus getButtonStatus(BUTTON but);
 	/* returns true when a button is pressed, O(1) (mutex locking) */
-	bool buttonPressed(BUTTON but_);
+	bool buttonPressed(BUTTON but);
 	/* returns true when a button is NOT pressed, O(1) (mutex locking) */
-	bool buttonReleased(BUTTON but_);
+	bool buttonReleased(BUTTON but);
 
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
@@ -90,9 +90,9 @@ public:
 	vec2 getPosWorldSpace(vec2 windowSpacePos);
 
 					/* graphics utility */
-	/*  submit a Drawable to be drawn relative to the window, O(1)  */
-	void submitDrawable(Drawable && d_);
-	void submitDrawable(Drawable const& d_);
+	/*  submit a Drawable to be rendered the next frame, O(1)  */
+	void submitDrawable(Drawable && d);
+	void submitDrawable(Drawable const& d);
 	/* attach a texture to a submited Drawable */
 	void attachTexture(uint32_t drawableID, std::string_view name, vec2 min = { 0,0 }, vec2 max = { 1,1 });
 

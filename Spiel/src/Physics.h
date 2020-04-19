@@ -16,17 +16,16 @@ inline vec2 boundsSize(Form form, vec2 size, float rotation = 0.0f) {
 		return size;
 	}
 	else {
-		vec2 max{ 0,0 }; vec2 min{ 0,0 };
-		for (float i = -0.5f; i < 0.51f; i += 1.0f) {
-			for (float j = -0.5f; j < 0.51f; j += 1.0f) {
-				vec2 point = rotate({ size.x * i, size.y * j }, rotation);
-				max.x = std::max(max.x, point.x);
-				max.y = std::max(max.y, point.y);
-				min.x = std::min(min.x, point.x);
-				min.y = std::min(min.y, point.y);
-			}
-		}
-		return max - min;
+		vec2 maxPos{ 0,0 }; vec2 minPos{ 0,0 };
+		vec2 point1 = rotate({ size.x * -0.5f, size.y * -0.5f }, rotation);
+		vec2 point2 = rotate90(point1);
+		vec2 point3 = rotate90(point2);
+		vec2 point4 = rotate90(point3);
+
+		maxPos = max(max(point1, point2), max(point3, point4));
+		minPos = min(min(point1, point2), min(point3, point4));
+
+		return maxPos - minPos;
 	}
 }
 
@@ -102,8 +101,10 @@ CollisionTestResult rectangleRectangleCollisionCheck(CollidableAdapter const* co
 CollisionTestResult checkCircleRectangleCollision(CollidableAdapter const* circle, CollidableAdapter const* rect, bool bothSolid, bool isCirclePrimary);
 
 inline bool isOverlappingAABB(CollidableAdapter const* a, CollidableAdapter const* b) {
-	return fabs(b->getPos().x - a->getPos().x) <= fabs(b->getBoundsSize().x + a->getBoundsSize().x) * 0.5f &&
-	fabs(b->getPos().y - a->getPos().y) <= fabs(b->getBoundsSize().y + a->getBoundsSize().y) * 0.5f;
+	auto a_AABB = boundsSize(a->getForm(), a->getSize(), a->getRota());
+	auto b_AABB = boundsSize(b->getForm(), b->getSize(), b->getRota());
+	return fabs(b->getPos().x - a->getPos().x) <= fabs(b_AABB.x + a_AABB.x) * 0.5f 
+		&& fabs(b->getPos().y - a->getPos().y) <= fabs(b_AABB.y + a_AABB.y) * 0.5f;
 }
 
 CollisionTestResult checkForCollision(CollidableAdapter const* coll_, CollidableAdapter const* other_);

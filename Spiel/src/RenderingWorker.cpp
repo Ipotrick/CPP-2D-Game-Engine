@@ -189,7 +189,7 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 		maxTex = texHandler.getTexRef(d.id).maxPos;
 	}
 
-	bool isCircle = d.form ==  Form::CIRCLE ? 1.0f : 0.0f;
+	bool isCircle = d.form == Form::CIRCLE ? 1.0f : 0.0f;
 
 	mat3 modelMatrix2 = mat3::translate(vec2(d.position.x, d.position.y)) * mat3::rotate(d.rotation) * mat3::scale(vec2(d.scale.x, d.scale.y));
 	if (!d.isInWindowSpace()) {
@@ -197,28 +197,28 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 	}
 
 	Vertex v1;
-	v1.position = modelMatrix2 * vec2{ -0.5f, 0.5f };
-	v1.texCoord = { minTex.x, maxTex.y };
-	v1.color = d.color;
-	v1.texID = texID;
-	v1.circle = isCircle;
 	Vertex v2;
-	v2.position = modelMatrix2 * vec2{ 0.5f, 0.5f };
-	v2.texCoord = { maxTex.x, maxTex.y };
-	v2.color = d.color;
-	v2.texID = texID;
-	v2.circle = isCircle;
 	Vertex v3;
-	v3.position = modelMatrix2 * vec2{ -0.5f, -0.5f };
-	v3.texCoord = { minTex.x, minTex.y };
-	v3.color = d.color;
-	v3.texID = texID;
-	v3.circle = isCircle;
 	Vertex v4;
-	v4.position = modelMatrix2 * vec2{ 0.5f, -0.5f };
-	v4.texCoord = { maxTex.x, minTex.y };
+	v1.position = modelMatrix2 * vec2{ -0.5f,  0.5f };
+	v2.position = modelMatrix2 * vec2{  0.5f,  0.5f };
+	v3.position = modelMatrix2 * vec2{ -0.5f, -0.5f };
+	v4.position = modelMatrix2 * vec2{  0.5f, -0.5f };
+	v1.color = d.color;
+	v2.color = d.color;
+	v3.color = d.color;
 	v4.color = d.color;
+	v1.texCoord.x = minTex.x; v1.texCoord.y = maxTex.y;
+	v2.texCoord.x = maxTex.x; v2.texCoord.y = maxTex.y;
+	v3.texCoord.x = minTex.x; v3.texCoord.y = minTex.y;
+	v4.texCoord.x = maxTex.x; v4.texCoord.y = minTex.y;
+	v1.texID = texID;
+	v2.texID = texID;
+	v3.texID = texID;
 	v4.texID = texID;
+	v1.circle = isCircle;
+	v2.circle = isCircle;
+	v3.circle = isCircle;
 	v4.circle = isCircle;
 
 	return { v1, v2, v3, v4 };
@@ -235,30 +235,31 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, mat3 const& 
 	int texSamplers[32] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
 	glUniform1iv(50, 32, texSamplers);
 
-	bindTexture("white", 0);	// texture slot 0 is allways the white texture
-	bindTexture("default", 1);
+	bindTexture("default", 0);
 
-	uint32_t nextTextureSamplerSlot{ 2 }; // when there are no texture slots left, the batch is full and will be rendered.
+	uint32_t nextTextureSamplerSlot{ 1 }; // when there are no texture slots left, the batch is full and will be rendered.
 	robin_hood::unordered_map<std::string_view, uint32_t> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
 	// fill batch with vertices
 	size_t index{ startIndex };
 	int drawableCount{ 0 };
-	for (; nextTextureSamplerSlot < 32 
-		&& index < drawables.size() 
-		&& drawableCount < maxRectCount; index++, drawableCount++)
+	for (; index < drawables.size()  && drawableCount < maxRectCount; index++, drawableCount++)
 	{
 		Drawable const& d = drawables[index];
-		uint32_t drawableSamplerSlot{ 0 };
+		int drawableSamplerSlot{ 0 };
 
 		// check if drawable has texture
 		if (texHandler.hasTexture(d.id)) {
-			if (texHandler.isTextureLoaded(texHandler.getTexRef(d.id).textureName)) {
+			if (texHandler.isTextureLoaded(texHandler.getTexRef(d.id).textureName)) { 
 				// is texture allready in the usedSamplerMap?
 				if (usedTexturesSamplerSlots.contains(texHandler.getTexRef(d.id).textureName)) {
 					// then just use the allready sloted texture sampler:
 					drawableSamplerSlot = usedTexturesSamplerSlots[texHandler.getTexRef(d.id).textureName];
 				}
-				else {
+				else { 
+					// if all texture sampler slots are used flush the batch
+					if (nextTextureSamplerSlot >= maxTextureSlots) break;
+
+					// there is a free texture sampler slot
 					// add texture to usedSamplerSlotMap:
 					usedTexturesSamplerSlots.insert({ texHandler.getTexRef(d.id).textureName , nextTextureSamplerSlot });
 					// bind texture to sampler slot
@@ -267,14 +268,14 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, mat3 const& 
 					nextTextureSamplerSlot++;
 				}
 			}
-			else {
+			else { 
 				// drawable gets the error texture
-				drawableSamplerSlot = 1;
+				drawableSamplerSlot = 0;
 			}
 		}
-		else {
-			// drawable has no texture so it gets sampler slot 0 (white texture)
-			drawableSamplerSlot = 0;
+		else { 
+			// drawable has no texture so it gets sampler slot -1 (white texture)
+			drawableSamplerSlot = -1;
 		}
 
 		auto vertecies = generateVertices(d, drawableSamplerSlot, viewProjectionMatrix);
@@ -319,7 +320,7 @@ void RenderingWorker::bindTexture(std::string_view name, int slot)
 
 void RenderingWorker::drawDrawable(Drawable const& d, mat4 const& viewProjectionMatrix)
 {
-	constexpr int texSlot{ 0 };
+	int texSlot{ 0 };
 
 	auto vertecies = generateVertices(d, texSlot, viewProjectionMatrix);
 	for (int i = 0; i < 4; i++) {
@@ -340,7 +341,7 @@ void RenderingWorker::drawDrawable(Drawable const& d, mat4 const& viewProjection
 		}
 	}
 	else {
-		bindTexture("white", texSlot);
+		texSlot = -1;
 	}
 
 	// give the shader the possible texture slots

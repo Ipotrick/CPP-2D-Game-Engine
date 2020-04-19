@@ -29,20 +29,23 @@ struct Collider : public CompData {
 	vec2 size;
 	Form form;
 	bool particle;
+	bool sleeping;
 	Collider(vec2 size_ = { 1,1 }, Form form_ = Form::CIRCLE, bool particle_ = false) :
 		size{ size_ }, 
 		form{ form_ },
-		particle{ particle_ } {}
+		particle{ particle_ },
+		sleeping{ false }
+	{}
 };
 
 // solidBody component
 
-struct SolidBody : public CompData {
+struct PhysicsBody : public CompData {
 	float elasticity;
 	float mass;
 	float momentOfInertia;
-	SolidBody(float elasticity_, float mass_, float mOI_) : elasticity{ elasticity_ }, mass{ mass_ }, momentOfInertia{ mOI_ } {}
-	SolidBody() : 
+	PhysicsBody(float elasticity_, float mass_, float mOI_) : elasticity{ elasticity_ }, mass{ mass_ }, momentOfInertia{ mOI_ } {}
+	PhysicsBody() : 
 		elasticity{ 0.f }, 
 		mass{ 0.f }, 
 		momentOfInertia{ 0.f } {
@@ -72,7 +75,7 @@ struct Draw : public CompData {
 // slave component
 
 struct Slave {
-	uint32_t ownerID;
+	ent_id_t ownerID;
 	Slave(uint32_t id_ = 0) :
 		ownerID{ id_ } {}
 
@@ -111,16 +114,23 @@ struct Composit : public CompData {
 	}
 };
 
-// moveField component
+// effector components
 
-struct MoveField : public CompData {
-	MoveField(vec2 const& mvdr = {1,0}, float frc = 0.0f, float accel = 0.0f) :
+struct LinearEffector : public CompData {
+	vec2 movdir;
+	float force;
+	float acceleration;
+	LinearEffector(vec2 const& mvdr = {1,0}, float frc = 0.0f, float accel = 0.0f) :
 		movdir{ mvdr },
 		force{ frc },
 		acceleration{ accel }
 	{ }
-
-	vec2 movdir;
-	float force;
-	float acceleration;
+};
+struct FrictionEffector : public CompData {
+	float friction;
+	float rotationalFriction;
+	FrictionEffector(float frctn = 0, float rotaFrctn = 0) :
+		friction{ frctn },
+		rotationalFriction{ rotaFrctn }
+	{}
 };

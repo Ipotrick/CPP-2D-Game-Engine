@@ -25,11 +25,9 @@ public:
 	// can only be called when renderer is ready, so allways call waitTillFinished before
 	void flushSubmissions();
 	// allways call waitTillFinished once after rendering before calling this function
+	// submit drawables for the next frame
 	void submit(Drawable const& d);
 	void submit(Drawable && d);
-	// allways call waitTillFinished once after rendering before calling this function
-	void submitWindowSpace(Drawable const& d);
-	void submitWindowSpace(Drawable && d);
 	// attaches Texture to a drawable
 	void attachTex(uint32_t drawableID, std::string_view texName, vec2 min = { 0,0 }, vec2 max = { 1,1 });
 	void attachTex(uint32_t drawableID, TextureRef const& texRef);
@@ -67,7 +65,7 @@ inline void Renderer::submit(Drawable const& d) {
 inline void Renderer::submit(Drawable && d) {
 #ifdef _DEBUG
 	auto d_ = d;
-	frontBuffer->drawables.push_back(d_);
+	frontBuffer->drawables.push_back(d);
 #else
 	frontBuffer->drawables.push_back(d);
 #endif

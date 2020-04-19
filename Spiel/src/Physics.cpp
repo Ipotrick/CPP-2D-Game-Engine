@@ -10,19 +10,19 @@ vec2 calcPosChange(CollidableAdapter const* coll, CollidableAdapter const* other
 			//they move into each other
 			if (collDirV2 < 0) {
 				//coll moved into other
-				return dist * primCollNormal * Physics::pushoutFactor * 0.9f;
+				return dist * primCollNormal * 0.9f + primCollNormal * Physics::nullDelta * 2;
 			}
 			else {
 				//other moved into coll
-				return dist * primCollNormal * Physics::pushoutFactor * 0.1f;
+				return dist * primCollNormal * 0.1f + primCollNormal * Physics::nullDelta * 2;
 			}
 		}
 		else {
-			return dist * primCollNormal * bPart * Physics::pushoutFactor;
+			return dist * primCollNormal * bPart + primCollNormal * Physics::nullDelta * 2;
 		}
 	}
 	else {
-		return dist * primCollNormal * Physics::pushoutFactor;
+		return dist * primCollNormal + primCollNormal * Physics::nullDelta * 2;
 	}
 }
 
@@ -198,25 +198,25 @@ CollisionTestResult circleCircleCollisionCheck(CollidableAdapter const* coll, Co
 
 CollisionTestResult checkForCollision(CollidableAdapter const* coll_, CollidableAdapter const* other_) {
 	//pretest with AABB
-	if (isOverlappingAABB(coll_, other_)) {
-		if (coll_->getForm() == Form::CIRCLE) {
-			if (other_->getForm() == Form::CIRCLE) {
-				return circleCircleCollisionCheck(coll_, other_);
-			}
-			else {
-				return checkCircleRectangleCollision(coll_, other_, true);
-			}
+	if (coll_->getForm() == Form::CIRCLE) {
+		if (other_->getForm() == Form::CIRCLE) {
+			return circleCircleCollisionCheck(coll_, other_);
 		}
 		else {
-			if (other_->getForm() == Form::CIRCLE) {
-				return checkCircleRectangleCollision(other_, coll_, false);
-			}
-			else {
-				return rectangleRectangleCollisionCheck(coll_, other_);
-			}
+			return checkCircleRectangleCollision(coll_, other_, true);
 		}
 	}
 	else {
-		return CollisionTestResult();
+		if (other_->getForm() == Form::CIRCLE) {
+			return checkCircleRectangleCollision(other_, coll_, false);
+		}
+		else {
+			if (isOverlappingAABB(coll_, other_)) {
+				return rectangleRectangleCollisionCheck(coll_, other_);
+			}
+			else {
+				return CollisionTestResult();
+			}
+		}
 	}
 }
