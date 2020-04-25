@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <ostream>
 
-#include "glmath.h"
+#include "vector_math.h"
 
 enum class Form : uint8_t {
 	CIRCLE = 0x00,

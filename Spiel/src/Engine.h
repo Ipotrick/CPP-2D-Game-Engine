@@ -12,7 +12,6 @@
 //#define DEBUG_QUADTREE
 //#define DEBUG_QUADTREE2
 //#define DEBUG_PATHFINDING
-#define DEBUG_COLLIDER_SLEEP
 
 // ------------------
 
@@ -30,14 +29,14 @@
 #include "EventHandler.h"
 #include "World.h"
 
-#include "PhysicsWorker.h"
+#include "PhysicsSystem.h"
 #include "Renderer.h"
 
 
 class Engine
 {
 public:
-	Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
+	Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
 	~Engine();
 
 	/* ends programm after finisheing the current tick */
@@ -73,7 +72,7 @@ public:
 	/* returns if a given key_ is repeating, O(1) (mutex locking) */
 	bool keyRepeating(KEY key);
 	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
-	vec2 getCursorPos();
+	Vec2 getCursorPos();
 	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
 	InputStatus getButtonStatus(BUTTON but);
 	/* returns true when a button is pressed, O(1) (mutex locking) */
@@ -83,41 +82,36 @@ public:
 
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
-	vec2 getWindowSize();
+	Vec2 getWindowSize();
 	/* returns aspect ration width/height of the window, O(1)*/
 	float getWindowAspectRatio();
 	/* transformes world space coordinates into relative window space coordinates */
-	vec2 getPosWorldSpace(vec2 windowSpacePos);
+	Vec2 getPosWorldSpace(Vec2 windowSpacePos);
 
 					/* graphics utility */
 	/*  submit a Drawable to be rendered the next frame, O(1)  */
 	void submitDrawable(Drawable && d);
 	void submitDrawable(Drawable const& d);
 	/* attach a texture to a submited Drawable */
-	void attachTexture(uint32_t drawableID, std::string_view name, vec2 min = { 0,0 }, vec2 max = { 1,1 });
+	void attachTexture(uint32_t drawableID, std::string_view name, Vec2 min = { 0,0 }, Vec2 max = { 1,1 });
 
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(ent_id_t id_);
-	/* CALL THIS WHENEVER YOU MOVE/ ADD/ REMOVE STATIC ENTITIES, O(1) */
-	inline void staticsChanged() {  rebuildStaticData = true; }
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
 	Grid<bool> const& getStaticGrid() { return staticGrid; }
 
 public:
-	World world;
+	World& world;
 	EventHandler events;
 	Camera camera;
 
 	uint32_t freeDrawableID{ 0x80000000 };
 
 private:
-	void physicsUpdate(World& world, float deltaTime);
-	template<int N> void syncCompositPhysics();
 	void updateStaticGrid(World& world);
 	void rendererUpdate(World& world);
-
 private:
 	// meta
 	std::chrono::microseconds minimunLoopTime;
@@ -125,25 +119,16 @@ private:
 	uint32_t iteration;
 	float maxDeltaTime;
 
-	// physics
-	bool rebuildStaticData;
-	unsigned physicsThreadCount;
-	std::vector<CollisionInfo> collInfos;
-	robin_hood::unordered_map<ent_id_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
-	robin_hood::unordered_map<ent_id_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
-	std::vector<std::shared_ptr<PhysicsPerThreadData>> physicsPerThreadData;
-	std::shared_ptr<PhysicsPoolData> physicsPoolData;
-	std::shared_ptr<PhysicsSharedSyncData> sharedPhysicsSyncData;
-	std::vector<std::thread> physicsThreads;
-	uint32_t qtreeCapacity;
-
-	// AI
-	Grid<bool> staticGrid;
-
 	// perf
 	PerfLogger perfLog;
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
+
+	// physics
+	PhysicsSystem physicsSystem;
+
+	// AI
+	Grid<bool> staticGrid;
 
 	// window
 	std::shared_ptr<Window> window;
@@ -152,15 +137,15 @@ private:
 	Renderer renderer;
 };
 
-inline void Engine::submitDrawable(Drawable && d) {
-	renderer.submit(std::move(d));
-}
-
-inline void Engine::submitDrawable(Drawable const& d) {
+__forceinline void Engine::submitDrawable(Drawable && d) {
 	renderer.submit(d);
 }
 
-inline void Engine::attachTexture(uint32_t drawableID, std::string_view name, vec2 min, vec2 max)
+__forceinline void Engine::submitDrawable(Drawable const& d) {
+	renderer.submit(d);
+}
+
+__forceinline void Engine::attachTexture(uint32_t drawableID, std::string_view name, Vec2 min, Vec2 max)
 {
 	renderer.attachTex(drawableID, name, min, max);
 }

@@ -31,18 +31,15 @@
     <Filter Include="_stbi">
       <UniqueIdentifier>{41d0503f-0ab4-475c-ada3-0170b6a27b2f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_math">
+      <UniqueIdentifier>{7c1b4701-56b3-4db5-8736-770ce17348be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Engine.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Timing.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\World.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\glmath.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\Input.h">
@@ -56,12 +53,6 @@
     </ClInclude>
     <ClInclude Include="src\Script.h">
       <Filter>_Script</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Physics.h">
-      <Filter>_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsWorker.h">
-      <Filter>_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\QuadTree.h">
       <Filter>_Physics</Filter>
@@ -114,15 +105,66 @@
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
       <Filter>_stbi</Filter>
     </ClInclude>
+    <ClInclude Include="src\GameWorld.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystemWorldInclude">
+      <Filter>_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameCompWorldInclude">
+      <Filter>_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystemUnifroms.h">
+      <Filter>_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\basic_math.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vec3.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vec4.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vec.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mat3.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mat4.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vector_math.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\collision_detection.h">
+      <Filter>_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsWorker.h">
+      <Filter>_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\random.h">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\World.h">
+      <Filter>_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsSystem.h">
+      <Filter>_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug.h">
+      <Filter>_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics.h">
+      <Filter>_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreSystemUniforms.h">
+      <Filter>_Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\World.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\glmath.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\Game.cpp">
@@ -130,9 +172,6 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PhysicsWorker.cpp">
-      <Filter>_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
       <Filter>_Rendering</Filter>
@@ -154,6 +193,30 @@
     </ClCompile>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
       <Filter>_stbi</Filter>
+    </ClCompile>
+    <ClCompile Include="src\World.cpp">
+      <Filter>_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algo.h">
+      <Filter>Headerdateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vec2.h">
+      <Filter>_math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mat4.cpp">
+      <Filter>_math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mat3.cpp">
+      <Filter>_math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\collision_detection.cpp">
+      <Filter>_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PhysicsWorker.cpp">
+      <Filter>_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PhysicsSystem.cpp">
+      <Filter>_Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

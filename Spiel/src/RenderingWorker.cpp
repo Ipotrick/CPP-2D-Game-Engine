@@ -115,7 +115,7 @@ void RenderingWorker::operator()()
 			// refresh texture Refs
 			texHandler.refreshRefMap(data->renderBuffer->newTextureRefs);
 
-			mat3 viewProjectionMatrix = mat3::scale(camera.zoom) * mat3::scale(camera.frustumBend) * mat3::rotate(-camera.rotation) * mat3::translate(-camera.position);
+			Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
 
 			std::sort(drawables.begin(), drawables.end(),
 				[](Drawable const& a, Drawable const& b) {
@@ -181,9 +181,9 @@ std::string RenderingWorker::readShader(std::string path_)
 	return ss.str();
 }
 
-std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, mat3 const& viewProjMat) {
-	vec2 minTex{ 0,0 };
-	vec2 maxTex{ 1,1 };
+std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat) {
+	Vec2 minTex{ 0,0 };
+	Vec2 maxTex{ 1,1 };
 	if (texHandler.hasTexture(d.id) && texHandler.isTextureLoaded(texHandler.getTexRef(d.id).textureName)) {
 		minTex = texHandler.getTexRef(d.id).minPos;
 		maxTex = texHandler.getTexRef(d.id).maxPos;
@@ -191,7 +191,7 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 
 	bool isCircle = d.form == Form::CIRCLE ? 1.0f : 0.0f;
 
-	mat3 modelMatrix2 = mat3::translate(vec2(d.position.x, d.position.y)) * mat3::rotate(d.rotation) * mat3::scale(vec2(d.scale.x, d.scale.y));
+	Mat3 modelMatrix2 = Mat3::translate(Vec2(d.position.x, d.position.y)) * Mat3::rotate(d.rotationVec) * Mat3::scale(Vec2(d.scale.x, d.scale.y));
 	if (!d.isInWindowSpace()) {
 		modelMatrix2 = viewProjMat * modelMatrix2;
 	}
@@ -200,10 +200,10 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 	Vertex v2;
 	Vertex v3;
 	Vertex v4;
-	v1.position = modelMatrix2 * vec2{ -0.5f,  0.5f };
-	v2.position = modelMatrix2 * vec2{  0.5f,  0.5f };
-	v3.position = modelMatrix2 * vec2{ -0.5f, -0.5f };
-	v4.position = modelMatrix2 * vec2{  0.5f, -0.5f };
+	v1.position = modelMatrix2 * Vec2{ -0.5f,  0.5f };
+	v2.position = modelMatrix2 * Vec2{  0.5f,  0.5f };
+	v3.position = modelMatrix2 * Vec2{ -0.5f, -0.5f };
+	v4.position = modelMatrix2 * Vec2{  0.5f, -0.5f };
 	v1.color = d.color;
 	v2.color = d.color;
 	v3.color = d.color;
@@ -226,7 +226,7 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 
 
 
-size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, mat3 const& viewProjectionMatrix, size_t startIndex)
+size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, size_t startIndex)
 {
 	glUseProgram(shader);
 	glBindBuffer(GL_ARRAY_BUFFER, verteciesBuffer);
@@ -318,7 +318,7 @@ void RenderingWorker::bindTexture(std::string_view name, int slot)
 	glBindTexture(GL_TEXTURE_2D, texHandler.getTexture(name).openglTexID);
 }
 
-void RenderingWorker::drawDrawable(Drawable const& d, mat4 const& viewProjectionMatrix)
+void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix)
 {
 	int texSlot{ 0 };
 

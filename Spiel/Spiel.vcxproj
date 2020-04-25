@@ -22,21 +22,32 @@
     <ClInclude Include="..\Libraries\stb_image\stb_image.h" />
     <ClInclude Include="src\BaseTypes.h" />
     <ClInclude Include="src\BasicScripts.h" />
+    <ClInclude Include="src\basic_math.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\collision_detection.h" />
     <ClInclude Include="src\CoreComponents.h" />
+    <ClInclude Include="src\CoreSystemUniforms.h" />
+    <ClInclude Include="src\debug.h" />
     <ClInclude Include="src\ECS.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventHandler.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
-    <ClInclude Include="src\glmath.h" />
+    <ClInclude Include="src\GameCompWorldInclude" />
+    <ClInclude Include="src\GameSystemUnifroms.h" />
+    <ClInclude Include="src\GameSystemWorldInclude" />
+    <ClInclude Include="src\GameWorld.h" />
     <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\Mat3.h" />
+    <ClInclude Include="src\Mat4.h" />
     <ClInclude Include="src\Perf.h" />
     <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\PhysicsSystem.h" />
     <ClInclude Include="src\PhysicsTypes.h" />
     <ClInclude Include="src\PhysicsWorker.h" />
     <ClInclude Include="src\PlayerScript.h" />
     <ClInclude Include="src\QuadTree.h" />
+    <ClInclude Include="src\random.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\RenderingWorker.h" />
     <ClInclude Include="src\RenderTypes.h" />
@@ -44,22 +55,31 @@
     <ClInclude Include="src\ScriptInclude.h" />
     <ClInclude Include="src\TextureHandler.h" />
     <ClInclude Include="src\Timing.h" />
+    <ClInclude Include="src\Vec.h" />
+    <ClInclude Include="src\Vec3.h" />
+    <ClInclude Include="src\Vec4.h" />
+    <ClInclude Include="src\vector_math.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp" />
+    <ClCompile Include="src\algo.h" />
+    <ClCompile Include="src\collision_detection.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\glmath.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Mat3.cpp" />
+    <ClCompile Include="src\Mat4.cpp" />
     <ClCompile Include="src\Physics.cpp" />
+    <ClCompile Include="src\PhysicsSystem.cpp" />
     <ClCompile Include="src\PhysicsWorker.cpp" />
     <ClCompile Include="src\QuadTree.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\RenderingWorker.cpp" />
     <ClCompile Include="src\TextureHandler.cpp" />
+    <ClCompile Include="src\Vec2.h" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>

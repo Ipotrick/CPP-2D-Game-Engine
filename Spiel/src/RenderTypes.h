@@ -6,6 +6,7 @@
 #include "GL/glew.h"
 
 #include "BaseTypes.h"
+#include "Vec2.h"
 #include "Camera.h"
 #include "Window.h"
 
@@ -13,18 +14,18 @@
 class Drawable {
 public:
 	/* x y world coordinates, z depth*/
-	vec2 position;
+	Vec2 position;
 	/* in radiants 2pi = one rotation*/
-	float rotation;
-	vec4 color;
-	vec2 scale;
+	RotaVec2 rotationVec;
+	Vec4 color;
+	Vec2 scale;
 	float drawingPrio;
 	uint32_t id;
 	Form form;
 
-	Drawable(uint32_t id_, vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, Form form_, float rotation_, bool inWindowSpace = false) :
+	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, bool inWindowSpace = false) :
 		position{ position_ },
-		rotation{ rotation_ },
+		rotationVec{ rotation_ },
 		drawingPrio{ drawingPrio_ },
 		scale{ scale_ },
 		color{ color_ },
@@ -34,8 +35,6 @@ public:
 	{
 	}
 
-	inline vec2 getPos() const { return position; }
-	inline float getRota() const { return rotation; }
 	inline bool isInWindowSpace() const { return inWindowSpace; }
 private:
 	bool inWindowSpace;
@@ -63,9 +62,9 @@ struct Texture {
 
 struct TextureRef {
 	std::string_view textureName;
-	vec2 minPos;
-	vec2 maxPos;
-	TextureRef(std::string_view name = "default.png", vec2 minPos_ = { 0,0 }, vec2 maxPos_ = { 1,1 }) :
+	Vec2 minPos;
+	Vec2 maxPos;
+	TextureRef(std::string_view name = "default.png", Vec2 minPos_ = { 0,0 }, Vec2 maxPos_ = { 1,1 }) :
 		textureName{ name },
 		minPos{ minPos_ },
 		maxPos{ maxPos_ }
@@ -73,11 +72,11 @@ struct TextureRef {
 };
 
 struct Light {
-	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
-	vec2 position;
+	Light(Vec2 pos, float rad, uint32_t id_, Vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
+	Vec2 position;
 	float radius;
 	uint32_t id;
-	vec4 color;
+	Vec4 color;
 };
 
 struct RenderBuffer {

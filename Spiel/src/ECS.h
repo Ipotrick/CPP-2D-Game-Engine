@@ -1,6 +1,11 @@
 #pragma once
+#include <utility> 
+#include <functional> // std::invoke
+
 #include <cassert>
 #include <iterator>
+#include <variant>
+#include <tuple>
 
 #include <vector>
 

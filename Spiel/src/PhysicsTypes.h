@@ -12,37 +12,6 @@ namespace Physics {
 	inline std::vector<Drawable> debugDrawables;
 }
 
-
-class CollidableAdapter {
-public:
-	CollidableAdapter(vec2 const& pos_, float const& rota_, vec2 const& vel_, vec2 const& size_, Form const& form_, bool dyn_) :
-		position{ pos_ },
-		rotation{ rota_ },
-		velocity{ vel_ },
-		size{ size_ },
-		form{ form_ },
-		dynamic{ dyn_ }
-	{}
-
-
-	inline vec2 const& getPos() const { return position; }
-	inline float getRota() const { return rotation; }
-	inline vec2 const& getVel() const { return velocity; }
-	inline vec2 const& getSize() const { return size; }
-	inline Form getForm() const { return form; }
-	inline bool isDynamic() const { return dynamic; }
-
-	inline float getRadius() const { return size.r * 0.5f; }
-	inline float getSurfaceArea() const { return size.x * size.y; }
-private:
-	vec2 const position;
-	float const rotation;
-	vec2 const velocity;
-	vec2 const size;
-	Form const form;
-	bool const dynamic;
-};
-
 template<typename T>
 class Grid {
 public:
@@ -52,7 +21,7 @@ public:
 		cellSize{ 0.1f, 0.1f }
 	{}
 
-	Grid(vec2 cellSize_) :
+	Grid(Vec2 cellSize_) :
 		minPos{ 0.0f, 0.0f },
 		sizeX{ 0 },
 		cellSize{ cellSize_ }
@@ -82,37 +51,13 @@ public:
 	inline std::pair<int, int> getSize() const { return { sizeX, sizeY }; }
 	inline int getSizeX() const { return sizeX; }
 	inline int getSizeY() const { return sizeY; }
-	vec2 const getMinPos() const { return minPos; }
-	vec2 const getCellSize() const { return cellSize; }
+	Vec2 const getMinPos() const { return minPos; }
+	Vec2 const getCellSize() const { return cellSize; }
 
-	vec2 minPos;
-	vec2 cellSize;
+	Vec2 minPos;
+	Vec2 cellSize;
 private:
 	int sizeX;
 	int sizeY;
 	std::vector<T> data;
-};
-
-struct CollisionTestResult {
-	vec2 posChange;
-	vec2 collisionNormal;
-	vec2 collisionPos;
-	float clippingDist;
-	bool collided;
-
-	CollisionTestResult() : posChange{ 0.0f }, collisionPos{ vec2(0,0) }, collided{ false }, clippingDist{ 0.0f }, collisionNormal{ 1,0 } {}
-};
-
-struct CollisionInfo {
-	uint32_t idA;
-	uint32_t idB;
-	float clippingDist;
-	vec2 collisionNormal;
-	vec2 collisionPos;
-
-	CollisionInfo(uint32_t idA_, uint32_t idB_, float clippingDist_, vec2 collisionNormal_, vec2 collisionPos_) :idA{ idA_ }, idB{ idB_ }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
-};
-
-struct CollisionResponse {
-	vec2 posChange;
 };

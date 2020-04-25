@@ -12,9 +12,9 @@
 
 struct Vertex {
 	static int constexpr floatCount{ 10 };
-	vec2 position;
-	vec4 color;
-	vec2 texCoord;
+	Vec2 position;
+	Vec4 color;
+	Vec2 texCoord;
 	float texID;
 	float circle;
 
@@ -92,10 +92,10 @@ public:
 	std::shared_ptr<RenderingSharedData> data;
 private:
 	std::string readShader(std::string path_);
-	std::array<Vertex, 4> generateVertices(Drawable const& d, float texID, mat3 const& viewProjMat);
-	void drawDrawable(Drawable const& d, mat4 const& viewProjectionMatrix);
+	std::array<Vertex, 4> generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat);
+	void drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix);
 	// returns the index after the last element that was drawn in the batch
-	size_t drawBatch(std::vector<Drawable>& drawables, mat3 const& viewProjectionMatrix, size_t startIndex);
+	size_t drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, size_t startIndex);
 	void bindTexture(GLuint texID, int slot = 0);
 	void bindTexture(std::string_view name, int slot = 0);
 private:

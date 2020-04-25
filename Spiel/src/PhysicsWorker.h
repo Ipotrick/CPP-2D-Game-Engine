@@ -5,6 +5,7 @@
 #include <condition_variable>
 
 #include "Physics.h"
+#include "collision_detection.h"
 #include "robin_hood.h"
 #include "QuadTree.h"
 #include "Timing.h"
@@ -38,10 +39,11 @@ struct PhysicsPoolData {
 	{}
 
 	World& world;
-	std::vector<uint32_t>* sensorCollidables;
-	std::vector<uint32_t>* dynCollidables;
-	std::vector<uint32_t>* statCollidables;
-	std::vector<CollisionResponse>* collisionResponses;
+	std::vector<uint32_t> sensorCollidables;
+	std::vector<uint32_t> dynCollidables;
+	std::vector<uint32_t> statCollidables;
+	std::vector<CollisionResponse> collisionResponses;
+	std::vector<Vec2> aabbCache;
 	bool rebuildDynQuadTrees = true;
 	Quadtree2 qtreeDynamic;
 	bool rebuildStatQuadTrees = true;
@@ -68,28 +70,18 @@ struct PhysicsWorker {
 	std::shared_ptr<PhysicsPoolData> physicsPoolData;
 	std::shared_ptr<PhysicsSharedSyncData> syncData;
 
+	std::vector<uint32_t> nearCollidablesBuffer;	// reuse heap memory for all dyn collidable collisions
+
 	unsigned const physicsThreadCount;
+	bool run{ true };
+
+	void cacheAABBs(std::vector<ent_id_t>& colliders);
+
+	void waitForUpdate();
+
+	void waitForOtherWorkers();
+
+	void collisionFunction(ent_id_t collID, Quadtree2 const& quadtree, bool dynamic);
 
 	void operator()(); 
-
-	bool areEntsRelated(ent_id_t endA, ent_id_t endB);
 };
-
-inline bool PhysicsWorker::areEntsRelated(ent_id_t collID, ent_id_t otherID) {
-	if (physicsPoolData->world.hasComp<Slave>(collID) && physicsPoolData->world.hasComp<Slave>(otherID)) {	//same owner no collision check
-		if (physicsPoolData->world.getComp<Slave>(collID).ownerID == physicsPoolData->world.getComp<Slave>(otherID).ownerID) {
-			return true;
-		}
-	}
-	else if (physicsPoolData->world.hasComp<Slave>(collID)) {
-		if (physicsPoolData->world.getComp<Slave>(collID).ownerID == otherID) {
-			return true;
-		}
-	}
-	else if (physicsPoolData->world.hasComp<Slave>(otherID)) {
-		if (physicsPoolData->world.getComp<Slave>(otherID).ownerID == collID) {
-			return true;
-		}
-	}
-	return false;
-}

@@ -62,8 +62,8 @@ struct Trigger : public CompData {
 // light component
 
 struct CompDataLight : public CompData {
-	CompDataLight(vec4 col_ = vec4(1,1,1,1)) :color{col_} {}
-	vec4 color;
+	CompDataLight(Vec4 col_ = Vec4(1,1,1,1)) :color{col_} {}
+	Vec4 color;
 };
 
 // enemy component

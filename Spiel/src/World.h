@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <fstream>
- 
+
 #include <vector>
 #include <queue>
 #include <bitset>
@@ -11,28 +11,29 @@
 
 #include "BaseTypes.h"
 #include "RenderTypes.h"
+#include "algo.h"
+
 #include "ECS.h"
 #include "CoreComponents.h"
 #include "GameComponents.h"
+#include "CoreSystemUniforms.h"
+#include "GameSystemUnifroms.h"
 
-#define GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, CompStorage, storageType) \
-template<> __forceinline auto& getAll<CompType>() { return CompStorage; } \
-template<> __forceinline CompType& getComp<CompType>(ent_id_t entity) { return CompStorage.get(entity); }\
-template<> __forceinline bool hasComp<CompType>(ent_id_t entity) { return CompStorage.contains(entity); }\
-template<> __forceinline void addComp<CompType>(ent_id_t entity, CompType data) { CompStorage.insert(entity, data); } \
-template<> __forceinline void addComp<CompType>(ent_id_t entity) { CompStorage.insert(entity, CompType()); } \
-template<> __forceinline void remComp<CompType>(ent_id_t entity) { CompStorage.remove(entity); }
+#include "GameSystemWorldInclude"
 
-#define GENERATE_COMPONENT_CODE(CompType, StorageType, Num) \
-private: ComponentStorage<CompType, StorageType> compStorage ## Num; \
-public: GENERATE_COMPONENT_ACCESS_FUNCTIONS_INTERN(CompType, compStorage ## Num, storageType)
+// GameSystemWorldInclude API
+#define SYSTEM_UNIFORMS(System) SystemUniforms ## System uniforms ## System;
+#include "GameSystemWorldInclude"
 
-struct PhysicsUniforms {
-	float friction{ 0 };
-	vec2  linearEffectDir{ 0 };
-	float linearEffectAccel{ 0 };
-	float linearEffectForce{ 0 };
-};
+#define CORE_COMPONENT_COUNT 11
+// GameCompWorldInclude API
+	#define COMPONENT_INDEX(CompType, Index) template<> struct ComponentIndex<CompType> { static int constexpr index = Index + CORE_COMPONENT_COUNT; };
+	#define COMPONENT_STORAGE(CompType, StorageType) ComponentStorage<CompType, StorageType>
+#include "GameCompWorldInclude"
+
+#define COMPONENT_INDEX_CORE(CompType, Index) template<> struct ComponentIndex<CompType> { static int constexpr index = Index; };
+
+struct Dummy {};
 
 class Ent {
 public:
@@ -63,7 +64,7 @@ class World {
 	friend class SingleView;
 public:
 
-	World() : lastID{ 0 }, despawnList{}, oldCapacity{0}
+	World() : lastID{ 0 }, despawnList{}
 	{
 		entities.push_back({ false });
 	}
@@ -74,9 +75,11 @@ public:
 	/* creates blank entity and returns its entity, O(1) */
 	ent_id_t createEnt();
 	/* enslaves the first ent to the second, ~O(1) */
-	void enslaveEntTo(ent_id_t slave, ent_id_t owner, vec2 relativePos, float relativeRota);
+	void enslaveEntTo(ent_id_t slave, ent_id_t owner, Vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
 	void despawn(ent_id_t entity);
+	/* returns if an entitiy is related to another entity via a slave/owner relationship */
+	bool areEntsRelated(ent_id_t collID, ent_id_t otherID);
 
 	/* world utility */
 	/* returnes the entity of the most rescently spawned entity.
@@ -88,17 +91,23 @@ public:
 	size_t const getEntCount();
 	/* returns the size of the vector that holds the entities, O(1) */
 	size_t const getEntMemSize();
+	/* sets static entities changed flag */
+	void staticsChanged();
 	/* returns wheter or not static entities changed */
 	bool didStaticsChange();
 
 	/* Component access utility */
-	/* returnes reference to a safe virtual container of the given components one can iterate over. the iterator also holds the entity entity of the compoenent it points to, O(1) */
+	/* returnes reference to a safe virtual container of the given components one can iterate over.
+	the iterator also holds the entity entity of the compoenent it points to, O(1) */
 	template<typename CompType> auto& getAll();
 	/* returnes refference the component data of one entitiy, ~O(1) */
 	template<typename CompType> CompType& getComp(ent_id_t entity);
 	/* returns bool whether or not the given entity has the component added/registered, ~O(1) */
 	template<typename CompType> bool hasComp(ent_id_t entity);
 	template<typename ... CompTypes> bool hasComps(ent_id_t entity);
+	/* returns bool whether or not the given entity has'nt the component added/registered, ~O(1) */
+	template<typename CompType> bool hasntComp(ent_id_t entity);
+	template<typename ... CompTypes> bool hasntComps(ent_id_t entity);
 	/* adds a new Compoenent to an entity, ~O(1) */
 	template<typename CompType> void addComp(ent_id_t entity, CompType data);
 	/* adds a new Compoenent to an entity, ~O(1) */
@@ -111,38 +120,90 @@ public:
 
 	void loadMap(std::string);
 public:
-	PhysicsUniforms u_physics;
+	// System Uniform Data
+	SYSTEM_UNIFORMS(Physics)
+	SYSTEM_UNIFORM_SEGMENT
 private:
-	GENERATE_COMPONENT_CODE(Base, direct_indexing, 0)
-	GENERATE_COMPONENT_CODE(Movement, direct_indexing, 1)
-	GENERATE_COMPONENT_CODE(Collider, direct_indexing, 2)
-	GENERATE_COMPONENT_CODE(PhysicsBody, direct_indexing, 3)
-	GENERATE_COMPONENT_CODE(LinearEffector, hashing, 4)
-	GENERATE_COMPONENT_CODE(FrictionEffector, hashing, 5)
-	GENERATE_COMPONENT_CODE(Draw, direct_indexing, 6)
-	GENERATE_COMPONENT_CODE(TextureRef, direct_indexing, 7)
-	GENERATE_COMPONENT_CODE(Slave, direct_indexing, 8)
-	GENERATE_COMPONENT_CODE(Composit<4>, hashing, 9)
-	GENERATE_COMPONENT_CODE(CompDataLight, hashing, 10)
-	GENERATE_COMPONENT_CODE(Health, hashing, 11)
-	GENERATE_COMPONENT_CODE(Age, hashing, 12)
-	GENERATE_COMPONENT_CODE(Player, hashing, 13)
-	GENERATE_COMPONENT_CODE(Bullet, hashing, 14)
-	GENERATE_COMPONENT_CODE(Enemy, hashing, 15)
+	// Component Data
+private:
+	template<typename CompType>
+	struct CompStorageIndex {};
+	std::tuple<
+		ComponentStorage<Base, direct_indexing>,
+		ComponentStorage<Movement, direct_indexing>,
+		ComponentStorage<Collider, direct_indexing>,
+		ComponentStorage<PhysicsBody, direct_indexing>,
+		ComponentStorage<LinearEffector, hashing>,
+		ComponentStorage<FrictionEffector, hashing>,
+		ComponentStorage<Draw, direct_indexing>,
+		ComponentStorage<TextureRef, direct_indexing>,
+		ComponentStorage<Slave, direct_indexing>,
+		ComponentStorage<Composit<4>, hashing>,
+		ComponentStorage<CompDataLight, hashing>,
+		COMPONENT_SEGMENT
+	> componentStorageTuple;
+private:
+	template<typename CompType>
+	struct ComponentIndex {
+		static int const index = -1;
+	};
+	COMPONENT_INDEX_CORE(Base, 0)
+	COMPONENT_INDEX_CORE(Movement, 1)
+	COMPONENT_INDEX_CORE(Collider, 2)
+	COMPONENT_INDEX_CORE(PhysicsBody, 3)
+	COMPONENT_INDEX_CORE(LinearEffector , 4)
+	COMPONENT_INDEX_CORE(FrictionEffector , 5)
+	COMPONENT_INDEX_CORE(Draw , 6)
+	COMPONENT_INDEX_CORE(TextureRef , 7)
+	COMPONENT_INDEX_CORE(Slave , 8)
+	COMPONENT_INDEX_CORE(Composit<4 >, 9)
+	COMPONENT_INDEX_CORE(CompDataLight, 1)
+	COMPONENT_INDEX_SEGMENT
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	friend class Engine;
 	void slaveOwnerDespawn(); // slaves with dead owner get despawned, dead slaves cut their refference of themselfes to the owner
 	void deregisterDespawnedEntities();	// CALL BEFORE "executeDespawns"
 	void executeDespawns();
+	/* resets static entities changed flag*/
+	void resetStaticsChangedFlag();
 private:
-	size_t oldCapacity;
 	std::vector<Ent> entities;
 	std::queue<ent_id_t> emptySlots;
 	ent_id_t lastID;
 	std::vector<ent_id_t> despawnList;
-	bool staticSpawnOrDespawn{ false };
+	bool staticEntitiesChanged{ true };
 };
+
+// ---- Component Accessors implementations --------------------------------
+
+template<typename CompType> __forceinline auto& World::getAll() { 
+	return std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple);
+} 
+
+template<typename CompType> __forceinline CompType& World::getComp(ent_id_t entity) {
+	return std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).get(entity);
+} 
+
+template<typename CompType> __forceinline bool World::hasComp(ent_id_t entity) {
+	return std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).contains(entity);
+} 
+
+template<typename CompType> __forceinline bool World::hasntComp(ent_id_t entity) {
+	return !std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).contains(entity);
+} 
+
+template<typename CompType> __forceinline void World::addComp(ent_id_t entity, CompType data) {
+	std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).insert(entity, data);
+} 
+
+template<typename CompType> __forceinline void World::addComp(ent_id_t entity) {
+	std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).insert(entity, CompType());
+} 
+
+template<typename CompType> __forceinline void World::remComp(ent_id_t entity) {
+	std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).remove(entity);
+}
 
 // ---------- hasComps implementation --------------------------------------
 
@@ -172,6 +233,37 @@ namespace _HasCompsTesterImpl {
 template<typename... CompTypes>
 inline bool World::hasComps(ent_id_t entity) {
 	_HasCompsTesterImpl::HasCompsTester<CompTypes...> tester(entity, *this);
+	return tester.result;
+}
+
+// --------- hasntComps implementation -------------------------------------
+
+namespace _HasntCompsTesterImpl {
+	template<typename... CompTypes>
+	struct HasntCompsTester {
+		HasntCompsTester(ent_id_t entity, World& world) {
+			result = true;
+		}
+		bool result;
+	};
+	template<typename Head, typename... CompTypes>
+	struct HasntCompsTester<Head, CompTypes...> {
+		HasntCompsTester(ent_id_t entity, World& world) {
+			if (world.hasntComp<Head>(entity)) {
+				HasntCompsTester<CompTypes...> recursiveTester(entity, world);
+				result = recursiveTester.result;
+			}
+			else {
+				result = false;
+			}
+		}
+		bool result;
+	};
+}
+
+template<typename... CompTypes>
+inline bool World::hasntComps(ent_id_t entity) {
+	_HasntCompsTesterImpl::HasntCompsTester<CompTypes...> tester(entity, *this);
 	return tester.result;
 }
 
@@ -301,7 +393,7 @@ public:
 	};
 	inline iterator<CompType> begin() {
 		ent_id_t entity = 1;
-		while (!world.hasComps<CompType>(entity) && entity < endID) entity++;	// TODO: replace getEntMemSize with component specific sizes
+		while (!world.hasComps<CompType>(entity) && entity < endID) entity++;
 		return iterator<CompType>(std::min(entity, endID), *this);
 	}
 	inline iterator<CompType> end() { return iterator<CompType>(endID, *this); }
@@ -326,4 +418,23 @@ inline bool World::doesEntExist(ent_id_t entity) {
 
 inline ent_id_t const World::getLastEntID() {
 	return lastID;
+}
+
+__forceinline bool World::areEntsRelated(ent_id_t collID, ent_id_t otherID) {
+	if (hasComp<Slave>(collID) && hasComp<Slave>(otherID)) {	//same owner no collision check
+		if (getComp<Slave>(collID).ownerID == getComp<Slave>(otherID).ownerID) {
+			return true;
+		}
+	}
+	else if (hasComp<Slave>(collID)) {
+		if (getComp<Slave>(collID).ownerID == otherID) {
+			return true;
+		}
+	}
+	else if (hasComp<Slave>(otherID)) {
+		if (getComp<Slave>(otherID).ownerID == collID) {
+			return true;
+		}
+	}
+	return false;
 }
