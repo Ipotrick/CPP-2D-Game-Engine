@@ -10,8 +10,7 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	renderer{ window },
-	physicsSystem{ world, std::thread::hardware_concurrency() - 1 , perfLog},
-	staticGrid{ {0.2f, 0.2f} }
+	physicsSystem{ world, std::thread::hardware_concurrency() - 1 , perfLog}
 {
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
@@ -108,6 +107,11 @@ std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::ite
 	return physicsSystem.getCollisions(entity);
 }
 
+Grid<bool> const& Engine::getStaticGrid()
+{
+	return physicsSystem.getStaticGrid();
+}
+
 void Engine::run() {
 	create();
 
@@ -123,17 +127,14 @@ void Engine::run() {
 			{
 				Timer t(perfLog.getInputRef("updatetime"));
 				update(world, getDeltaTimeSafe());
-				world.slaveOwnerDespawn();
-				world.deregisterDespawnedEntities();
-				world.executeDespawns();
+				world.slaveOwnerDestroy();
+				world.deregisterDestroyedEntities();
+				world.executeDestroys();
 			}
 			{
 				Timer t(perfLog.getInputRef("physicstime"));
 				physicsSystem.execute(getDeltaTimeSafe());
 				for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
-			}
-			{
-				updateStaticGrid(world);
 			}
 			{
 				rendererUpdate(world);
@@ -154,59 +155,6 @@ void Engine::run() {
 	renderer.end();
 
 	destroy();
-}
-
-void Engine::updateStaticGrid(World& world)
-{	/*
-	if (world.didStaticsChange()) {
-		Vec2 staticGridMinPos = Vec2(0,0);
-		Vec2 staticGridMaxPos = Vec2(0, 0);
-		auto treeMin = physicsPoolData->qtreeStatic.getPosition() - physicsPoolData->qtreeStatic.getSize() * 0.5f;
-		auto treeMax = physicsPoolData->qtreeStatic.getPosition() + physicsPoolData->qtreeStatic.getSize() * 0.5f;
-		if (treeMin.x < staticGridMinPos.x) staticGridMinPos.x = treeMin.x;
-		if (treeMin.y < staticGridMinPos.y) staticGridMinPos.y = treeMin.y;
-		if (treeMax.x > staticGridMaxPos.x) staticGridMaxPos.x = treeMax.x;
-		if (treeMax.y > staticGridMaxPos.y) staticGridMaxPos.y = treeMax.y;
-		staticGrid.minPos = staticGridMinPos;
-		int xSize = static_cast<int>(ceilf((staticGridMaxPos.x - staticGridMinPos.x)) / staticGrid.cellSize.x);
-		int ySize = static_cast<int>(ceilf((staticGridMaxPos.y - staticGridMinPos.y)) / staticGrid.cellSize.y);
-		staticGrid.clear();
-		staticGrid.resize(xSize, ySize);
-
-		std::vector<uint32_t> nearCollidables;
-		nearCollidables.reserve(20);
-		for (int x = 0; x < staticGrid.getSizeX(); x++) {
-			for (int y = 0; y < staticGrid.getSizeY(); y++) {
-				Vec2 pos = staticGrid.minPos + Vec2(x, y) * staticGrid.cellSize;
-				Vec2 size = staticGrid.cellSize;
-				CollidableAdapter collAdapter = CollidableAdapter(pos, 0, size, Form::RECTANGLE, true, RotaVec2());
-
-				PosSize posSize(pos, size);
-				physicsPoolData->qtreeStatic.querry(nearCollidables, posSize);
-
-				for (auto& otherID : nearCollidables) {
-					CollidableAdapter otherAdapter = CollidableAdapter(world.getComp<Base>(otherID).position, world.getComp<Base>(otherID).rotation, world.getComp<Collider>(otherID).size, world.getComp<Collider>(otherID).form, false, world.getComp<Base>(otherID).rotaVec);
-					auto result = collisionTest(collAdapter, otherAdapter);
-					if (result.collided) {
-						staticGrid.set(x, y, true);
-						break;
-					}
-				}
-				nearCollidables.clear();
-			}
-		}
-	}
-#ifdef DEBUG_STATIC_GRID
-	Drawable d = Drawable(++freeDrawableID, staticGrid.minPos, 0.1f, staticGrid.cellSize, Vec4(1, 1, 0, 1), Form::RECTANGLE, 0.0f);
-	for (int i = 0; i < staticGrid.getSizeX(); i++) {
-		for (int j = 0; j < staticGrid.getSizeY(); j++) {
-			d.position = staticGrid.minPos + Vec2(i,0) * staticGrid.cellSize.x + Vec2(0,j) * staticGrid.cellSize.y;
-			if (staticGrid.at(i,j)) {
-				submitDrawable(d);
-			}
-		}
-	}
-#endif*/
 }
 
 Drawable buildWorldSpaceDrawable(World& world, ent_id_t entity) {

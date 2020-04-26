@@ -48,6 +48,10 @@ struct PhysicsPoolData {
 	Quadtree2 qtreeDynamic;
 	bool rebuildStatQuadTrees = true;
 	Quadtree2 qtreeStatic;
+
+	Grid<bool> staticCollisionGrid;
+
+	std::vector<Drawable> debugDrawables;
 };
 
 struct PhysicsPerThreadData {
@@ -64,10 +68,10 @@ struct PhysicsPerThreadData {
 
 struct PhysicsWorker {
 	PhysicsWorker(std::shared_ptr<PhysicsPerThreadData> physicsData_, std::shared_ptr<PhysicsPoolData> poolData, std::shared_ptr<PhysicsSharedSyncData> syncData_, unsigned threadCount_) :
-		physicsData{ physicsData_ }, syncData{ syncData_ }, physicsPoolData{ poolData }, physicsThreadCount{ threadCount_ }
+		physicsData{ physicsData_ }, syncData{ syncData_ }, poolData{ poolData }, physicsThreadCount{ threadCount_ }
 	{}
 	std::shared_ptr<PhysicsPerThreadData> physicsData;
-	std::shared_ptr<PhysicsPoolData> physicsPoolData;
+	std::shared_ptr<PhysicsPoolData> poolData;
 	std::shared_ptr<PhysicsSharedSyncData> syncData;
 
 	std::vector<uint32_t> nearCollidablesBuffer;	// reuse heap memory for all dyn collidable collisions
@@ -82,6 +86,8 @@ struct PhysicsWorker {
 	void waitForOtherWorkers();
 
 	void collisionFunction(ent_id_t collID, Quadtree2 const& quadtree, bool dynamic);
+
+	void updateStaticGrid();
 
 	void operator()(); 
 };

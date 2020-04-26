@@ -6,10 +6,12 @@ ent_id_t World::createEnt() {
 		ent_id_t id = emptySlots.front();
 		emptySlots.pop();
 		entities[id].setValid(true);
+		entities[id].setDestroyMark(false);
+		entities[id].setSpawned(false);
 		lastID = id;
 	}
 	else {
-		entities.push_back({ true });
+		entities.emplace_back( true );
 		lastID = static_cast<ent_id_t>(entities.size() - 1);
 	}
 	return lastID;
@@ -38,21 +40,22 @@ void World::enslaveEntTo(ent_id_t slave, ent_id_t owner, Vec2 relativePos, float
 	getComp<Slave>(slave) = Slave(owner);
 }
 
-void World::despawn(ent_id_t entitiy_id) {
-	if (entitiy_id < entities.size() && !entities[entitiy_id].isDespawnMarked()) {
+void World::destroy(ent_id_t entitiy_id) {
+	if (entitiy_id < entities.size() && !entities[entitiy_id].isDestroyMarked()) {
 		assert(entities[entitiy_id].isValid());
-		entities[entitiy_id].setDespawnMark(true);
+		entities[entitiy_id].setDestroyMark(true);
 		despawnList.push_back(entitiy_id);
 	}
 }
 
 
 
-void World::executeDespawns() {
+void World::executeDestroys() {
 	for (ent_id_t entity : despawnList) {
 		if (hasComp<Collider>(entity) && !hasComp<Movement>(entity)) { staticEntitiesChanged = true; }
 		entities[entity].setValid(false);
-		entities[entity].setDespawnMark(false);
+		entities[entity].setDestroyMark(false);
+		entities[entity].setSpawned(false);
 		emptySlots.push(entity);
 	}
 	despawnList.clear();
@@ -63,7 +66,7 @@ void World::resetStaticsChangedFlag()
 	staticEntitiesChanged = false;
 }
 
-void World::slaveOwnerDespawn() {
+void World::slaveOwnerDestroy() {
 	despawnList.reserve(entities.size());	//make sure the iterator stays valid
 	for (auto iter = despawnList.begin(); iter != despawnList.end(); ++iter) {
 		assert(entities[*iter].isValid());
@@ -71,7 +74,7 @@ void World::slaveOwnerDespawn() {
 		if (hasComp<Composit<4>>(*iter)) {
 			auto& owner = getComp<Composit<4>>(*iter);
 			for (int i = 0; i < 4; ++i) {
-				despawn(owner.slaves[i].id);
+				destroy(owner.slaves[i].id);
 			}
 		}
 		//if ent is a slave it clears its refference of the owner on despawn
@@ -89,7 +92,7 @@ void World::slaveOwnerDespawn() {
 	}
 }
 
-void World::deregisterDespawnedEntities() {
+void World::deregisterDestroyedEntities() {
 	for (ent_id_t entity : despawnList) {
 		for_each(componentStorageTuple, [&](auto& componentStorage) {
 			componentStorage.remove(entity);
@@ -139,6 +142,7 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Collider>(player, Collider(scaleEnt, Form::RECTANGLE));
 		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt),0.5f));
 		addComp<Player>(player, Player());
+		spawn(player);
 		
 		auto slave = createEnt();
 		addComp<Base>(slave, Base({ 0,0 }, 0));
@@ -169,6 +173,7 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Health>(enemy, Health(100));
 		addComp<Enemy>(enemy, player);
 		addComp<TextureRef>(enemy, TextureRef("test.png", Vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), Vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
+		spawn(enemy);
 
 		Collider	wallCollider(Vec2(0.4f, 10.0f), Form::RECTANGLE);
 		PhysicsBody	wallSolidBody(0.5f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, Vec2(0.4f, 10.0f)), 1.0f);
@@ -182,9 +187,10 @@ void World::loadMap(std:: string mapname_) {
 			addComp<PhysicsBody>(wall, wallSolidBody);
 			addComp<Draw>(wall, wallDraw);
 			//addComp<TextureRef>(wall, TextureRef("test.png",vec2(0,0), vec2(1,25)));
+			spawn(wall);
 		}
 
-		int num = 400;
+		int num = 4;
 		Vec2 scale = Vec2(0.3f, 0.3f);
 		Collider trashCollider = Collider(scale, Form::RECTANGLE);
 		Draw trashDraw = Draw(Vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
@@ -208,6 +214,7 @@ void World::loadMap(std:: string mapname_) {
 			addComp<Draw>(trash, trashDraw);
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(getLastEntID(), Health(100));
+			spawn(trash);
 		}
 	}
 }

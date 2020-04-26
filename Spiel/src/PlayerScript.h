@@ -60,6 +60,7 @@ public:
 				world.addComp<Draw>(bullet, bulletDraw);
 				world.addComp<Collider>(bullet, bulletCollider);
 				world.addComp<Bullet>(world.getLastEntID(), Bullet(10.0f * scale));
+				world.spawn(bullet);
 			}
 		}
 	}

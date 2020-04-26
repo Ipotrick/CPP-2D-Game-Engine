@@ -213,7 +213,7 @@ void Game::cursorManipFunc()
 
 		if (keyPressed(KEY::DELETE) || keyPressed(KEY::BACKSPACE)) {
 			if (cursorManipData.locked == true) {
-				world.despawn(cursorManipData.lockedID);
+				world.destroy(cursorManipData.lockedID);
 			}
 		}
 	}
@@ -236,6 +236,7 @@ void Game::cursorManipFunc()
 				world.addComp<Draw>(trash, trashDraw);
 				world.addComp<Health>(world.getLastEntID(), Health(100));
 				world.addComp<TextureRef>(trash, TextureRef("test.png", Vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), Vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
+				world.spawn(trash);
 			}
 		}
 
@@ -252,7 +253,7 @@ void Game::cursorManipFunc()
 				world.addComp<PhysicsBody>(trash, trashSolidBody);
 				world.addComp<Draw>(trash, trashDraw);
 				world.addComp<TextureRef>(trash, TextureRef("test.png", Vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), Vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
-				world.staticsChanged();
+				world.spawn(trash);
 			}
 		}
 	}

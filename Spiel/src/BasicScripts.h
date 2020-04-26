@@ -17,7 +17,7 @@ public:
 		}
 
 		if (data.curHealth <= 0) {
-			world.despawn(id);
+			world.destroy(id);
 		}
 	}
 
@@ -37,7 +37,7 @@ public:
 		data.curAge += deltaTime;
 
 		if (data.curAge > data.maxAge) {
-			engine.world.despawn(id);
+			engine.world.destroy(id);
 		}
 	}
 	inline void executeMeta(float deltaTime) override {
@@ -66,6 +66,7 @@ public:
 		if (foundCollisionWithMortal) {
 			if (norm(world.getComp<Collider>(id).size * 0.5f) > 0.02f) {
 				auto newEnt = world.createEnt();
+				std::cout << "is spawned: " << std::boolalpha <<  world.entities[newEnt].isSpawned() << std::endl;
 				world.addComp<Base>(newEnt, world.getComp<Base>(id));
 				world.addComp<Movement>(newEnt, world.getComp<Movement>(id));
 				world.getComp<Movement>(newEnt).velocity *= 0.5f;
@@ -77,8 +78,9 @@ public:
 				bulletDummy.damage /= 2;
 				delayedAddComp.push_back({ newEnt, bulletDummy });
 				world.addComp<PhysicsBody>(newEnt, world.getComp<PhysicsBody>(id));
+				world.spawn(newEnt);
 			}
-			world.despawn(id);
+			world.destroy(id);
 		}
 	}
 	inline void executeMeta(float deltaTime) override {

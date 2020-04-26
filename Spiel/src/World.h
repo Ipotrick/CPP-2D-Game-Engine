@@ -39,17 +39,21 @@ class Ent {
 public:
 	Ent(bool valid) : flags{} {
 		flags[0] = valid;
-		flags[1] = 0;
+		flags[1] = false;
+		flags[2] = false;
 	}
 	__forceinline void setValid(bool valid) {  flags[0] = valid; }
 	__forceinline bool isValid() { return flags[0]; }
-	__forceinline void setDespawnMark(bool mark) { flags[1] = mark; }
-	__forceinline bool isDespawnMarked() { return flags[1]; }
+	__forceinline void setDestroyMark(bool mark) { flags[1] = mark; }
+	__forceinline bool isDestroyMarked() { return flags[1]; }
+	__forceinline void setSpawned(bool spawned) { flags[2] = spawned; }
+	__forceinline bool isSpawned() { return flags[2]; }
 
 private:
 	// flag 0: valid
-	// flag 1: despawnMark
-	std::bitset<2> flags;
+	// flag 1: destroyMark
+	// flag 2: spawned
+	std::bitset<3> flags;
 };
 
 template<typename First, typename Second, typename ... CompTypes>
@@ -58,6 +62,8 @@ template<typename CompType>
 class SingleView;
 
 class World {
+	// TODO REMOVE
+	friend class BulletScript;
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiView;
 	template<typename CompType>
@@ -77,9 +83,15 @@ public:
 	/* enslaves the first ent to the second, ~O(1) */
 	void enslaveEntTo(ent_id_t slave, ent_id_t owner, Vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
-	void despawn(ent_id_t entity);
+	void destroy(ent_id_t entity);
 	/* returns if an entitiy is related to another entity via a slave/owner relationship */
 	bool areEntsRelated(ent_id_t collID, ent_id_t otherID);
+	/* temporarily disables all updates from an entity */
+	void despawn(ent_id_t entity);
+	/* respawnes despawned entity */
+	void respawn(ent_id_t entity);
+	/* initial spawn of entitiy */
+	void spawn(ent_id_t entity);
 
 	/* world utility */
 	/* returnes the entity of the most rescently spawned entity.
@@ -114,7 +126,7 @@ public:
 	template<typename CompType> void addComp(ent_id_t entity);
 	/* removes a component from the entity */
 	template<typename CompType> void remComp(ent_id_t entity);
-	/* returnes a View, and iterable object that only iterates over the entities with the given Components */
+	/* returnes a View, and iterable object that only iterates over the entities with the given Components, ignored despawned entities */
 	template<typename First, typename Second, typename ... CompTypes> MultiView<First, Second, CompTypes...> view();
 	template<typename CompType> SingleView<CompType> view();
 
@@ -162,9 +174,9 @@ private:
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	friend class Engine;
-	void slaveOwnerDespawn(); // slaves with dead owner get despawned, dead slaves cut their refference of themselfes to the owner
-	void deregisterDespawnedEntities();	// CALL BEFORE "executeDespawns"
-	void executeDespawns();
+	void slaveOwnerDestroy(); // slaves with dead owner get destroyed, dead slaves cut their refference of themselfes to the owner
+	void deregisterDestroyedEntities();	// CALL BEFORE "executeDestroyed"
+	void executeDestroys();
 	/* resets static entities changed flag*/
 	void resetStaticsChangedFlag();
 private:
@@ -290,7 +302,7 @@ public:
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
 			entity++;
-			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.hasComp<First>(entity) && view.world.hasComp<Second>(entity) && view.world.hasComps<CompTypes...>(entity))) entity++;
+			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.entities[entity].isSpawned() && view.world.hasComp<First>(entity) && view.world.hasComp<Second>(entity) && view.world.hasComps<CompTypes...>(entity))) entity++;
 			assert(entity <= view.endID);
 			return *this;
 		}
@@ -360,7 +372,7 @@ public:
 			assert(view.world.doesEntExist(entity));
 			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			entity++;
-			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.hasComp<CompType>(entity))) entity++;
+			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.entities[entity].isSpawned() && view.world.hasComp<CompType>(entity))) entity++;
 			assert(entity <= view.endID);
 			return *this;
 		}
@@ -437,4 +449,23 @@ __forceinline bool World::areEntsRelated(ent_id_t collID, ent_id_t otherID) {
 		}
 	}
 	return false;
+}
+
+inline void World::despawn(ent_id_t entity)
+{
+	assert(entities[entity].isValid() && entities[entity].isSpawned());
+	if (hasComp<Collider>(entity) && hasntComp<Movement>(entity)) staticEntitiesChanged = true;	// set static changed flag
+	entities[entity].setSpawned(false);
+}
+
+inline void World::respawn(ent_id_t entity)
+{
+	assert(entities[entity].isValid() && !entities[entity].isSpawned());
+	if (hasComp<Collider>(entity) && hasntComp<Movement>(entity)) staticEntitiesChanged = true;	// set static changed flag
+	entities[entity].setSpawned(true);
+}
+
+inline void World::spawn(ent_id_t entity)
+{
+	respawn(entity);
 }

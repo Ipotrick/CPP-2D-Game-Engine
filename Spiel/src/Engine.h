@@ -100,7 +100,7 @@ public:
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(ent_id_t id_);
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
-	Grid<bool> const& getStaticGrid() { return staticGrid; }
+	Grid<bool> const& getStaticGrid();
 
 public:
 	World& world;
@@ -110,7 +110,6 @@ public:
 	uint32_t freeDrawableID{ 0x80000000 };
 
 private:
-	void updateStaticGrid(World& world);
 	void rendererUpdate(World& world);
 private:
 	// meta
@@ -126,9 +125,6 @@ private:
 
 	// physics
 	PhysicsSystem physicsSystem;
-
-	// AI
-	Grid<bool> staticGrid;
 
 	// window
 	std::shared_ptr<Window> window;

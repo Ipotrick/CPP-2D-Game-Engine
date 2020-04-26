@@ -26,7 +26,7 @@ NUMBER_OF_PROCESSORS = 6
 OneDrive = C:\Users\Patrick\OneDrive
 OneDriveConsumer = C:\Users\Patrick\OneDrive
 OS = Windows_NT
-Path = c:\program files (x86)\microsoft visual studio\2019\community\common7\ide\commonextensions\microsoft\teamfoundation\team explorer\NativeBinaries\x86;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Program Files\nodejs\;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\mingw64\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JDK11\bin;C:\Program Files\Maven\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;;C:\Users\Patrick\AppData\Roaming\npm;C:\Program Files\Python34\Scripts;;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;
+Path = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Program Files\nodejs\;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\mingw64\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JDK11\bin;C:\Program Files\Maven\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;;C:\Users\Patrick\AppData\Roaming\npm;C:\Program Files\Python34\Scripts;;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 PkgDefApplicationConfigFile = C:\Users\Patrick\AppData\Local\Microsoft\VisualStudio\16.0_2d768764\devenv.exe.config
 PROCESSOR_ARCHITECTURE = x86
@@ -40,7 +40,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = 458A2A21
+ServiceHubLogSessionKey = C69F255F
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -58,26 +58,8 @@ VisualStudioVersion = 16.0
 VSAPPIDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
 VSAPPIDNAME = devenv.exe
 VSLANG = 1031
-VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  Engine.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: "APIENTRY": Makro-Neudefinition
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3.h(123): message : Siehe vorherige Definition von "APIENTRY"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(199,90): warning C4244: "Argument": Konvertierung von "double" in "const float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(231,1): warning C4267: "Argument": Konvertierung von "size_t" nach "ent_id_t", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(231): message : beim Kompilieren der Klasse Vorlage-Memberfunktion "ComponentStorage<Collider,0>::iterator ComponentStorage<Collider,0>::end(void)"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(222): message : Siehe Verweis auf die gerade kompilierte Instanziierung "ComponentStorage<Collider,0>::iterator ComponentStorage<Collider,0>::end(void)" der Funktions-Vorlage.
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(181): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Collider,0>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(685): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::_Tuple_val<_This>".
-          with
-          [
-              _This=ComponentStorage<Collider,0>
-          ]
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(227): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::tuple<ComponentStorage<Collider,0>,ComponentStorage<PhysicsBody,0>,ComponentStorage<LinearEffector,1>,ComponentStorage<FrictionEffector,1>,ComponentStorage<Draw,0>,ComponentStorage<TextureRef,0>,ComponentStorage<Slave,0>,ComponentStorage<Composit<4>,1>,ComponentStorage<CompDataLight,1>,ComponentStorage<Health,1>,ComponentStorage<Age,1>,ComponentStorage<Player,1>,ComponentStorage<Bullet,1>,ComponentStorage<Enemy,1>>".
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(227): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::tuple<ComponentStorage<Movement,0>,ComponentStorage<Collider,0>,ComponentStorage<PhysicsBody,0>,ComponentStorage<LinearEffector,1>,ComponentStorage<FrictionEffector,1>,ComponentStorage<Draw,0>,ComponentStorage<TextureRef,0>,ComponentStorage<Slave,0>,ComponentStorage<Composit<4>,1>,ComponentStorage<CompDataLight,1>,ComponentStorage<Health,1>,ComponentStorage<Age,1>,ComponentStorage<Player,1>,ComponentStorage<Bullet,1>,ComponentStorage<Enemy,1>>".
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(144): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::tuple<ComponentStorage<Base,0>,ComponentStorage<Movement,0>,ComponentStorage<Collider,0>,ComponentStorage<PhysicsBody,0>,ComponentStorage<LinearEffector,1>,ComponentStorage<FrictionEffector,1>,ComponentStorage<Draw,0>,ComponentStorage<TextureRef,0>,ComponentStorage<Slave,0>,ComponentStorage<Composit<4>,1>,ComponentStorage<CompDataLight,1>,ComponentStorage<Health,1>,ComponentStorage<Age,1>,ComponentStorage<Player,1>,ComponentStorage<Bullet,1>,ComponentStorage<Enemy,1>>".
+  World.cpp
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

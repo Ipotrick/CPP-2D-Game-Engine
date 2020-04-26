@@ -17,6 +17,7 @@ public:
 	PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog);
 	void execute(float deltaTime);
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(ent_id_t id_);
+	Grid<bool> getStaticGrid();
 	void end();
 public:
 	std::vector<Drawable> debugDrawables;

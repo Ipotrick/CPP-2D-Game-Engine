@@ -26,9 +26,12 @@ PhysicsSystem::PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& per
 
 void PhysicsSystem::execute(float deltaTime)
 {
+	debugDrawables.clear();
+	poolWorkerData->debugDrawables.clear();
 	prepare();
 	collisionDetection();
 	applyPhysics(deltaTime);
+	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
 std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> PhysicsSystem::getCollisions(ent_id_t entity)
@@ -41,6 +44,11 @@ std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::ite
 	else {
 		return std::make_tuple( collisionInfos.end(), collisionInfos.end() );
 	}
+}
+
+Grid<bool> PhysicsSystem::getStaticGrid()
+{
+	return poolWorkerData->staticCollisionGrid;
 }
 
 void PhysicsSystem::end()
@@ -71,9 +79,8 @@ void PhysicsSystem::prepare()
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
 	Vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
-	for (auto iter = world.getAll<Collider>().begin(); iter != world.getAll<Collider>().end(); ++iter) {
-		auto& collider = *iter;
-		auto colliderID = iter.id();
+	for (auto colliderID : world.view<Collider>()) {
+		auto& collider = world.getComp<Collider>(colliderID);
 		auto& baseCollider = world.getComp<Base>(colliderID);
 
 		if (world.hasComp<PhysicsBody>(colliderID)) { // if a collider has a solidBody, it is a physics object
