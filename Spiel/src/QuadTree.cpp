@@ -31,7 +31,7 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 			for (auto& pcoll : collidablesOld)
 			{
 				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(pcoll).position,
-					boundsSize(world.getComp<Collider>(pcoll).form, world.getComp<Collider>(pcoll).size, world.getComp<Base>(pcoll).rotation));
+					aabbBounds(world.getComp<Collider>(pcoll).size, world.getComp<Base>(pcoll).rotaVec));
 				int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 				if (isInCount > 1)
 				{
@@ -66,7 +66,7 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 	else {
 		// this node has subtrees and tries to distribute them into the subtrees
 		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(coll).position,
-			boundsSize(world.getComp<Collider>(coll).form, world.getComp<Collider>(coll).size, world.getComp<Base>(coll).rotation));
+			aabbBounds(world.getComp<Collider>(coll).size, world.getComp<Base>(coll).rotaVec));
 		int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 		if (isInCount > 1)
 		{

@@ -140,7 +140,7 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Movement>(player, Movement(0.0f, 0.0f ));
 		addComp<Draw>(player, Draw(Vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE));
 		addComp<Collider>(player, Collider(scaleEnt, Form::RECTANGLE));
-		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt),0.5f));
+		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt),10));
 		addComp<Player>(player, Player());
 		spawn(player);
 		
@@ -152,6 +152,7 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), {scaleEnt.x}, 0.49f, Form::CIRCLE));
 		//addComp<TextureRef>(slave, TextureRef("test.png"));
 		enslaveEntTo(slave, player, Vec2(0.0f, -0.4f), 45.0f);
+		spawn(slave);
 
 		slave = createEnt();
 		addComp<Base>(slave);
@@ -162,6 +163,7 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Draw>(slave, Draw(Vec4(0,0,0,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.49f, Form::RECTANGLE));
 		//addComp<TextureRef>(slave, TextureRef("test.png"));
 		enslaveEntTo(slave, player, Vec2(0.0f, 0.4f), 45.0f);
+		spawn(slave);
 		
 		Vec2 scaleEnemy{ 5.4f, 1.4f };
 		auto enemy = createEnt();
@@ -169,14 +171,14 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Movement>(enemy, Movement(0.0f, 0.0f));
 		addComp<Draw>(enemy, Draw(Vec4(1, 1, 1, 1), scaleEnemy, 0.4f, Form::RECTANGLE));
 		addComp<Collider>(enemy, Collider(scaleEnemy, Form::RECTANGLE));
-		addComp<PhysicsBody>(enemy, PhysicsBody(0.0f, 470, calcMomentOfIntertia(470, scaleEnemy),0.5f));
+		addComp<PhysicsBody>(enemy, PhysicsBody(0.0f, 470, calcMomentOfIntertia(470, scaleEnemy),10.f));
 		addComp<Health>(enemy, Health(100));
 		addComp<Enemy>(enemy, player);
 		addComp<TextureRef>(enemy, TextureRef("test.png", Vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), Vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
 		spawn(enemy);
 
 		Collider	wallCollider(Vec2(0.4f, 10.0f), Form::RECTANGLE);
-		PhysicsBody	wallSolidBody(0.5f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, Vec2(0.4f, 10.0f)), 1.0f);
+		PhysicsBody	wallSolidBody(0.5f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, Vec2(0.4f, 10.0f)), 100.0f);
 		Draw		wallDraw = Draw(Vec4(0, 0, 0, 1), Vec2(0.4f, 10.0f), 0.5f, Form::RECTANGLE, true);
 		for (int i = 0; i < 4; i++) {
 			auto wall = createEnt();
@@ -190,11 +192,11 @@ void World::loadMap(std:: string mapname_) {
 			spawn(wall);
 		}
 
-		int num = 4;
-		Vec2 scale = Vec2(0.3f, 0.3f);
+		int num = 10000;
+		Vec2 scale = Vec2(0.04f, 0.04f);
 		Collider trashCollider = Collider(scale, Form::RECTANGLE);
 		Draw trashDraw = Draw(Vec4(0.0f, 0.0f, 0.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
-		PhysicsBody trashSolidBody(0.5f, 8.0f, calcMomentOfIntertia(8,scale) * 10, 0.5f);
+		PhysicsBody trashSolidBody(0.5f, 1.0f, calcMomentOfIntertia(1,scale), 0);
 		for (int i = 0; i < num; i++) {
 			if (i % 2) {
 				trashCollider.form = Form::CIRCLE;

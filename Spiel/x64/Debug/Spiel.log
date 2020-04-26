@@ -40,7 +40,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = C69F255F
+ServiceHubLogSessionKey = DD353152
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -61,5 +61,122 @@ VSLANG = 1031
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
+  stb_image.cpp
+  algo.h
+  collision_detection.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(165,89): warning C4244: "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(165,53): warning C4244: "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
+  Engine.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
+  EventHandler.cpp
+  Game.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(62,62): warning C4244: "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(11,20): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(31,39): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(32,51): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(250,1): warning C4267: "=": Konvertierung von "size_t" nach "_Ty", Datenverlust möglich
+          with
+          [
+              _Ty=std::_Vbase
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(242): message : beim Kompilieren der Klasse Vorlage-Memberfunktion "void ComponentStorage<Base,2>::insert(ent_id_t,const CompType &)"
+          with
+          [
+              CompType=Base
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(209): message : Siehe Verweis auf die gerade kompilierte Instanziierung "void ComponentStorage<Base,2>::insert(ent_id_t,const CompType &)" der Funktions-Vorlage.
+          with
+          [
+              CompType=Base
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(181): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Base,2>".
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(685): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::_Tuple_val<_This>".
+          with
+          [
+              _This=ComponentStorage<Base,2>
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(156): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::tuple<ComponentStorage<Base,2>,ComponentStorage<Movement,0>,ComponentStorage<Collider,0>,ComponentStorage<PhysicsBody,0>,ComponentStorage<LinearEffector,1>,ComponentStorage<FrictionEffector,1>,ComponentStorage<Draw,0>,ComponentStorage<TextureRef,0>,ComponentStorage<Slave,0>,ComponentStorage<Composit<4>,1>,ComponentStorage<CompDataLight,1>,ComponentStorage<Health,1>,ComponentStorage<Age,1>,ComponentStorage<Player,1>,ComponentStorage<Bullet,1>,ComponentStorage<Enemy,1>>".
+  main.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.h(62,62): warning C4244: "Argument": Konvertierung von "float" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(11,20): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(250,1): warning C4267: "=": Konvertierung von "size_t" nach "_Ty", Datenverlust möglich
+          with
+          [
+              _Ty=std::_Vbase
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(242): message : beim Kompilieren der Klasse Vorlage-Memberfunktion "void ComponentStorage<Base,2>::insert(ent_id_t,const CompType &)"
+          with
+          [
+              CompType=Base
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(209): message : Siehe Verweis auf die gerade kompilierte Instanziierung "void ComponentStorage<Base,2>::insert(ent_id_t,const CompType &)" der Funktions-Vorlage.
+          with
+          [
+              CompType=Base
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(181): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Base,2>".
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(685): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::_Tuple_val<_This>".
+          with
+          [
+              _This=ComponentStorage<Base,2>
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(156): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::tuple<ComponentStorage<Base,2>,ComponentStorage<Movement,0>,ComponentStorage<Collider,0>,ComponentStorage<PhysicsBody,0>,ComponentStorage<LinearEffector,1>,ComponentStorage<FrictionEffector,1>,ComponentStorage<Draw,0>,ComponentStorage<TextureRef,0>,ComponentStorage<Slave,0>,ComponentStorage<Composit<4>,1>,ComponentStorage<CompDataLight,1>,ComponentStorage<Health,1>,ComponentStorage<Age,1>,ComponentStorage<Player,1>,ComponentStorage<Bullet,1>,ComponentStorage<Enemy,1>>".
+  Mat3.cpp
+  Mat4.cpp
+  Physics.cpp
+  PhysicsSystem.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsSystem.cpp(13,22): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+  PhysicsWorker.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(215,63): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(215,60): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(239,61): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(239,120): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+  QuadTree.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode"
+  Renderer.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: "APIENTRY": Makro-Neudefinition
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3.h(123): message : Siehe vorherige Definition von "APIENTRY"
+  RenderingWorker.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(130,70): warning C4267: "=": Konvertierung von "size_t" nach "int", Datenverlust möglich
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(260,33): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(281,40): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(325,39): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+  TextureHandler.cpp
+  Vec2.h
   World.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(250,1): warning C4267: "=": Konvertierung von "size_t" nach "_Ty", Datenverlust möglich
+          with
+          [
+              _Ty=std::_Vbase
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ECS.h(242): message : beim Kompilieren der Klasse Vorlage-Memberfunktion "void ComponentStorage<Base,2>::insert(ent_id_t,const CompType &)"
+          with
+          [
+              CompType=Base
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(209): message : Siehe Verweis auf die gerade kompilierte Instanziierung "void ComponentStorage<Base,2>::insert(ent_id_t,const CompType &)" der Funktions-Vorlage.
+          with
+          [
+              CompType=Base
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(181): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "ComponentStorage<Base,2>".
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\include\tuple(685): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::_Tuple_val<_This>".
+          with
+          [
+              _This=ComponentStorage<Base,2>
+          ]
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.h(156): message : Siehe Verweis auf die gerade kompilierte Klasse Vorlage-Instanziierung "std::tuple<ComponentStorage<Base,2>,ComponentStorage<Movement,0>,ComponentStorage<Collider,0>,ComponentStorage<PhysicsBody,0>,ComponentStorage<LinearEffector,1>,ComponentStorage<FrictionEffector,1>,ComponentStorage<Draw,0>,ComponentStorage<TextureRef,0>,ComponentStorage<Slave,0>,ComponentStorage<Composit<4>,1>,ComponentStorage<CompDataLight,1>,ComponentStorage<Health,1>,ComponentStorage<Age,1>,ComponentStorage<Player,1>,ComponentStorage<Bullet,1>,ComponentStorage<Enemy,1>>".
+  Code wird generiert...
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.h(55): warning C4715: "Vertex::operator[]": Nicht alle Codepfade geben einen Wert zurück.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(112): warning C4172: Adresse einer lokalen Variablen oder eines temporären Werts "" wird zurückgegeben
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

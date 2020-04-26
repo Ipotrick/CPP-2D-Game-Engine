@@ -14,7 +14,7 @@
 
 class PhysicsSystem {
 public:
-	PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog);
+	PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog, float statCollGridRes = 0.5f);
 	void execute(float deltaTime);
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(ent_id_t id_);
 	Grid<bool> getStaticGrid();
@@ -39,6 +39,7 @@ private:
 	std::vector<std::shared_ptr<PhysicsPerThreadData>> perWorkerData;
 
 	// buffers
+	std::vector<Vec2> oldPosCache;
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit;
 	std::vector<CollisionInfo> collisionInfos{};
 	robin_hood::unordered_map<ent_id_t, std::vector<CollisionInfo>::iterator> collisionInfoBegins;

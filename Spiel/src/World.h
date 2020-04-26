@@ -62,8 +62,6 @@ template<typename CompType>
 class SingleView;
 
 class World {
-	// TODO REMOVE
-	friend class BulletScript;
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiView;
 	template<typename CompType>

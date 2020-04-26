@@ -89,7 +89,7 @@ void Game::update(World& world, float deltaTime) {
 	ageScript.executeAll(    deltaTime);
 	bulletScript.executeAll( deltaTime);
 
-
+	/*
 	for (auto enemy : world.view<Enemy, Base, Movement>()) {
 		assert(world.doesEntExist(enemy));
 		auto& enemyComp =	world.getComp<Enemy>(enemy);
@@ -142,7 +142,7 @@ void Game::update(World& world, float deltaTime) {
 			Node bestExpansionNode;
 
 		}
-	}
+	}*/
 
 	//display performance statistics
 	//std::cout << getPerfInfo(5) << '\n';

@@ -108,25 +108,6 @@ private:
 			(fabs(posB.y - posA.y) <= fabs(sizeB.y + sizeA.y) * 0.5f);
 	}
 
-	inline Vec2 boundsSize(Form form, Vec2 size, float rotation = 0.0f) {
-		if (form == Form::CIRCLE) {
-			return size;
-		}
-		else {
-			Vec2 max{ 0,0 }; Vec2 min{ 0,0 };
-			for (float i = -0.5f; i < 0.51f; i += 1.0f) {
-				for (float j = -0.5f; j < 0.51f; j += 1.0f) {
-					Vec2 point = rotate({ size.x * i, size.y * j }, rotation);
-					max.x = std::max(max.x, point.x);
-					max.y = std::max(max.y, point.y);
-					min.x = std::min(min.x, point.x);
-					min.y = std::min(min.y, point.y);
-				}
-			}
-			return max - min;
-		}
-	}
-
 private:
 	Vec2 m_pos;
 	Vec2 m_size;

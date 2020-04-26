@@ -1,12 +1,13 @@
 #include "PhysicsSystem.h"
 
-PhysicsSystem::PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog) :
+PhysicsSystem::PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog, float statCollGridRes) :
 	world{ world },
 	threadCount{ threadCount },
 	perfLog{ perfLog },
 	qtreeCapacity{ 8 }
 {
 	poolWorkerData = std::make_shared<PhysicsPoolData>(PhysicsPoolData(world, qtreeCapacity));
+	poolWorkerData->staticCollisionGrid = Grid<bool>(statCollGridRes);
 
 	perWorkerData = std::vector<std::shared_ptr<PhysicsPerThreadData>>(threadCount);
 	for (int id = 0; id < threadCount; id++) {
@@ -67,7 +68,6 @@ void PhysicsSystem::prepare()
 	poolWorkerData->rebuildDynQuadTrees = true; // allways rebuild dynamic quadtree
 	poolWorkerData->rebuildStatQuadTrees = world.didStaticsChange(); // only rebuild static quadtree if static Entities changed
 
-
 	// allocate memory for collider groups
 	poolWorkerData->sensorCollidables.clear();
 	poolWorkerData->sensorCollidables.reserve(world.getEntMemSize());
@@ -75,6 +75,8 @@ void PhysicsSystem::prepare()
 	poolWorkerData->dynCollidables.reserve(world.getEntMemSize());
 	poolWorkerData->statCollidables.clear();
 	poolWorkerData->statCollidables.reserve(world.getEntMemSize());
+
+	oldPosCache.resize(world.getEntMemSize(), Vec2(0,0));
 
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
@@ -246,7 +248,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 
 				float elast = std::max(solidA.elasticity, solidB.elasticity);
 				float friction = std::min(solidA.friction, solidB.friction) * deltaTime;
-				auto [collChanges, otherChanges] = dynamicCollision2d6(
+				auto [collChanges, otherChanges] = impulseResolution(
 					baseA.position, moveA.velocity, moveA.angleVelocity, solidA.mass, solidA.momentOfInertia,
 					baseB.position, moveB.velocity, moveB.angleVelocity, solidB.mass, solidB.momentOfInertia,
 					collInfo.collisionNormal, collInfo.collisionPos, elast,friction);
@@ -260,25 +262,27 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 	}
 
 	// let entities sleep or wake them up
-	for (auto entity : world.view<Collider, Movement>()) {
+	for (auto entity : world.view<Collider, Movement, Base>()) {
 		auto& collider = world.getComp<Collider>(entity);
 		auto& movement = world.getComp<Movement>(entity);
+		auto& base = world.getComp<Base>(entity);
 
-		if (movement.velocity == Vec2(0, 0) && movement.angleVelocity == 0.0f && !collider.particle) {
+		if (movement.velocity == Vec2(0, 0) && movement.angleVelocity == 0.0f && base.position == oldPosCache[entity] && !collider.particle) {
 			// wake up entity
 			collider.sleeping = true;
 		}
 		else {
 			collider.sleeping = false;
+			oldPosCache[entity] = base.position;
 		}
 	}
 
 	// wake up entities (all dynamic(Collider+Movement) physics entities that collide must wake up
 	for (auto& collInfo : collisionInfos) {
-		if (world.hasComp<Collider>(collInfo.idA) && world.hasComp<Movement>(collInfo.idA)) {
+		if (world.hasComps<Collider, Movement>(collInfo.idA)) {
 			world.getComp<Collider>(collInfo.idA).sleeping = false;
 		}
-		if (world.hasComp<Collider>(collInfo.idB) && world.hasComp<Movement>(collInfo.idB)) {
+		if (world.hasComps<Collider, Movement>(collInfo.idB)) {
 			world.getComp<Collider>(collInfo.idB).sleeping = false;
 		}
 	}
