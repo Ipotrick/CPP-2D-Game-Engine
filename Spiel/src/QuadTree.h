@@ -9,7 +9,7 @@
 #include "RenderTypes.h"
 
 #include "World.h"
-
+#include "collision_detection.h"
 
 
 struct PosSize {
@@ -96,16 +96,11 @@ private:
 
 	inline std::tuple<bool, bool, bool, bool> isInSubtrees(Vec2 treePos, Vec2 treeSize, Vec2 pos, Vec2 size) const {
 		return {
-			isOverlappingAABB2(treePos + Vec2(-treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
-			isOverlappingAABB2(treePos + Vec2( treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
-			isOverlappingAABB2(treePos + Vec2(-treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
-			isOverlappingAABB2(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size)
+			isOverlappingAABB(treePos + Vec2(-treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
+			isOverlappingAABB(treePos + Vec2( treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
+			isOverlappingAABB(treePos + Vec2(-treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
+			isOverlappingAABB(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size)
 		};
-	}
-
-	__forceinline bool isOverlappingAABB2(Vec2 const& posA, Vec2 const& sizeA, Vec2 const& posB, Vec2 const& sizeB) const {
-		return (fabs(posB.x - posA.x) <= fabs(sizeB.x + sizeA.x) * 0.5f) &
-			(fabs(posB.y - posA.y) <= fabs(sizeB.y + sizeA.y) * 0.5f);
 	}
 
 private:

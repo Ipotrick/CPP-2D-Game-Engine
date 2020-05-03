@@ -141,6 +141,10 @@ public:
 		return laps;
 	}
 
+	void setLapTime(float lap_time) {
+		this->lap_time = floatToMicsec(lap_time);
+	}
+
 private:
 	Unit lap_time;
 	Unit time_since_last_lap;

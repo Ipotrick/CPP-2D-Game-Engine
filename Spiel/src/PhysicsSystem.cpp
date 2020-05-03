@@ -1,13 +1,13 @@
 #include "PhysicsSystem.h"
 
-PhysicsSystem::PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog, float statCollGridRes) :
-	world{ world },
+PhysicsSystem::PhysicsSystem(World& world, uint32_t threadCount, PerfLogger& perfLog, float statCollGridRes, uint32_t qtreeCapacity) :
+	CoreSystem( world ),
 	threadCount{ threadCount },
 	perfLog{ perfLog },
-	qtreeCapacity{ 8 }
+	qtreeCapacity{ qtreeCapacity }
 {
 	poolWorkerData = std::make_shared<PhysicsPoolData>(PhysicsPoolData(world, qtreeCapacity));
-	poolWorkerData->staticCollisionGrid = Grid<bool>(statCollGridRes);
+	poolWorkerData->staticCollisionGrid = GridPhysics<bool>(statCollGridRes);
 
 	perWorkerData = std::vector<std::shared_ptr<PhysicsPerThreadData>>(threadCount);
 	for (int id = 0; id < threadCount; id++) {
@@ -35,7 +35,7 @@ void PhysicsSystem::execute(float deltaTime)
 	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> PhysicsSystem::getCollisions(ent_id_t entity)
+std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> PhysicsSystem::getCollisions(entity_handle entity)
 {
 	auto begin = collisionInfoBegins.find(entity);
 	auto end = collisionInfoEnds.find(entity);
@@ -47,7 +47,7 @@ std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::ite
 	}
 }
 
-Grid<bool> PhysicsSystem::getStaticGrid()
+GridPhysics<bool> PhysicsSystem::getStaticGrid()
 {
 	return poolWorkerData->staticCollisionGrid;
 }
@@ -76,7 +76,7 @@ void PhysicsSystem::prepare()
 	poolWorkerData->statCollidables.clear();
 	poolWorkerData->statCollidables.reserve(world.getEntMemSize());
 
-	oldPosCache.resize(world.getEntMemSize(), Vec2(0,0));
+	if (oldPosCache.size() != world.getEntMemSize()) oldPosCache.resize(world.getEntMemSize(), Vec2(0, 0));
 
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
@@ -125,20 +125,20 @@ void PhysicsSystem::prepare()
 	}
 
 	poolWorkerData->collisionResponses.clear();
-	poolWorkerData->collisionResponses.resize(world.getEntMemSize());
+	if (poolWorkerData->collisionResponses.size() != world.getEntMemSize()) poolWorkerData->collisionResponses.resize(world.getEntMemSize());
 
 	poolWorkerData->aabbCache.clear();
-	poolWorkerData->aabbCache.resize(world.getEntMemSize());
+	if (poolWorkerData->aabbCache.size() != world.getEntMemSize()) poolWorkerData->aabbCache.resize(world.getEntMemSize());
 
 	// give physics workers their info
 	// write physics pool data
 	if (poolWorkerData->rebuildDynQuadTrees) {
-		poolWorkerData->qtreeDynamic.removeEmptyLeafes();
 		poolWorkerData->qtreeDynamic.resetPerMinMax(dynMinPos, dynMaxPos);
+		poolWorkerData->qtreeDynamic.removeEmptyLeafes();
 	}
 	if (poolWorkerData->rebuildStatQuadTrees) {
-		poolWorkerData->qtreeStatic.removeEmptyLeafes();
 		poolWorkerData->qtreeStatic.resetPerMinMax(statMinPos, statMaxPos);
+		poolWorkerData->qtreeStatic.removeEmptyLeafes();
 	}
 	// write physics individual data
 	for (auto& split : collisionInfosSplit) split.clear();
@@ -210,9 +210,9 @@ void PhysicsSystem::collisionDetection()
 
 void PhysicsSystem::applyPhysics(float deltaTime)
 {
-	// execute physics
 	Timer t3(perfLog.getInputRef("physicsexecute"));
 
+// collision info operations begin:
 	// execute inelastic collisions 
 	for (auto& collInfo : collisionInfos) {
 		uint32_t entA = collInfo.idA;
@@ -223,15 +223,15 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 			// owner stands in place for the slave for a collision response execution
 			if (world.hasComp<Slave>(entA) | world.hasComp<Slave>(entB)) {
 				if (world.hasComp<Slave>(entA) && !world.hasComp<Slave>(entB)) {
-					entA = world.getComp<Slave>(entA).ownerID;
+					entA = world.getComp<Slave>(entA).ownerHandle;
 				}
 				else if (!world.hasComp<Slave>(entA) && world.hasComp<Slave>(entB)) {
-					entB = world.getComp<Slave>(entB).ownerID;
+					entB = world.getComp<Slave>(entB).ownerHandle;
 				}
 				else {
 					// both are slaves
-					entA = world.getComp<Slave>(entA).ownerID;
-					entB = world.getComp<Slave>(entB).ownerID;
+					entA = world.getComp<Slave>(entA).ownerHandle;
+					entB = world.getComp<Slave>(entB).ownerHandle;
 				}
 			}
 
@@ -262,13 +262,12 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 	}
 
 	// let entities sleep or wake them up
-	for (auto entity : world.view<Collider, Movement, Base>()) {
+	for (auto entity : world.view<Movement, Collider, Base>()) {
 		auto& collider = world.getComp<Collider>(entity);
 		auto& movement = world.getComp<Movement>(entity);
 		auto& base = world.getComp<Base>(entity);
 
-		if (movement.velocity == Vec2(0, 0) && movement.angleVelocity == 0.0f && base.position == oldPosCache[entity] && !collider.particle) {
-			// wake up entity
+		if (movement.angleVelocity == 0 && base.position == oldPosCache[entity] && !collider.particle) {
 			collider.sleeping = true;
 		}
 		else {
@@ -277,27 +276,8 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 		}
 	}
 
-	// wake up entities (all dynamic(Collider+Movement) physics entities that collide must wake up
-	for (auto& collInfo : collisionInfos) {
-		if (world.hasComps<Collider, Movement>(collInfo.idA)) {
-			world.getComp<Collider>(collInfo.idA).sleeping = false;
-		}
-		if (world.hasComps<Collider, Movement>(collInfo.idB)) {
-			world.getComp<Collider>(collInfo.idB).sleeping = false;
-		}
-	}
-
-	// apply dampened collision response pushout of slave to owner
-	for (auto slaveEnt : world.view<Slave, PhysicsBody>()) {
-		auto slave = world.getComp<Slave>(slaveEnt);
-		float slaveWeight = norm(poolWorkerData->collisionResponses[slaveEnt].posChange);
-		float ownerWeight = norm(poolWorkerData->collisionResponses[slave.ownerID].posChange);
-		float normalizer = slaveWeight + ownerWeight;
-		if (normalizer > Physics::nullDelta) {
-			poolWorkerData->collisionResponses[slave.ownerID].posChange = (slaveWeight * poolWorkerData->collisionResponses[slaveEnt].posChange + ownerWeight * poolWorkerData->collisionResponses[slave.ownerID].posChange) / normalizer;
-		}
-	}
-
+// collision info operations end!
+// effector operations begin:
 	// linear effector execution
 	for (auto ent : world.view<LinearEffector>()) {
 		auto& moveField = world.getComp<LinearEffector>(ent);
@@ -324,36 +304,49 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 		}
 	}
 
-	// uniform effector execution:
+	// uniform effector execution :
 	for (auto ent : world.view<Movement, PhysicsBody>()) {
 		auto& mov = world.getComp<Movement>(ent);
 		auto& solid = world.getComp<PhysicsBody>(ent);
-		mov.velocity *= (1 / (1 + deltaTime * world.uniformsPhysics.friction));
-		mov.angleVelocity *= (1 / (1 + deltaTime * world.uniformsPhysics.friction));
+		mov.velocity *= (1 / (1 + deltaTime * std::min(world.uniformsPhysics.friction, solid.friction)));
+		mov.angleVelocity *= (1 / (1 + deltaTime * std::min(world.uniformsPhysics.friction, solid.friction)));
 		mov.velocity += world.uniformsPhysics.linearEffectDir * world.uniformsPhysics.linearEffectAccel * deltaTime;
 		mov.velocity += world.uniformsPhysics.linearEffectDir * world.uniformsPhysics.linearEffectForce / solid.mass * deltaTime;
 	}
+// effector operations end!
+// velocity and pushout operations:
 
-	// execute overlap pushout on dynamic entities
-	for (auto ent : world.view<PhysicsBody, Movement, Base>()) {
+	// apply dampened collision response pushout of slave to owner
+	for (auto slaveEnt : world.view<Slave, PhysicsBody>()) {
+		auto slave = world.getComp<Slave>(slaveEnt);
+		float slaveWeight = norm(poolWorkerData->collisionResponses[slaveEnt].posChange);
+		float ownerWeight = norm(poolWorkerData->collisionResponses[slave.ownerHandle].posChange);
+		float normalizer = slaveWeight + ownerWeight;
+		if (normalizer > Physics::nullDelta) {
+			poolWorkerData->collisionResponses[slave.ownerHandle].posChange = (slaveWeight * poolWorkerData->collisionResponses[slaveEnt].posChange + ownerWeight * poolWorkerData->collisionResponses[slave.ownerHandle].posChange) / normalizer;
+		}
+	}
+
+	// apply pushout
+	for (auto ent : world.view<Movement, PhysicsBody, Base>()) {
 		auto& base = world.getComp<Base>(ent);
 		base.position += poolWorkerData->collisionResponses[ent].posChange;
 	}
 
 	// execute physics changes in pos, rota
 	for (auto ent : world.view<Movement, Base>()) {
+
 		auto& movement = world.getComp<Movement>(ent);
 		auto& base = world.getComp<Base>(ent);
+
+		if (fabs(movement.velocity.x) + fabs(movement.velocity.y) < Physics::nullDelta) movement.velocity = Vec2(0, 0);
+		if (fabs(movement.angleVelocity) < Physics::nullDelta) movement.angleVelocity = 0;
+
 		base.position += movement.velocity * deltaTime;
-
-		float rotationAngle = getAngle(rotate(Vec2(1, 0), base.rotaVec));
 		base.rotation += movement.angleVelocity * deltaTime;
-		base.rotaVec = RotaVec2(base.rotation);
 
-		// set super small movements to 0
-		if ((movement.velocity.x * movement.velocity.x) < Physics::nullDelta && (movement.velocity.y * movement.velocity.y) < Physics::nullDelta) movement.velocity = Vec2(0, 0);
-		if ((movement.angleVelocity * movement.angleVelocity) < Physics::nullDelta * 10) movement.angleVelocity = 0;
 	}
+// velocity and pushouts end!
 
 	syncCompositPhysics<4>();
 	t3.stop();
@@ -403,13 +396,13 @@ void PhysicsSystem::syncCompositPhysics()
 {
 	auto& view = world.getAll<Composit<N>>();
 	for (auto iter = view.begin(); iter != view.end(); ++iter) {
-		auto& baseOwner = world.getComp<Base>(iter.id());
-		auto& movOwner = world.getComp<Movement>(iter.id());
+		auto& baseOwner = world.getComp<Base>(iter.handle());
+		auto& movOwner = world.getComp<Movement>(iter.handle());
 
 		for (int i = 0; i < N; i++) {
-			if (iter->slaves[i].id != 0) {
-				auto& baseSlave = world.getComp<Base>(iter->slaves[i].id);
-				auto& movSlave = world.getComp<Movement>(iter->slaves[i].id);
+			if (iter->slaves[i].handle != 0) {
+				auto& baseSlave = world.getComp<Base>(iter->slaves[i].handle);
+				auto& movSlave = world.getComp<Movement>(iter->slaves[i].handle);
 				auto slaveComposidData = iter->slaves[i];
 				baseSlave.position = baseOwner.position + rotate(slaveComposidData.relativePos, baseOwner.rotation);
 				movSlave.velocity = movOwner.velocity;

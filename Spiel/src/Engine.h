@@ -29,7 +29,9 @@
 #include "EventHandler.h"
 #include "World.h"
 
+// Core Systems
 #include "PhysicsSystem.h"
+#include "BaseSystem.h"
 #include "Renderer.h"
 
 
@@ -97,10 +99,10 @@ public:
 
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(ent_id_t id_);
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_handle id_);
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
-	Grid<bool> const& getStaticGrid();
+	GridPhysics<bool> const& getStaticGrid();
 
 public:
 	World& world;
@@ -122,6 +124,9 @@ private:
 	PerfLogger perfLog;
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
+
+	// base
+	BaseSystem baseSystem;
 
 	// physics
 	PhysicsSystem physicsSystem;

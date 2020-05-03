@@ -18,5 +18,5 @@ std::array<Drawable, 3> makeArrow(Vec2 vec, Vec2 origin) {
 		Drawable(0, centerPos, 0.95f, Vec2(len, width), color, Form::RECTANGLE, rotaVec),
 		Drawable(0, origin, 0.95f, Vec2(width, width) , color, Form::CIRCLE, rotaVec),
 		Drawable(0, origin + vec, 0.95f, Vec2(width, width) / sqrt(2), color, Form::RECTANGLE, rotaVecTip)
-	}
+	};
 }

@@ -2,4 +2,4 @@
 
 #include "Script.h"
 
-GAME_SCRIPT(PlayerScript, Player)
+GAME_SCRIPT(BulletScript, Bullet)

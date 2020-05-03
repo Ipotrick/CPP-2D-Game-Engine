@@ -163,8 +163,26 @@ inline Vec2 rotate(Vec2 const& vec, float angle) {
 	return { ca * vec.x - sa * vec.y , sa * vec.x + ca * vec.y };
 }
 
-inline Vec2 rotate90(Vec2 const& vec) {
+// computes sin and cos at compile time
+template<auto angle>
+inline Vec2 rotate(Vec2 const& vec);
+
+// computes sin and cos at compile time
+template<>
+inline Vec2 rotate<90>(Vec2 const& vec) {
 	return { -vec.y, vec.x };
+}
+
+// computes sin and cos at compile time
+template<>
+inline Vec2 rotate<180>(Vec2 const& vec) {
+	return -vec;
+}
+
+// computes sin and cos at compile time
+template<>
+inline Vec2 rotate<270>(Vec2 const& vec) {
+	return { -vec.y, -vec.x };
 }
 
 // uses trigonometric functions and or sqrt

@@ -5,11 +5,22 @@
 
 #include "ECS.h"
 
+struct ParticleScriptComp : public CompData {
+	ParticleScriptComp() {}
+	ParticleScriptComp(Vec2 startSize, Vec2 endSize, Vec4 startColor, Vec4 endColor) : startSize{ startSize }, endSize{ endSize }, startColor{ startColor }, endColor{ endColor } {}
+	Vec2 startSize;
+	Vec2 endSize;
+	Vec4 startColor;
+	Vec4 endColor;
+};
+
 // player component
 
 struct Player : public CompData {
-	Player() : bulletShotLapTimer{ 0.001f } {}
+	Player() : bulletShotLapTimer{ 0.001f }, flameSpawnTimer{ 0.001f }{}
 	LapTimer<> bulletShotLapTimer;
+	LapTimer<> flameSpawnTimer;
+	float power{ 1.0f };
 };
 
 // health component
@@ -69,6 +80,6 @@ struct CompDataLight : public CompData {
 // enemy component
 
 struct Enemy : public CompData {
-	Enemy(ent_id_t tar_ = 0) : target{ tar_} {}
-	ent_id_t target;
+	Enemy(entity_handle tar_ = 0) : target{ tar_} {}
+	entity_handle target;
 };

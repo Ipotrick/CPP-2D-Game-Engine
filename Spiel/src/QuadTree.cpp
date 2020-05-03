@@ -11,7 +11,10 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 			// if the node has no subtrees and is at capacity, split tree in subtrees:
 
 			// clear collidables and save old collidables temporarily
-			auto collidablesOld = trees[thisID].collidables;
+			std::vector<entity_handle> collidablesOld;
+			collidablesOld.reserve(trees[thisID].collidables.size()+1);
+			collidablesOld = trees[thisID].collidables;
+			collidablesOld.push_back(coll);
 			trees[thisID].collidables.clear();
 
 			if (freeIndices.size() == 0) {
@@ -56,11 +59,12 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 						insert(pcoll, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
 					}
 					else {
-						std::cerr << "FAILURE TO INSERT" << std::endl;
+						std::cerr << "FAILURE TO INSERT FOUND " << isInCount << " FITTING SUBTREES" << std::endl;
+						std::cerr << "AABB: " << aabbBounds(world.getComp<Collider>(pcoll).size, world.getComp<Base>(pcoll).rotaVec) << " pos: " << world.getComp<Base>(pcoll).position << std::endl;
+						std::cerr << "AABB MotherNode: " << thisSize << " Pos MotherNode: " << thisPos << std::endl;
 					}
 				}
 			}
-			insert(coll, thisID, thisPos, thisSize);
 		}
 	}
 	else {
@@ -91,7 +95,9 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 				insert(coll, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
 			}
 			else {
-				std::cerr << "FAILURE TO INSERT" << std::endl;
+				std::cerr << "FAILURE TO INSERT FOUND " << isInCount << " FITTING SUBTREES" << std::endl;
+				std::cerr << "AABB: " << aabbBounds(world.getComp<Collider>(coll).size, world.getComp<Base>(coll).rotaVec) << " pos: " << world.getComp<Base>(coll).position << std::endl;
+				std::cerr << "AABB MotherNode: " << thisSize << " Pos MotherNode: " << thisPos << std::endl;
 			}
 		}
 	}

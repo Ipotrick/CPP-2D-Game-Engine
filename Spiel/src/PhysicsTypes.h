@@ -8,20 +8,21 @@
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
+	constexpr float pushout = nullDelta;
 
 	inline std::vector<Drawable> debugDrawables;
 }
 
 template<typename T>
-class Grid {
+class GridPhysics {
 public:
-	Grid() :
+	GridPhysics() :
 		minPos{ 0.0f, 0.0f },
 		sizeX{ 0 },
 		cellSize{ 0.1f, 0.1f }
 	{}
 
-	Grid(Vec2 cellSize_) :
+	GridPhysics(Vec2 cellSize_) :
 		minPos{ 0.0f, 0.0f },
 		sizeX{ 0 },
 		cellSize{ cellSize_ }
@@ -29,11 +30,12 @@ public:
 
 	inline T at(int x, int y) const {
 		assert(x * sizeX + y < data.size());
-		return data.at(x * sizeY + y);
+		return data[x * sizeY + y];
 	}
 
 	inline void set(int x, int y, T val) {
-		data.at(x * sizeY + y) = val;
+		assert(x * sizeX + y < data.size());
+		data[x * sizeY + y] = val;
 	}
 
 	inline void clear() { data.clear(); }

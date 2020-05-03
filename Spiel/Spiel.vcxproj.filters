@@ -13,109 +13,73 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="_Physics">
-      <UniqueIdentifier>{70648b4a-dee6-4dfa-81c0-4f69d61be49b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Component">
-      <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Rendering">
-      <UniqueIdentifier>{8105babe-c711-49ff-a49d-160139bfc316}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Script">
-      <UniqueIdentifier>{1c16b84b-8a9c-4e7d-bfb4-14ba9c429120}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_shader">
-      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
-    </Filter>
     <Filter Include="_stbi">
       <UniqueIdentifier>{41d0503f-0ab4-475c-ada3-0170b6a27b2f}</UniqueIdentifier>
     </Filter>
     <Filter Include="_math">
       <UniqueIdentifier>{7c1b4701-56b3-4db5-8736-770ce17348be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine">
+      <UniqueIdentifier>{982f06a6-d1e0-4368-bcee-f69b45d24c20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_Component">
+      <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_Executors">
+      <UniqueIdentifier>{1c16b84b-8a9c-4e7d-bfb4-14ba9c429120}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_Physics">
+      <UniqueIdentifier>{70648b4a-dee6-4dfa-81c0-4f69d61be49b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_Rendering">
+      <UniqueIdentifier>{8105babe-c711-49ff-a49d-160139bfc316}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_shader">
+      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Engine.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Timing.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Game.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameComponents.h">
-      <Filter>_Component</Filter>
-    </ClInclude>
     <ClInclude Include="src\Script.h">
-      <Filter>_Script</Filter>
+      <Filter>_Engine\_Executors</Filter>
     </ClInclude>
     <ClInclude Include="src\QuadTree.h">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\Camera.h">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer.h">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Window.h">
-      <Filter>_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ScriptInclude.h">
-      <Filter>_Script</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PlayerScript.h">
-      <Filter>_Script</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BasicScripts.h">
-      <Filter>_Script</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\CoreComponents.h">
-      <Filter>_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EventHandler.h">
-      <Filter>Headerdateien</Filter>
+      <Filter>_Engine\_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\ECS.h">
-      <Filter>_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BaseTypes.h">
-      <Filter>Headerdateien</Filter>
+      <Filter>_Engine\_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\PhysicsTypes.h">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\RenderingWorker.h">
-      <Filter>_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Perf.h">
-      <Filter>Headerdateien</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\TextureHandler.h">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\RenderTypes.h">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
       <Filter>_stbi</Filter>
     </ClInclude>
     <ClInclude Include="src\GameWorld.h">
       <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystemWorldInclude">
-      <Filter>_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameCompWorldInclude">
-      <Filter>_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystemUnifroms.h">
-      <Filter>_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\basic_math.h">
       <Filter>_math</Filter>
@@ -139,34 +103,91 @@
       <Filter>_math</Filter>
     </ClInclude>
     <ClInclude Include="src\collision_detection.h">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\PhysicsWorker.h">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\random.h">
       <Filter>_math</Filter>
     </ClInclude>
     <ClInclude Include="src\World.h">
-      <Filter>_Component</Filter>
+      <Filter>_Engine\_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\PhysicsSystem.h">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\debug.h">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics.h">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\CoreSystemUniforms.h">
-      <Filter>_Component</Filter>
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreSystem.h">
+      <Filter>_Engine\_Executors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystem.h">
+      <Filter>_Engine\_Executors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BaseTypes.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BaseSystem.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ai.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventHandler.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Perf.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Timing.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AgeScript.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BasicScripts.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BulletScript.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HealthScript.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlayerScript.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameComponents.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameCompWorldInclude">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystemUnifroms.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystemWorldInclude">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ParticleScript.h">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Engine.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\Game.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
@@ -174,31 +195,25 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">
-      <Filter>_Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EventHandler.cpp">
-      <Filter>Quelldateien</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics.cpp">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\QuadTree.cpp">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\RenderingWorker.cpp">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\TextureHandler.cpp">
-      <Filter>_Rendering</Filter>
+      <Filter>_Engine\_Rendering</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
       <Filter>_stbi</Filter>
     </ClCompile>
     <ClCompile Include="src\World.cpp">
-      <Filter>_Component</Filter>
-    </ClCompile>
-    <ClCompile Include="src\algo.h">
-      <Filter>Headerdateien</Filter>
+      <Filter>_Engine\_Component</Filter>
     </ClCompile>
     <ClCompile Include="src\Vec2.h">
       <Filter>_math</Filter>
@@ -210,27 +225,51 @@
       <Filter>_math</Filter>
     </ClCompile>
     <ClCompile Include="src\collision_detection.cpp">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\PhysicsWorker.cpp">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\PhysicsSystem.cpp">
-      <Filter>_Physics</Filter>
+      <Filter>_Engine\_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algo.h">
+      <Filter>_Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine.cpp">
+      <Filter>_Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventHandler.cpp">
+      <Filter>_Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AgeScript.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BulletScript.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HealthScript.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlayerScript.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ParticleScript.cpp">
+      <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\Basic.frag">
-      <Filter>_shader</Filter>
+      <Filter>_Engine\_shader</Filter>
     </None>
     <None Include="shader\Basic.vert">
-      <Filter>_shader</Filter>
+      <Filter>_Engine\_shader</Filter>
     </None>
     <None Include="shader\shadow.frag">
-      <Filter>_shader</Filter>
+      <Filter>_Engine\_shader</Filter>
     </None>
     <None Include="shader\shadow.vert">
-      <Filter>_shader</Filter>
+      <Filter>_Engine\_shader</Filter>
     </None>
   </ItemGroup>
 </Project>

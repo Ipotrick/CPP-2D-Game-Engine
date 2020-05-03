@@ -15,7 +15,12 @@ struct CompData {
 
 };
 
-using ent_id_t = uint32_t;
+using entity_id_type = uint32_t;
+using entity_handle = uint32_t;
+struct entity_id {
+	entity_id(entity_id_type id = 0) : id{ id } {}
+	entity_id_type id;
+};
 
 using storage_t = int;
 
@@ -26,11 +31,11 @@ constexpr storage_t lookup_table = 2;
 template<typename CompType, storage_t storageType>
 class ComponentStorage {
 public:
-	inline void insert(ent_id_t entity, CompType const& comp);
-	inline void remove(ent_id_t entity);
-	inline bool contains(ent_id_t entity) const;
-	inline CompType& get(ent_id_t entity);
-	inline CompType& operator[](ent_id_t ent);
+	inline void insert(entity_handle entity, CompType const& comp);
+	inline void remove(entity_handle entity);
+	inline bool contains(entity_handle entity) const;
+	inline CompType& get(entity_handle entity);
+	inline CompType& operator[](entity_handle ent);
 	inline size_t size() const;
 	
 	class iterator {
@@ -46,7 +51,7 @@ public:
 		pointer operator->();
 		bool operator==(const self_type& rhs);
 		bool operator!=(const self_type& rhs);
-		ent_id_t id();
+		entity_handle id();
 	};
 	inline iterator begin();
 	inline iterator end();
@@ -61,29 +66,47 @@ public:
 		-no interloop comp registration
 		-no interloop comp deregistration
 		violating these limitations will mass up the iterators
+	memory alignment:
+		random
+		packed (1.3)
+	memory usage:
+		n = count(entities)
+		nMax = (current maximum of the entitiy List)
+		m(n, nMax) = nMax + n * sizeof(CompType) * 8 * 1.3;
 */
 template<typename CompType>
 class ComponentStorage<CompType, hashing> {
 public:
 	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
 
-	inline void insert(ent_id_t entity, CompType const& comp) {
+	inline void insert(entity_handle entity, CompType const& comp) {
+		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
+		containsVec[entity] = true;
+
 		storage.insert({ entity, comp });
 	}
-	inline void remove(ent_id_t entity) {
-		auto res = storage.find(entity);
-		if (res != storage.end()) {
-			storage.erase(res);
+	inline void remove(entity_handle entity) {
+		if (contains(entity)) {
+			containsVec[entity] = false;
+			auto res = storage.find(entity);
+			if (res != storage.end()) {
+				storage.erase(res);
+			}
 		}
 	}
-	inline bool contains(ent_id_t entity) const {
-		return storage.contains(entity);
+	inline bool contains(entity_handle entity) const {
+		if (entity < containsVec.size()) {
+			return containsVec[entity];
+		}
+		else {
+			return false;
+		}
 	}
-	inline CompType& get(ent_id_t entity) {
+	inline CompType& get(entity_handle entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
-	inline CompType& operator[](ent_id_t entity) {
+	inline CompType& operator[](entity_handle entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
@@ -120,7 +143,7 @@ public:
 		bool operator!=(const self_type& rhs) {
 			return iter != rhs.iter;
 		}
-		ent_id_t id() { return iter->first; }
+		entity_handle handle() { return iter->first; }
 	private:
 		typename storage_t::iterator iter;
 		storage_t& storage;
@@ -129,56 +152,65 @@ public:
 	inline iterator end() { return iterator(storage.end(), storage); }
 private:
 	storage_t storage;
+	std::vector<bool> containsVec;
 };
 
 /*
 	pros:
 		instant access
 		instant deregistration
-		very fast registration
+		instant registration
 		linear iteration, super cache friendly
 		iterators NEVER get invalidated
 	cons:
 		very high memory usage
+	memory alignment:
+		linear
+		sparse (n / nMax)
+	memory usage:
+		n = count(entities)
+		nMax = (current maximum of the entitiy List)
+		m(n, nMax) = nMax + nMax * sizeof(CompType) * 8;
 
 */
 template<typename CompType>
 class ComponentStorage<CompType, direct_indexing>{
 public:
-	using storage_t = std::vector<std::pair<bool, CompType>>;
+	using storage_t = std::vector<CompType>;
 
-	inline void insert(ent_id_t entity, CompType const& comp) {
+	inline void insert(entity_handle entity, CompType const& comp) {
+		assert(!contains(entity));
+		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
+		containsVec[entity] = true;
 		if (entity < storage.size()) {
-			assert(storage[entity].first != true);	//cant register a registered entity
-			storage[entity].first = true;
-			storage[entity].second = comp;
+			storage[entity] = comp;
 		}
 		else if (entity == storage.size()) {
-			storage.push_back({ true, comp });
+			storage.push_back(comp);
 		}
 		else if (entity > storage.size()) {
-			storage.resize(entity, std::pair<bool, CompType>(false, CompType()));
-			storage.push_back({ true, comp });
+			storage.resize(entity+1, CompType());
+			storage[entity] = comp;
 		}
 	}
-	inline void remove(ent_id_t entity) {
-		if (entity < storage.size()) {
-			storage[entity].first = false;
+	inline void remove(entity_handle entity) {
+		if (contains(entity)) {
+			containsVec[entity] = false;
 		}
 	}
-	inline bool contains(ent_id_t entity) const {
-		if (entity < storage.size()) {
-			return storage[entity].first;
+	inline bool contains(entity_handle entity) const {
+		if (entity < containsVec.size()) {
+			return containsVec[entity];
 		}
 		else {
 			return false;
 		}
 	}
-	inline CompType& get(ent_id_t entity) {
+	inline CompType& get(entity_handle entity) {
 		assert(contains(entity));
-		return storage[entity].second;
+		return storage[entity];
 	}
-	inline CompType& operator[](ent_id_t entity) {
+	inline CompType& operator[](entity_handle entity) {
 		assert(contains(entity));
 		return storage[entity].second;
 	}
@@ -190,11 +222,11 @@ public:
 		typedef CompType& reference;
 		typedef CompType* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(ent_id_t entity_, storage_t& storage_) : entity{ entity_ }, storage{ storage_ } {}
+		iterator(entity_handle entity_, storage_t& storage_) : entity{ entity_ }, storage{ storage_ } {}
 		self_type operator++(int dummy) {
 			assert(entity < storage.size());
 			++entity;
-			while (entity < storage.size() && storage[entity].first == false) ++entity; //skip non valid entries
+			while (!contains(entity)) ++entity; //skip non valid entries
 			return *this;
 		}
 		self_type operator++() {
@@ -204,11 +236,11 @@ public:
 		}
 		reference operator*() {
 			assert(entity < storage.size());
-			return storage[entity].second;
+			return storage[entity];
 		}
 		pointer operator->() {
 			assert(entity < storage.size());
-			return &storage[entity].second;
+			return &storage[entity];
 		}
 		bool operator==(self_type const& rhs) {
 			return entity == entity;
@@ -216,22 +248,23 @@ public:
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		ent_id_t id() {
+		entity_handle handle() {
 			assert(entity < storage.size());
 			return entity;
 		}
 	private:
-		ent_id_t entity;
+		entity_handle entity;
 		storage_t& storage;
 	};
 	inline iterator begin() {
-		ent_id_t id = 0;
-		while (id < storage.size() && storage[id].first == false) ++id;
+		entity_handle id = 0;
+		while (!contains(id)) ++id;
 		return iterator(id, storage);
 	}
 	inline iterator end() { return iterator(storage.size(), storage); }
 private:
 	storage_t storage;
+	std::vector<bool> containsVec;
 };
 
 /*
@@ -239,11 +272,18 @@ private:
 		instant access
 		instant deregistration
 		very fast registration
-		random iteration BUT data is tightly packed
 		iterators NEVER get invalidated
 		memory usage on large objects that appear often is very good
 	cons:
+		random iteration BUT data is tightly packed
 		index table memory overhead ( 4 bytes * MaxEntID )
+	memory alignment:
+		random (can be optimised by call to linear)
+		packed (1)
+	memory usage:
+		n = count(entities)
+		nMax = (current maximum of the entitiy List)
+		m(n, nMax) = nMax * 32 + n * sizeof(CompType) * 8
 
 */
 template<typename CompType>
@@ -252,7 +292,7 @@ public:
 	using storage_t = std::vector<CompType>;
 
 	inline void optimiseMemoryLayout() {
-		std::vector<ent_id_t> storedIDs;
+		std::vector<entity_handle> storedIDs;
 		storedIDs.reserve(storage.size());
 		for (auto id : *this) {
 			storedIDs.push_back(id);
@@ -269,10 +309,10 @@ public:
 			indexTable[id] = n;
 		}
 		storage.shrink_to_fit();
-		freeStorageSlots = std::queue<ent_id_t>();
+		freeStorageSlots = std::queue<entity_handle>();
 	}
 
-	inline void insert(ent_id_t entity, CompType const& comp) {
+	inline void insert(entity_handle entity, CompType const& comp) {
 		assert(!contains(entity));
 		if (entity >= indexTable.size()) {
 			indexTable.resize(entity + 1, 0xFFFFFFFF);
@@ -283,30 +323,30 @@ public:
 			indexTable[entity] = storage.size() - 1;
 		}
 		else {
-			ent_id_t freeSlotIndex = freeStorageSlots.front();
+			entity_handle freeSlotIndex = freeStorageSlots.front();
 			freeStorageSlots.pop();
 			indexTable[entity] = freeSlotIndex;
 			storage[indexTable[entity]] = comp;
 		}
 	}
 
-	inline void remove(ent_id_t entity) {
+	inline void remove(entity_handle entity) {
 		assert(contains(entity));
 		freeStorageSlots.push(indexTable[entity]);
 		indexTable[entity] = 0xFFFFFFFF;
 	}
 
-	inline bool contains(ent_id_t entity) const {
+	inline bool contains(entity_handle entity) const {
 		assert(entity != 0);
 		if (entity >= indexTable.size()) return false;
 		else return indexTable[entity] != 0xFFFFFFFF;
 	}
 
-	inline CompType& get(ent_id_t entity) {
+	inline CompType& get(entity_handle entity) {
 		assert(contains(entity));
 		return storage[indexTable[entity]];
 	}
-	inline CompType& operator[](ent_id_t entity) {
+	inline CompType& operator[](entity_handle entity) {
 		return get(entity);
 	}
 	inline size_t size() const { 
@@ -320,7 +360,7 @@ public:
 		typedef CompType& reference;
 		typedef CompType* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(ent_id_t entity_, storage_t& storage_, std::vector<ent_id_t>& indexTable) : entity{ entity_ }, storage{ storage_ }, indexTable{ indexTable } {}
+		iterator(entity_handle entity_, storage_t& storage_, std::vector<entity_handle>& indexTable) : entity{ entity_ }, storage{ storage_ }, indexTable{ indexTable } {}
 		self_type operator++(int dummy) {
 			assert(entity < indexTable.size());
 			++entity;
@@ -346,17 +386,17 @@ public:
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		ent_id_t id() {
+		entity_handle handle() {
 			assert(entity < indexTable.size());
 			return entity;
 		}
 	private:
-		ent_id_t entity;
+		entity_handle entity;
 		storage_t& storage;
-		std::vector<ent_id_t>& indexTable;
+		std::vector<entity_handle>& indexTable;
 	};
 private:
-	std::vector<ent_id_t> indexTable;
+	std::vector<entity_handle> indexTable;
 	storage_t storage;
-	std::queue<ent_id_t> freeStorageSlots;
+	std::queue<entity_handle> freeStorageSlots;
 };

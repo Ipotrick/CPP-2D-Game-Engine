@@ -89,7 +89,7 @@ void PhysicsWorker::operator()()
 }
 
 
-void PhysicsWorker::cacheAABBs(std::vector<ent_id_t>& colliders) {
+void PhysicsWorker::cacheAABBs(std::vector<entity_handle>& colliders) {
 	for (auto ent : colliders) {
 		auto& base = poolData->world.getComp<Base>(ent);
 		auto& collider = poolData->world.getComp<Collider>(ent);
@@ -118,7 +118,7 @@ void PhysicsWorker::waitForOtherWorkers()
 	}
 }
 
-void PhysicsWorker::collisionFunction(ent_id_t collID, Quadtree2 const& quadtree, bool otherDynamic) {
+void PhysicsWorker::collisionFunction(entity_handle collID, Quadtree2 const& quadtree, bool otherDynamic) {
 	auto& world = poolData->world;
 	auto& collisionResponses = poolData->collisionResponses;
 
@@ -146,18 +146,17 @@ void PhysicsWorker::collisionFunction(ent_id_t collID, Quadtree2 const& quadtree
 		for (auto& otherID : nearCollidablesBuffer) {
 			//do not check against self 
 			if (collID != otherID) {
-				//do not check for collision when the colliders are related (slave/owner)
-				if (!world.areEntsRelated(collID, otherID)) {
-					CollidableAdapter otherAdapter = CollidableAdapter(
-						world.getComp<Base>(otherID).position,
-						world.getComp<Base>(otherID).rotation,
-						world.getComp<Collider>(otherID).size,
-						world.getComp<Collider>(otherID).form,
-						otherDynamic,
-						world.getComp<Base>(otherID).rotaVec);
-					auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, poolData->aabbCache.at(collID), poolData->aabbCache.at(otherID));
+				CollidableAdapter otherAdapter = CollidableAdapter(
+					world.getComp<Base>(otherID).position,
+					world.getComp<Base>(otherID).rotation,
+					world.getComp<Collider>(otherID).size,
+					world.getComp<Collider>(otherID).form,
+					otherDynamic,
+					world.getComp<Base>(otherID).rotaVec);
+				auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, poolData->aabbCache.at(collID), poolData->aabbCache.at(otherID));
 
-					if (newTestResult.collided) {
+				if (newTestResult.collided) {
+					if (!world.areEntsRelated(collID, otherID)) {
 						physicsData->collisionInfos->push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 						if (world.hasComp<Movement>(collID)) {
 							auto& movementColl = world.getComp<Movement>(collID);

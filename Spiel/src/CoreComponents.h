@@ -92,13 +92,28 @@ struct Draw : public CompData {
 	}
 };
 
+// Parent component
+
+struct Parent {
+	Parent() {}
+	std::vector<entity_handle> children;
+};
+
+// BaseSlave component
+
+struct BaseSlave {
+	BaseSlave() : parent{ entity_id(0) }, relativePos{ 0, 0 }, relativeRota{ 0 } {}
+	BaseSlave(entity_id parent, Vec2 relativePos, float relativeRota) : parent{ parent }, relativePos{ relativePos }, relativeRota { relativeRota } {}
+	entity_id parent;
+	Vec2 relativePos;
+	float relativeRota;
+};
+
 // slave component
 
 struct Slave {
-	ent_id_t ownerID;
-	Slave(uint32_t id_ = 0) :
-		ownerID{ id_ } {}
-
+	entity_handle ownerHandle;
+	Slave(uint32_t handle = 0) : ownerHandle{ handle } {}
 };
 
 // composit component
@@ -106,15 +121,15 @@ struct Slave {
 template<int N>
 struct Composit : public CompData {
 	struct Slave {
-		Slave() : id{ 0 }, relativePos{ 0,0 }, relativeRota{ 0.f } {}
+		Slave() : handle{ 0 }, relativePos{ 0,0 }, relativeRota{ 0.f } {}
 
-		Slave(uint32_t id_, Vec2 relativePos_, float relativeRota_) :
-			id{ id_ },
-			relativePos{ relativePos_ },
-			relativeRota{ relativeRota_ }
+		Slave(entity_handle handle, Vec2 relativePos, float relativeRota) :
+			handle{ handle },
+			relativePos{ relativePos },
+			relativeRota{ relativeRota }
 		{}
 
-		uint32_t id;
+		entity_handle handle;
 		Vec2 relativePos;
 		float relativeRota;
 	};
@@ -127,9 +142,9 @@ struct Composit : public CompData {
 		}
 	}
 
-	Composit(Slave slaves_[]) {
+	Composit(Slave slaves[]) {
 		for (int i = 0; i < N; ++i) {
-			slaves[i] = slaves_[i];
+			this->slaves[i] = slaves[i];
 		}
 	}
 };

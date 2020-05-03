@@ -1,7 +1,7 @@
 #pragma once
 
 #include <assert.h>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 
 #ifdef _WIN32

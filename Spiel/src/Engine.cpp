@@ -9,8 +9,9 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	maxDeltaTime{0.02f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
-	renderer{ window },
-	physicsSystem{ world, std::thread::hardware_concurrency() - 1 , perfLog}
+	baseSystem( wrld ),
+	physicsSystem{ world, std::thread::hardware_concurrency() - 1 , perfLog},
+	renderer{ window }
 {
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
@@ -20,6 +21,7 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	perfLog.submitTime("physicscollide");
 	perfLog.submitTime("physicsexecute");
 	perfLog.submitTime("rendertime");
+	perfLog.submitTime("calcRotaVecTime");
 }
 
 Engine::~Engine() {
@@ -29,7 +31,8 @@ Engine::~Engine() {
 
 std::string Engine::getPerfInfo(int detail) {
 	std::stringstream ss;
-	if (detail >= 4) ss << "Entities: " << world.getEntCount() << "\n";
+	if (detail >= 4) ss << "Entity Max: " << world.getEntMemSize() << "\n";
+	if (detail >= 1) ss << "Entity Count: " << world.getEntCount() << "\n";
 	if (detail >= 1) {
 		ss << "    deltaTime(s): " << perfLog.getTime("maintime") << "\n"
 			<< "    Ticks/s: " << 1 / perfLog.getTime("maintime") << "\n"
@@ -103,11 +106,11 @@ Vec2 Engine::getPosWorldSpace(Vec2 windowSpacePos_) {
 	return { transformedPos.x, transformedPos.y };
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(ent_id_t entity) {
+std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(entity_handle entity) {
 	return physicsSystem.getCollisions(entity);
 }
 
-Grid<bool> const& Engine::getStaticGrid()
+GridPhysics<bool> const& Engine::getStaticGrid()
 {
 	return physicsSystem.getStaticGrid();
 }
@@ -127,14 +130,18 @@ void Engine::run() {
 			{
 				Timer t(perfLog.getInputRef("updatetime"));
 				update(world, getDeltaTimeSafe());
-				world.slaveOwnerDestroy();
-				world.deregisterDestroyedEntities();
-				world.executeDestroys();
+				world.tick();
+				if (iteration % 4 == 0) world.sortFreeHandleQueue();
+				if ((iteration + 2) % 4 == 0) world.sortFreeIDQueue();
 			}
 			{
 				Timer t(perfLog.getInputRef("physicstime"));
 				physicsSystem.execute(getDeltaTimeSafe());
 				for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
+			}
+			{
+				Timer t(perfLog.getInputRef("calcRotaVecTime"));
+				baseSystem.execute();
 			}
 			{
 				rendererUpdate(world);
@@ -145,7 +152,10 @@ void Engine::run() {
 			renderer.end();
 		}
 		// window access begin
-		glfwPollEvents();
+		{
+			std::lock_guard l(window->mut);
+			glfwPollEvents();
+		}
 		// window access end
 		renderer.startRendering();
 		// reset flags
@@ -157,7 +167,7 @@ void Engine::run() {
 	destroy();
 }
 
-Drawable buildWorldSpaceDrawable(World& world, ent_id_t entity) {
+Drawable buildWorldSpaceDrawable(World& world, entity_handle entity) {
 	return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec));
 }
 
