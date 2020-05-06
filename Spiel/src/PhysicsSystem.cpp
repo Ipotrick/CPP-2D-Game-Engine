@@ -76,8 +76,6 @@ void PhysicsSystem::prepare()
 	poolWorkerData->statCollidables.clear();
 	poolWorkerData->statCollidables.reserve(world.getEntMemSize());
 
-	if (oldPosCache.size() != world.getEntMemSize()) oldPosCache.resize(world.getEntMemSize(), Vec2(0, 0));
-
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
 	Vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
@@ -221,17 +219,17 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 		if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { //check if both are solid
 
 			// owner stands in place for the slave for a collision response execution
-			if (world.hasComp<Slave>(entA) | world.hasComp<Slave>(entB)) {
-				if (world.hasComp<Slave>(entA) && !world.hasComp<Slave>(entB)) {
-					entA = world.getComp<Slave>(entA).ownerHandle;
+			if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
+				if (world.hasComp<BaseChild>(entA) && !world.hasComp<BaseChild>(entB)) {
+					entA = world.getEnt(world.getComp<BaseChild>(entA).parent);
 				}
-				else if (!world.hasComp<Slave>(entA) && world.hasComp<Slave>(entB)) {
-					entB = world.getComp<Slave>(entB).ownerHandle;
+				else if (!world.hasComp<BaseChild>(entA) && world.hasComp<BaseChild>(entB)) {
+					entB = world.getEnt(world.getComp<BaseChild>(entB).parent);
 				}
 				else {
 					// both are slaves
-					entA = world.getComp<Slave>(entA).ownerHandle;
-					entB = world.getComp<Slave>(entB).ownerHandle;
+					entA = world.getEnt(world.getComp<BaseChild>(entA).parent);
+					entB = world.getEnt(world.getComp<BaseChild>(entB).parent);
 				}
 			}
 
@@ -267,12 +265,11 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 		auto& movement = world.getComp<Movement>(entity);
 		auto& base = world.getComp<Base>(entity);
 
-		if (movement.angleVelocity == 0 && base.position == oldPosCache[entity] && !collider.particle) {
+		if (movement.angleVelocity == 0 && movement.velocity == Vec2(0,0) && !collider.particle) {
 			collider.sleeping = true;
 		}
 		else {
 			collider.sleeping = false;
-			oldPosCache[entity] = base.position;
 		}
 	}
 
@@ -317,15 +314,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 // velocity and pushout operations:
 
 	// apply dampened collision response pushout of slave to owner
-	for (auto slaveEnt : world.view<Slave, PhysicsBody>()) {
-		auto slave = world.getComp<Slave>(slaveEnt);
-		float slaveWeight = norm(poolWorkerData->collisionResponses[slaveEnt].posChange);
-		float ownerWeight = norm(poolWorkerData->collisionResponses[slave.ownerHandle].posChange);
-		float normalizer = slaveWeight + ownerWeight;
-		if (normalizer > Physics::nullDelta) {
-			poolWorkerData->collisionResponses[slave.ownerHandle].posChange = (slaveWeight * poolWorkerData->collisionResponses[slaveEnt].posChange + ownerWeight * poolWorkerData->collisionResponses[slave.ownerHandle].posChange) / normalizer;
-		}
-	}
+	propagateChildPushoutToParent();
 
 	// apply pushout
 	for (auto ent : world.view<Movement, PhysicsBody, Base>()) {
@@ -347,8 +336,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 
 	}
 // velocity and pushouts end!
-
-	syncCompositPhysics<4>();
+	syncBaseChildrenToParents();
 	t3.stop();
 
 	// submit debug drawables for physics
@@ -391,27 +379,33 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 #endif
 }
 
-template<int N>
-void PhysicsSystem::syncCompositPhysics()
+void PhysicsSystem::propagateChildPushoutToParent()
 {
-	auto& view = world.getAll<Composit<N>>();
-	for (auto iter = view.begin(); iter != view.end(); ++iter) {
-		auto& baseOwner = world.getComp<Base>(iter.handle());
-		auto& movOwner = world.getComp<Movement>(iter.handle());
-
-		for (int i = 0; i < N; i++) {
-			if (iter->slaves[i].handle != 0) {
-				auto& baseSlave = world.getComp<Base>(iter->slaves[i].handle);
-				auto& movSlave = world.getComp<Movement>(iter->slaves[i].handle);
-				auto slaveComposidData = iter->slaves[i];
-				baseSlave.position = baseOwner.position + rotate(slaveComposidData.relativePos, baseOwner.rotation);
-				movSlave.velocity = movOwner.velocity;
-				baseSlave.rotation = baseOwner.rotation + slaveComposidData.relativeRota;
-				movSlave.angleVelocity = movOwner.angleVelocity;
-			}
-			else {
-				break;
-			}
+	for (auto child : world.view<BaseChild, PhysicsBody>()) {
+		auto relationship = world.getComp<BaseChild>(child);
+		auto parent = world.getEnt(relationship.parent);
+		float childWeight = norm(poolWorkerData->collisionResponses[child].posChange);
+		float parentWeight = norm(poolWorkerData->collisionResponses[parent].posChange);
+		float normalizer = childWeight + parentWeight;
+		if (normalizer > Physics::nullDelta) {
+			poolWorkerData->collisionResponses[parent].posChange = (childWeight * poolWorkerData->collisionResponses[child].posChange + parentWeight * poolWorkerData->collisionResponses[parent].posChange) / normalizer;
 		}
+	}
+}
+
+void PhysicsSystem::syncBaseChildrenToParents() {
+	for (auto child : world.view<BaseChild>()) {
+		auto& base = world.getComp<Base>(child);
+		auto& movement = world.getComp<Movement>(child);
+		auto& relationship = world.getComp<BaseChild>(child);
+
+		auto parent = world.getEnt(relationship.parent);
+		auto& baseP = world.getComp<Base>(parent);
+		auto& movementP = world.getComp<Movement>(parent);
+
+		base.position = baseP.position + rotate(relationship.relativePos, baseP.rotation);
+		movement.velocity = movementP.velocity;
+		base.rotation = baseP.rotation + relationship.relativeRota;
+		movement.angleVelocity = movementP.angleVelocity;
 	}
 }

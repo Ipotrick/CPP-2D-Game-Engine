@@ -5,7 +5,7 @@
 #define GAME_SCRIPT(name, Component) \
 struct name : public GameScript<Component> { \
 using GameScript<Component>::GameScript; \
-virtual void script(uint32_t id, Component& data, float deltaTime) override; \
+virtual void script(entity_handle id, Component& data, float deltaTime) override; \
 };
 
 template<typename CompType>

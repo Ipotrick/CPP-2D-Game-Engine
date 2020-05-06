@@ -25,19 +25,13 @@
 #define SYSTEM_UNIFORMS(System) SystemUniforms ## System uniforms ## System;
 #include "GameSystemWorldInclude"
 
-#define CORE_COMPONENT_COUNT 15
+#define CORE_COMPONENT_COUNT 10
 // GameCompWorldInclude API
 	#define COMPONENT_INDEX(CompType, Index) template<> struct ComponentIndex<CompType> { static int constexpr index = Index + CORE_COMPONENT_COUNT; };
 	#define COMPONENT_STORAGE(CompType, StorageType) ComponentStorage<CompType, StorageType>
 #include "GameCompWorldInclude"
 
-#define COMPONENT_INDEX_CORE(CompType, Index) template<> struct ComponentIndex<CompType> { static int constexpr index = Index; };
-
-struct Dummy {};
-
-struct EntityId {
-	entity_id id;
-};
+#define CORE_COMPONENT_INDEX(CompType, Index) template<> struct ComponentIndex<CompType> { static int constexpr index = Index; };
 
 class EntityStatus {
 public:
@@ -64,6 +58,7 @@ template<typename First, typename Second, typename ... CompTypes>
 class MultiView;
 template<typename CompType>
 class SingleView;
+class ComponentView;
 
 class World {
 	template<typename First, typename Second, typename ... CompTypes>
@@ -72,10 +67,11 @@ class World {
 	friend class SingleView;
 public:
 
-	World() : latestHandle{ 0 }, despawnList{}
+	World() : latestHandle{ 0 }, defragMode{ DefragMode::NONE }, despawnList{}
 	{
 		entities.push_back({ false });
 		handleToId.push_back(entity_id(0));
+		idToHandle.push_back(0);
 	}
 	
 	/* returnes if entitiy exists or not, O(1) */
@@ -84,7 +80,7 @@ public:
 	/* creates blank entity and returns its entity, O(1) */
 	entity_handle createEnt();
 	/* enslaves the first ent to the second, ~O(1) */
-	void enslaveEntTo(entity_handle slave, entity_handle owner, Vec2 relativePos, float relativeRota);
+	void linkBase(entity_handle slave, entity_handle owner, Vec2 relativePos, float relativeRota);
 	/* marks entity for deletion, entities are deleted after each update, O(1) */
 	void destroy(entity_handle entity);
 	/* returns if an entitiy is related to another entity via a slave/owner relationship */
@@ -103,7 +99,7 @@ public:
 	/* identification utility */
 	/* returns true when entity has an id */
 	bool hasID(entity_handle entity);
-	/* generated new id for entity or returns existing id */
+	/* generates new id for entity or returns existing id */
 	entity_id identify(entity_handle entity);
 	/* if entity has an id it will be returned, call hasID before! */
 	entity_id getID(entity_handle entity);
@@ -116,7 +112,7 @@ public:
 		if 0 is returnsed, there are no entities spawned yet.
 		Try to not use this function and use the return value of create() instead
 		, O(1) */
-	entity_handle const getLastEntID();
+	entity_handle const getLastEntity();
 	/* returns count of entities, O(1) */
 	size_t const getEntCount();
 	/* returns the size of the vector that holds the entities, O(1) */
@@ -125,6 +121,19 @@ public:
 	void staticsChanged();
 	/* returns wheter or not static entities changed */
 	bool didStaticsChange();
+	/* returnes how fragmented the entities are */
+	float getFragmentation();
+	enum class DefragMode {
+		NONE,
+		LAZY,
+		MODERATE,
+		EAGER,
+		AGRESSIVE,
+		COMPLETE,
+		FAST
+	};
+	/* sets how much at a time and at what fragmentation(%) the world defragments */
+	void setDefragMode(DefragMode mode);
 
 	/* Component access utility */
 	/* returnes reference to a safe virtual container of the given components one can iterate over.
@@ -139,14 +148,15 @@ public:
 	template<typename CompType> bool hasntComp(entity_handle entity);
 	template<typename ... CompTypes> bool hasntComps(entity_handle entity);
 	/* adds a new Compoenent to an entity, ~O(1) */
-	template<typename CompType> void addComp(entity_handle entity, CompType data);
+	template<typename CompType> CompType& addComp(entity_handle entity, CompType data);
 	/* adds a new Compoenent to an entity, ~O(1) */
-	template<typename CompType> void addComp(entity_handle entity);
+	template<typename CompType> CompType& addComp(entity_handle entity);
 	/* removes a component from the entity */
 	template<typename CompType> void remComp(entity_handle entity);
 	/* returnes a View, and iterable object that only iterates over the entities with the given Components, ignored despawned entities */
 	template<typename First, typename Second, typename ... CompTypes> MultiView<First, Second, CompTypes...> view();
 	template<typename CompType> SingleView<CompType> view();
+	ComponentView viewComps(entity_handle entity);
 
 	void loadMap(std::string);
 public:
@@ -167,13 +177,8 @@ private:
 		ComponentStorage<FrictionEffector, hashing>,
 		ComponentStorage<Draw, direct_indexing>,
 		ComponentStorage<TextureRef, direct_indexing>,
-		ComponentStorage<Slave, direct_indexing>,
-		ComponentStorage<Composit<1>, hashing>,
-		ComponentStorage<Composit<2>, hashing>,
-		ComponentStorage<Composit<4>, hashing>,
-		ComponentStorage<Composit<8>, hashing>,
-		ComponentStorage<Composit<16>, hashing>,
-		ComponentStorage<Composit<32>, hashing>,
+		ComponentStorage<Parent, hashing>,
+		ComponentStorage<BaseChild, hashing>,
 		COMPONENT_SEGMENT
 	> componentStorageTuple;
 private:
@@ -181,28 +186,28 @@ private:
 	struct ComponentIndex {
 		static int const index = -1;
 	};
-	COMPONENT_INDEX_CORE(Base, 0)
-	COMPONENT_INDEX_CORE(Movement, 1)
-	COMPONENT_INDEX_CORE(Collider, 2)
-	COMPONENT_INDEX_CORE(PhysicsBody, 3)
-	COMPONENT_INDEX_CORE(LinearEffector, 4)
-	COMPONENT_INDEX_CORE(FrictionEffector, 5)
-	COMPONENT_INDEX_CORE(Draw, 6)
-	COMPONENT_INDEX_CORE(TextureRef, 7)
-	COMPONENT_INDEX_CORE(Slave, 8)
-	COMPONENT_INDEX_CORE(Composit<1>, 9)
-	COMPONENT_INDEX_CORE(Composit<2>, 10)
-	COMPONENT_INDEX_CORE(Composit<4>, 11)
-	COMPONENT_INDEX_CORE(Composit<8>, 12)
-	COMPONENT_INDEX_CORE(Composit<16>, 13)
-	COMPONENT_INDEX_CORE(Composit<32>, 14)
+	CORE_COMPONENT_INDEX(Base, 0)
+	CORE_COMPONENT_INDEX(Movement, 1)
+	CORE_COMPONENT_INDEX(Collider, 2)
+	CORE_COMPONENT_INDEX(PhysicsBody, 3)
+	CORE_COMPONENT_INDEX(LinearEffector, 4)
+	CORE_COMPONENT_INDEX(FrictionEffector, 5)
+	CORE_COMPONENT_INDEX(Draw, 6)
+	CORE_COMPONENT_INDEX(TextureRef, 7)
+	CORE_COMPONENT_INDEX(Parent, 8)
+	CORE_COMPONENT_INDEX(BaseChild, 9)
 	COMPONENT_INDEX_SEGMENT
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	friend class Engine;
 	void tick();
-	void slaveOwnerDestroy(); // slaves with dead owner get destroyed, dead slaves cut their refference of themselfes to the owner
-	void deregisterDestroyedEntities();	// CALL BEFORE "executeDestroyed"
+	void moveEntity(entity_handle start, entity_handle goal);
+	entity_handle findBiggestValidHandle();
+	void shrink(); // shorten entity array and delete freeHandles at the end of the entity array
+	void defragmentEntities();
+	void childParentDestroy(); // destroy on parent calls destroy on child
+	void parentChildDestroy(); // destroy on child calls destroy on parent
+	void deregisterDestroyedEntities();
 	void executeDelayedSpawns();
 	void executeDestroys();
 	void sortFreeHandleQueue();
@@ -216,12 +221,15 @@ private:
 	entity_handle latestHandle;
 
 	std::vector<entity_handle> idToHandle;
+	std::vector<uint32_t> idVersion;
 	std::vector<entity_id> handleToId;
 	std::queue<entity_id> freeIdQueue;
 
 	std::vector<entity_handle> despawnList;
 	std::vector<entity_handle> spawnLaterList;
 	bool staticEntitiesChanged{ true };
+
+	DefragMode defragMode;
 };
 
 // ---- Component Accessors implementations --------------------------------
@@ -242,12 +250,14 @@ template<typename CompType> __forceinline bool World::hasntComp(entity_handle en
 	return !std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).contains(entity);
 } 
 
-template<typename CompType> __forceinline void World::addComp(entity_handle entity, CompType data) {
+template<typename CompType> __forceinline CompType& World::addComp(entity_handle entity, CompType data) {
 	std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).insert(entity, data);
+	return std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple)[entity];
 } 
 
-template<typename CompType> __forceinline void World::addComp(entity_handle entity) {
+template<typename CompType> __forceinline CompType& World::addComp(entity_handle entity) {
 	std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple).insert(entity, CompType());
+	return std::get<World::ComponentIndex<CompType>::index>(componentStorageTuple)[entity];
 } 
 
 template<typename CompType> __forceinline void World::remComp(entity_handle entity) {
@@ -407,7 +417,6 @@ public:
 		inline self_type operator++(int junk) {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
-			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			entity++;
 			while (entity < view.endID && !(view.world.entities[entity].isValid() && view.world.entities[entity].isSpawned() && view.world.hasComp<CompType>(entity))) entity++;
 			assert(entity <= view.endID);
@@ -421,13 +430,11 @@ public:
 		inline reference operator*() {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
-			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			return entity;
 		}
 		inline pointer operator->() {
 			assert(entity < view.endID);
 			assert(view.world.doesEntExist(entity));
-			assert(view.componentStorageSizeOnCreate == view.world.getAll<CompType>().size());
 			return &entity;
 		}
 		inline bool operator==(const self_type& rhs) {
@@ -459,29 +466,56 @@ inline SingleView<CompType> World::view() {
 	return SingleView<CompType>(*this);
 }
 
-// -------------------------------------------------------------------------
+// -------- ComponentView implementation -----------------------------------
+
+using Move = Movement;
+using Coll = Collider;
+using PBody = PhysicsBody;
+using TexRef = TextureRef;
+class ComponentView {
+public:
+	ComponentView(World& world, entity_handle entity) : world{ world }, entity{ entity } {}
+	template<typename CompType> __forceinline bool has() { return world.hasComp<CompType>(entity); }
+	template<typename CompType> __forceinline CompType& add() {
+		return world.addComp<CompType>(entity);
+	}
+	template<typename CompType> __forceinline CompType& add(CompType comp) {
+		return world.addComp<CompType>(entity, comp);
+	}
+	template<typename CompType> __forceinline CompType& get() { return world.getComp<CompType>(entity); }
+private:
+	World& world;
+	entity_handle entity;
+};
+
+__forceinline ComponentView World::viewComps(entity_handle entity)
+{
+	return ComponentView(*this, entity);
+}
+
+// ------------------------------------------------------------------------
 
 inline bool World::doesEntExist(entity_handle entity) {
 	return (entity < entities.size() ? entities[entity].isValid() : false);
 }
 
-inline entity_handle const World::getLastEntID() {
+inline entity_handle const World::getLastEntity() {
 	return latestHandle;
 }
 
 __forceinline bool World::areEntsRelated(entity_handle collID, entity_handle otherID) {
-	if (hasComp<Slave>(collID) && hasComp<Slave>(otherID)) {	//same owner no collision check
-		if (getComp<Slave>(collID).ownerHandle == getComp<Slave>(otherID).ownerHandle) {
+	if (hasComp<BaseChild>(collID) && hasComp<BaseChild>(otherID)) {	//same owner no collision check
+		if (getEnt(getComp<BaseChild>(collID).parent) == getEnt(getComp<BaseChild>(otherID).parent)) {
 			return true;
 		}
 	}
-	else if (hasComp<Slave>(collID)) {
-		if (getComp<Slave>(collID).ownerHandle == otherID) {
+	else if (hasComp<BaseChild>(collID)) {
+		if (getEnt(getComp<BaseChild>(collID).parent) == otherID) {
 			return true;
 		}
 	}
-	else if (hasComp<Slave>(otherID)) {
-		if (getComp<Slave>(otherID).ownerHandle == collID) {
+	else if (hasComp<BaseChild>(otherID)) {
+		if (getEnt(getComp<BaseChild>(otherID).parent) == collID) {
 			return true;
 		}
 	}
@@ -520,11 +554,16 @@ inline entity_id World::getID(entity_handle entity) {
 
 inline bool World::isIDValid(entity_id entityID)
 {
-	return entityID.id < idToHandle.size() && idToHandle[entityID.id] > 0;
+	return entityID.id < idToHandle.size() && idToHandle[entityID.id] > 0 && idVersion[entityID.id] == entityID.version;
 }
 
 inline entity_handle World::getEnt(entity_id entityID)
 {
 	assert(isIDValid(entityID));
 	return idToHandle[entityID.id];
+}
+
+inline void World::setDefragMode(DefragMode mode)
+{
+	defragMode = mode;
 }

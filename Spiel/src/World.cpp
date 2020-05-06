@@ -3,12 +3,12 @@
 
 entity_handle World::createEnt() {
 	if (!freeHandleQueue.empty()) {
-		entity_handle id = freeHandleQueue.front();
+		entity_handle handle = freeHandleQueue.front();
 		freeHandleQueue.pop();
-		entities[id].setValid(true);
-		entities[id].setDestroyMark(false);
-		entities[id].setSpawned(false);
-		latestHandle = id;
+		entities[handle].setValid(true);
+		entities[handle].setDestroyMark(false);
+		entities[handle].setSpawned(false);
+		latestHandle = handle;
 	}
 	else {
 		entities.emplace_back( true );
@@ -17,27 +17,19 @@ entity_handle World::createEnt() {
 	return latestHandle;
 }
 
-void World::enslaveEntTo(entity_handle slave, entity_handle owner, Vec2 relativePos, float relativeRota)
+void World::linkBase(entity_handle slave, entity_handle owner, Vec2 relativePos, float relativeRota)
 {
-	if (!hasComp<Composit<4>>(owner)) {
-		addComp<Composit<4>>(owner, Composit<4>());
-	}
-	auto& ownerComposit = getComp<Composit<4>>(owner);
-	//find free slaveSlot
-	int i = 0;
-	while (i < 4) {
-		if (ownerComposit.slaves[i].handle == 0) {
-			break;
-		}
-		else {
-			i++;
-		}
-	}
-	assert(i < 4);	//spawned more slaves than can be hold
+	if (hasntComp<Parent>(owner)) addComp<Parent>(owner);
+	auto& parent = getComp<Parent>(owner);
 
-	ownerComposit.slaves[i] = Composit<4>::Slave(getLastEntID(), relativePos, relativeRota);
-	if (!hasComp<Slave>(slave)) addComp<Slave>(slave);
-	getComp<Slave>(slave) = Slave(owner);
+	parent.children.push_back(identify(slave));
+
+	if (hasntComp<BaseChild>(slave)) addComp<BaseChild>(slave);
+	auto& baseChild = getComp<BaseChild>(slave);
+
+	baseChild.relativePos = relativePos;
+	baseChild.relativeRota = relativeRota;
+	baseChild.parent = identify(owner);
 }
 
 void World::destroy(entity_handle entitiy_id) {
@@ -60,24 +52,29 @@ void World::respawnLater(entity_handle entity)
 
 entity_id World::identify(entity_handle entity)
 {
-	if (!doesEntExist(entity)) return { 0 };
-	if (handleToId.size() != entities.size()) handleToId.resize(entities.size(), { 0 });
+	assert(doesEntExist(entity));
+	if (handleToId.size() != entities.size()) handleToId.resize(entities.size(), entity_id(0,0) );
 	if (handleToId[entity].id != 0) /* does the handle allready have an id? */ {
 		return handleToId[entity];
 	}
 	else {
 		// generate id for entity
 		if (!freeIdQueue.empty()) {
+			// reuse existing index of id vector
 			auto idToken = freeIdQueue.front();
 			freeIdQueue.pop();
 			idToHandle[idToken.id] = entity;
+			idVersion[idToken.id] += 1;	// for every reuse the version gets an increase
 			handleToId[entity] = idToken;
+			idToken.version = idVersion[idToken.id];
 			return idToken;
 		}
 		else {
+			// expand id vector
 			idToHandle.push_back(entity);
-			entity_id idToken = entity_id(idToHandle.size() - 1);
-			handleToId[entity] = { idToHandle[idToken.id] };
+			idVersion.emplace_back(0);
+			entity_id idToken = entity_id(idToHandle.size() - 1, 0);
+			handleToId[entity] = idToken;
 			return idToken;
 		}
 	}
@@ -90,7 +87,7 @@ void World::executeDestroys() {
 		if (hasID(entity)) {
 			auto idToken = handleToId[entity];
 			freeIdQueue.push(idToken);
-			handleToId[entity] = { 0 };
+			handleToId[entity] = entity_id(0, 0);
 			idToHandle[idToken.id] = 0;
 		}
 		// reset status of handle:
@@ -132,34 +129,126 @@ void World::resetStaticsChangedFlag()
 }
 
 void World::tick()
-{
+{ 
+	despawnList.reserve(entities.size());	// make sure the iterators stay valid
 	executeDelayedSpawns();
-	slaveOwnerDestroy();
+	childParentDestroy();
+	parentChildDestroy();
 	deregisterDestroyedEntities();
 	executeDestroys();
+	sortFreeHandleQueue();
+	defragmentEntities();
 }
 
-void World::slaveOwnerDestroy() {
-	despawnList.reserve(entities.size());	//make sure the iterator stays valid
-	for (auto iter = despawnList.begin(); iter != despawnList.end(); ++iter) {
-		assert(entities[*iter].isValid());
-		//if the ent is an owner it despawns its slaves on destruction
-		if (hasComp<Composit<4>>(*iter)) {
-			auto& owner = getComp<Composit<4>>(*iter);
-			for (int i = 0; i < 4; ++i) {
-				destroy(owner.slaves[i].handle);
-			}
-		}
-		//if ent is a slave it clears its refference of the owner on despawn
+void World::moveEntity(entity_handle start, entity_handle goal)
+{
+	assert(entities.size() > goal && entities[goal].isValid() == false);
+	assert(entities.size() > start && entities[start].isValid() == true); 
+	if (hasID(start)) {
+		idToHandle[handleToId[start].id] = goal;
+		handleToId[goal] = handleToId[start];
+		handleToId[start].id = 0;
 		
-		if (hasComp<Slave>(*iter)) {
-			auto slaveComp = getComp<Slave>(*iter);
-			auto owner = getComp<Composit<4>>(slaveComp.ownerHandle);
-			for (int i = 0; i < 4; ++i) {
-				if (owner.slaves[i].handle == *iter) {
-					owner.slaves[i].handle = 0;
-					break;
-				}
+	}
+	for_each(componentStorageTuple, [&](auto& componentStorage) {
+		if (componentStorage.contains(start)) {
+			componentStorage.insert(goal, componentStorage.get(start));
+			componentStorage.remove(start);
+			assert(componentStorage.contains(goal));
+			assert(!componentStorage.contains(start));
+		}
+		});
+	entities[goal].setValid(true);
+	entities[goal].setSpawned(entities[start].isSpawned());
+	entities[start].setValid(false);
+	entities[start].setDestroyMark(false);
+	entities[start].setSpawned(false);
+}
+
+entity_handle World::findBiggestValidHandle()
+{
+	for (int i = entities.size() - 1; i > 0; i--) {
+		if (entities[i].isValid()) return i;
+	}
+	return 0;
+}
+
+void World::shrink() {
+	auto lastEl = findBiggestValidHandle();
+	entities.resize(lastEl + 1, EntityStatus(false));
+	std::vector<entity_handle> handleVec;
+	while (!freeHandleQueue.empty()) {
+		handleVec.push_back(freeHandleQueue.front());
+		freeHandleQueue.pop();
+	}
+	for (auto& el : handleVec) {
+		if (el < entities.size()) freeHandleQueue.push(el);
+	}
+}
+
+void World::defragmentEntities()
+{
+	int maxDefragEntCount;
+	float minFragmentation;
+	switch (defragMode) {
+	case DefragMode::FAST:
+		maxDefragEntCount = 10;
+		minFragmentation = 0.1;
+		break;
+	case DefragMode::NONE:
+		maxDefragEntCount = 0;
+		minFragmentation = 1.01f;
+		break;
+	case DefragMode::LAZY:
+		maxDefragEntCount = 50;
+		minFragmentation = 0.5f;
+		break;
+	case DefragMode::MODERATE:
+		maxDefragEntCount = 50;
+		minFragmentation = 0.33333f;
+		break;
+	case DefragMode::EAGER:
+		maxDefragEntCount = 50;
+		minFragmentation = 0.3f;
+		break;
+	case DefragMode::AGRESSIVE:
+		maxDefragEntCount = 50;
+		minFragmentation = 0.1f;
+		break;
+	case DefragMode::COMPLETE:
+		maxDefragEntCount = getEntMemSize();
+		minFragmentation = 0.00001f;
+		break;
+	}
+
+	if (getFragmentation() > minFragmentation) {
+		shrink();
+		
+		for (int defragCount = 0; defragCount < maxDefragEntCount; defragCount++) {
+			if (freeHandleQueue.empty()) break;
+			auto biggesthandle = findBiggestValidHandle();
+			moveEntity(biggesthandle, freeHandleQueue.front());
+			freeHandleQueue.pop();
+			shrink();
+		}
+	}
+}
+
+void World::childParentDestroy()
+{
+	for (auto& entity : despawnList) {
+		if (hasComp<BaseChild>(entity)) {
+			despawnList.push_back(getEnt(getComp<BaseChild>(entity).parent));
+		}
+	}
+}
+
+void World::parentChildDestroy() {
+	for (auto& entity : despawnList) {
+		if (hasComp<Parent>(entity)) {
+			auto& parent = getComp<Parent>(entity);
+			for (auto& child : parent.children) {
+				despawnList.push_back(getEnt(child));
 			}
 		}
 	}
@@ -182,7 +271,7 @@ void World::executeDelayedSpawns()
 }
 
 size_t const World::getEntCount() {
-	return entities.size() - freeHandleQueue.size();
+	return entities.size() - (freeHandleQueue.size() + 1);
 }
 
 size_t const World::getEntMemSize() {
@@ -197,6 +286,11 @@ void World::staticsChanged()
 bool World::didStaticsChange()
 {
 	return staticEntitiesChanged;
+}
+
+float World::getFragmentation()
+{
+	return (float)freeHandleQueue.size() / (float)getEntMemSize();
 }
 
 float randomFloatd(float MaxAbsVal) {
@@ -215,8 +309,8 @@ void World::loadMap(std:: string mapname_) {
 	{
 		Vec2 scaleEnt = { 0.4f, 0.8f };
 		uniformsPhysics.friction = 0.06f;
-		uniformsPhysics.linearEffectDir = Vec2(0, -1);
-		uniformsPhysics.linearEffectAccel = 1.f;
+		//uniformsPhysics.linearEffectDir = Vec2(0, -1);
+		//uniformsPhysics.linearEffectAccel = 1.f;
 		
 		auto player = createEnt(); 
 		addComp<Base>(player, Base({ 0,0 }, 0));
@@ -232,10 +326,9 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
 		addComp<PhysicsBody>(slave);
-		addComp<Slave>(slave);
 		addComp<Collider>(slave, Collider({ scaleEnt.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE));
 		addComp<Draw>(slave, Draw(Vec4(0,0,0,1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.6f, Form::RECTANGLE));
-		enslaveEntTo(slave, player, Vec2(0.0f, 0.4f), 45.0f);
+		linkBase(slave, player, Vec2(0.0f, 0.4f), 45.0f);
 		spawn(slave);
 
 		Vec2 scaleLegs{ 0.1, 0.2 };
@@ -243,10 +336,9 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
 		addComp<PhysicsBody>(slave);
-		addComp<Slave>(slave);
 		addComp<Collider>(slave, Collider(scaleLegs, Form::RECTANGLE));
 		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), scaleLegs, 0.6f, Form::RECTANGLE));
-		enslaveEntTo(slave, player, Vec2(0.2f, -0.4f), 30.0f);
+		linkBase(slave, player, Vec2(0.2f, -0.4f), 30.0f);
 		spawn(slave);
 
 
@@ -254,10 +346,9 @@ void World::loadMap(std:: string mapname_) {
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
 		addComp<PhysicsBody>(slave);
-		addComp<Slave>(slave);
 		addComp<Collider>(slave, Collider(scaleLegs, Form::RECTANGLE));
 		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), scaleLegs, 0.6f, Form::RECTANGLE));
-		enslaveEntTo(slave, player, Vec2(-0.2f, -0.4f), -30.0f);
+		linkBase(slave, player, Vec2(-0.2f, -0.4f), -30.0f);
 		spawn(slave);
 		
 		/*Vec2 scaleEnemy{ 5.4f, 1.4f };
@@ -296,19 +387,19 @@ void World::loadMap(std:: string mapname_) {
 			spawn(wall);
 		}
 
-		int num = 0;
-		Vec2 scale = Vec2(0.1f, 0.1f);
+		int num = 33;
+		Vec2 scale = Vec2(0.05f, 0.05f);
 		Collider trashCollider = Collider(scale, Form::RECTANGLE);
 		Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
 		PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1,scale), 10.0f);
 		for (int i = 0; i < num; i++) {
 			if (i % 2) {
-				trashCollider.form = Form::CIRCLE;
-				trashDraw.form = Form::CIRCLE;
+				//trashCollider.form = Form::CIRCLE;
+				//trashDraw.form = Form::CIRCLE;
 			}
 			else {
-				//trashCollider.form = Form::RECTANGLE;
-				//trashDraw.form = Form::RECTANGLE;
+				trashCollider.form = Form::RECTANGLE;
+				trashDraw.form = Form::RECTANGLE;
 			}
 
 
@@ -322,6 +413,36 @@ void World::loadMap(std:: string mapname_) {
 			addComp<Health>(trash, Health(100));
 			addComp<TextureRef>(trash, TextureRef("Dir.png"));
 			spawn(trash);
+			
+			auto trashAss = createEnt();
+			auto cmps = viewComps(trashAss);
+			cmps.add<Base>();
+			cmps.add<Movement>();
+			auto coll = trashCollider;
+			coll.form = Form::CIRCLE;
+			cmps.add<Coll>(coll);
+			cmps.add<PhysicsBody>();
+			auto draw = trashDraw;
+			draw.form = Form::CIRCLE;
+			cmps.add<Draw>(draw);
+			cmps.add<TexRef>(TextureRef("Dir.png"));
+			linkBase(trashAss, trash, Vec2(0, 0.02f), 0);
+			spawn(trashAss);
+
+			trashAss = createEnt();
+			auto cmps2 = viewComps(trashAss);
+			cmps2.add<Base>();
+			cmps2.add<Movement>();
+			coll = trashCollider;
+			coll.form = Form::CIRCLE;
+			cmps2.add<Coll>(coll);
+			cmps2.add<PhysicsBody>();
+			draw = trashDraw;
+			draw.form = Form::CIRCLE;
+			cmps2.add<Draw>(draw);
+			cmps2.add<TexRef>(TextureRef("Dir.png"));
+			linkBase(trashAss, trash, Vec2(0, -0.02f), 0);
+			spawn(trashAss);
 		}
 
 		int num2 = 0;
@@ -330,14 +451,6 @@ void World::loadMap(std:: string mapname_) {
 		Draw trashDraw2 = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale2, 0.5f, Form::RECTANGLE, true);
 		PhysicsBody trashSolidBody2(0.9f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1, scale), 10.0f);
 		for (int i = 0; i < num2; i++) {
-			if (i % 2) {
-				trashCollider2.form = Form::CIRCLE;
-				trashDraw2.form = Form::CIRCLE;
-			}
-			else {
-				trashCollider2.form = Form::RECTANGLE;
-				trashDraw2.form = Form::RECTANGLE;
-			}
 
 			Vec2 position2 = { static_cast<float>(rand() % 1000 / 10.0f - 50.0f) * 4.6f, static_cast<float>(rand() % 1000 / 10.0f - 50.0f) * 4.6f };
 			auto trash2 = createEnt();

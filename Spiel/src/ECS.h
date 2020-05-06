@@ -18,8 +18,13 @@ struct CompData {
 using entity_id_type = uint32_t;
 using entity_handle = uint32_t;
 struct entity_id {
-	entity_id(entity_id_type id = 0) : id{ id } {}
+	explicit entity_id(entity_id_type id = 0, uint32_t version = 0) : id{ id }, version{ version } {}
+	void operator=(entity_id rhs) {
+		this->id = rhs.id;
+	}
+	entity_id_type& operator*() { return id; }
 	entity_id_type id;
+	uint32_t version;
 };
 
 using storage_t = int;
@@ -37,7 +42,6 @@ public:
 	inline CompType& get(entity_handle entity);
 	inline CompType& operator[](entity_handle ent);
 	inline size_t size() const;
-	
 	class iterator {
 	public:
 		typedef iterator self_type;
@@ -212,7 +216,7 @@ public:
 	}
 	inline CompType& operator[](entity_handle entity) {
 		assert(contains(entity));
-		return storage[entity].second;
+		return storage[entity];
 	}
 	inline size_t size() const { return storage.size(); }
 	class iterator {
@@ -352,7 +356,6 @@ public:
 	inline size_t size() const { 
 		return storage.size() - freeStorageSlots.size();
 	}
-
 	class iterator {
 	public:
 		typedef iterator self_type;

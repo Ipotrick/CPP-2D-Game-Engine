@@ -96,57 +96,17 @@ struct Draw : public CompData {
 
 struct Parent {
 	Parent() {}
-	std::vector<entity_handle> children;
+	std::vector<entity_id> children;
 };
 
 // BaseSlave component
 
-struct BaseSlave {
-	BaseSlave() : parent{ entity_id(0) }, relativePos{ 0, 0 }, relativeRota{ 0 } {}
-	BaseSlave(entity_id parent, Vec2 relativePos, float relativeRota) : parent{ parent }, relativePos{ relativePos }, relativeRota { relativeRota } {}
+struct BaseChild {
+	BaseChild() : parent{ entity_id(0) }, relativePos{ 0, 0 }, relativeRota{ 0 } {}
+	BaseChild(entity_id parent, Vec2 relativePos, float relativeRota) : parent{ parent }, relativePos{ relativePos }, relativeRota { relativeRota } {}
 	entity_id parent;
 	Vec2 relativePos;
 	float relativeRota;
-};
-
-// slave component
-
-struct Slave {
-	entity_handle ownerHandle;
-	Slave(uint32_t handle = 0) : ownerHandle{ handle } {}
-};
-
-// composit component
-
-template<int N>
-struct Composit : public CompData {
-	struct Slave {
-		Slave() : handle{ 0 }, relativePos{ 0,0 }, relativeRota{ 0.f } {}
-
-		Slave(entity_handle handle, Vec2 relativePos, float relativeRota) :
-			handle{ handle },
-			relativePos{ relativePos },
-			relativeRota{ relativeRota }
-		{}
-
-		entity_handle handle;
-		Vec2 relativePos;
-		float relativeRota;
-	};
-
-	Slave slaves[N];
-
-	Composit() {
-		for (int i = 0; i < N; ++i) {
-			slaves[i] = { 0, Vec2(0,0), 0 };
-		}
-	}
-
-	Composit(Slave slaves[]) {
-		for (int i = 0; i < N; ++i) {
-			this->slaves[i] = slaves[i];
-		}
-	}
 };
 
 // effector components

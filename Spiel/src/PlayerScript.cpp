@@ -2,16 +2,15 @@
 
 #include "PlayerScript.h"
 
-void PlayerScript::script(uint32_t entity, Player& data, float deltaTime) {
+void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
 	World& world = engine.world;
+	auto cmps = world.viewComps(entity);
 	auto [begin, end] = engine.getCollisions(entity);
 	for (auto iter = begin; iter != end; ++iter) {
 		if (engine.world.hasComp<PhysicsBody>(iter->idB)) {
 			engine.events.triggerEvent("playerHit");
 		}
 	}
-
-	
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
@@ -25,12 +24,21 @@ void PlayerScript::script(uint32_t entity, Player& data, float deltaTime) {
 			mov.velocity.y += rand() % 1000 / 400.0f * 1.0f - 0.5f;
 			mov.velocity += dir * vel;
 			world.addComp<Movement>(particle, mov);
-			world.addComp<Age>(particle, Age(1.0f));
 			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), 0.49f, Form::CIRCLE));
-			world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.2f, 0.2f), Vec2(1,1),
-				Vec4(202/256.f, 140/256.f, 120/256.f, 0.9f),
-				Vec4(100,0,0, 0)
-			));
+			if (rand() % 4 == 0) {
+				world.addComp<Age>(particle, Age(1.5f));
+				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.01f, 0.01f), Vec2(3, 3),
+					Vec4(220 / 256.f, 20 / 256.f, 20 / 256.f, 0.9f),
+					Vec4(0, 0, 0, 0)
+				));
+			}
+			else {
+				world.addComp<Age>(particle, Age(1.0f));
+				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.2f, 0.2f), Vec2(1, 1),
+					Vec4(202 / 256.f, 40 / 256.f, 20 / 256.f, 0.9f),
+					Vec4(0, 0, 0, 0)
+				));
+			}
 			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.01f, 0.0001, 0));
 			world.addComp<Collider>(particle, Collider(Vec2(0.2f, 0.2f), Form::CIRCLE, true));
 			world.addComp<TextureRef>(particle, TextureRef("Cloud.png"));
@@ -55,38 +63,35 @@ void PlayerScript::script(uint32_t entity, Player& data, float deltaTime) {
 	float flames = data.flameSpawnTimer.getLaps(deltaTime);
 
 	if (engine.keyPressed(KEY::W)) {
-		world.getComp<Movement>(entity).velocity += rotate(Vec2(0.0f, 2.0f*data.power), world.getComp<Base>(entity).rotation) * deltaTime;
-		spawnParticles(flames, rotate(rotate(Vec2(1, 0), world.getComp<Base>(entity).rotaVec), 270), 5, rotate(Vec2(0,-world.getComp<Collider>(entity).size.y * 0.7f), world.getComp<Base>(entity).rotaVec));
+		cmps.get<Move>().velocity += rotate(Vec2(0.0f, 2.0f*data.power), cmps.get<Base>().rotation) * deltaTime;
+		spawnParticles(flames, rotate(rotate(Vec2(1, 0), cmps.get<Base>().rotaVec), 270), 5, rotate(Vec2(0,-world.getComp<Collider>(entity).size.y * 0.7f), cmps.get<Base>().rotaVec));
 	}
 	if (engine.keyPressed(KEY::A)) {
-		world.getComp<Movement>(entity).velocity += rotate(Vec2(-1.0f * data.power, 0.0f), world.getComp<Base>(entity).rotation) * deltaTime;
-		spawnParticles(flames, rotate(rotate(Vec2(1, 0), world.getComp<Base>(entity).rotaVec), 0), 5, rotate(Vec2(world.getComp<Collider>(entity).size.x * 0.5f, 0), world.getComp<Base>(entity).rotaVec));
+		cmps.get<Move>().velocity += rotate(Vec2(-1.0f * data.power, 0.0f), cmps.get<Base>().rotation) * deltaTime;
+		spawnParticles(flames, rotate(rotate(Vec2(1, 0), cmps.get<Base>().rotaVec), 0), 5, rotate(Vec2(world.getComp<Collider>(entity).size.x * 0.5f, 0), cmps.get<Base>().rotaVec));
 	}
 	if (engine.keyPressed(KEY::S)) {
-		world.getComp<Movement>(entity).velocity += rotate(Vec2(0.0f, -1.0f * data.power), world.getComp<Base>(entity).rotation) * deltaTime;
-		spawnParticles(flames, rotate(rotate(Vec2(1, 0), world.getComp<Base>(entity).rotaVec), 90), 5, rotate(Vec2(0, world.getComp<Collider>(entity).size.y * 0.7f), world.getComp<Base>(entity).rotaVec));
+		cmps.get<Move>().velocity += rotate(Vec2(0.0f, -1.0f * data.power), cmps.get<Base>().rotation) * deltaTime;
+		spawnParticles(flames, rotate(rotate(Vec2(1, 0), cmps.get<Base>().rotaVec), 90), 5, rotate(Vec2(0, world.getComp<Collider>(entity).size.y * 0.7f), cmps.get<Base>().rotaVec));
 	}
 	if (engine.keyPressed(KEY::D)) {
-		world.getComp<Movement>(entity).velocity += rotate(Vec2(1.0f * data.power, 0.0f), world.getComp<Base>(entity).rotation) * deltaTime;
-		spawnParticles(flames, rotate(rotate(Vec2(1, 0), world.getComp<Base>(entity).rotaVec), 180), 5, rotate(Vec2(-world.getComp<Collider>(entity).size.x * 0.5f, 0), world.getComp<Base>(entity).rotaVec));
+		cmps.get<Move>().velocity += rotate(Vec2(1.0f * data.power, 0.0f), cmps.get<Base>().rotation) * deltaTime;
+		spawnParticles(flames, rotate(rotate(Vec2(1, 0), cmps.get<Base>().rotaVec), 180), 5, rotate(Vec2(-world.getComp<Collider>(entity).size.x * 0.5f, 0), cmps.get<Base>().rotaVec));
 	}
-	auto& baseEnt = world.getComp<Base>(entity);
-	auto& movEnt = world.getComp<Movement>(entity);
-	auto& collEnt = world.getComp<Collider>(entity);
 
 
-	movEnt.angleVelocity *= 1 / (1 + 2*deltaTime);
+	cmps.get<Move>().angleVelocity *= 1 / (1 + 2*deltaTime);
 	if (engine.keyPressed(KEY::Q)) {
-		movEnt.angleVelocity += 700.0f * deltaTime;
+		cmps.get<Move>().angleVelocity += 700.0f * deltaTime;
 	}
 	else if (engine.keyPressed(KEY::E)) {
-		movEnt.angleVelocity -= 700.0f * deltaTime;
+		cmps.get<Move>().angleVelocity -= 700.0f * deltaTime;
 	}
 
 	if (engine.keyPressed(KEY::F)) {
-		auto baseEnt = world.getComp<Base>(entity);
-		auto movEnt = world.getComp<Movement>(entity);
-		auto collEnt = world.getComp<Collider>(entity);
+		auto baseEnt = cmps.get<Base>();
+		auto movEnt = cmps.get<Move>();
+		auto collEnt = cmps.get<Coll>();
 
 		float scale = rand() % 10 * 0.1f + 0.5f;
 		Vec2 bulletSize = Vec2(0.05f, 0.05f) * scale;
@@ -103,7 +108,7 @@ void PlayerScript::script(uint32_t entity, Player& data, float deltaTime) {
 			world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1, 0));
 			world.addComp<Draw>(bullet, bulletDraw);
 			world.addComp<Collider>(bullet, bulletCollider);
-			world.addComp<Bullet>(world.getLastEntID(), Bullet(10.0f * scale));
+			world.addComp<Bullet>(world.getLastEntity(), Bullet(10.0f * scale));
 			world.spawn(bullet);
 		}
 	}

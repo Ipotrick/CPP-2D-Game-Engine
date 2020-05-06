@@ -24,7 +24,9 @@ private:
 	void prepare();
 	void collisionDetection();
 	void applyPhysics(float deltaTime);
-	template<int N> void syncCompositPhysics();
+
+	void propagateChildPushoutToParent();
+	void syncBaseChildrenToParents();
 private:
 	PerfLogger& perfLog;
 	uint32_t const threadCount;
@@ -37,7 +39,6 @@ private:
 	std::vector<std::shared_ptr<PhysicsPerThreadData>> perWorkerData;
 
 	// buffers
-	std::vector<Vec2> oldPosCache;
 	std::vector<std::vector<CollisionInfo>> collisionInfosSplit;
 	std::vector<CollisionInfo> collisionInfos{};
 	robin_hood::unordered_map<entity_handle, std::vector<CollisionInfo>::iterator> collisionInfoBegins;

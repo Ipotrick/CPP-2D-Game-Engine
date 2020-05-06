@@ -1,6 +1,6 @@
 #include "BulletScript.h"
 
-void BulletScript::script(uint32_t id, Bullet& data, float deltaTime) {
+void BulletScript::script(entity_handle id, Bullet& data, float deltaTime) {
 	assert(engine.world.doesEntExist(id));
 	World& world = engine.world;
 	auto [begin, end] = engine.getCollisions(id);

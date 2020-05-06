@@ -19,7 +19,7 @@ Game::Game() :
 	//Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
 	//world.addComp<Draw>(cursor, cursorDraw);
 	world.spawn(cursor);
-	cursorID = cursor;
+	cursorID = world.identify(cursor);
 }
 
 void Game::create() {
@@ -33,15 +33,32 @@ void Game::create() {
 		baseVec = rotate(rotate(baseVec, rotaVec), -42.7);
 		std::cout << "angle: " << angle << " translated angle: " << getAngle(baseVec) << std::endl;
 	}
-	
-	//std::cout << "sizeof(std::vector<bool>(200): " << sizeof(std::vector<bool>(100)) * 8 - sizeof(std::vector<bool>(0)) * 8 << std::endl;
-	
+	{
+		for (auto ent : world.view<Player>()) {
+			std::cout << "ding" << std::endl;
+			auto id = world.identify(ent);
+			bool hasID = world.hasID(ent);
+			auto retID = world.getID(ent);
+			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << " retID: " << retID.id << std::endl;
+		}
+		auto newent = world.createEnt();
+		auto id = world.identify(newent);
+		bool hasIDafter = world.hasID(newent);
+		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
+		world.destroy(newent);
+
+		auto newent2 = world.createEnt();
+		bool hasIDbefore = world.hasID(newent2);
+		auto id2 = world.identify(newent2);
+		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
+	}
+	world.setDefragMode(World::DefragMode::FAST);
 }
 
 void Game::update(World& world, float deltaTime) {
 	submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(2,2), Vec4(1, 1, 1, 1), Form::RECTANGLE, 0, true));
 	submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(10, 10), Vec4(0.5, 0.45, 0.5, 1), Form::RECTANGLE, 0, false));
-	//attachTexture(freeDrawableID, "nothing");
+	attachTexture(freeDrawableID, "default");
 
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
@@ -89,12 +106,16 @@ void Game::update(World& world, float deltaTime) {
 
 	//display performance statistics
 	//std::cout << getPerfInfo(5) << '\n';
+	std::cout << "fragmentation: " << world.getFragmentation() << std::endl;
+	std::cout << "ent count: " << world.getEntCount() << std::endl;
+	std::cout << "ent memsize: " << world.getEntMemSize() << std::endl << std::endl;
 }
 
 void Game::cursorManipFunc()
 {
-	auto& baseCursor = world.getComp<Base>(cursorID);
-	auto& colliderCursor = world.getComp<Collider>(cursorID);
+	auto cursor = world.getEnt(cursorID);
+	auto& baseCursor = world.getComp<Base>(cursor);
+	auto& colliderCursor = world.getComp<Collider>(cursor);
 	baseCursor.position = getPosWorldSpace(getCursorPos());
 
 	baseCursor.rotation = camera.rotation;
@@ -144,7 +165,7 @@ void Game::cursorManipFunc()
 			}
 		}
 		else {
-			auto [begin, end] = getCollisions(cursorID);
+			auto [begin, end] = getCollisions(cursor);
 			auto iterWIthHighestDrawPrio = begin;
 			for (auto iter = begin; iter != end; ++iter) {
 				if (world.getComp<Draw>(iter->idB).drawingPrio > world.getComp<Draw>(iterWIthHighestDrawPrio->idB).drawingPrio) {	//higher drawprio found
@@ -169,21 +190,52 @@ void Game::cursorManipFunc()
 
 		// spawns:
 		if (keyPressed(KEY::U)) {
-			Vec2 scale = Vec2(0.08f, 0.08f);
+			Vec2 scale = Vec2(0.05f, 0.05f);
 			Collider trashCollider = Collider(scale, Form::RECTANGLE);
-			Draw trashDraw = Draw(Vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
-			PhysicsBody trashSolidBody(0.2f, 2.5f, 0.1f, 10.0f);
+			Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
+			PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1, scale), 10.0f);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
+				Vec2 position = baseCursor.position;
 				auto trash = world.createEnt();
-				world.addComp<Base>(trash, Base(baseCursor.position, 0));
-				world.addComp<Movement>(trash);
-				world.addComp<PhysicsBody>(trash, trashSolidBody);
+				world.addComp<Base>(trash, Base(position, RotaVec2(0)));
+				world.addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 				world.addComp<Collider>(trash, trashCollider);
 				world.addComp<Draw>(trash, trashDraw);
-				world.addComp<Health>(world.getLastEntID(), Health(100));
-				world.addComp<TextureRef>(trash, TextureRef("test.png", Vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), Vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
+				world.addComp<PhysicsBody>(trash, trashSolidBody);
+				world.addComp<Health>(trash, Health(100));
+				world.addComp<TextureRef>(trash, TextureRef("Dir.png"));
 				world.spawn(trash);
+
+				auto trashAss = world.createEnt();
+				auto cmps = world.viewComps(trashAss);
+				cmps.add<Base>();
+				cmps.add<Movement>();
+				auto coll = trashCollider;
+				coll.form = Form::CIRCLE;
+				cmps.add<Coll>(coll);
+				cmps.add<PhysicsBody>();
+				auto draw = trashDraw;
+				draw.form = Form::CIRCLE;
+				cmps.add<Draw>(draw);
+				cmps.add<TexRef>(TextureRef("Dir.png"));
+				world.linkBase(trashAss, trash, Vec2(0, 0.02f), 0);
+				world.spawn(trashAss);
+
+				trashAss = world.createEnt();
+				auto cmps2 = world.viewComps(trashAss);
+				cmps2.add<Base>();
+				cmps2.add<Movement>();
+				coll = trashCollider;
+				coll.form = Form::CIRCLE;
+				cmps2.add<Coll>(coll);
+				cmps2.add<PhysicsBody>();
+				draw = trashDraw;
+				draw.form = Form::CIRCLE;
+				cmps2.add<Draw>(draw);
+				cmps2.add<TexRef>(TextureRef("Dir.png"));
+				world.linkBase(trashAss, trash, Vec2(0, -0.02f), 0);
+				world.spawn(trashAss);
 			}
 		}
 

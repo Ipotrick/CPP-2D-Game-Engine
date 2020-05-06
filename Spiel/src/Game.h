@@ -37,7 +37,7 @@ public:
 	BulletScript	bulletScript;
 	ParticleScript particleScript;
 
-	uint32_t cursorID;
+	entity_id cursorID;
 
 	CursorManipData cursorManipData;
 	void cursorManipFunc();
