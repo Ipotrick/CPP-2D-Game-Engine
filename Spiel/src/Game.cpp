@@ -11,7 +11,7 @@ Game::Game() :
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 
-	auto cursor = world.createEnt();
+	auto cursor = world.create();
 	Vec2 cursorScale = { 0.1f,0.1f };
 	world.addComp<Base>(cursor);
 	Collider cursorCollider(cursorScale, Form::RECTANGLE, true);
@@ -41,18 +41,18 @@ void Game::create() {
 			auto retID = world.getID(ent);
 			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << " retID: " << retID.id << std::endl;
 		}
-		auto newent = world.createEnt();
+		auto newent = world.create();
 		auto id = world.identify(newent);
 		bool hasIDafter = world.hasID(newent);
 		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
 		world.destroy(newent);
 
-		auto newent2 = world.createEnt();
+		auto newent2 = world.create();
 		bool hasIDbefore = world.hasID(newent2);
 		auto id2 = world.identify(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
 	}
-	world.setDefragMode(World::DefragMode::FAST);
+	world.setDefragMode(World::DefragMode::LAZY);
 }
 
 void Game::update(World& world, float deltaTime) {
@@ -106,14 +106,18 @@ void Game::update(World& world, float deltaTime) {
 
 	//display performance statistics
 	//std::cout << getPerfInfo(5) << '\n';
-	std::cout << "fragmentation: " << world.getFragmentation() << std::endl;
-	std::cout << "ent count: " << world.getEntCount() << std::endl;
-	std::cout << "ent memsize: " << world.getEntMemSize() << std::endl << std::endl;
+	std::cout << "fragmentation: " << world.fragmentation() << std::endl;
+	std::cout << "ent count: " << world.entityCount() << std::endl;
+	std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
+	for (auto player : world.view<Player>()) {
+		auto cmps = world.viewComps(player);
+		//std::cout << "player speed: " << length(cmps.get<Movement>().velocity) << std::endl;
+	}
 }
 
 void Game::cursorManipFunc()
 {
-	auto cursor = world.getEnt(cursorID);
+	auto cursor = world.getEntity(cursorID);
 	auto& baseCursor = world.getComp<Base>(cursor);
 	auto& colliderCursor = world.getComp<Collider>(cursor);
 	baseCursor.position = getPosWorldSpace(getCursorPos());
@@ -127,10 +131,10 @@ void Game::cursorManipFunc()
 
 	//world.getComp<Draw>(cursorID).scale = vec2(1, 1) / camera.zoom / 100.0f;
 	if (buttonPressed(BUTTON::MB_LEFT)) {
-		world.staticsChanged();
+		world.setStaticsChanged();
 		if (cursorManipData.locked) {
 			
-			if (world.doesEntExist(cursorManipData.lockedID)) {
+			if (world.exists(cursorManipData.lockedID)) {
 				if (world.hasComp<Movement>(cursorManipData.lockedID)) {
 					auto& movControlled = world.getComp<Movement>(cursorManipData.lockedID);
 					world.getComp<Movement>(cursorManipData.lockedID) = baseCursor.position - cursorManipData.oldCursorPos;
@@ -197,7 +201,7 @@ void Game::cursorManipFunc()
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
 				Vec2 position = baseCursor.position;
-				auto trash = world.createEnt();
+				auto trash = world.create();
 				world.addComp<Base>(trash, Base(position, RotaVec2(0)));
 				world.addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 				world.addComp<Collider>(trash, trashCollider);
@@ -207,7 +211,7 @@ void Game::cursorManipFunc()
 				world.addComp<TextureRef>(trash, TextureRef("Dir.png"));
 				world.spawn(trash);
 
-				auto trashAss = world.createEnt();
+				auto trashAss = world.create();
 				auto cmps = world.viewComps(trashAss);
 				cmps.add<Base>();
 				cmps.add<Movement>();
@@ -219,10 +223,10 @@ void Game::cursorManipFunc()
 				draw.form = Form::CIRCLE;
 				cmps.add<Draw>(draw);
 				cmps.add<TexRef>(TextureRef("Dir.png"));
-				world.linkBase(trashAss, trash, Vec2(0, 0.02f), 0);
+				world.link(trashAss, trash, Vec2(0, 0.02f), 0);
 				world.spawn(trashAss);
 
-				trashAss = world.createEnt();
+				trashAss = world.create();
 				auto cmps2 = world.viewComps(trashAss);
 				cmps2.add<Base>();
 				cmps2.add<Movement>();
@@ -234,7 +238,7 @@ void Game::cursorManipFunc()
 				draw.form = Form::CIRCLE;
 				cmps2.add<Draw>(draw);
 				cmps2.add<TexRef>(TextureRef("Dir.png"));
-				world.linkBase(trashAss, trash, Vec2(0, -0.02f), 0);
+				world.link(trashAss, trash, Vec2(0, -0.02f), 0);
 				world.spawn(trashAss);
 			}
 		}
@@ -246,7 +250,7 @@ void Game::cursorManipFunc()
 			Draw trashDraw = Draw(Vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
-				auto trash = world.createEnt();
+				auto trash = world.create();
 				world.addComp<Base>(trash, Base(cursorManipData.oldCursorPos, 0));
 				world.addComp<Collider>(trash, trashCollider);
 				world.addComp<PhysicsBody>(trash, trashSolidBody);

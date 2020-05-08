@@ -36,6 +36,7 @@ constexpr storage_t lookup_table = 2;
 template<typename CompType, storage_t storageType>
 class ComponentStorage {
 public:
+	using Component = CompType;
 	inline void insert(entity_handle entity, CompType const& comp);
 	inline void remove(entity_handle entity);
 	inline bool contains(entity_handle entity) const;
@@ -81,6 +82,7 @@ public:
 template<typename CompType>
 class ComponentStorage<CompType, hashing> {
 public:
+	using Component = CompType;
 	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
 
 	inline void insert(entity_handle entity, CompType const& comp) {
@@ -180,6 +182,7 @@ private:
 template<typename CompType>
 class ComponentStorage<CompType, direct_indexing>{
 public:
+	using Component = CompType;
 	using storage_t = std::vector<CompType>;
 
 	inline void insert(entity_handle entity, CompType const& comp) {
@@ -293,6 +296,7 @@ private:
 template<typename CompType>
 class ComponentStorage<CompType, lookup_table> {
 public:
+	using Component = CompType;
 	using storage_t = std::vector<CompType>;
 
 	inline void optimiseMemoryLayout() {
@@ -402,4 +406,24 @@ private:
 	std::vector<entity_handle> indexTable;
 	storage_t storage;
 	std::queue<entity_handle> freeStorageSlots;
+};
+
+template< size_t I, typename T, typename Tuple_t>
+constexpr size_t index_in_storagetuple_fn() {
+	static_assert(I < std::tuple_size<Tuple_t>::value, "The element is not in the tuple");
+
+	typedef typename std::tuple_element<I, Tuple_t>::type el;
+	if constexpr (std::is_same<ComponentStorage<T, hashing>, el>::value
+		|| std::is_same<ComponentStorage<T, direct_indexing>, el>::value
+		|| std::is_same<ComponentStorage<T, lookup_table>, el>::value) {
+		return I;
+	}
+	else {
+		return index_in_storagetuple_fn<I + 1, T, Tuple_t>();
+	}
+}
+
+template<typename T, typename Tuple_t>
+struct index_in_storagetuple {
+	static constexpr size_t value = index_in_storagetuple_fn<0, T, Tuple_t>();
 };

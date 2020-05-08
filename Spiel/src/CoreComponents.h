@@ -1,6 +1,6 @@
 #include "BaseTypes.h"
 #include "Vec.h"
-#include "ECS.h"
+#include "EntityComponentStorage.h"
 #include "Timing.h"
 
 // basis component

@@ -14,7 +14,7 @@ void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
-			auto particle = world.createEnt();
+			auto particle = world.create();
 			Base base = world.getComp<Base>(entity);
 			base.position += offset;
 			world.addComp<Base>(particle, base);
@@ -102,13 +102,13 @@ void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
 			Vec2 bullCollVel = movEnt.velocity + (bulletVel + (rand() % 1000 / 1000.0f)) * rotate(Vec2(0, 1), baseEnt.rotation + velOffsetRota);
 			Collider bulletCollider = Collider(bulletSize, Form::CIRCLE, true);
 			Draw bulletDraw = Draw(Vec4(0.f, 1.f, 0.f, 1), bulletSize, 0.4f, Form::CIRCLE);
-			auto bullet = world.createEnt();
+			auto bullet = world.create();
 			world.addComp<Base>(bullet, Base(baseEnt.position + rotate(Vec2(-collEnt.size.y, 0.0f) / 1.5f, baseEnt.rotation + 270)));
 			world.addComp<Movement>(bullet, Movement(bullCollVel, 0));
 			world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1, 0));
 			world.addComp<Draw>(bullet, bulletDraw);
 			world.addComp<Collider>(bullet, bulletCollider);
-			world.addComp<Bullet>(world.getLastEntity(), Bullet(10.0f * scale));
+			world.addComp<Bullet>(bullet, Bullet(10.0f * scale));
 			world.spawn(bullet);
 		}
 	}

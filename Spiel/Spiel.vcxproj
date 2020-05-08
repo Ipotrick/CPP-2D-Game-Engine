@@ -29,18 +29,18 @@
     <ClInclude Include="src\BulletScript.h" />
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\collision_detection.h" />
+    <ClInclude Include="src\CoreCompInclude.h" />
     <ClInclude Include="src\CoreComponents.h" />
     <ClInclude Include="src\CoreSystem.h" />
     <ClInclude Include="src\CoreSystemUniforms.h" />
     <ClInclude Include="src\debug.h" />
-    <ClInclude Include="src\ECS.h" />
+    <ClInclude Include="src\EntityComponentStorage.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventHandler.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
-    <ClInclude Include="src\GameCompWorldInclude" />
+    <ClInclude Include="src\GameCompInclude.h" />
     <ClInclude Include="src\GameSystemUnifroms.h" />
-    <ClInclude Include="src\GameSystemWorldInclude" />
     <ClInclude Include="src\GameWorld.h" />
     <ClInclude Include="src\HealthScript.h" />
     <ClInclude Include="src\Input.h" />
@@ -67,6 +67,7 @@
     <ClInclude Include="src\Vec4.h" />
     <ClInclude Include="src\vector_math.h" />
     <ClInclude Include="src\Window.h" />
+    <ClInclude Include="src\EntityComponentManager.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
@@ -78,6 +79,7 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GameWorld.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mat3.cpp" />
@@ -92,6 +94,7 @@
     <ClCompile Include="src\RenderingWorker.cpp" />
     <ClCompile Include="src\TextureHandler.cpp" />
     <ClCompile Include="src\Vec2.h" />
+    <ClCompile Include="src\EntityComponentManager.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>

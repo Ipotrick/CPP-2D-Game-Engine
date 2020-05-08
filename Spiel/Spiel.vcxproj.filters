@@ -60,9 +60,6 @@
     <ClInclude Include="src\CoreComponents.h">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\ECS.h">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
     <ClInclude Include="src\PhysicsTypes.h">
       <Filter>_Engine\_Physics</Filter>
     </ClInclude>
@@ -110,9 +107,6 @@
     </ClInclude>
     <ClInclude Include="src\random.h">
       <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\World.h">
-      <Filter>_Engine\_Component</Filter>
     </ClInclude>
     <ClInclude Include="src\PhysicsSystem.h">
       <Filter>_Engine\_Physics</Filter>
@@ -174,17 +168,26 @@
     <ClInclude Include="src\GameComponents.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameCompWorldInclude">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\GameSystemUnifroms.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystemWorldInclude">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\ParticleScript.h">
       <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EntityComponentStorage.h">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreCompInclude.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameCompInclude.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EntityComponentManager.h">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\World.h">
+      <Filter>_Engine\_Component</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -211,9 +214,6 @@
     </ClCompile>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
       <Filter>_stbi</Filter>
-    </ClCompile>
-    <ClCompile Include="src\World.cpp">
-      <Filter>_Engine\_Component</Filter>
     </ClCompile>
     <ClCompile Include="src\Vec2.h">
       <Filter>_math</Filter>
@@ -255,6 +255,15 @@
       <Filter>Quelldateien</Filter>
     </ClCompile>
     <ClCompile Include="src\ParticleScript.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EntityComponentManager.cpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\World.cpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameWorld.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

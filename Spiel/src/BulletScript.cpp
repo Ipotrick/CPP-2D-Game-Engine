@@ -1,7 +1,7 @@
 #include "BulletScript.h"
 
 void BulletScript::script(entity_handle id, Bullet& data, float deltaTime) {
-	assert(engine.world.doesEntExist(id));
+	assert(engine.world.exists(id));
 	World& world = engine.world;
 	auto [begin, end] = engine.getCollisions(id);
 	bool foundCollisionWithMortal{ false };
@@ -14,7 +14,7 @@ void BulletScript::script(entity_handle id, Bullet& data, float deltaTime) {
 
 	if (foundCollisionWithMortal) {
 		if (norm(world.getComp<Collider>(id).size * 0.5f) > 0.02f) {
-			auto newEnt = world.createEnt();
+			auto newEnt = world.create();
 			world.addComp<Base>(newEnt, world.getComp<Base>(id));
 			world.addComp<Movement>(newEnt, world.getComp<Movement>(id));
 			world.getComp<Movement>(newEnt).velocity *= 0.5f;

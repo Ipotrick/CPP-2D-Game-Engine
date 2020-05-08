@@ -3,7 +3,7 @@
 #include "Timing.h"
 #include "BaseTypes.h"
 
-#include "ECS.h"
+#include "EntityComponentStorage.h"
 
 struct ParticleScriptComp : public CompData {
 	ParticleScriptComp() {}

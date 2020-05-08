@@ -156,7 +156,7 @@ void PhysicsWorker::collisionFunction(entity_handle collID, Quadtree2 const& qua
 				auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, poolData->aabbCache.at(collID), poolData->aabbCache.at(otherID));
 
 				if (newTestResult.collided) {
-					if (!world.areEntsRelated(collID, otherID)) {
+					if (!world.areRelated(collID, otherID)) {
 						physicsData->collisionInfos->push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 						if (world.hasComp<Movement>(collID)) {
 							auto& movementColl = world.getComp<Movement>(collID);

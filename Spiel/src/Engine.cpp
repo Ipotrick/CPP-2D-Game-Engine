@@ -31,8 +31,8 @@ Engine::~Engine() {
 
 std::string Engine::getPerfInfo(int detail) {
 	std::stringstream ss;
-	if (detail >= 4) ss << "Entity Max: " << world.getEntMemSize() << "\n";
-	if (detail >= 1) ss << "Entity Count: " << world.getEntCount() << "\n";
+	if (detail >= 4) ss << "Entity Max: " << world.memorySize() << "\n";
+	if (detail >= 1) ss << "Entity Count: " << world.entityCount() << "\n";
 	if (detail >= 1) {
 		ss << "    deltaTime(s): " << perfLog.getTime("maintime") << "\n"
 			<< "    Ticks/s: " << 1 / perfLog.getTime("maintime") << "\n"
@@ -131,8 +131,6 @@ void Engine::run() {
 				Timer t(perfLog.getInputRef("updatetime"));
 				update(world, getDeltaTimeSafe());
 				world.tick();
-				if (iteration % 4 == 0) world.sortFreeHandleQueue();
-				if ((iteration + 2) % 4 == 0) world.sortFreeIDQueue();
 			}
 			{
 				Timer t(perfLog.getInputRef("physicstime"));
@@ -159,7 +157,7 @@ void Engine::run() {
 		// window access end
 		renderer.startRendering();
 		// reset flags
-		world.resetStaticsChangedFlag();
+		world.setStaticsChanged(false);
 		iteration++;
 	}
 	renderer.end();
