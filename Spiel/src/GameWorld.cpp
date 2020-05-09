@@ -8,17 +8,66 @@ void World::loadMap(std::string mapname_) {
 	}
 	else
 	{
-		Vec2 scaleEnt = { 0.4f, 0.8f };
-		physics.friction = 0.16f;
-		//uniformsPhysics.linearEffectDir = Vec2(0, -1);
-		//uniformsPhysics.linearEffectAccel = 1.f;
+		auto makeWall = [&](int x, int y) {
+			auto wall = create();
+			auto comp = viewComps(wall);
+			comp.add<Base>(Base(Vec2(x, y), 0));
+			comp.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(1, 1), 0.45f, Form::RECTANGLE));
+			comp.add<Collider>(Collider(Vec2(1, 1), Form::RECTANGLE));
+			comp.add<PhysicsBody>(PhysicsBody(0.0f, 10000000000000000000000000000000000.0f, 1000000000000000000000000000000000.0f, 30));
+			spawn(wall);
+		};
 
+		int const height = 16;
+		int const width = 64+4;
+		std::string map = {
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+		};
+
+		for (int vert = 0; vert < height; vert++) {
+			for (int hor = 0; hor < width; hor++) {
+				if (map.at(vert * width + hor) == '#') makeWall(hor, vert);
+			}
+		}
+
+		Vec2 scalePlayer(1, 1);
 		auto player = create();
+		auto cmps = viewComps(player);
+		cmps.add<Base>(Base(Vec2(5,5),0));
+		cmps.add<Collider>(Collider(scalePlayer, Form::RECTANGLE));
+		cmps.add<PhysicsBody>(PhysicsBody(0.5, 1.0f, calcMomentOfIntertia(1.0f, scalePlayer), 1.0f));
+		cmps.add<Movement>();
+		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::RECTANGLE));
+		cmps.add<Player>();
+		spawn(player);
+
+		/*
+		Vec2 scalePlayer = { 0.4f, 0.8f };
+		physics.friction = 0.16f;
+		//physics.linearEffectDir = Vec2(0, -1);
+		//physics.linearEffectAccel = 1.f;
+
+		entity_handle player = create();
 		addComp<Base>(player, Base({ 0,0 }, 0));
 		addComp<Movement>(player, Movement(0.0f, 0.0f));
-		addComp<Draw>(player, Draw(Vec4(1, 1, 1, 1), scaleEnt, 0.6f, Form::RECTANGLE));
-		addComp<Collider>(player, Collider(scaleEnt, Form::RECTANGLE));
-		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scaleEnt), 100));
+		addComp<Draw>(player, Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.6f, Form::RECTANGLE));
+		addComp<Collider>(player, Collider(scalePlayer, Form::RECTANGLE));
+		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scalePlayer), 100));
 		addComp<TextureRef>(player, TextureRef("Dir.png"));
 		addComp<Player>(player, Player());
 		spawn(player);
@@ -27,8 +76,8 @@ void World::loadMap(std::string mapname_) {
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
 		addComp<PhysicsBody>(slave);
-		addComp<Collider>(slave, Collider({ scaleEnt.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE));
-		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), { scaleEnt.x * 1 / sqrtf(2.0f) }, 0.6f, Form::RECTANGLE));
+		addComp<Collider>(slave, Collider({ scalePlayer.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE));
+		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), { scalePlayer.x * 1 / sqrtf(2.0f) }, 0.6f, Form::RECTANGLE));
 		link(slave, player, Vec2(0.0f, 0.4f), 45.0f);
 		spawn(slave);
 
@@ -52,27 +101,6 @@ void World::loadMap(std::string mapname_) {
 		link(slave, player, Vec2(-0.2f, -0.4f), -30.0f);
 		spawn(slave);
 
-		/*Vec2 scaleEnemy{ 5.4f, 1.4f };
-		auto enemy = createEnt();
-		addComp<Base>(enemy, Base({ 0,0 }, 0));
-		addComp<Movement>(enemy, Movement(0.0f, 0.0f));
-		addComp<Draw>(enemy, Draw(Vec4(1, 1, 1, 1), scaleEnemy, 0.4f, Form::RECTANGLE));
-		addComp<Collider>(enemy, Collider(scaleEnemy, Form::RECTANGLE));
-		addComp<PhysicsBody>(enemy, PhysicsBody(0.0f, 470, calcMomentOfIntertia(470, scaleEnemy),10.f));
-		addComp<Health>(enemy, Health(100));
-		addComp<Enemy>(enemy, player);
-		addComp<TextureRef>(enemy, TextureRef("test.png", Vec2(1.f / 16.f * 3.f, 1.f / 16.f * 15.f), Vec2(1.f / 16.f * 4.f, 1.f / 16.f * 16.f)));
-		spawn(enemy);
-
-		auto pinguin = createEnt();
-		addComp<Base>(pinguin, Base(Vec2(3, 4), 0));
-		addComp<Draw>(pinguin, Draw(Vec4(1, 1, 1, 0.5), Vec2(2, 3), 0.5F, Form::RECTANGLE));
-		addComp<Collider>(pinguin, Collider(Vec2(2,3), Form::RECTANGLE));
-		addComp<TextureRef>(pinguin, TextureRef("pingu.png"));
-		addComp<PhysicsBody>(pinguin, PhysicsBody(1, 8, calcMomentOfIntertia(8, Vec2(2, 3)), 0.5));
-		addComp<PhysicsBody>(pinguin);
-		spawn(pinguin);*/
-
 		Collider	wallCollider(Vec2(0.4f, 10.0f), Form::RECTANGLE);
 		PhysicsBody	wallSolidBody(0.5f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, Vec2(0.4f, 10.0f)), 100.0f);
 		Draw		wallDraw = Draw(Vec4(0, 0, 0, 1), Vec2(0.4f, 10.0f), 0.5f, Form::RECTANGLE, true);
@@ -88,7 +116,7 @@ void World::loadMap(std::string mapname_) {
 			spawn(wall);
 		}
 
-		int num = 33;
+		int num = 333;
 		Vec2 scale = Vec2(0.05f, 0.05f);
 		Collider trashCollider = Collider(scale, Form::RECTANGLE);
 		Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
@@ -159,6 +187,6 @@ void World::loadMap(std::string mapname_) {
 			addComp<Collider>(trash2, trashCollider2);
 			addComp<PhysicsBody>(trash2, trashSolidBody2);
 			spawn(trash2);
-		}
+		}*/
 	}
 }

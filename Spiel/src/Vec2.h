@@ -186,7 +186,7 @@ inline Vec2 rotate<270>(Vec2 const& vec) {
 }
 
 // uses trigonometric functions and or sqrt
-inline float getAngle(Vec2 vec) {
+inline float getRotation(Vec2 vec) {
 	if (vec.y == 0.0f)
 		return vec.x < 0.0f ? 180.0f : 0.0f;
 	else if (vec.x == 0)

@@ -40,7 +40,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = B4CF0438
+ServiceHubLogSessionKey = F0D1EE43
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -62,9 +62,7 @@ VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  World.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(71,56): warning C4267: "Argument": Konvertierung von "size_t" nach "entity_id_type", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(158,38): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "int", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(203,38): warning C4267: "=": Konvertierung von "size_t" nach "int", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\World.cpp(318,28): warning C4305: "Argument": Verkürzung von "double" in "float"
+  GameWorld.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\GameWorld.cpp(14,32): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\GameWorld.cpp(14,29): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

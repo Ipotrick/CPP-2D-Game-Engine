@@ -86,10 +86,11 @@ public:
 	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
 
 	inline void insert(entity_handle entity, CompType const& comp) {
+		assert(!contains(entity));
 		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
 		containsVec[entity] = true;
 
-		storage.insert({ entity, comp });
+		storage[entity] = comp;
 	}
 	inline void remove(entity_handle entity) {
 		if (contains(entity)) {

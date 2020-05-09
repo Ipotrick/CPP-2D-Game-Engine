@@ -51,10 +51,10 @@ struct Age : public CompData {
 // bullet component
 
 struct Bullet : public CompData {
-	Bullet(int damage_) :damage{ damage_ } {}
-	Bullet() : damage {0} {}
+	Bullet(int damage_, int hitPoints) :damage{ damage_ }, hitPoints{ hitPoints } {}
+	Bullet() : damage{ 0 } , hitPoints{1} {}
 	int damage;
-	
+	int hitPoints;
 };
 
 // loading and event trigger component

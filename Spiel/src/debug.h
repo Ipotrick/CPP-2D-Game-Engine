@@ -10,7 +10,7 @@ std::array<Drawable, 3> makeArrow(Vec2 vec, Vec2 origin) {
 	float const width = 0.03f;
 	Vec4 const color = Vec4(1, 0, 0, 1);
 	float len = length(vec);
-	float angle = getAngle(vec);
+	float angle = getRotation(vec);
 	RotaVec2 rotaVec = RotaVec2(angle);
 	RotaVec2 rotaVecTip = RotaVec2(angle + 45);
 	auto centerPos = origin + vec * 0.5f;

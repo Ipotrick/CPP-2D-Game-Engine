@@ -29,12 +29,12 @@ public:
 	{}
 
 	inline T at(int x, int y) const {
-		assert(x * sizeX + y < data.size());
+		assert(x * sizeY + y < data.size());
 		return data[x * sizeY + y];
 	}
 
 	inline void set(int x, int y, T val) {
-		assert(x * sizeX + y < data.size());
+		assert(x * sizeY + y < data.size());
 		data[x * sizeY + y] = val;
 	}
 
