@@ -105,6 +105,9 @@
     <ClInclude Include="src\PhysicsTypes.h">
       <Filter>_Physics</Filter>
     </ClInclude>
+    <ClInclude Include="src\fileUtility.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Engine.cpp">

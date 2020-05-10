@@ -26,6 +26,7 @@
     <ClInclude Include="src\ECS.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventHandler.h" />
+    <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
     <ClInclude Include="src\glmath.h" />
