@@ -189,6 +189,9 @@
     <ClInclude Include="src\World.h">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
+    <ClInclude Include="src\dummy.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -264,6 +267,9 @@
       <Filter>_Engine\_Component</Filter>
     </ClCompile>
     <ClCompile Include="src\GameWorld.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DummyScript.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,7 +6,8 @@ Game::Game() :
 	healthScript{ *this },
 	ageScript   { *this },
 	bulletScript{ *this },
-	particleScript{ *this }
+	particleScript{ *this },
+	dummyScript{ *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
@@ -97,17 +98,18 @@ void Game::update(World& world, float deltaTime) {
 	cursorManipFunc();
 	
 	//execute scripts
-	playerScript.execute( deltaTime);
-	healthScript.execute( deltaTime);
-	ageScript.execute(    deltaTime);
-	bulletScript.execute( deltaTime);
+	playerScript.execute(deltaTime);
+	healthScript.execute(deltaTime);
+	ageScript.execute(deltaTime);
+	bulletScript.execute(deltaTime);
 	particleScript.execute(deltaTime);
+	dummyScript.execute(deltaTime);
 
 
 	//display performance statistics
 	//std::cout << getPerfInfo(5) << '\n';
 	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
-	//std::cout << "ent count: " << world.entityCount() << std::endl;
+	std::cout << "ent count: " << world.entityCount() << std::endl;
 	//std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
 	for (auto player : world.view<Player>()) {
 		auto cmps = world.viewComps(player);

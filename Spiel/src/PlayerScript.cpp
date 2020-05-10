@@ -2,10 +2,10 @@
 
 #include "PlayerScript.h"
 
-void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
+void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 	World& world = engine.world;
-	auto cmps = world.viewComps(entity);
-	auto [begin, end] = engine.getCollisions(entity);
+	auto cmps = world.viewComps(me);
+	auto [begin, end] = engine.getCollisions(me);
 	for (auto iter = begin; iter != end; ++iter) {
 		if (engine.world.hasComp<PhysicsBody>(iter->idB)) {
 			engine.events.triggerEvent("playerHit");
@@ -15,10 +15,10 @@ void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
 			auto particle = world.create();
-			Base base = world.getComp<Base>(entity);
+			Base base = world.getComp<Base>(me);
 			base.position += offset;
 			world.addComp<Base>(particle, base);
-			Movement mov = world.getComp<Movement>(entity);
+			Movement mov = world.getComp<Movement>(me);
 			mov.angleVelocity += rand() % 1000 / 400.0f * 90.0f - 45.0f;
 			mov.velocity.x += rand() % 1000 / 400.0f * 1.0f - 0.5f;
 			mov.velocity.y += rand() % 1000 / 400.0f * 1.0f - 0.5f;
