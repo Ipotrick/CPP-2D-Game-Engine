@@ -4,125 +4,183 @@
 
 void PhysicsWorker::operator()()
 {
-	auto& world = *physicsPoolData->world;
+	auto& world = poolData->world;
+	auto& beginSensor = physicsData->beginSensor;
+	auto& endSensor = physicsData->endSensor;
+	auto& sensorCollidables = poolData->sensorCollidables;
 	auto& beginDyn = physicsData->beginDyn;
 	auto& endDyn = physicsData->endDyn;
-	auto& dynCollidables = physicsPoolData->dynCollidables;
+	auto& dynCollidables = poolData->dynCollidables;
 	auto& beginStat = physicsData->beginStat;
 	auto& endStat = physicsData->endStat;
-	auto& statCollidables = physicsPoolData->statCollidables;
-	auto& collisionResponses = physicsPoolData->collisionResponses;
+	auto& statCollidables = poolData->statCollidables;
+	auto& collisionResponses = poolData->collisionResponses;
 	auto& collisionInfos = physicsData->collisionInfos;
-	auto& qtreesDynamic = physicsPoolData->qtreesDynamic;
-	auto& qtreesStatic = physicsPoolData->qtreesStatic;
+	auto& qtreeDynamic = poolData->qtreeDynamic;
+	auto& qtreeStatic = poolData->qtreeStatic;
+	auto& aabbCache = poolData->aabbCache;
 
-	while (true) {
-		{
-			std::unique_lock<std::mutex> switch_lock(syncData->mut);
-			syncData->go.at(physicsData->id) = false;
-			syncData->cond.notify_all();
-			syncData->cond.wait(switch_lock, [&]() { return syncData->go.at(physicsData->id) == true; });	//wait for engine to give go sign
-			if (syncData->run == false) break;
+	bool firstIteration = true;
+	while (run){
+		if (!firstIteration) {
+			if (physicsData->id == 0) {
+				if (poolData->rebuildDynQuadTrees) {
+					for (auto& ent : dynCollidables) {
+						if (!world.getComp<Collider>(ent).particle) {	// never check for collisions against particles
+							qtreeDynamic.insert(ent);
+						}
+					}
+				}
+				// rebuild stat qtree
+				if (physicsThreadCount == 1) {
+					if (poolData->rebuildStatQuadTrees) {
+						for (auto& ent : statCollidables) {
+							if (!world.getComp<Collider>(ent).particle) {	// never check for collisions against particles
+								qtreeStatic.insert(ent);
+							}
+						}
+						updateStaticGrid();
+					}
+					cacheAABBs(dynCollidables);
+					cacheAABBs(statCollidables);
+					cacheAABBs(sensorCollidables);
+				}
+			}
+			if (physicsData->id == 1) {
+				if (poolData->rebuildStatQuadTrees) {
+					for (auto& ent : statCollidables) {
+						if (!world.getComp<Collider>(ent).particle) {	// never check for collisions against particles
+							qtreeStatic.insert(ent);
+						}
+					}
+					updateStaticGrid();
+				}
+				cacheAABBs(dynCollidables);
+				cacheAABBs(statCollidables);
+				cacheAABBs(sensorCollidables);
+			}
+
+			// re sync with others after building trees
+			waitForOtherWorkers();
+
+			collisionInfos->reserve(static_cast<size_t>(dynCollidables.size() / 10.f));	// try to avoid reallocations
+
+			// physics objects collision tests
+			for (uint32_t i = beginDyn; i < endDyn; i++) {
+				auto& collID = dynCollidables.at(i);
+				collisionFunction(collID, qtreeDynamic, true);
+				collisionFunction(collID, qtreeStatic, false);
+			}
+
+			// sensor collision tests
+			for (uint32_t i = beginSensor; i < endSensor; i++) {
+				auto& collID = sensorCollidables.at(i);
+				collisionFunction(collID, qtreeDynamic, true);
+				if (world.hasntComps<LinearEffector, FrictionEffector>(collID)) {
+					collisionFunction(collID, qtreeStatic, false);
+				}
+			}
 		}
+		else {
+			firstIteration = false;
+		}
+		waitForUpdate();
+	}
+}
 
-		if (physicsPoolData->dynCollidables) {
-			// rebuild dyn qtree
-			if (physicsPoolData->rebuildDynQuadTrees) {
-				for (ent_id_t i = beginDyn; i < endDyn; i++) {
-					if (!world.getComp<Collider>(dynCollidables->at(i)).particle) {	//never check for collisions against particles
-						PosSize aabb(
-							world.getComp<Base>(dynCollidables->at(i)).position,
-							world.getComp<Collider>(dynCollidables->at(i)).size);
-						qtreesDynamic->at(physicsData->id).insert({ dynCollidables->at(i), aabb });
-					}
-				}
-			}
-			// rebuild stat qtree
-			if (physicsPoolData->rebuildStatQuadTrees) {
-				for (ent_id_t i = beginStat; i < endStat; i++) {
-					if (!world.getComp<Collider>(statCollidables->at(i)).particle) {	//never check for collisions against particles
-						PosSize aabb(
-							world.getComp<Base>(statCollidables->at(i)).position,
-							world.getComp<Collider>(statCollidables->at(i)).size);
-						qtreesStatic->at(physicsData->id).insert({ statCollidables->at(i), aabb });
-					}
-				}
-			}
 
-			// re sync with others after inserting (building trees)
-			{
-				std::unique_lock<std::mutex> switch_lock(syncData->mut2);
-				syncData->insertReady++;
-				if (syncData->insertReady == physicsThreadCount) {
-					syncData->insertReady = 0;
-					syncData->cond2.notify_all();
-				}
-				else {
-					syncData->cond2.wait(switch_lock, [&]() { return syncData->insertReady == 0; });
-				}
-			}
+void PhysicsWorker::cacheAABBs(std::vector<entity_handle>& colliders) {
+	for (auto ent : colliders) {
+		auto& base = poolData->world.getComp<Base>(ent);
+		auto& collider = poolData->world.getComp<Collider>(ent);
+		poolData->aabbCache.at(ent) = aabbBounds(collider.size, base.rotaVec);
+	}
+}
 
-			collisionInfos->reserve(static_cast<size_t>(dynCollidables->size() / 10.f));	//try to avoid reallocations
+void PhysicsWorker::waitForUpdate() {
+	std::unique_lock<std::mutex> switch_lock(syncData->mut);
+	syncData->go.at(physicsData->id) = false;
+	syncData->cond.notify_all();
+	syncData->cond.wait(switch_lock, [&]() { return syncData->go.at(physicsData->id) == true; });	// wait for engine to give go sign
+	if (syncData->run == false) run = false;
+}
 
-			std::vector<uint32_t> nearCollidables;	//reuse heap memory for all dyn collidable collisions
-			nearCollidables.reserve(10);
-			for (ent_id_t i = beginDyn; i < endDyn; i++) {
+void PhysicsWorker::waitForOtherWorkers()
+{
+	std::unique_lock<std::mutex> switch_lock(syncData->mut2);
+	syncData->insertReady++;
+	if (syncData->insertReady == physicsThreadCount) {
+		syncData->insertReady = 0;
+		syncData->cond2.notify_all();
+	}
+	else {
+		syncData->cond2.wait(switch_lock, [&]() { return syncData->insertReady == 0; });
+	}
+}
 
-				auto& collID = dynCollidables->at(i);
-				auto& baseColl = world.getComp<Base>(collID);
-				auto& colliderColl = world.getComp<Collider>(collID);
-				(*collisionResponses)[collID].posChange = vec2(0, 0);
-				nearCollidables.clear();
+void PhysicsWorker::collisionFunction(entity_handle collID, Quadtree2 const& quadtree, bool otherDynamic) {
+	auto& world = poolData->world;
+	auto& collisionResponses = poolData->collisionResponses;
 
-				vec2 collVel = (world.hasComp<Movement>(collID) ? world.getComp<Movement>(collID).velocity : vec2(0, 0));
+	if (!world.getComp<Collider>(collID).sleeping) {
 
-				CollidableAdapter collAdapter = CollidableAdapter(world.getComp<Base>(collID).position, 
-					world.getComp<Base>(collID).rotation, 
-					collVel,
-					world.getComp<Collider>(collID).size, 
-					world.getComp<Collider>(collID).form, 
-					world.getComp<Collider>(collID).dynamic);
+		CollidableAdapter collAdapter = CollidableAdapter(
+			world.getComp<Base>(collID).position,
+			world.getComp<Base>(collID).rotation,
+			world.getComp<Collider>(collID).size,
+			world.getComp<Collider>(collID).form,
+			true,
+			world.getComp<Base>(collID).rotaVec);
 
-				// querry dynamic entities
-				for (unsigned i = 0; i < physicsThreadCount; i++) {
-					qtreesDynamic->at(i).querry(nearCollidables, baseColl.position, boundsSize(colliderColl.form, colliderColl.size, baseColl.rotation));
-				}
+		auto& baseColl = world.getComp<Base>(collID);
+		auto& colliderColl = world.getComp<Collider>(collID);
+		PosSize posSize(baseColl.position, aabbBounds(colliderColl.size, baseColl.rotaVec));
 
-				// querry static entities
-				for (unsigned i = 0; i < physicsThreadCount; i++) {
-					qtreesStatic->at(i).querry(nearCollidables, baseColl.position, boundsSize(colliderColl.form, colliderColl.size, baseColl.rotation));
-				}
+		/// dyn vs dyn
+		nearCollidablesBuffer.clear();
+		// querry dynamic entities
+		quadtree.querry(nearCollidablesBuffer, posSize);
 
-				//check for collisions and save the changes in velocity and position these cause
-				for (auto& otherID : nearCollidables) {
-					//do not check against self 
-					if (collID != otherID) {
-						// check if one is a slave
-						bool areCollidersRelated{ false };
-						if (world.hasComp<Slave>(collID) && world.hasComp<Slave>(otherID)) {	//same owner no collision check
-							if (world.getComp<Slave>(collID).ownerID == world.getComp<Slave>(otherID).ownerID) areCollidersRelated = true;
-						}
-						else if (world.hasComp<Slave>(collID)) {
-							if (world.getComp<Slave>(collID).ownerID == otherID) areCollidersRelated = true;
-						}
-						else if (world.hasComp<Slave>(otherID)){
-							if (world.getComp<Slave>(otherID).ownerID == collID) areCollidersRelated = true;
-						}
-						//do not check for collision when the colliders are related (slave/owner)
-						if (!areCollidersRelated) {
-							vec2 velOther = (world.hasComp<Movement>(otherID) ? world.getComp<Movement>(otherID).velocity : vec2(0,0));
-							CollidableAdapter otherAdapter = CollidableAdapter(world.getComp<Base>(otherID).position, world.getComp<Base>(otherID).rotation, velOther, world.getComp<Collider>(otherID).size, world.getComp<Collider>(otherID).form, world.getComp<Collider>(otherID).dynamic);
-							auto newTestResult = checkForCollision(&collAdapter, &otherAdapter, world.hasComp<SolidBody>(collID) && world.hasComp<SolidBody>(otherID));
+		//check for collisions and save the changes in velocity and position these cause
 
-							if (newTestResult.collided) {
-								collisionInfos->push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
-								//take average of pushouts with weights
-								float weightOld = norm((*collisionResponses)[collID].posChange);
-								float weightNew = norm(newTestResult.posChange);
-								float normalizer = weightOld + weightNew;
-								if (normalizer > Physics::nullDelta) {
-									(*collisionResponses)[collID].posChange = ((*collisionResponses)[collID].posChange * weightOld / normalizer + newTestResult.posChange * weightNew / normalizer);
-								}
+		for (auto& otherID : nearCollidablesBuffer) {
+			//do not check against self 
+			if (collID != otherID) {
+				CollidableAdapter otherAdapter = CollidableAdapter(
+					world.getComp<Base>(otherID).position,
+					world.getComp<Base>(otherID).rotation,
+					world.getComp<Collider>(otherID).size,
+					world.getComp<Collider>(otherID).form,
+					otherDynamic,
+					world.getComp<Base>(otherID).rotaVec);
+				auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, poolData->aabbCache.at(collID), poolData->aabbCache.at(otherID));
+
+				if (newTestResult.collided) {
+					if (!world.areRelated(collID, otherID)) {
+						physicsData->collisionInfos->push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
+						if (world.hasComp<Movement>(collID)) {
+							auto& movementColl = world.getComp<Movement>(collID);
+							Vec2 velocityOther;
+							if (otherDynamic) {
+								auto& movementOther = world.getComp<Movement>(otherID);
+								velocityOther = movementOther.velocity;
+							}
+							else {
+								velocityOther = Vec2(0, 0);
+							}
+
+							Vec2 newPosChange = calcPosChange(
+								collAdapter.getSurfaceArea(), movementColl.velocity,
+								otherAdapter.getSurfaceArea(), velocityOther,
+								newTestResult.clippingDist, newTestResult.collisionNormal, otherDynamic);
+
+							Vec2 oldPosChange = collisionResponses.at(collID).posChange;
+
+							float weightOld = norm(oldPosChange);
+							float weightNew = norm(newPosChange);
+							float normalizer = weightOld + weightNew;
+							if (normalizer > Physics::nullDelta) {
+								collisionResponses.at(collID).posChange = (oldPosChange * weightOld / normalizer + newPosChange * weightNew / normalizer);
 							}
 						}
 					}
@@ -130,4 +188,58 @@ void PhysicsWorker::operator()()
 			}
 		}
 	}
+}
+
+void PhysicsWorker::updateStaticGrid()
+{
+	if (poolData->world.didStaticsChange()) {
+		Vec2 staticGridMinPos = Vec2(0, 0);
+		Vec2 staticGridMaxPos = Vec2(0, 0);
+		auto treeMin = poolData->qtreeStatic.getPosition() - poolData->qtreeStatic.getSize() * 0.5f;
+		auto treeMax = poolData->qtreeStatic.getPosition() + poolData->qtreeStatic.getSize() * 0.5f;
+		if (treeMin.x < staticGridMinPos.x) staticGridMinPos.x = treeMin.x;
+		if (treeMin.y < staticGridMinPos.y) staticGridMinPos.y = treeMin.y;
+		if (treeMax.x > staticGridMaxPos.x) staticGridMaxPos.x = treeMax.x;
+		if (treeMax.y > staticGridMaxPos.y) staticGridMaxPos.y = treeMax.y;
+		poolData->staticCollisionGrid.minPos = staticGridMinPos;
+		int xSize = static_cast<int>(ceilf((staticGridMaxPos.x - staticGridMinPos.x)) / poolData->staticCollisionGrid.cellSize.x);
+		int ySize = static_cast<int>(ceilf((staticGridMaxPos.y - staticGridMinPos.y)) / poolData->staticCollisionGrid.cellSize.y);
+		poolData->staticCollisionGrid.clear();
+		poolData->staticCollisionGrid.resize(xSize, ySize);
+
+		std::vector<uint32_t> nearCollidables;
+		nearCollidables.reserve(20);
+		for (int x = 0; x < poolData->staticCollisionGrid.getSizeX(); x++) {
+			for (int y = 0; y < poolData->staticCollisionGrid.getSizeY(); y++) {
+				Vec2 pos = poolData->staticCollisionGrid.minPos + Vec2(x, y) * poolData->staticCollisionGrid.cellSize;
+				Vec2 size = poolData->staticCollisionGrid.cellSize;
+				CollidableAdapter collAdapter = CollidableAdapter(pos, 0, size, Form::RECTANGLE, true, RotaVec2());
+
+				PosSize posSize(pos, size);
+				poolData->qtreeStatic.querry(nearCollidables, posSize);
+
+				for (auto& otherID : nearCollidables) {
+					CollidableAdapter otherAdapter = CollidableAdapter(poolData->world.getComp<Base>(otherID).position, poolData->world.getComp<Base>(otherID).rotation, poolData->world.getComp<Collider>(otherID).size, poolData->world.getComp<Collider>(otherID).form, false, poolData->world.getComp<Base>(otherID).rotaVec);
+					auto result = collisionTest(collAdapter, otherAdapter);
+					if (result.collided) {
+						poolData->staticCollisionGrid.set(x, y, true);
+						break;
+					}
+				}
+				nearCollidables.clear();
+			}
+		}
+	}
+#define DEBUG_STATIC_GRID
+#ifdef DEBUG_STATIC_GRID
+	Drawable d = Drawable(0, poolData->staticCollisionGrid.minPos, 0.1f, poolData->staticCollisionGrid.cellSize, Vec4(1, 1, 0, 1), Form::RECTANGLE, 0.0f);
+	for (int i = 0; i < poolData->staticCollisionGrid.getSizeX(); i++) {
+		for (int j = 0; j < poolData->staticCollisionGrid.getSizeY(); j++) {
+			d.position = poolData->staticCollisionGrid.minPos + Vec2(i, 0) * poolData->staticCollisionGrid.cellSize.x + Vec2(0, j) * poolData->staticCollisionGrid.cellSize.y;
+			if (poolData->staticCollisionGrid.at(i, j)) {
+				poolData->debugDrawables.push_back(d);
+			}
+		}
+	}
+#endif
 }

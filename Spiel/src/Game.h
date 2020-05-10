@@ -3,16 +3,18 @@
 #include <iostream>
 
 #include "Engine.h"
+#include "GameWorld.h"
 #include "GameComponents.h"
-#include "ScriptInclude.h"
+#include "BasicScripts.h"
+#include "ParticleScript.h"
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
 
 	bool locked;
-	vec2 oldCursorPos;
+	Vec2 oldCursorPos;
 	uint32_t lockedID;
-	vec2 lockedIDDist;
+	Vec2 lockedIDDist;
 	LapTimer<> ballSpawnLap;
 	LapTimer<> wallSpawnLap;
 };
@@ -28,12 +30,14 @@ public:
 	void destroy() override {}
 
 public:
+	GameWorld world;
 	PlayerScript	playerScript;
 	HealthScript	healthScript;
 	AgeScript		ageScript;
 	BulletScript	bulletScript;
+	ParticleScript particleScript;
 
-	uint32_t cursorID;
+	entity_id cursorID;
 
 	CursorManipData cursorManipData;
 	void cursorManipFunc();

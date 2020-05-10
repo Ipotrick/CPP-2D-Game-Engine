@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glmath.h"
+#include "vector_math.h"
 
 /* Camera */
 class Camera {
@@ -9,10 +9,10 @@ public:
 		position{ 0.0f, 0.0f },
 		zoom{ 1.0f },
 		rotation{ 0.0f },
-		frustumBend{ vec2(1.0f, 1.0f) }
+		frustumBend{ Vec2(1.0f, 1.0f) }
 	{}
-	vec2 position;
+	Vec2 position;
 	float zoom;
 	float rotation;
-	vec2 frustumBend;
+	Vec2 frustumBend;
 };

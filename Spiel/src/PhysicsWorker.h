@@ -5,6 +5,7 @@
 #include <condition_variable>
 
 #include "Physics.h"
+#include "collision_detection.h"
 #include "robin_hood.h"
 #include "QuadTree.h"
 #include "Timing.h"
@@ -31,18 +32,32 @@ struct PhysicsSharedSyncData {
 };
 
 struct PhysicsPoolData {
-	World* world;
-	std::vector<uint32_t>* dynCollidables;
-	std::vector<uint32_t>* statCollidables;
-	std::vector<CollisionResponse>* collisionResponses;
+	PhysicsPoolData(World& wrld, size_t qtreeCapacity) :
+		world{ wrld },
+		qtreeDynamic(0, 0, qtreeCapacity, wrld),
+		qtreeStatic(0, 0, qtreeCapacity, wrld)
+	{}
+
+	World& world;
+	std::vector<uint32_t> sensorCollidables;
+	std::vector<uint32_t> dynCollidables;
+	std::vector<uint32_t> statCollidables;
+	std::vector<CollisionResponse> collisionResponses;
+	std::vector<Vec2> aabbCache;
 	bool rebuildDynQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree>> qtreesDynamic;
+	Quadtree2 qtreeDynamic;
 	bool rebuildStatQuadTrees = true;
-	std::shared_ptr<std::vector<Quadtree>> qtreesStatic;
+	Quadtree2 qtreeStatic;
+
+	GridPhysics<bool> staticCollisionGrid;
+
+	std::vector<Drawable> debugDrawables;
 };
 
 struct PhysicsPerThreadData {
 	int id = 0;
+	uint32_t beginSensor;
+	uint32_t endSensor;
 	uint32_t beginDyn;
 	uint32_t endDyn;
 	uint32_t beginStat;
@@ -53,13 +68,26 @@ struct PhysicsPerThreadData {
 
 struct PhysicsWorker {
 	PhysicsWorker(std::shared_ptr<PhysicsPerThreadData> physicsData_, std::shared_ptr<PhysicsPoolData> poolData, std::shared_ptr<PhysicsSharedSyncData> syncData_, unsigned threadCount_) :
-		physicsData{ physicsData_ }, syncData{ syncData_ }, physicsPoolData{ poolData }, physicsThreadCount{ threadCount_ }
+		physicsData{ physicsData_ }, syncData{ syncData_ }, poolData{ poolData }, physicsThreadCount{ threadCount_ }
 	{}
 	std::shared_ptr<PhysicsPerThreadData> physicsData;
-	std::shared_ptr<PhysicsPoolData> physicsPoolData;
+	std::shared_ptr<PhysicsPoolData> poolData;
 	std::shared_ptr<PhysicsSharedSyncData> syncData;
 
+	std::vector<uint32_t> nearCollidablesBuffer;	// reuse heap memory for all dyn collidable collisions
+
 	unsigned const physicsThreadCount;
+	bool run{ true };
+
+	void cacheAABBs(std::vector<entity_handle>& colliders);
+
+	void waitForUpdate();
+
+	void waitForOtherWorkers();
+
+	void collisionFunction(entity_handle collID, Quadtree2 const& quadtree, bool dynamic);
+
+	void updateStaticGrid();
 
 	void operator()(); 
 };

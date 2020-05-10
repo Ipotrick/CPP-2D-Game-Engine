@@ -8,13 +8,17 @@
 #include "GLFW/glfw3.h"
 
 // makro definitions:
-#define DEBUG_STATIC_GRID
+//#define DEBUG_STATIC_GRID
+//#define DEBUG_QUADTREE
+//#define DEBUG_QUADTREE2
+//#define DEBUG_PATHFINDING
 
 // ------------------
 
 #include "robin_hood.h"
 
 #include "Timing.h"
+#include "Perf.h"
 #include "BaseTypes.h"
 #include "RenderTypes.h"
 #include "QuadTree.h"
@@ -25,14 +29,16 @@
 #include "EventHandler.h"
 #include "World.h"
 
-#include "PhysicsWorker.h"
+// Core Systems
+#include "PhysicsSystem.h"
+#include "BaseSystem.h"
 #include "Renderer.h"
 
 
 class Engine
 {
 public:
-	Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
+	Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
 	~Engine();
 
 	/* ends programm after finisheing the current tick */
@@ -47,21 +53,12 @@ public:
 	virtual void update(World& world, float deltaTime) = 0;
 	/* specify what happenes once for destruction */
 	virtual void destroy() = 0;
-	
 
 					/*-- general statistics utility --*/
 	/* returns time difference to last physics dispatch, O(1)*/
 	inline float getDeltaTime() { return deltaTime; }
 	/* returns deltatime or the lowest allowed sim time difference, O(1)*/
 	inline float getDeltaTimeSafe() { return std::min(deltaTime, maxDeltaTime); }
-	/* returns physics + update + bufferSwapTime, O(1) */
-	inline float getMainTime() { return mainTime; }
-	/* returns time it took to process the last update task, O(1)*/
-	inline float getUpdateTime() { return updateTime; }
-	/* returns time it took to process the last physics task, O(1) */
-	inline float getPhysicsTime() { return physicsTime; }
-	/* returns time it took to render, O(1) */
-	inline float getRenderTime() { return renderTime; }
 	/* returns the number of past iterations , O(1)*/ 
 	inline uint32_t getIteration() { return iteration; }
 	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
@@ -69,126 +66,87 @@ public:
 
 					/*-- input utility --*/
 	/* returns the status(KEYSTATUS) of a given key_(KEY), O(1) (mutex locking) */
-	InputStatus getKeyStatus(KEY key_);
+	InputStatus getKeyStatus(KEY key);
 	/* returns if a given key_ is pressed, O(1) (mutex locking) */
-	bool keyPressed(KEY key_);
+	bool keyPressed(KEY key);
 	/* returns if a given key_ is released, O(1) (mutex locking) */
-	bool keyReleased(KEY key_);
+	bool keyReleased(KEY key);
 	/* returns if a given key_ is repeating, O(1) (mutex locking) */
-	bool keyRepeating(KEY key_);
+	bool keyRepeating(KEY key);
 	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
-	vec2 getCursorPos();
+	Vec2 getCursorPos();
 	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
-	InputStatus getButtonStatus(BUTTON but_);
+	InputStatus getButtonStatus(BUTTON but);
 	/* returns true when a button is pressed, O(1) (mutex locking) */
-	bool buttonPressed(BUTTON but_);
+	bool buttonPressed(BUTTON but);
 	/* returns true when a button is NOT pressed, O(1) (mutex locking) */
-	bool buttonReleased(BUTTON but_);
+	bool buttonReleased(BUTTON but);
 
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
-	vec2 getWindowSize();
+	Vec2 getWindowSize();
 	/* returns aspect ration width/height of the window, O(1)*/
 	float getWindowAspectRatio();
 	/* transformes world space coordinates into relative window space coordinates */
-	vec2 getPosWorldSpace(vec2 windowSpacePos);
+	Vec2 getPosWorldSpace(Vec2 windowSpacePos);
 
 					/* graphics utility */
-	/* submit a Drawable to be drawn relative to the window, O(1) */
-	void submitDrawableWindowSpace(Drawable d_);
-	/* submit a Drawable to be drawn relative to the world, O(1) */
-	void submitDrawableWorldSpace(Drawable d_);
-				
+	/*  submit a Drawable to be rendered the next frame, O(1)  */
+	void submitDrawable(Drawable && d);
+	void submitDrawable(Drawable const& d);
+	/* attach a texture to a submited Drawable */
+	void attachTexture(uint32_t drawableID, std::string_view name, Vec2 min = { 0,0 }, Vec2 max = { 1,1 });
+
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisionInfos(uint32_t id_);
-	/* CALL THIS WHENEVER YOU MOVE/ ADD/ REMOVE STATIC ENTITIES, O(1) */
-	inline void staticsChanged() { 
-		rebuildStaticData = true;
-	}
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_handle id_);
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
-	Grid<bool> const& getStaticGrid() { return staticGrid; }
+	GridPhysics<bool> const& getStaticGrid();
 
 public:
-	World world;
+	World& world;
 	EventHandler events;
 	Camera camera;
 
-	std::chrono::microseconds minimunLoopTime;
+	uint32_t freeDrawableID{ 0x80000000 };
 
 private:
-	void commitTimeMessurements();
-	void physicsUpdate(World& world, float deltaTime);
-	template<int N>
-	void syncCompositPhysics();
-	void updateStaticGrid(World& world);
-
+	void rendererUpdate(World& world);
 private:
 	// meta
+	std::chrono::microseconds minimunLoopTime;
 	bool running;
 	uint32_t iteration;
-	float maxDeltaTime = 0.02f;
-	bool rebuildStaticData{ true };
-
-	// physics
-	size_t oldWorldEntitiesCapacity;
-	unsigned physicsThreadCount;
-	std::vector<CollisionInfo> collInfos;
-	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoBegins;
-	robin_hood::unordered_map<uint32_t, std::vector<CollisionInfo>::iterator> collInfoEnds;
-	std::vector<std::shared_ptr<PhysicsPerThreadData>> physicsPerThreadData;
-	std::shared_ptr<PhysicsPoolData> physicsPoolData;
-	std::shared_ptr<PhysicsSharedSyncData> sharedPhysicsSyncData;
-	std::vector<std::thread> physicsThreads;
-	uint32_t qtreeCapacity;
-
-	// AI
-	Grid<bool> staticGrid;
+	float maxDeltaTime;
 
 	// perf
+	PerfLogger perfLog;
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
-	std::chrono::microseconds new_mainTime;
-	float mainTime;
-	std::chrono::microseconds new_updateTime;
-	float updateTime;
-	std::chrono::microseconds new_physicsTime;
-	float physicsTime;
-	std::chrono::microseconds new_physicsPrepareTime;
-	float physicsPrepareTime;
-	std::chrono::microseconds new_physicsCollisionTime;
-	float physicsCollisionTime;
-	std::chrono::microseconds new_physicsExecuteTime;
-	float physicsExecuteTime;
-	std::chrono::microseconds new_staticGridBuildTime;
-	float staticGridBuildTime;
-	std::chrono::microseconds new_mainSyncTime;
-	float mainSyncTime;
-	std::chrono::microseconds new_mainWaitTime;
-	float mainWaitTime;
-	std::chrono::microseconds new_renderBufferPushTime;
-	float renderBufferPushTime;
-	std::chrono::microseconds new_renderTime;
-	float renderTime;
-	std::chrono::microseconds new_renderSyncTime;
-	float renderSyncTime;
+
+	// base
+	BaseSystem baseSystem;
+
+	// physics
+	PhysicsSystem physicsSystem;
 
 	// window
 	std::shared_ptr<Window> window;
-	std::shared_ptr<RendererSharedData> sharedRenderData;
-	std::thread renderThread;
-	RenderBuffer renderBufferA;
 
 	// render
-	std::vector<Drawable> windowSpaceDrawables;
-	std::vector<Drawable> worldSpaceDrawables;
+	Renderer renderer;
 };
 
-inline void Engine::submitDrawableWindowSpace(Drawable d_) {
-	windowSpaceDrawables.emplace_back(d_);
+__forceinline void Engine::submitDrawable(Drawable && d) {
+	renderer.submit(d);
 }
 
-inline void Engine::submitDrawableWorldSpace(Drawable d_) {
-	worldSpaceDrawables.emplace_back(d_);
+__forceinline void Engine::submitDrawable(Drawable const& d) {
+	renderer.submit(d);
+}
+
+__forceinline void Engine::attachTexture(uint32_t drawableID, std::string_view name, Vec2 min, Vec2 max)
+{
+	renderer.attachTex(drawableID, name, min, max);
 }

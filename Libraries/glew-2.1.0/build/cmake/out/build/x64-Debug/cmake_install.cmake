@@ -1,8 +1,8 @@
-# Install script for directory: C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake
+# Install script for directory: C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Users/kunke/Source/Repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug")
+  set(CMAKE_INSTALL_PREFIX "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,40 +33,40 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY OPTIONAL FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/lib/glew32d.lib")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY OPTIONAL FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/lib/glew32d.lib")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE SHARED_LIBRARY FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/glew32d.dll")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE SHARED_LIBRARY FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/glew32d.dll")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/lib/libglew32d.lib")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/lib/libglew32d.lib")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/glewinfo.exe")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/glewinfo.exe")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/visualinfo.exe")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/visualinfo.exe")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/../../glew.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/../../glew.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Dd][Ee][Bb][Uu][Gg]|[Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE FILE FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/glew32d.pdb")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE FILE FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/bin/glew32d.pdb")
   endif("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Dd][Ee][Bb][Uu][Gg]|[Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/GL" TYPE FILE FILES
-    "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/../../include/GL/wglew.h"
-    "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/../../include/GL/glew.h"
-    "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/../../include/GL/glxew.h"
+    "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/../../include/GL/wglew.h"
+    "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/../../include/GL/glew.h"
+    "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/../../include/GL/glxew.h"
     )
 endif()
 
@@ -74,7 +74,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/glew/glew-targets.cmake")
     file(DIFFERENT EXPORT_FILE_CHANGED FILES
          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/glew/glew-targets.cmake"
-         "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/CMakeFiles/Export/lib/cmake/glew/glew-targets.cmake")
+         "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/CMakeFiles/Export/lib/cmake/glew/glew-targets.cmake")
     if(EXPORT_FILE_CHANGED)
       file(GLOB OLD_CONFIG_FILES "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/glew/glew-targets-*.cmake")
       if(OLD_CONFIG_FILES)
@@ -83,16 +83,16 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
       endif()
     endif()
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/glew" TYPE FILE FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/CMakeFiles/Export/lib/cmake/glew/glew-targets.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/glew" TYPE FILE FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/CMakeFiles/Export/lib/cmake/glew/glew-targets.cmake")
   if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/glew" TYPE FILE FILES "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/CMakeFiles/Export/lib/cmake/glew/glew-targets-debug.cmake")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/glew" TYPE FILE FILES "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/CMakeFiles/Export/lib/cmake/glew/glew-targets-debug.cmake")
   endif()
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/glew" TYPE FILE FILES
-    "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/glew-config.cmake"
-    "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/CopyImportedTargetProperties.cmake"
+    "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/glew-config.cmake"
+    "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/CopyImportedTargetProperties.cmake"
     )
 endif()
 
@@ -104,5 +104,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

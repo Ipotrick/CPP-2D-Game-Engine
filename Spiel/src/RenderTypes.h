@@ -1,57 +1,86 @@
 #pragma once
 
+#include <vector>
+#include <string>
+
+#include "GL/glew.h"
+
 #include "BaseTypes.h"
-
-struct Basis {
-	/* x y world coordinates, z depth*/
-	vec2 position;
-	/* in radiants 2pi = one rotation*/
-	float rotation;
-
-	Basis() :
-		position{ 0.0f, 0.0f },
-		rotation{ 0.0f }
-	{
-	}
-
-	Basis(vec2 position_, float rotation_) :
-		position{ position_ },
-		rotation{ rotation_ }
-	{
-	}
-
-	inline vec2 getPos() const { return position; }
-	inline float getRota() const { return rotation; }
-};
+#include "Vec2.h"
+#include "Camera.h"
+#include "Window.h"
 
 
-
-class Drawable : virtual public Basis {
+class Drawable {
 public:
-	vec4 color;
-	vec2 scale;
+	/* x y world coordinates, z depth*/
+	Vec2 position;
+	/* in radiants 2pi = one rotation*/
+	RotaVec2 rotationVec;
+	Vec4 color;
+	Vec2 scale;
 	float drawingPrio;
 	uint32_t id;
 	Form form;
-	bool throwsShadow;
 
-	Drawable(uint32_t id_, vec2 position_, float drawingPrio_, vec2 scale_, vec4 color_, Form form_, float rotation_, bool throwsShadow_ = false) :
-		Basis(vec2(position_.x, position_.y), rotation_),
+	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, bool inWindowSpace = false) :
+		position{ position_ },
+		rotationVec{ rotation_ },
 		drawingPrio{ drawingPrio_ },
 		scale{ scale_ },
 		color{ color_ },
 		id{ id_ },
 		form{ form_ },
-		throwsShadow{ throwsShadow_ }
+		inWindowSpace{ inWindowSpace }
 	{
 	}
+
+	inline bool isInWindowSpace() const { return inWindowSpace; }
+private:
+	bool inWindowSpace;
 };
 
+struct Texture {
+	Texture() :
+		openglTexID{ 0 },
+		width{ -1 },
+		height{ -1 },
+		channelPerPixel{ -1 }
+	{}
+	Texture(GLuint id, int width_, int height_, int bitsPerPixel_) :
+		openglTexID{ id },
+		width{ width_ },
+		height{ height_ },
+		channelPerPixel{ bitsPerPixel_ } 
+	{}
+
+	GLuint openglTexID;
+	int width;
+	int height;
+	int channelPerPixel;
+};
+
+struct TextureRef {
+	std::string_view textureName;
+	Vec2 minPos;
+	Vec2 maxPos;
+	TextureRef(std::string_view name = "default.png", Vec2 minPos_ = { 0,0 }, Vec2 maxPos_ = { 1,1 }) :
+		textureName{ name },
+		minPos{ minPos_ },
+		maxPos{ maxPos_ }
+	{}
+};
 
 struct Light {
-	Light(vec2 pos, float rad, uint32_t id_, vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
-	vec2 position;
+	Light(Vec2 pos, float rad, uint32_t id_, Vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
+	Vec2 position;
 	float radius;
 	uint32_t id;
-	vec4 color;
+	Vec4 color;
+};
+
+struct RenderBuffer {
+	std::vector<Drawable> drawables{};
+	std::vector<std::pair<uint32_t, TextureRef>> newTextureRefs{};
+	Camera camera{};
 };

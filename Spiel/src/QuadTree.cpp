@@ -1,206 +1,221 @@
 #include "QuadTree.h"
 
-void Quadtree::printContcoll(int i) const {
-	for (int j = 0; j < i; j++) std::cout << "  ";
-	std::cout << "tree " << ": \n";
-	for (auto& coll : collidables) {
-		for (int j = 0; j < i; j++) std::cout << "  ";
-		std::cout << "(" << coll.second.pos.x << "," << coll.second.pos.y << ")\n";
-	}
-
-	if (ul != nullptr) {
-		for (int j = 0; j < i; j++) std::cout << "  ";
-		std::cout << "ul\n";
-		ul->printContcoll(i + 1);
-	}
-	if (ur != nullptr) {
-		for (int j = 0; j < i; j++) std::cout << "  ";
-		std::cout << "ur\n";
-		ur->printContcoll(i + 1);
-	}
-	if (dl != nullptr) {
-		for (int j = 0; j < i; j++) std::cout << "  ";
-		std::cout << "dl\n";
-		dl->printContcoll(i + 1);
-	}
-	if (dr != nullptr) {
-		for (int j = 0; j < i; j++) std::cout << "  ";
-		std::cout << "dr\n";
-		dr->printContcoll(i + 1);
-	}
-}
-
-void Quadtree::insert(std::pair<uint32_t, PosSize> coll)
+void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSize)
 {
-	if (hasSubTrees == false)
-	{
-		if (collidables.capacity() == 0) {
-			collidables.reserve(capacity);
+	if (!trees[thisID].hasSubTrees()) {
+		if (trees[thisID].collidables.size() < m_capacity) {
+			// if the node has no subtrees and is unter capacity, take the element into own storage:
+			trees[thisID].collidables.push_back(coll);
 		}
-		if (collidables.size() < capacity)
-		{
-			collidables.emplace_back(coll);
-		}
-		else
-		{
-			collidables.push_back(coll);
-			auto collidablesOld = collidables;
-			collidables.clear();
-			hasSubTrees = true;
+		else {
+			// if the node has no subtrees and is at capacity, split tree in subtrees:
 
-			ul = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
-				(pos.x - size.x * 0.25f),
-				(pos.y - size.y * 0.25f),
-				capacity);
+			// clear collidables and save old collidables temporarily
+			std::vector<entity_handle> collidablesOld;
+			collidablesOld.reserve(trees[thisID].collidables.size()+1);
+			collidablesOld = trees[thisID].collidables;
+			collidablesOld.push_back(coll);
+			trees[thisID].collidables.clear();
 
-			ur = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
-				(pos.x + size.x * 0.25f),
-				(pos.y - size.y * 0.25f),
-				capacity);
-			dl = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
-				(pos.x - size.x * 0.25f),
-				(pos.y + size.y * 0.25f),
-				capacity);
-			dr = std::make_unique<Quadtree>(size.x * 0.5f, size.y * 0.5f,
-				(pos.x + size.x * 0.25f),
-				(pos.y + size.y * 0.25f),
-				capacity);
+			if (freeIndices.size() == 0) {
+				trees.push_back(QuadtreeNode());
+				trees.push_back(QuadtreeNode());
+				trees.push_back(QuadtreeNode());
+				trees.push_back(QuadtreeNode());
+				trees[thisID].firstSubTree = nextFreeIndex;
+				nextFreeIndex += 4;
+			}
+			else {
+				trees[thisID].firstSubTree = freeIndices.front();
+				freeIndices.pop();
+			}
 
+			// redistribute own collidables into subtrees:
 			for (auto& pcoll : collidablesOld)
 			{
-				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(pcoll.second.pos, pcoll.second.size);
+				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(pcoll).position,
+					aabbBounds(world.getComp<Collider>(pcoll).size, world.getComp<Base>(pcoll).rotaVec));
 				int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 				if (isInCount > 1)
 				{
-					collidables.push_back(pcoll);
+					trees[thisID].collidables.push_back(pcoll);
 				}
 				else
 				{
 					if (isInUl)
 					{
-						ul->insert(pcoll);
+						insert(pcoll, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
 					}
 					else if (isInUr)
 					{
-						ur->insert(pcoll);
+						insert(pcoll, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
 					}
 					else if (isInDl)
 					{
-						dl->insert(pcoll);
+						insert(pcoll, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
 					}
 					else if (isInDr)
 					{
-						dr->insert(pcoll);
+						insert(pcoll, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
 					}
-#ifdef _DEBUG
-					if (isInCount == 0) {
-						std::cout << "FAILURE IN INSERTION" << std::endl;
+					else {
+						std::cerr << "FAILURE TO INSERT FOUND " << isInCount << " FITTING SUBTREES" << std::endl;
+						std::cerr << "AABB: " << aabbBounds(world.getComp<Collider>(pcoll).size, world.getComp<Base>(pcoll).rotaVec) << " pos: " << world.getComp<Base>(pcoll).position << std::endl;
+						std::cerr << "AABB MotherNode: " << thisSize << " Pos MotherNode: " << thisPos << std::endl;
 					}
-#endif
 				}
 			}
 		}
 	}
-	else
-	{
-		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtree(coll.second.pos, coll.second.size);
+	else {
+		// this node has subtrees and tries to distribute them into the subtrees
+		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(coll).position,
+			aabbBounds(world.getComp<Collider>(coll).size, world.getComp<Base>(coll).rotaVec));
 		int isInCount = (int)isInUl + (int)isInUr + (int)isInDl + (int)isInDr;
 		if (isInCount > 1)
 		{
-			collidables.push_back(coll);
+			trees[thisID].collidables.push_back(coll);
 		}
 		else
 		{
 			if (isInUl)
 			{
-				ul->insert(coll);
+				insert(coll, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
 			}
 			else if (isInUr)
 			{
-				ur->insert(coll);
+				insert(coll, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
 			}
 			else if (isInDl)
 			{
-				dl->insert(coll);
+				insert(coll, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
 			}
 			else if (isInDr)
 			{
-				dr->insert(coll);
+				insert(coll, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
+			}
+			else {
+				std::cerr << "FAILURE TO INSERT FOUND " << isInCount << " FITTING SUBTREES" << std::endl;
+				std::cerr << "AABB: " << aabbBounds(world.getComp<Collider>(coll).size, world.getComp<Base>(coll).rotaVec) << " pos: " << world.getComp<Base>(coll).position << std::endl;
+				std::cerr << "AABB MotherNode: " << thisSize << " Pos MotherNode: " << thisPos << std::endl;
 			}
 		}
 	}
 }
 
-void Quadtree::querry(std::vector<uint32_t>& rVec, vec2 pos, vec2 size) const
-{
-	if (hasSubTrees == true)
+void Quadtree2::querry(std::vector<uint32_t>& rVec, PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize) const {
+	if (trees[thisID].hasSubTrees())
 	{
-		auto [inUl, inUr, inDl, inDr] = isInSubtree(pos, size);
-
-		if (inUl)
+		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, posSize.pos, posSize.size);
+		if (isInUl)
 		{
-			ul->querry(rVec, pos, size);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f );
 		}
-		if (inUr)
+		if (isInUr)
 		{
-			ur->querry(rVec, pos, size);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
 		}
-		if (inDl)
+		if (isInDl)
 		{
-			dl->querry(rVec, pos, size);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5f);
 		}
-		if (inDr)
+		if (isInDr)
 		{
-			dr->querry(rVec, pos, size);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5f);
 		}
 	}
-	rVec.reserve(rVec.size() + collidables.size());
-	for (auto& coll : collidables) {
-		rVec.push_back(coll.first);
-	}
+	rVec.reserve(rVec.size() + trees[thisID].collidables.size());
+	rVec.insert(rVec.end(), trees[thisID].collidables.begin(), trees[thisID].collidables.end());
 }
 
-void Quadtree::querryWithDrawables(std::vector<uint32_t>& rVec, vec2 pos, vec2 size, std::vector<Drawable>& drawables) const
-{
-	if (hasSubTrees == true)
+void Quadtree2::querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw) const {
+	if (trees[thisID].hasSubTrees())
 	{
-		auto [inUl, inUr, inDl, inDr] = isInSubtree(pos, size);
+		auto [inUl, inUr, inDl, inDr] = isInSubtrees(thisPos, thisSize, posSize.pos, posSize.size);
 
 		if (inUl)
 		{
-			ul->querryWithDrawables(rVec, pos, size, drawables);
+			querryDebug(posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f, draw);
 		}
 		if (inUr)
 		{
-			ur->querryWithDrawables(rVec, pos, size, drawables);
+			querryDebug(posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f, draw);
 		}
 		if (inDl)
 		{
-			dl->querryWithDrawables(rVec, pos, size, drawables);
+			querryDebug(posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw);
 		}
 		if (inDr)
 		{
-			dr->querryWithDrawables(rVec, pos, size, drawables);
-		}
-		if (!inUl && !inUr && !inDl && !inDr) {
-			std::cout << "in no subtree! " << std::endl;
+			querryDebug(posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw);
 		}
 	}
 	else {
-		drawables.push_back(Drawable(0, pos, 0.1f, size, vec4(1, 1, 1, 1), Form::RECTANGLE, 0.0f));
-	}
-	rVec.reserve(rVec.size() + collidables.size());
-	for (auto& coll : collidables) {
-		rVec.push_back(coll.first);
+		draw.push_back(Drawable(0, thisPos, 0.2f, thisSize, Vec4(0, 0, 0, 1), Form::RECTANGLE, RotaVec2(0)));
 	}
 }
 
-void Quadtree::clear() {
-	collidables.clear();
-	if (hasSubTrees) {
-		ul->clear();
-		ur->clear();
-		dl->clear();
-		dr->clear();
+void Quadtree2::querryDebugAll(uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw, Vec4 color, int depth) const {
+	if (trees[thisID].hasSubTrees())
+	{
+		querryDebugAll(trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f,  draw, color, depth + 1);
+		querryDebugAll(trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f, draw, color, depth + 1);
+		querryDebugAll(trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw, color, depth + 1);
+		querryDebugAll(trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw, color, depth + 1);
+	}
+	else {
+		draw.push_back(Drawable(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::RECTANGLE, RotaVec2(0)));
+		draw.push_back(Drawable(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), color, Form::RECTANGLE, RotaVec2(0)));
+	}
+}
+
+void Quadtree2::clear(uint32_t thisID)
+{
+	trees[thisID].collidables.clear();
+	if (trees[thisID].hasSubTrees()) {
+		clear(trees[thisID].firstSubTree + 0);
+		clear(trees[thisID].firstSubTree + 1);
+		clear(trees[thisID].firstSubTree + 2);
+		clear(trees[thisID].firstSubTree + 3);
+	}
+}
+
+void Quadtree2::resetPerPosSize(Vec2 pos, Vec2 size)
+{
+	clear();
+	m_pos = pos;
+	m_size = size;
+}
+
+void Quadtree2::resetPerMinMax(Vec2 minPos, Vec2 maxPos)
+{
+	clear();
+	Vec2 pos = 0.5f * (minPos + maxPos);
+	Vec2 size = Vec2(fabs(maxPos.x - minPos.x), fabs(maxPos.y - minPos.y));
+	m_pos = pos;
+	m_size = size;
+}
+
+void Quadtree2::removeEmptyLeafes(uint32_t thisID)
+{
+	if (trees[thisID].hasSubTrees()) {
+		removeEmptyLeafes(trees[thisID].firstSubTree + 0);
+		removeEmptyLeafes(trees[thisID].firstSubTree + 1);
+		removeEmptyLeafes(trees[thisID].firstSubTree + 2);
+		removeEmptyLeafes(trees[thisID].firstSubTree + 3);
+		if (!trees[trees[thisID].firstSubTree + 0].hasSubTrees()	// if no sub tree has sub trees
+			&& !trees[trees[thisID].firstSubTree + 1].hasSubTrees()
+			&& !trees[trees[thisID].firstSubTree + 2].hasSubTrees()
+			&& !trees[trees[thisID].firstSubTree + 3].hasSubTrees())
+		{
+			if (trees[trees[thisID].firstSubTree + 0].collidables.empty()
+				&& trees[trees[thisID].firstSubTree + 1].collidables.empty()
+				&& trees[trees[thisID].firstSubTree + 2].collidables.empty()
+				&& trees[trees[thisID].firstSubTree + 3].collidables.empty())
+			{
+				freeIndices.push(trees[thisID].firstSubTree);
+				trees[thisID].firstSubTree = 0;
+			}
+		}
 	}
 }

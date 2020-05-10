@@ -19,43 +19,83 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Libraries\stb_image\stb_image.h" />
+    <ClInclude Include="src\AgeScript.h" />
+    <ClInclude Include="src\ai.h" />
+    <ClInclude Include="src\BaseSystem.h" />
     <ClInclude Include="src\BaseTypes.h" />
     <ClInclude Include="src\BasicScripts.h" />
+    <ClInclude Include="src\basic_math.h" />
+    <ClInclude Include="src\BulletScript.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\collision_detection.h" />
+    <ClInclude Include="src\CoreCompInclude.h" />
     <ClInclude Include="src\CoreComponents.h" />
-    <ClInclude Include="src\ECS.h" />
+    <ClInclude Include="src\CoreSystem.h" />
+    <ClInclude Include="src\CoreSystemUniforms.h" />
+    <ClInclude Include="src\debug.h" />
+    <ClInclude Include="src\EntityComponentStorage.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventHandler.h" />
     <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
-    <ClInclude Include="src\glmath.h" />
+    <ClInclude Include="src\GameCompInclude.h" />
+    <ClInclude Include="src\GameSystemUnifroms.h" />
+    <ClInclude Include="src\GameWorld.h" />
+    <ClInclude Include="src\HealthScript.h" />
     <ClInclude Include="src\Input.h" />
-    <ClInclude Include="src\json.h" />
+    <ClInclude Include="src\Mat3.h" />
+    <ClInclude Include="src\Mat4.h" />
+    <ClInclude Include="src\ParticleScript.h" />
+    <ClInclude Include="src\Perf.h" />
     <ClInclude Include="src\Physics.h" />
+    <ClInclude Include="src\PhysicsSystem.h" />
     <ClInclude Include="src\PhysicsTypes.h" />
     <ClInclude Include="src\PhysicsWorker.h" />
     <ClInclude Include="src\PlayerScript.h" />
     <ClInclude Include="src\QuadTree.h" />
+    <ClInclude Include="src\random.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\RenderingWorker.h" />
     <ClInclude Include="src\RenderTypes.h" />
-    <ClInclude Include="src\robin_hood.h" />
     <ClInclude Include="src\Script.h" />
-    <ClInclude Include="src\ScriptInclude.h" />
+    <ClInclude Include="src\GameSystem.h" />
+    <ClInclude Include="src\TextureHandler.h" />
     <ClInclude Include="src\Timing.h" />
+    <ClInclude Include="src\Vec.h" />
+    <ClInclude Include="src\Vec3.h" />
+    <ClInclude Include="src\Vec4.h" />
+    <ClInclude Include="src\vector_math.h" />
     <ClInclude Include="src\Window.h" />
+    <ClInclude Include="src\EntityComponentManager.h" />
     <ClInclude Include="src\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Libraries\stb_image\stb_image.cpp" />
+    <ClCompile Include="src\AgeScript.cpp" />
+    <ClCompile Include="src\algo.h" />
+    <ClCompile Include="src\BulletScript.cpp" />
+    <ClCompile Include="src\collision_detection.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\glmath.cpp" />
+    <ClCompile Include="src\GameWorld.cpp" />
+    <ClCompile Include="src\HealthScript.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Mat3.cpp" />
+    <ClCompile Include="src\Mat4.cpp" />
+    <ClCompile Include="src\ParticleScript.cpp" />
     <ClCompile Include="src\Physics.cpp" />
+    <ClCompile Include="src\PhysicsSystem.cpp" />
     <ClCompile Include="src\PhysicsWorker.cpp" />
+    <ClCompile Include="src\PlayerScript.cpp" />
     <ClCompile Include="src\QuadTree.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\RenderingWorker.cpp" />
+    <ClCompile Include="src\TextureHandler.cpp" />
+    <ClCompile Include="src\Vec2.h" />
+    <ClCompile Include="src\EntityComponentManager.cpp" />
     <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +167,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <SourcePath>$(SolutionDir)\Libraries\stb_image\;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -153,8 +194,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -192,18 +236,20 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

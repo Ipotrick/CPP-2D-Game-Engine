@@ -2,13 +2,25 @@
 
 #include "Timing.h"
 #include "BaseTypes.h"
-#include "ECS.h"
 
-//player component
+#include "EntityComponentStorage.h"
+
+struct ParticleScriptComp : public CompData {
+	ParticleScriptComp() {}
+	ParticleScriptComp(Vec2 startSize, Vec2 endSize, Vec4 startColor, Vec4 endColor) : startSize{ startSize }, endSize{ endSize }, startColor{ startColor }, endColor{ endColor } {}
+	Vec2 startSize;
+	Vec2 endSize;
+	Vec4 startColor;
+	Vec4 endColor;
+};
+
+// player component
 
 struct Player : public CompData {
-	Player() : bulletShotLapTimer{ 0.001f } {}
+	Player() : bulletShotLapTimer{ 0.001f }, flameSpawnTimer{ 0.001f }{}
 	LapTimer<> bulletShotLapTimer;
+	LapTimer<> flameSpawnTimer;
+	float power{ 1.0f };
 };
 
 // health component
@@ -36,16 +48,16 @@ struct Age : public CompData {
 	float curAge;
 };
 
-//bullet component
+// bullet component
 
 struct Bullet : public CompData {
-	Bullet(int damage_) :damage{ damage_ } {}
-	Bullet() : damage {0} {}
+	Bullet(int damage_, int hitPoints) :damage{ damage_ }, hitPoints{ hitPoints } {}
+	Bullet() : damage{ 0 } , hitPoints{1} {}
 	int damage;
-	
+	int hitPoints;
 };
 
-//loading and event trigger component
+// loading and event trigger component
 
 struct Trigger : public CompData {
 	Trigger(int type_, std::string mapname_) :
@@ -61,13 +73,13 @@ struct Trigger : public CompData {
 // light component
 
 struct CompDataLight : public CompData {
-	CompDataLight(vec4 col_ = vec4(1,1,1,1)) :color{col_} {}
-	vec4 color;
+	CompDataLight(Vec4 col_ = Vec4(1,1,1,1)) :color{col_} {}
+	Vec4 color;
 };
 
 // enemy component
 
 struct Enemy : public CompData {
-	Enemy(ent_id_t tar_ = 0) : target{ tar_} {}
-	ent_id_t target;
+	Enemy(entity_handle tar_ = 0) : target{ tar_} {}
+	entity_handle target;
 };

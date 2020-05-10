@@ -1,13 +1,13 @@
-if(NOT EXISTS "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt")
-  message(FATAL_ERROR "Cannot find install manifest: C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt")
-endif(NOT EXISTS "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt")
+if(NOT EXISTS "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt")
+  message(FATAL_ERROR "Cannot find install manifest: C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt")
+endif(NOT EXISTS "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt")
 
 if (NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set (CMAKE_INSTALL_PREFIX "C:/Users/kunke/Source/Repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug")
+  set (CMAKE_INSTALL_PREFIX "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug")
 endif ()
  message(${CMAKE_INSTALL_PREFIX})
 
-file(READ "C:/Users/kunke/source/repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt" files)
+file(READ "C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug/install_manifest.txt" files)
 string(REGEX REPLACE "\n" ";" files "${files}")
 foreach(file ${files})
   message(STATUS "Uninstalling $ENV{DESTDIR}${file}")

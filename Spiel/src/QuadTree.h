@@ -8,79 +8,108 @@
 #include "BaseTypes.h"
 #include "RenderTypes.h"
 
+#include "World.h"
+#include "collision_detection.h"
+
+
 struct PosSize {
-	PosSize(vec2 pos_, vec2 size_) :
+	PosSize(Vec2 pos_, Vec2 size_) :
 		pos{pos_},
-		size{size_} {}
+		size{size_} 
+	{}
 
-	inline vec2 const& getPos() const { return pos; }
-	inline vec2 const& getSize() const { return size; }
+	inline Vec2 const& getPos() const { return pos; }
+	inline Vec2 const& getSize() const { return size; }
 
-	vec2 pos;
-	vec2 size;
+	Vec2 pos;
+	Vec2 size;
 };
 
-class Quadtree {
-public:
-	Quadtree(float width, float hight, float xPos, float yPos, size_t capacity_)
-		:size(vec2(width, hight)),
-		pos(vec2(xPos, yPos)),
-		collidables(),
-		capacity{ capacity_ },
-		hasSubTrees{ false },
-		marked{ false }
+struct QuadtreeNode {
+	QuadtreeNode() :
+		firstSubTree{ 0 }
 	{}
 
-	Quadtree(vec2 minPos_, vec2 maxPos_, size_t capacity_) :
-		size(maxPos_ - minPos_),
-		pos((maxPos_ - minPos_) / 2 + minPos_),
-		capacity{ capacity_ },
-		collidables(),
-		hasSubTrees{ false },
-		marked{ false }
-	{}
+	__forceinline bool hasSubTrees() const {
+		return (firstSubTree > 0);
+	}
+
+	std::vector<uint32_t> collidables;
+	uint32_t firstSubTree;
+};
+
+class Quadtree2 {
+	friend class QuadtreeNode;
 public:
+	Quadtree2(Vec2 minPos_, Vec2 maxPos_, size_t capacity_, World& wrld) :
+		m_pos{ (maxPos_ - minPos_) / 2 + minPos_ },
+		m_size{ maxPos_ - minPos_ },
+		m_capacity{ capacity_ },
+		nextFreeIndex{ 1 },
+		world{ wrld }
+	{
+		trees.reserve(100);
+		trees.push_back(QuadtreeNode());
+	}
 
-	void printContcoll(int i = 0) const;
+	void insert(uint32_t ent, uint32_t thisID, Vec2 thisPos, Vec2 thisSize);
+	__forceinline void insert(uint32_t ent) {
+		insert(ent, 0, m_pos, m_size);
+	}
+	void querry(std::vector<uint32_t>& rVec, PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize) const;
+	__forceinline void querry(std::vector<uint32_t>& rVec, PosSize const& posSize) const {
+		querry(rVec, posSize, 0, m_pos, m_size);
+	}
+	
+	void querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw) const;
+	__forceinline void querryDebug(PosSize const& posSize, std::vector<Drawable>& draw) const {
+		querryDebug(posSize, 0, m_pos, m_size, draw);
+	}
+	void querryDebugAll(uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw, Vec4 color, int depth) const;
+	__forceinline void querryDebugAll(std::vector<Drawable>& draw, Vec4 color) const {
+		querryDebugAll(0, m_pos, m_size, draw, color, 0);
+	}
 
-	void insert(std::pair<uint32_t, PosSize> coll);
+	void clear(uint32_t thisID);
+	__forceinline void clear() {
+		clear(0);
+	}
 
-	void querry(std::vector<uint32_t> & rVec, vec2 pos, vec2 size) const;
+	void resetPerPosSize(Vec2 pos, Vec2 size);
 
-	void querryWithDrawables(std::vector<uint32_t> & rVec, vec2 pos, vec2 size, std::vector<Drawable>& drawables) const;
+	void resetPerMinMax(Vec2 minPos, Vec2 maxPos);
 
-	void clear();
+	void removeEmptyLeafes(uint32_t thisID);
+	__forceinline void removeEmptyLeafes() {
+		removeEmptyLeafes(0);
+	}
 
-	vec2 getPosition() { return pos; }
-	vec2 getSize() { return size; }
+	__forceinline void setPosSize(Vec2 pos, Vec2 size) {
+		m_pos = pos;
+		m_size = size;
+	}
+
+	__forceinline Vec2 getPosition() const { return m_pos; }
+	__forceinline Vec2 getSize() const { return m_size; }
 
 private:
 
-	inline std::tuple<bool, bool, bool, bool> isInSubtree(vec2 const& collPos, vec2 const& collSize) const {
-		return std::tuple<bool, bool, bool, bool>(
-			isOverlappingAABB2(collPos, collSize, ul->pos, ul->size),
-			isOverlappingAABB2(collPos, collSize, ur->pos, ur->size),
-			isOverlappingAABB2(collPos, collSize, dl->pos, dl->size),
-			isOverlappingAABB2(collPos, collSize, dr->pos, dr->size));
+	inline std::tuple<bool, bool, bool, bool> isInSubtrees(Vec2 treePos, Vec2 treeSize, Vec2 pos, Vec2 size) const {
+		return {
+			isOverlappingAABB(treePos + Vec2(-treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
+			isOverlappingAABB(treePos + Vec2( treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
+			isOverlappingAABB(treePos + Vec2(-treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
+			isOverlappingAABB(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size)
+		};
 	}
 
-	inline bool isOverlappingAABB2(vec2 const& posA, vec2 const& sizeA, vec2 const& posB, vec2 const& sizeB) const {
-		return fabs(posB.x - posA.x) <= fabs(sizeB.x + sizeA.x) * 0.5f &&
-			fabs(posB.y - posA.y) <= fabs(sizeB.y + sizeA.y) * 0.5f;
-	}
-
-public:
-	mutable bool marked;
 private:
-	bool hasSubTrees;
-	// first = id, second.first = pos, second.second = size
-	std::vector<std::pair<uint32_t, PosSize>> collidables;
-	size_t capacity;
-	vec2 size;
-	vec2 pos;
-	std::unique_ptr<Quadtree> ul;	//up left
-	std::unique_ptr<Quadtree> ur;	//up right
-	std::unique_ptr<Quadtree> dl;	//down left
-	std::unique_ptr<Quadtree> dr;	//down right
-
+	Vec2 m_pos;
+	Vec2 m_size;
+	size_t m_capacity;
+	std::vector<QuadtreeNode> trees;
+	uint32_t nextFreeIndex;
+	std::queue<uint32_t> freeIndices;
+	World& world;
 };
+
