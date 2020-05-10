@@ -7,7 +7,7 @@
 #include "GameComponents.h"
 #include "BasicScripts.h"
 #include "ParticleScript.h"
-#include "dummy.h"
+#include "DummyScript.h"
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
@@ -36,8 +36,8 @@ public:
 	HealthScript	healthScript;
 	AgeScript		ageScript;
 	BulletScript	bulletScript;
-	ParticleScript particleScript;
-	DummyScript dummyScript;
+	ParticleScript	particleScript;
+	DummyScript		dummyScript;
 
 	entity_id cursorID;
 

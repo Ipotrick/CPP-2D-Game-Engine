@@ -17,9 +17,10 @@ struct ParticleScriptComp : public CompData {
 // player component
 
 struct Player : public CompData {
-	Player() : bulletShotLapTimer{ 0.001f }, flameSpawnTimer{ 0.001f }{}
+	Player() : bulletShotLapTimer{ 0.001f }, flameSpawnTimer{ 0.001f }, dummyExis{ entity_id() } {}
 	LapTimer<> bulletShotLapTimer;
 	LapTimer<> flameSpawnTimer;
+	entity_id dummyExis;
 	float power{ 1.0f };
 };
 
@@ -82,4 +83,11 @@ struct CompDataLight : public CompData {
 struct Enemy : public CompData {
 	Enemy(entity_handle tar_ = 0) : target{ tar_} {}
 	entity_handle target;
+};
+
+// dummy component
+
+struct Dummy : public CompData {
+	Dummy(entity_id player_id_ = entity_id()) : player_id{ player_id_} {}
+	entity_id player_id;
 };

@@ -121,4 +121,34 @@ void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 			world.spawn(bullet);
 		}
 	}
+
+	
+	if (engine.keyPressed(KEY::K) && !world.isIdValid(data.dummyExis)) {
+		std::cout << "stored ID " << data.dummyExis.id << std::endl;
+		auto baseEnt = cmps.get<Base>();
+		auto movEnt = cmps.get<Move>();
+		auto collEnt = cmps.get<Coll>();
+
+		Vec2 scale(0.8, 0.8);
+		float dummyVel = 0.0f;
+
+		float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
+		Collider DummyCollider = Collider(scale, Form::CIRCLE, false);
+		Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::CIRCLE);
+		
+		auto dummy = world.create();
+		world.addComp<Base>(dummy, Base(baseEnt));
+		world.addComp<Movement>(dummy);
+		world.addComp<PhysicsBody>(dummy, PhysicsBody(0.9f, 0.01f, 1, 0));
+		world.addComp<Draw>(dummy, dummyDraw);
+		world.addComp<Collider>(dummy, DummyCollider);
+		world.addComp<Dummy>(dummy, Dummy(world.identify(me)));
+		world.addComp<Health>(dummy, 10000);
+		world.spawn(dummy);
+		data.dummyExis = world.identify(dummy);
+		if (!world.isIdValid(data.dummyExis))
+		{
+			std::cout << " error, id is not valid " << std::endl;
+		}
+	}
 }

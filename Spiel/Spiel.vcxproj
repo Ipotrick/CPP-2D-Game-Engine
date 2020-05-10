@@ -34,10 +34,11 @@
     <ClInclude Include="src\CoreSystem.h" />
     <ClInclude Include="src\CoreSystemUniforms.h" />
     <ClInclude Include="src\debug.h" />
-    <ClInclude Include="src\dummy.h" />
+    <ClInclude Include="src\DummyScript.h" />
     <ClInclude Include="src\EntityComponentStorage.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventHandler.h" />
+    <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\GameComponents.h" />
     <ClInclude Include="src\GameCompInclude.h" />

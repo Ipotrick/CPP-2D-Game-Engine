@@ -189,7 +189,10 @@
     <ClInclude Include="src\World.h">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\dummy.h">
+    <ClInclude Include="src\fileUtility.h">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DummyScript.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
