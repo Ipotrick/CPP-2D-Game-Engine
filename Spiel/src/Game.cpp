@@ -6,7 +6,8 @@ Game::Game() :
 	healthScript{ *this },
 	ageScript   { *this },
 	bulletScript{ *this },
-	particleScript{ *this }
+	particleScript{ *this },
+	dummyScript{ *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
@@ -102,6 +103,7 @@ void Game::update(World& world, float deltaTime) {
 	ageScript.execute(    deltaTime);
 	bulletScript.execute( deltaTime);
 	particleScript.execute(deltaTime);
+	dummyScript.execute(deltaTime);
 
 
 	//display performance statistics

@@ -34,6 +34,7 @@
     <ClInclude Include="src\CoreSystem.h" />
     <ClInclude Include="src\CoreSystemUniforms.h" />
     <ClInclude Include="src\debug.h" />
+    <ClInclude Include="src\DummyScript.h" />
     <ClInclude Include="src\EntityComponentStorage.h" />
     <ClInclude Include="src\Engine.h" />
     <ClInclude Include="src\EventHandler.h" />
@@ -77,6 +78,7 @@
     <ClCompile Include="src\algo.h" />
     <ClCompile Include="src\BulletScript.cpp" />
     <ClCompile Include="src\collision_detection.cpp" />
+    <ClCompile Include="src\DummyScript.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />

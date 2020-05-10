@@ -2,10 +2,10 @@
 
 #include "PlayerScript.h"
 
-void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
+void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 	World& world = engine.world;
-	auto cmps = world.viewComps(entity);
-	auto [begin, end] = engine.getCollisions(entity);
+	auto cmps = world.viewComps(me);
+	auto [begin, end] = engine.getCollisions(me);
 	for (auto iter = begin; iter != end; ++iter) {
 		if (engine.world.hasComp<PhysicsBody>(iter->idB)) {
 			engine.events.triggerEvent("playerHit");
@@ -15,10 +15,10 @@ void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
 			auto particle = world.create();
-			Base base = world.getComp<Base>(entity);
+			Base base = world.getComp<Base>(me);
 			base.position += offset;
 			world.addComp<Base>(particle, base);
-			Movement mov = world.getComp<Movement>(entity);
+			Movement mov = world.getComp<Movement>(me);
 			mov.angleVelocity += rand() % 1000 / 400.0f * 90.0f - 45.0f;
 			mov.velocity.x += rand() % 1000 / 400.0f * 1.0f - 0.5f;
 			mov.velocity.y += rand() % 1000 / 400.0f * 1.0f - 0.5f;
@@ -119,6 +119,36 @@ void PlayerScript::script(entity_handle entity, Player& data, float deltaTime) {
 			world.addComp<Collider>(bullet, bulletCollider);
 			world.addComp<Bullet>(bullet, Bullet(10, 3));
 			world.spawn(bullet);
+		}
+	}
+
+	
+	if (engine.keyPressed(KEY::K) && !world.isIdValid(data.dummyExis)) {
+		std::cout << "stored ID " << data.dummyExis.id << std::endl;
+		auto baseEnt = cmps.get<Base>();
+		auto movEnt = cmps.get<Move>();
+		auto collEnt = cmps.get<Coll>();
+
+		Vec2 scale(0.8, 0.8);
+		float dummyVel = 0.0f;
+
+		float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
+		Collider DummyCollider = Collider(scale, Form::CIRCLE, false);
+		Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::CIRCLE);
+		
+		auto dummy = world.create();
+		world.addComp<Base>(dummy, Base(baseEnt));
+		world.addComp<Movement>(dummy);
+		world.addComp<PhysicsBody>(dummy, PhysicsBody(0.9f, 0.01f, 1, 0));
+		world.addComp<Draw>(dummy, dummyDraw);
+		world.addComp<Collider>(dummy, DummyCollider);
+		world.addComp<Dummy>(dummy, Dummy(world.identify(me)));
+		world.addComp<Health>(dummy, 10000);
+		world.spawn(dummy);
+		data.dummyExis = world.identify(dummy);
+		if (!world.isIdValid(data.dummyExis))
+		{
+			std::cout << " error, id is not valid " << std::endl;
 		}
 	}
 }

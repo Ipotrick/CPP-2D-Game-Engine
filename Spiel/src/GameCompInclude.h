@@ -4,4 +4,5 @@ ComponentStorage<Age, hashing>, \
 ComponentStorage<Player, hashing>, \
 ComponentStorage<Bullet, hashing>, \
 ComponentStorage<Enemy, hashing>, \
-ComponentStorage<ParticleScriptComp, hashing>
+ComponentStorage<ParticleScriptComp, hashing>, \
+ComponentStorage<Dummy, hashing>
