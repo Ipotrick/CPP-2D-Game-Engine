@@ -1,6 +1,6 @@
 #include "ParticleScript.h"
 
-void ParticleScript::script(entity_handle entity, ParticleScriptComp& data, float deltaTime) {
+void ParticleScript::script(entity_id entity, ParticleScriptComp& data, float deltaTime) {
 	assert(world.hasComp<Age>(entity));
 	auto& age = world.getComp<Age>(entity);
 	assert(world.hasComp<Draw>(entity)); 

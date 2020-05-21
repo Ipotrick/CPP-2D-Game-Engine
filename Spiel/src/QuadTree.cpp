@@ -11,7 +11,7 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 			// if the node has no subtrees and is at capacity, split tree in subtrees:
 
 			// clear collidables and save old collidables temporarily
-			std::vector<entity_handle> collidablesOld;
+			std::vector<entity_index_type> collidablesOld;
 			collidablesOld.reserve(trees[thisID].collidables.size()+1);
 			collidablesOld = trees[thisID].collidables;
 			collidablesOld.push_back(coll);

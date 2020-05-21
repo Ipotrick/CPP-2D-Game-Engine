@@ -1,6 +1,6 @@
 #include "AgeScript.h"
 
-void AgeScript::script(entity_handle id, Age& data, float deltaTime) {
+void AgeScript::script(entity_id id, Age& data, float deltaTime) {
 
 	data.curAge += deltaTime;
 

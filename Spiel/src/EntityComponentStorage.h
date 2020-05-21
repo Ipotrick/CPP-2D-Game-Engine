@@ -16,11 +16,12 @@ struct CompData {
 };
 
 using entity_id_type = uint32_t;
-using entity_handle = uint32_t;
+using entity_index_type = uint32_t;
 struct entity_id {
 	explicit entity_id(entity_id_type id = 0, uint32_t version = 0) : id{ id }, version{ version } {}
 	void operator=(entity_id rhs) {
 		this->id = rhs.id;
+		this->version = rhs.version;
 	}
 	entity_id_type& operator*() { return id; }
 	entity_id_type id;
@@ -37,11 +38,11 @@ template<typename CompType, storage_t storageType>
 class ComponentStorage {
 public:
 	using Component = CompType;
-	inline void insert(entity_handle entity, CompType const& comp);
-	inline void remove(entity_handle entity);
-	inline bool contains(entity_handle entity) const;
-	inline CompType& get(entity_handle entity);
-	inline CompType& operator[](entity_handle ent);
+	inline void insert(entity_index_type entity, CompType const& comp);
+	inline void remove(entity_index_type entity);
+	inline bool contains(entity_index_type entity) const;
+	inline CompType& get(entity_index_type entity);
+	inline CompType& operator[](entity_index_type ent);
 	inline size_t size() const;
 	class iterator {
 	public:
@@ -56,7 +57,7 @@ public:
 		pointer operator->();
 		bool operator==(const self_type& rhs);
 		bool operator!=(const self_type& rhs);
-		entity_handle id();
+		entity_index_type id();
 	};
 	inline iterator begin();
 	inline iterator end();
@@ -85,14 +86,14 @@ public:
 	using Component = CompType;
 	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
 
-	inline void insert(entity_handle entity, CompType const& comp) {
+	inline void insert(entity_index_type entity, CompType const& comp) {
 		assert(!contains(entity));
 		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
 		containsVec[entity] = true;
 
 		storage[entity] = comp;
 	}
-	inline void remove(entity_handle entity) {
+	inline void remove(entity_index_type entity) {
 		if (contains(entity)) {
 			containsVec[entity] = false;
 			auto res = storage.find(entity);
@@ -101,7 +102,7 @@ public:
 			}
 		}
 	}
-	inline bool contains(entity_handle entity) const {
+	inline bool contains(entity_index_type entity) const {
 		if (entity < containsVec.size()) {
 			return containsVec[entity];
 		}
@@ -109,11 +110,11 @@ public:
 			return false;
 		}
 	}
-	inline CompType& get(entity_handle entity) {
+	inline CompType& get(entity_index_type entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
-	inline CompType& operator[](entity_handle entity) {
+	inline CompType& operator[](entity_index_type entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
@@ -150,7 +151,7 @@ public:
 		bool operator!=(const self_type& rhs) {
 			return iter != rhs.iter;
 		}
-		entity_handle handle() { return iter->first; }
+		entity_index_type handle() { return iter->first; }
 	private:
 		typename storage_t::iterator iter;
 		storage_t& storage;
@@ -186,7 +187,7 @@ public:
 	using Component = CompType;
 	using storage_t = std::vector<CompType>;
 
-	inline void insert(entity_handle entity, CompType const& comp) {
+	inline void insert(entity_index_type entity, CompType const& comp) {
 		assert(!contains(entity));
 		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
 		containsVec[entity] = true;
@@ -201,12 +202,12 @@ public:
 			storage[entity] = comp;
 		}
 	}
-	inline void remove(entity_handle entity) {
+	inline void remove(entity_index_type entity) {
 		if (contains(entity)) {
 			containsVec[entity] = false;
 		}
 	}
-	inline bool contains(entity_handle entity) const {
+	inline bool contains(entity_index_type entity) const {
 		if (entity < containsVec.size()) {
 			return containsVec[entity];
 		}
@@ -214,11 +215,11 @@ public:
 			return false;
 		}
 	}
-	inline CompType& get(entity_handle entity) {
+	inline CompType& get(entity_index_type entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
-	inline CompType& operator[](entity_handle entity) {
+	inline CompType& operator[](entity_index_type entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
@@ -230,7 +231,7 @@ public:
 		typedef CompType& reference;
 		typedef CompType* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_handle entity_, storage_t& storage_) : entity{ entity_ }, storage{ storage_ } {}
+		iterator(entity_index_type entity_, storage_t& storage_) : entity{ entity_ }, storage{ storage_ } {}
 		self_type operator++(int dummy) {
 			assert(entity < storage.size());
 			++entity;
@@ -256,16 +257,16 @@ public:
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		entity_handle handle() {
+		entity_index_type handle() {
 			assert(entity < storage.size());
 			return entity;
 		}
 	private:
-		entity_handle entity;
+		entity_index_type entity;
 		storage_t& storage;
 	};
 	inline iterator begin() {
-		entity_handle id = 0;
+		entity_index_type id = 0;
 		while (!contains(id)) ++id;
 		return iterator(id, storage);
 	}
@@ -301,7 +302,7 @@ public:
 	using storage_t = std::vector<CompType>;
 
 	inline void optimiseMemoryLayout() {
-		std::vector<entity_handle> storedIDs;
+		std::vector<entity_index_type> storedIDs;
 		storedIDs.reserve(storage.size());
 		for (auto id : *this) {
 			storedIDs.push_back(id);
@@ -318,10 +319,10 @@ public:
 			indexTable[id] = n;
 		}
 		storage.shrink_to_fit();
-		freeStorageSlots = std::queue<entity_handle>();
+		freeStorageSlots = std::queue<entity_index_type>();
 	}
 
-	inline void insert(entity_handle entity, CompType const& comp) {
+	inline void insert(entity_index_type entity, CompType const& comp) {
 		assert(!contains(entity));
 		if (entity >= indexTable.size()) {
 			indexTable.resize(entity + 1, 0xFFFFFFFF);
@@ -332,30 +333,30 @@ public:
 			indexTable[entity] = storage.size() - 1;
 		}
 		else {
-			entity_handle freeSlotIndex = freeStorageSlots.front();
+			entity_index_type freeSlotIndex = freeStorageSlots.front();
 			freeStorageSlots.pop();
 			indexTable[entity] = freeSlotIndex;
 			storage[indexTable[entity]] = comp;
 		}
 	}
 
-	inline void remove(entity_handle entity) {
+	inline void remove(entity_index_type entity) {
 		assert(contains(entity));
 		freeStorageSlots.push(indexTable[entity]);
 		indexTable[entity] = 0xFFFFFFFF;
 	}
 
-	inline bool contains(entity_handle entity) const {
+	inline bool contains(entity_index_type entity) const {
 		assert(entity != 0);
 		if (entity >= indexTable.size()) return false;
 		else return indexTable[entity] != 0xFFFFFFFF;
 	}
 
-	inline CompType& get(entity_handle entity) {
+	inline CompType& get(entity_index_type entity) {
 		assert(contains(entity));
 		return storage[indexTable[entity]];
 	}
-	inline CompType& operator[](entity_handle entity) {
+	inline CompType& operator[](entity_index_type entity) {
 		return get(entity);
 	}
 	inline size_t size() const { 
@@ -368,7 +369,7 @@ public:
 		typedef CompType& reference;
 		typedef CompType* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_handle entity_, storage_t& storage_, std::vector<entity_handle>& indexTable) : entity{ entity_ }, storage{ storage_ }, indexTable{ indexTable } {}
+		iterator(entity_index_type entity_, storage_t& storage_, std::vector<entity_index_type>& indexTable) : entity{ entity_ }, storage{ storage_ }, indexTable{ indexTable } {}
 		self_type operator++(int dummy) {
 			assert(entity < indexTable.size());
 			++entity;
@@ -394,19 +395,19 @@ public:
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		entity_handle handle() {
+		entity_index_type handle() {
 			assert(entity < indexTable.size());
 			return entity;
 		}
 	private:
-		entity_handle entity;
+		entity_index_type entity;
 		storage_t& storage;
-		std::vector<entity_handle>& indexTable;
+		std::vector<entity_index_type>& indexTable;
 	};
 private:
-	std::vector<entity_handle> indexTable;
+	std::vector<entity_index_type> indexTable;
 	storage_t storage;
-	std::queue<entity_handle> freeStorageSlots;
+	std::queue<entity_index_type> freeStorageSlots;
 };
 
 template< size_t I, typename T, typename Tuple_t>

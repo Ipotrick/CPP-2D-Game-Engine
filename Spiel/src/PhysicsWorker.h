@@ -79,13 +79,13 @@ struct PhysicsWorker {
 	unsigned const physicsThreadCount;
 	bool run{ true };
 
-	void cacheAABBs(std::vector<entity_handle>& colliders);
+	void cacheAABBs(std::vector<entity_index_type>& colliders);
 
 	void waitForUpdate();
 
 	void waitForOtherWorkers();
 
-	void collisionFunction(entity_handle collID, Quadtree2 const& quadtree, bool dynamic);
+	void collisionFunction(entity_index_type collID, Quadtree2 const& quadtree, bool dynamic);
 
 	void updateStaticGrid();
 

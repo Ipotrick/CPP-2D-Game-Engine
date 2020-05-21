@@ -1,10 +1,10 @@
 #include "DummyScript.h"
 
-void DummyScript::script(entity_handle me, Dummy& data, float deltaTime) {
+void DummyScript::script(entity_id me, Dummy& data, float deltaTime) {
 	assert(engine.world.exists(me));
 	World& world = engine.world;
 
-	auto player = world.getEntity(data.player_id);
+	auto player = world.getIndex(data.player_id);
 	auto compsPlayer = world.viewComps(player);
 	auto compsMe = world.viewComps(me);
 	float distance = length(compsMe.get<Base>().position - compsPlayer.get<Base>().position);

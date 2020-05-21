@@ -35,7 +35,7 @@ void PhysicsSystem::execute(float deltaTime)
 	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> PhysicsSystem::getCollisions(entity_handle entity)
+std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> PhysicsSystem::getCollisions(entity_index_type entity)
 {
 	auto begin = collisionInfoBegins.find(entity);
 	auto end = collisionInfoEnds.find(entity);
@@ -79,7 +79,7 @@ void PhysicsSystem::prepare()
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
 	Vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
-	for (auto colliderID : world.view<Collider>()) {
+	for (auto colliderID : world.viewIDX<Collider>()) {
 		auto& collider = world.getComp<Collider>(colliderID);
 		auto& baseCollider = world.getComp<Base>(colliderID);
 
@@ -221,15 +221,15 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 			// owner stands in place for the slave for a collision response execution
 			if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
 				if (world.hasComp<BaseChild>(entA) && !world.hasComp<BaseChild>(entB)) {
-					entA = world.getEntity(world.getComp<BaseChild>(entA).parent);
+					entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
 				}
 				else if (!world.hasComp<BaseChild>(entA) && world.hasComp<BaseChild>(entB)) {
-					entB = world.getEntity(world.getComp<BaseChild>(entB).parent);
+					entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
 				}
 				else {
 					// both are slaves
-					entA = world.getEntity(world.getComp<BaseChild>(entA).parent);
-					entB = world.getEntity(world.getComp<BaseChild>(entB).parent);
+					entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
+					entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
 				}
 			}
 
@@ -260,7 +260,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 	}
 
 	// let entities sleep or wake them up
-	for (auto entity : world.view<Movement, Collider, Base>()) {
+	for (auto entity : world.viewIDX<Movement, Collider, Base>()) {
 		auto& collider = world.getComp<Collider>(entity);
 		auto& movement = world.getComp<Movement>(entity);
 		auto& base = world.getComp<Base>(entity);
@@ -276,7 +276,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 // collision info operations end!
 // effector operations begin:
 	// linear effector execution
-	for (auto ent : world.view<LinearEffector>()) {
+	for (auto ent : world.viewIDX<LinearEffector>()) {
 		auto& moveField = world.getComp<LinearEffector>(ent);
 		auto [begin, end] = getCollisions(ent);
 		for (auto iter = begin; iter != end; ++iter) {
@@ -290,7 +290,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 	}
 
 	// friction effector execution
-	for (auto ent : world.view<FrictionEffector>()) {
+	for (auto ent : world.viewIDX<FrictionEffector>()) {
 		auto& moveField = world.getComp<FrictionEffector>(ent);
 		auto [begin, end] = getCollisions(ent);
 		for (auto iter = begin; iter != end; ++iter) {
@@ -302,7 +302,7 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 	}
 
 	// uniform effector execution :
-	for (auto ent : world.view<Movement, PhysicsBody>()) {
+	for (auto ent : world.viewIDX<Movement, PhysicsBody>()) {
 		auto& mov = world.getComp<Movement>(ent);
 		auto& solid = world.getComp<PhysicsBody>(ent);
 		mov.velocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
@@ -317,13 +317,13 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 	propagateChildPushoutToParent();
 
 	// apply pushout
-	for (auto ent : world.view<Movement, PhysicsBody, Base>()) {
+	for (auto ent : world.viewIDX<Movement, PhysicsBody, Base>()) {
 		auto& base = world.getComp<Base>(ent);
 		base.position += poolWorkerData->collisionResponses[ent].posChange;
 	}
 
 	// execute physics changes in pos, rota
-	for (auto ent : world.view<Movement, Base>()) {
+	for (auto ent : world.viewIDX<Movement, Base>()) {
 
 		auto& movement = world.getComp<Movement>(ent);
 		auto& base = world.getComp<Base>(ent);
@@ -381,9 +381,9 @@ void PhysicsSystem::applyPhysics(float deltaTime)
 
 void PhysicsSystem::propagateChildPushoutToParent()
 {
-	for (auto child : world.view<BaseChild, PhysicsBody>()) {
+	for (auto child : world.viewIDX<BaseChild, PhysicsBody>()) {
 		auto relationship = world.getComp<BaseChild>(child);
-		auto parent = world.getEntity(relationship.parent);
+		auto parent = world.getIndex(relationship.parent);
 		float childWeight = norm(poolWorkerData->collisionResponses[child].posChange);
 		float parentWeight = norm(poolWorkerData->collisionResponses[parent].posChange);
 		float normalizer = childWeight + parentWeight;
@@ -394,12 +394,12 @@ void PhysicsSystem::propagateChildPushoutToParent()
 }
 
 void PhysicsSystem::syncBaseChildrenToParents() {
-	for (auto child : world.view<BaseChild>()) {
+	for (auto child : world.viewIDX<BaseChild>()) {
 		auto& base = world.getComp<Base>(child);
 		auto& movement = world.getComp<Movement>(child);
 		auto& relationship = world.getComp<BaseChild>(child);
 
-		auto parent = world.getEntity(relationship.parent);
+		auto parent = world.getIndex(relationship.parent);
 		auto& baseP = world.getComp<Base>(parent);
 		auto& movementP = world.getComp<Movement>(parent);
 

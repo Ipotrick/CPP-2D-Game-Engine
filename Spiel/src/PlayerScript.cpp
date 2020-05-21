@@ -2,7 +2,7 @@
 
 #include "PlayerScript.h"
 
-void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
+void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 	World& world = engine.world;
 	auto cmps = world.viewComps(me);
 	auto [begin, end] = engine.getCollisions(me);
@@ -14,7 +14,7 @@ void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
-			auto particle = world.create();
+			auto particle = world.createIDX();
 			Base base = world.getComp<Base>(me);
 			base.position += offset;
 			world.addComp<Base>(particle, base);
@@ -57,7 +57,7 @@ void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 	float const maxAccel = 400.0f;	// (1 unit/second^2)
 	float const maxDecel = 50.0f;
 
-	if (engine.keyPressed(KEY::LEFT_SHIFT)) maxVel *= 2.5;
+	if (engine.keyPressed(KEY::SPACE)) maxVel *= 2.5;
 	
 	// calculate accelerationDir:
 	Vec2 accellDir(0, 0);
@@ -98,7 +98,7 @@ void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 
 	}
 
-	if (engine.keyPressed(KEY::SPACE)) {
+	if (engine.keyPressed(KEY::F)) {
 		auto baseEnt = cmps.get<Base>();
 		auto movEnt = cmps.get<Move>();
 		auto collEnt = cmps.get<Coll>();
@@ -142,10 +142,9 @@ void PlayerScript::script(entity_handle me, Player& data, float deltaTime) {
 		world.addComp<PhysicsBody>(dummy, PhysicsBody(0.9f, 0.01f, 1, 0));
 		world.addComp<Draw>(dummy, dummyDraw);
 		world.addComp<Collider>(dummy, DummyCollider);
-		world.addComp<Dummy>(dummy, Dummy(world.identify(me)));
-		world.addComp<Health>(dummy, 10000);
+		world.addComp<Dummy>(dummy, Dummy(me));
+		world.addComp<Health>(dummy, 100);
 		world.spawn(dummy);
-		data.dummyExis = world.identify(dummy);
 		if (!world.isIdValid(data.dummyExis))
 		{
 			std::cout << " error, id is not valid " << std::endl;

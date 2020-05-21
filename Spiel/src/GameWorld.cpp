@@ -9,7 +9,7 @@ void World::loadMap(std::string mapname_) {
 	else
 	{
 		auto makeWall = [&](int x, int y) {
-			auto wall = create();
+			auto wall = createIDX();
 			auto comp = viewComps(wall);
 			comp.add<Base>(Base(Vec2(x, y), 0));
 			comp.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(1, 1), 0.45f, Form::RECTANGLE));
@@ -41,20 +41,33 @@ void World::loadMap(std::string mapname_) {
 
 		for (int vert = 0; vert < height; vert++) {
 			for (int hor = 0; hor < width; hor++) {
-				if (map.at(vert * width + hor) == '#') makeWall(hor, vert);
+				if (map.at(vert * width + hor) == '#') 
+					makeWall(hor, vert);
 			}
 		}
 
 		Vec2 scalePlayer(1, 1);
-		auto player = create();
+		auto player = createIDX();
 		auto cmps = viewComps(player);
 		cmps.add<Base>(Base(Vec2(5,5),0));
 		cmps.add<Collider>(Collider(scalePlayer, Form::RECTANGLE));
-		cmps.add<PhysicsBody>(PhysicsBody(0.5, 1.0f, calcMomentOfIntertia(1.0f, scalePlayer), 1.0f));
+		cmps.add<PhysicsBody>(PhysicsBody(0.5, 1.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
 		cmps.add<Movement>();
 		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::RECTANGLE));
 		cmps.add<Player>();
 		spawn(player);
+
+
+		int num = 250'000 / 4;
+		for (int i = 0; i < num; i++) {
+			auto ent = createIDX();
+			auto c = viewComps(ent);
+			c.add<Base>();
+			c.add<Movement>();
+			c.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(0, 0), 0.4f, Form::RECTANGLE));
+			spawn(ent);
+		}
+
 
 		/*
 		Vec2 scalePlayer = { 0.4f, 0.8f };
@@ -114,36 +127,25 @@ void World::loadMap(std::string mapname_) {
 			addComp<Draw>(wall, wallDraw);
 			//addComp<TextureRef>(wall, TextureRef("test.png",vec2(0,0), vec2(1,25)));
 			spawn(wall);
-		}
+		}*/
 
-		int num = 333;
-		Vec2 scale = Vec2(0.05f, 0.05f);
+		Vec2 scale = Vec2(0.1f, 0.1f);
 		Collider trashCollider = Collider(scale, Form::RECTANGLE);
 		Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
-		PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1, scale), 10.0f);
-		for (int i = 0; i < num; i++) {
-			if (i % 2) {
-				//trashCollider.form = Form::CIRCLE;
-				//trashDraw.form = Form::CIRCLE;
-			}
-			else {
-				trashCollider.form = Form::RECTANGLE;
-				trashDraw.form = Form::RECTANGLE;
-			}
+		PhysicsBody trashSolidBody(0.9f, 0.1f, calcMomentOfIntertia(1, scale), 10.0f);
+		for (int i = 0; i < 3333; i++) {
 
-
-			Vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f, static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f };
-			auto trash = create();
+			Vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5 , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5 };
+			auto trash = createIDX();
 			addComp<Base>(trash, Base(position, RotaVec2(0)));
 			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 			addComp<Collider>(trash, trashCollider);
 			addComp<Draw>(trash, trashDraw);
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(trash, Health(100));
-			addComp<TextureRef>(trash, TextureRef("Dir.png"));
 			spawn(trash);
 
-			auto trashAss = create();
+			auto trashAss = createIDX();
 			auto cmps = viewComps(trashAss);
 			cmps.add<Base>();
 			cmps.add<Movement>();
@@ -154,11 +156,10 @@ void World::loadMap(std::string mapname_) {
 			auto draw = trashDraw;
 			draw.form = Form::CIRCLE;
 			cmps.add<Draw>(draw);
-			cmps.add<TexRef>(TextureRef("Dir.png"));
-			link(trashAss, trash, Vec2(0, 0.02f), 0);
+			link(trashAss, trash, Vec2(0, 0.05f), 0);
 			spawn(trashAss);
 
-			trashAss = create();
+			trashAss = createIDX();
 			auto cmps2 = viewComps(trashAss);
 			cmps2.add<Base>();
 			cmps2.add<Movement>();
@@ -169,11 +170,10 @@ void World::loadMap(std::string mapname_) {
 			draw = trashDraw;
 			draw.form = Form::CIRCLE;
 			cmps2.add<Draw>(draw);
-			cmps2.add<TexRef>(TextureRef("Dir.png"));
-			link(trashAss, trash, Vec2(0, -0.02f), 0);
+			link(trashAss, trash, Vec2(0, -0.05f), 0);
 			spawn(trashAss);
 		}
-
+		/*
 		int num2 = 0;
 		Vec2 scale2 = Vec2(0.04f, 0.04f);
 		Collider trashCollider2 = Collider(scale2, Form::RECTANGLE);
@@ -188,5 +188,6 @@ void World::loadMap(std::string mapname_) {
 			addComp<PhysicsBody>(trash2, trashSolidBody2);
 			spawn(trash2);
 		}*/
+
 	}
 }

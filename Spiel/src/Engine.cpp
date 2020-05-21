@@ -106,7 +106,7 @@ Vec2 Engine::getPosWorldSpace(Vec2 windowSpacePos_) {
 	return { transformedPos.x, transformedPos.y };
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(entity_handle entity) {
+std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(entity_index_type entity) {
 	return physicsSystem.getCollisions(entity);
 }
 
@@ -165,16 +165,16 @@ void Engine::run() {
 	destroy();
 }
 
-Drawable buildWorldSpaceDrawable(World& world, entity_handle entity) {
+Drawable buildWorldSpaceDrawable(World& world, entity_index_type entity) {
 	return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec));
 }
 
 void Engine::rendererUpdate(World& world)
 {
-	for (auto ent : world.view<Base,Draw>()) {
+	for (auto ent : world.viewIDX<Base,Draw>()) {
 		renderer.submit(buildWorldSpaceDrawable(world, ent));
 	}
-	for (auto ent : world.view<TextureRef>()) {
+	for (auto ent : world.viewIDX<TextureRef>()) {
 		renderer.attachTex(ent, world.getComp<TextureRef>(ent));
 	}
 	renderer.setCamera(camera);

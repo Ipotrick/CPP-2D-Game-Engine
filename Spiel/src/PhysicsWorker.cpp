@@ -89,7 +89,7 @@ void PhysicsWorker::operator()()
 }
 
 
-void PhysicsWorker::cacheAABBs(std::vector<entity_handle>& colliders) {
+void PhysicsWorker::cacheAABBs(std::vector<entity_index_type>& colliders) {
 	for (auto ent : colliders) {
 		auto& base = poolData->world.getComp<Base>(ent);
 		auto& collider = poolData->world.getComp<Collider>(ent);
@@ -118,7 +118,7 @@ void PhysicsWorker::waitForOtherWorkers()
 	}
 }
 
-void PhysicsWorker::collisionFunction(entity_handle collID, Quadtree2 const& quadtree, bool otherDynamic) {
+void PhysicsWorker::collisionFunction(entity_index_type collID, Quadtree2 const& quadtree, bool otherDynamic) {
 	auto& world = poolData->world;
 	auto& collisionResponses = poolData->collisionResponses;
 
