@@ -47,7 +47,7 @@ void World::loadMap(std::string mapname_) {
 		}
 
 		Vec2 scalePlayer(1, 1);
-		auto player = createIDX();
+		auto player = create();
 		auto cmps = viewComps(player);
 		cmps.add<Base>(Base(Vec2(5,5),0));
 		cmps.add<Collider>(Collider(scalePlayer, Form::RECTANGLE));
@@ -144,7 +144,7 @@ void World::loadMap(std::string mapname_) {
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(trash, Health(100));
 			spawn(trash);
-
+			
 			auto trashAss = createIDX();
 			auto cmps = viewComps(trashAss);
 			cmps.add<Base>();

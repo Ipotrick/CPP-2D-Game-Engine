@@ -14,7 +14,7 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
-			auto particle = world.createIDX();
+			auto particle = world.create();
 			Base base = world.getComp<Base>(me);
 			base.position += offset;
 			world.addComp<Base>(particle, base);

@@ -28,6 +28,8 @@ public:
 
 	void update(World& world, float dTime) override;
 
+	void gameplayUpdate(World& world, float deltaTime);
+
 	void destroy() override {}
 
 public:

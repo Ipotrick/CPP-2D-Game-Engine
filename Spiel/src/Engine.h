@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include <sstream>
+#include "std_extra.h"
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -112,6 +113,15 @@ public:
 
 	uint32_t freeDrawableID{ 0x80000000 };
 
+
+	// base
+	BaseSystem baseSystem;
+
+	// physics
+	PhysicsSystem physicsSystem;
+	// perf
+	PerfLogger perfLog;
+
 private:
 	void rendererUpdate(World& world);
 private:
@@ -121,16 +131,8 @@ private:
 	uint32_t iteration;
 	float maxDeltaTime;
 
-	// perf
-	PerfLogger perfLog;
 	std::chrono::microseconds new_deltaTime;
 	float deltaTime;
-
-	// base
-	BaseSystem baseSystem;
-
-	// physics
-	PhysicsSystem physicsSystem;
 
 	// window
 	std::shared_ptr<Window> window;

@@ -109,7 +109,7 @@ void EntityComponentManager::executeDestroys() {
 	despawnList.clear();
 }
 
-void EntityComponentManager::update()
+void EntityComponentManager::flushLaterActions()
 {
 	childParentDestroy();
 	parentChildDestroy();
@@ -119,7 +119,6 @@ void EntityComponentManager::update()
 	executeDestroys();
 	std::sort(freeIdQueue.begin(), freeIdQueue.end());
 	std::sort(freeIndexQueue.begin(), freeIndexQueue.end());
-	defragmentEntities();
 }
 
 void EntityComponentManager::moveEntity(entity_index_type start, entity_index_type goal)
@@ -157,7 +156,7 @@ entity_index_type EntityComponentManager::findBiggestValidHandle()
 void EntityComponentManager::shrink() {
 	// !! handles must be sorted !!
 	auto lastEl = findBiggestValidHandle();
-	entityStorageInfo.resize(lastEl + 1, EntityStatus(false));
+	entityStorageInfo.resize(lastEl + 1LL, EntityStatus(false));
 	std::vector<entity_index_type> handleVec;
 
 	for (int i = freeIndexQueue.size() - 1; i >= 0; i--) {
@@ -166,11 +165,11 @@ void EntityComponentManager::shrink() {
 	}
 }
 
-void EntityComponentManager::defragmentEntities()
+void EntityComponentManager::defragment(DefragMode const mode)
 {
 	int maxDefragEntCount;
-	float minFragmentation;
-	switch (defragMode) {
+	float minFragmentation(1.0f);
+	switch (mode) {
 	case DefragMode::FAST:
 		maxDefragEntCount = 10;
 		minFragmentation = 0.001;

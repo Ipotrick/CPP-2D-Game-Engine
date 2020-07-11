@@ -195,6 +195,9 @@
     <ClInclude Include="src\DummyScript.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\std_extra.h">
+      <Filter>_Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

@@ -130,16 +130,6 @@ void Engine::run() {
 			{
 				Timer t(perfLog.getInputRef("updatetime"));
 				update(world, getDeltaTimeSafe());
-				world.tick();
-			}
-			{
-				Timer t(perfLog.getInputRef("physicstime"));
-				physicsSystem.execute(getDeltaTimeSafe());
-				for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
-			}
-			{
-				Timer t(perfLog.getInputRef("calcRotaVecTime"));
-				baseSystem.execute();
 			}
 			{
 				rendererUpdate(world);

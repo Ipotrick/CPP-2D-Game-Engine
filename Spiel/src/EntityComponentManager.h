@@ -62,7 +62,7 @@ public:
 		std::bitset<3> flags;
 	};
 public:
-	EntityComponentManager() : latestIndex{ 0 }, defragMode{ DefragMode::NONE }, despawnList{}
+	EntityComponentManager() : latestIndex{ 0 }, despawnList{}
 	{
 		entityStorageInfo.push_back({ false });
 		indexToId.push_back(0);
@@ -118,17 +118,6 @@ public:
 	bool didStaticsChange();
 	/* returnes how fragmented the entities are */
 	float fragmentation();
-	enum class DefragMode {
-		NONE,
-		LAZY,
-		MODERATE,
-		EAGER,
-		AGRESSIVE,
-		COMPLETE,
-		FAST
-	};
-	/* sets how much at a time and at what fragmentation(%) the manager defragments */
-	void setDefragMode(DefragMode mode);
 
 	/* Component access */
 	/* returnes reference to a safe virtual container of the given components one can iterate over.
@@ -164,16 +153,25 @@ public:
 	ComponentView viewComps(entity_index_type index);
 	ComponentView viewComps(entity_id id);
 
+	// Meta utility:
+	void flushLaterActions();
+	enum class DefragMode {
+		NONE,
+		LAZY,
+		MODERATE,
+		EAGER,
+		AGRESSIVE,
+		COMPLETE,
+		FAST
+	};
+	void defragment(DefragMode mode);
 private:
 	std::tuple<CORE_COMPONENT_SEGMENT, GAME_COMPONENT_SEGMENT> componentStorageTuple;
-protected:
-	void update();
 private:
 	/* INNER ENGINE FUNCTIONS: */
 	void moveEntity(entity_index_type start, entity_index_type goal);
 	entity_index_type findBiggestValidHandle();
 	void shrink(); // shorten index array and delete freeHandles at the end of the index array
-	void defragmentEntities();
 	void childParentDestroy(); // destroy on parent calls destroy on child
 	void parentChildDestroy(); // destroy on child calls destroy on parent
 	void deregisterDestroyedEntities();
@@ -193,8 +191,6 @@ private:
 	std::vector<entity_index_type> despawnList;
 	std::vector<entity_index_type> spawnLaterList;
 	bool staticEntitiesChanged{ true };
-
-	DefragMode defragMode;
 };
 
 // ---- Component Accessors implementations --------------------------------
@@ -716,9 +712,4 @@ inline entity_index_type EntityComponentManager::getIndex(entity_id entityID)
 {
 	assert(isIdValid(entityID));
 	return idToIndex[entityID.id];
-}
-
-inline void EntityComponentManager::setDefragMode(DefragMode mode)
-{
-	defragMode = mode;
 }

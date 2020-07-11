@@ -62,6 +62,7 @@
     <ClInclude Include="src\RenderTypes.h" />
     <ClInclude Include="src\Script.h" />
     <ClInclude Include="src\GameSystem.h" />
+    <ClInclude Include="src\std_extra.h" />
     <ClInclude Include="src\TextureHandler.h" />
     <ClInclude Include="src\Timing.h" />
     <ClInclude Include="src\Vec.h" />

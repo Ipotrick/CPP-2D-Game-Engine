@@ -1,7 +1,11 @@
 #include "Game.h"
 
+using namespace std_extra;
+using std::cout;
+using std::endl;
+
 Game::Game() : 
-	Engine(world,"Test", 1600, 900),
+	Engine(world,"Spiel Fenster", 1600, 900),
 	playerScript{ *this },
 	healthScript{ *this },
 	ageScript   { *this },
@@ -26,6 +30,10 @@ Game::Game() :
 void Game::create() {
 	camera.zoom = 1 / 3.5f;
 	world.loadMap("shit");
+
+	for (auto i : range<-22,12>()) {
+		cout << i << endl;
+	}
 
 	{
 		float angle = 33.19f;
@@ -52,10 +60,25 @@ void Game::create() {
 		auto id2 = world.identify(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
 	}
-	world.setDefragMode(World::DefragMode::NONE);
 }
 
 void Game::update(World& world, float deltaTime) {
+	gameplayUpdate(world, deltaTime);
+	world.flushLaterActions();
+	world.defragment(World::DefragMode::FAST);
+	{
+		Timer t(perfLog.getInputRef("physicstime"));
+		physicsSystem.execute(getDeltaTimeSafe());
+		for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
+	}
+	{
+		Timer t(perfLog.getInputRef("calcRotaVecTime"));
+		baseSystem.execute();
+	}
+}
+
+void Game::gameplayUpdate(World& world, float deltaTime)
+{
 	//submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(2,2), Vec4(1, 1, 1, 1), Form::RECTANGLE, 0, true));
 	//submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(10, 10), Vec4(0.5, 0.45, 0.5, 1), Form::RECTANGLE, 0, false));
 	//attachTexture(freeDrawableID, "default");
@@ -96,7 +119,7 @@ void Game::update(World& world, float deltaTime) {
 	}
 
 	cursorManipFunc();
-	
+
 	//execute scripts
 	playerScript.execute(deltaTime);
 	healthScript.execute(deltaTime);
@@ -107,14 +130,10 @@ void Game::update(World& world, float deltaTime) {
 
 
 	//display performance statistics
-	//std::cout << getPerfInfo(5) << '\n';
-	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
-	//std::cout << "ent count: " << world.entityCount() << std::endl;
-	//std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
-	for (auto player : world.viewIDX<Player>()) {
-		auto cmps = world.viewComps(player);
-		//std::cout << "player speed: " << length(cmps.get<Movement>().velocity) << std::endl;
-	}
+	std::cout << getPerfInfo(5) << '\n';
+	std::cout << "fragmentation: " << world.fragmentation() << std::endl;
+	std::cout << "ent count: " << world.entityCount() << std::endl;
+	std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
 }
 
 void Game::cursorManipFunc()
