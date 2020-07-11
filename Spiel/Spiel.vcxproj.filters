@@ -37,6 +37,9 @@
     <Filter Include="_Engine\_shader">
       <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_ui">
+      <UniqueIdentifier>{42c656ce-1aaa-4d21-8427-c44901a221f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -194,6 +197,9 @@
     </ClInclude>
     <ClInclude Include="src\DummyScript.h">
       <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\htmlCompiler.h">
+      <Filter>_Engine\_ui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
