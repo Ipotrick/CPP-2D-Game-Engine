@@ -99,7 +99,8 @@ public:
 
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_handle id_);
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_index_type index);
+	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_id id);
 	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
 	GridPhysics<bool> const& getStaticGrid();
@@ -149,4 +150,9 @@ __forceinline void Engine::submitDrawable(Drawable const& d) {
 __forceinline void Engine::attachTexture(uint32_t drawableID, std::string_view name, Vec2 min, Vec2 max)
 {
 	renderer.attachTex(drawableID, name, min, max);
+}
+
+__forceinline std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(entity_id id)
+{
+	return getCollisions(world.getIndex(id));
 }
