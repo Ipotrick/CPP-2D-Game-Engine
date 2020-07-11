@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "htmlCompiler.h"
 
 Game::Game() : 
 	Engine(world,"Test", 1600, 900),
