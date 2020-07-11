@@ -45,6 +45,7 @@
     <ClInclude Include="src\GameSystemUnifroms.h" />
     <ClInclude Include="src\GameWorld.h" />
     <ClInclude Include="src\HealthScript.h" />
+    <ClInclude Include="src\htmlCompiler.h" />
     <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\Mat3.h" />
     <ClInclude Include="src\Mat4.h" />
