@@ -37,6 +37,9 @@
     <Filter Include="_Engine\_shader">
       <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_UI">
+      <UniqueIdentifier>{04555f50-28a1-4672-8acd-b672ae173589}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -198,6 +201,9 @@
     <ClInclude Include="src\std_extra.h">
       <Filter>_Engine</Filter>
     </ClInclude>
+    <ClInclude Include="src\htmlCompiler.h">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -277,6 +283,9 @@
     </ClCompile>
     <ClCompile Include="src\DummyScript.cpp">
       <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\htmlCompiler.cpp">
+      <Filter>_Engine\_UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

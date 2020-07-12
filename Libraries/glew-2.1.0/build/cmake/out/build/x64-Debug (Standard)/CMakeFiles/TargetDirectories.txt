@@ -1,0 +1,10 @@
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/glewinfo.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/glew.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/glew_s.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/uninstall.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/visualinfo.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/install.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/edit_cache.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/rebuild_cache.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/list_install_components.dir
+C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/build/x64-Debug (Standard)/CMakeFiles/install/local.dir

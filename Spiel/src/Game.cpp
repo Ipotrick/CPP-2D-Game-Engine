@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "htmlCompiler.h"
 
 using namespace std_extra;
 using std::cout;
@@ -59,6 +60,19 @@ void Game::create() {
 		bool hasIDbefore = world.hasID(newent2);
 		auto id2 = world.identify(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
+	}
+
+
+	{
+		// Test html compiler
+		std::string html =
+			"<test>"
+			"	<tester2> La La </tester2>"
+			"</test>";
+		UIElement uiElement;
+		uiElement.set(html);
+		bool success = uiElement.compile();
+		std::cout << "Test html Compiler: " << (success ? "passed" : "error") << std::endl;
 	}
 }
 

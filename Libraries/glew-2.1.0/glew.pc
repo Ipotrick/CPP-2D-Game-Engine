@@ -1,6 +1,6 @@
-prefix=C:/Users/kunke/Source/Repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug
+prefix=C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug (Standard)
 exec_prefix=${prefix}
-libdir=C:/Users/kunke/Source/Repos/Ipotrick/Spiel/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug/lib
+libdir=C:/Users/Patrick/Repos/Spiel/Spiel/SpielMappe/Libraries/glew-2.1.0/build/cmake/out/install/x64-Debug (Standard)/lib
 includedir=${prefix}/include
 
 Name: glew

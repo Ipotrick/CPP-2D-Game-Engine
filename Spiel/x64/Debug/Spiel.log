@@ -7,8 +7,6 @@ ChocolateyLastPathUpdate = 132319681596169636
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
-COMPLUS_InstallRoot = 
-COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -18,7 +16,8 @@ HOMEDRIVE = C:
 HOMEPATH = \Users\Patrick
 IntelliJ IDEA = C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;
 IntelliJ IDEA Community Edition = C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;
-JAVA_HOME = C:\Program Files\JDK11
+JAVA_HOME = C:\Program Files (x86)\Common Files\Oracle\Java\javapath
+JD2_HOME = C:\Users\Patrick\AppData\Local\JDownloader 2.0
 LOCALAPPDATA = C:\Users\Patrick\AppData\Local
 LOGONSERVER = \\DESKTOP-LFB5LBB
 MSBuildLoadMicrosoftTargetsReadOnly = true
@@ -26,7 +25,7 @@ NUMBER_OF_PROCESSORS = 6
 OneDrive = C:\Users\Patrick\OneDrive
 OneDriveConsumer = C:\Users\Patrick\OneDrive
 OS = Windows_NT
-Path = C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Program Files\nodejs\;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\mingw64\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\JDK11\bin;C:\Program Files\Maven\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;;C:\Users\Patrick\AppData\Roaming\npm;C:\Program Files\Python34\Scripts;;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;
+Path = C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Program Files\nodejs\;C:\Program Files\JDK11\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\MinGW\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Maven\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;;C:\Users\Patrick\AppData\Roaming\npm;C:\Program Files\Python34\Scripts;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;;
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 PkgDefApplicationConfigFile = C:\Users\Patrick\AppData\Local\Microsoft\VisualStudio\16.0_2d768764\devenv.exe.config
 PROCESSOR_ARCHITECTURE = x86
@@ -40,7 +39,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = C164C04F
+ServiceHubLogSessionKey = A30F7D84
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -62,85 +61,5 @@ VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
-  stb_image.cpp
-  AgeScript.cpp
-  algo.h
-  BulletScript.cpp
-  collision_detection.cpp
-  DummyScript.cpp
-  Engine.cpp
-  EventHandler.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(165,89): warning C4244: "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(165,53): warning C4244: "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
-  Game.cpp
-  GameWorld.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\AgeScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\AgeScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\BulletScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\BulletScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\DummyScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\DummyScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\Engine.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\Engine.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\Game.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\Game.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(13,20): warning C4305: "Argument": Verkürzung von "double" in "float" (Quelldatei wird kompiliert src\Game.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(33,39): warning C4305: "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(34,51): warning C4305: "Argument": Verkürzung von "double" in "float"
-  HealthScript.cpp
-  main.cpp
-  Mat3.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\GameWorld.cpp(14,32): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\GameWorld.cpp(14,29): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(115): warning C4172: Adresse einer lokalen Variablen oder eines temporären Werts "" wird zurückgegeben
-  Mat4.cpp
-  ParticleScript.cpp
-  Physics.cpp
-  PhysicsSystem.cpp
-  PhysicsWorker.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\HealthScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\HealthScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\main.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\main.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(13,20): warning C4305: "Argument": Verkürzung von "double" in "float" (Quelldatei wird kompiliert src\main.cpp)
-  PlayerScript.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\ParticleScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\ParticleScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(20,39): warning C4305: "Argument": Verkürzung von "double" in "const float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\PhysicsWorker.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\PhysicsWorker.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\PhysicsSystem.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\PhysicsSystem.cpp)
-  QuadTree.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsSystem.cpp(13,22): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(214,63): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(214,60): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(238,61): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PhysicsWorker.cpp(238,120): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-  Renderer.cpp
-  RenderingWorker.cpp
-  TextureHandler.cpp
-C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\minwindef.h(130,1): warning C4005: "APIENTRY": Makro-Neudefinition (Quelldatei wird kompiliert src\Renderer.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Libraries\glfw-3.3.2\include\GLFW\glfw3.h(123): message : Siehe vorherige Definition von "APIENTRY" (Quelldatei wird kompiliert src\Renderer.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\PlayerScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\PlayerScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(42,1): warning C4305: "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(97,18): warning C4244: "Argument": Konvertierung von "uint64_t" in "int", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(106,23): warning C4305: "Argument": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(132,23): warning C4305: "Argument": Verkürzung von "double" in "float"
-  Vec2.h
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\QuadTree.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\QuadTree.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(130,70): warning C4267: "=": Konvertierung von "size_t" nach "int", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(260,33): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(281,40): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(325,39): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-  EntityComponentManager.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.h(55): warning C4715: "Vertex::operator[]": Nicht alle Codepfade geben einen Wert zurück.
-  World.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\EntityComponentManager.cpp(69,45): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "entity_id_type", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\EntityComponentManager.cpp(134,38): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "int", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\EntityComponentManager.cpp(146,45): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "int", Datenverlust möglich
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\EntityComponentManager.cpp(159,27): warning C4305: "=": Verkürzung von "double" in "float"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\EntityComponentManager.cpp(182,35): warning C4267: "=": Konvertierung von "size_t" nach "int", Datenverlust möglich
+  htmlCompiler.cpp
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe
