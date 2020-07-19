@@ -24,6 +24,7 @@ private:
 			return -1;
 		}
 		else {
+			glfwWindowHint(GLFW_SAMPLES, 8);
 			glfwWindow = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 			if (!glfwWindow) {
 				glfwTerminate();

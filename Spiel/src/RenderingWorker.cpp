@@ -71,6 +71,8 @@ void RenderingWorker::initiate()
 	// change blending type to transparency blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glEnable(GL_MULTISAMPLE);
+
 	texHandler.initialize();
 	
 	verteciesRawBuffer = (float*)malloc(sizeof(Vertex) * maxVertexCount);
@@ -189,7 +191,7 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 		maxTex = texHandler.getTexRef(d.id).maxPos;
 	}
 
-	bool isCircle = d.form == Form::CIRCLE ? 1.0f : 0.0f;
+	bool isCircle = d.form == Form::Circle ? 1.0f : 0.0f;
 
 	Mat3 modelMatrix2 = Mat3::translate(Vec2(d.position.x, d.position.y)) * Mat3::rotate(d.rotationVec) * Mat3::scale(Vec2(d.scale.x, d.scale.y));
 	if (!d.isInWindowSpace()) {

@@ -31,6 +31,7 @@
 #include "World.h"
 
 // Core Systems
+#include "CollisionSystem.h"
 #include "PhysicsSystem.h"
 #include "BaseSystem.h"
 #include "Renderer.h"
@@ -113,11 +114,11 @@ public:
 
 	uint32_t freeDrawableID{ 0x80000000 };
 
-
 	// base
 	BaseSystem baseSystem;
 
 	// physics
+	CollisionSystem collisionSystem;
 	PhysicsSystem physicsSystem;
 	// perf
 	PerfLogger perfLog;

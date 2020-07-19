@@ -26,8 +26,12 @@
     <ClInclude Include="src\BaseTypes.h" />
     <ClInclude Include="src\BasicScripts.h" />
     <ClInclude Include="src\basic_math.h" />
+    <ClInclude Include="src\BuildQtreeJob.hpp" />
     <ClInclude Include="src\BulletScript.h" />
+    <ClInclude Include="src\CacheAABBJob.hpp" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\CollisionCheckJob.h" />
+    <ClInclude Include="src\CollisionSystem.h" />
     <ClInclude Include="src\collision_detection.h" />
     <ClInclude Include="src\CoreCompInclude.h" />
     <ClInclude Include="src\CoreComponents.h" />
@@ -47,6 +51,7 @@
     <ClInclude Include="src\HealthScript.h" />
     <ClInclude Include="src\htmlCompiler.h" />
     <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\JobManager.hpp" />
     <ClInclude Include="src\Mat3.h" />
     <ClInclude Include="src\Mat4.h" />
     <ClInclude Include="src\ParticleScript.h" />
@@ -54,7 +59,7 @@
     <ClInclude Include="src\Physics.h" />
     <ClInclude Include="src\PhysicsSystem.h" />
     <ClInclude Include="src\PhysicsTypes.h" />
-    <ClInclude Include="src\PhysicsWorker.h" />
+    <ClInclude Include="src\CollisionWorker.h" />
     <ClInclude Include="src\PlayerScript.h" />
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\random.h" />
@@ -79,6 +84,7 @@
     <ClCompile Include="src\AgeScript.cpp" />
     <ClCompile Include="src\algo.h" />
     <ClCompile Include="src\BulletScript.cpp" />
+    <ClCompile Include="src\CollisionSystem.cpp" />
     <ClCompile Include="src\collision_detection.cpp" />
     <ClCompile Include="src\DummyScript.cpp" />
     <ClCompile Include="src\Engine.cpp" />
@@ -93,7 +99,7 @@
     <ClCompile Include="src\ParticleScript.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PhysicsSystem.cpp" />
-    <ClCompile Include="src\PhysicsWorker.cpp" />
+    <ClCompile Include="src\CollisionWorker.cpp" />
     <ClCompile Include="src\PlayerScript.cpp" />
     <ClCompile Include="src\QuadTree.cpp" />
     <ClCompile Include="src\Renderer.cpp" />

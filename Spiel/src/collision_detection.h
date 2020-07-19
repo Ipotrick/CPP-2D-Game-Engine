@@ -18,7 +18,7 @@ struct CollidableAdapter {
 		position{ 0,0 },
 		size{ 0,0 },
 		rotationVec{ 0,0 },
-		form{ Form::CIRCLE },
+		form{ Form::Circle },
 		dynamic{ false }
 	{ }
 	inline CollidableAdapter& operator=(CollidableAdapter const& rhs) = default;

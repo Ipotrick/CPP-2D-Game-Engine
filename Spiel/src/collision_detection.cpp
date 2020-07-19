@@ -184,8 +184,8 @@ CollisionTestResult collisionTest(CollidableAdapter const& coll, CollidableAdapt
 	//pretest with AABB
 
 	if (isOverlappingAABB(coll.position, aabbBounds(coll.size, coll.rotationVec), other.position, aabbBounds(other.size, other.rotationVec))) {
-		if (coll.form == Form::CIRCLE) {
-			if (other.form == Form::CIRCLE) {
+		if (coll.form == Form::Circle) {
+			if (other.form == Form::Circle) {
 				return circleCircleCollisionCheck(coll, other);
 			}
 			else {
@@ -193,7 +193,7 @@ CollisionTestResult collisionTest(CollidableAdapter const& coll, CollidableAdapt
 			}
 		}
 		else {
-			if (other.form == Form::CIRCLE) {
+			if (other.form == Form::Circle) {
 				return checkCircleRectangleCollision(other, coll, false);
 			}
 			else {
@@ -210,8 +210,8 @@ CollisionTestResult collisionTestCachedAABB(CollidableAdapter const& coll_, Coll
 	//pretest with AABB
 
 	if (isOverlappingAABB(coll_.position, aabbColl, other_.position, aabbOther)) {
-		if (coll_.form == Form::CIRCLE) {
-			if (other_.form == Form::CIRCLE) {
+		if (coll_.form == Form::Circle) {
+			if (other_.form == Form::Circle) {
 				return circleCircleCollisionCheck(coll_, other_);
 			}
 			else {
@@ -219,7 +219,7 @@ CollisionTestResult collisionTestCachedAABB(CollidableAdapter const& coll_, Coll
 			}
 		}
 		else {
-			if (other_.form == Form::CIRCLE) {
+			if (other_.form == Form::Circle) {
 				return checkCircleRectangleCollision(other_, coll_, false);
 			}
 			else {

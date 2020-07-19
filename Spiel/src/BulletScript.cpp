@@ -5,6 +5,8 @@ void BulletScript::script(entity_id me, Bullet& data, float deltaTime) {
 	World& world = engine.world;
 	auto [begin, end] = engine.getCollisions(me);
 	bool foundHit{ false };
+	auto& draw = world.getComp<Draw>(me);
+	draw.color -= Vec4(1, 1, 1, 0) * deltaTime;
 	for (auto iter = begin; iter != end; ++iter) {
 		if (world.hasComps<Collider, PhysicsBody>(iter->idB) && world.hasntComp<Player>(iter->idB)) {
 			foundHit = true;

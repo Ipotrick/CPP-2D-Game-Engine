@@ -151,7 +151,7 @@ void Quadtree2::querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPo
 		}
 	}
 	else {
-		draw.push_back(Drawable(0, thisPos, 0.2f, thisSize, Vec4(0, 0, 0, 1), Form::RECTANGLE, RotaVec2(0)));
+		draw.push_back(Drawable(0, thisPos, 0.2f, thisSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0)));
 	}
 }
 
@@ -164,8 +164,8 @@ void Quadtree2::querryDebugAll(uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std
 		querryDebugAll(trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw, color, depth + 1);
 	}
 	else {
-		draw.push_back(Drawable(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::RECTANGLE, RotaVec2(0)));
-		draw.push_back(Drawable(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), color, Form::RECTANGLE, RotaVec2(0)));
+		draw.push_back(Drawable(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0)));
+		draw.push_back(Drawable(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), color, Form::Rectangle, RotaVec2(0)));
 	}
 }
 

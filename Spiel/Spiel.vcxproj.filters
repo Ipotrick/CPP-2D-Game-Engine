@@ -40,6 +40,9 @@
     <Filter Include="_Engine\_UI">
       <UniqueIdentifier>{04555f50-28a1-4672-8acd-b672ae173589}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_Collision">
+      <UniqueIdentifier>{af4549b1-e840-49f3-be88-0a5b9e8721f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Game.h">
@@ -47,9 +50,6 @@
     </ClInclude>
     <ClInclude Include="src\Script.h">
       <Filter>_Engine\_Executors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\QuadTree.h">
-      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\Camera.h">
       <Filter>_Engine\_Rendering</Filter>
@@ -101,12 +101,6 @@
     </ClInclude>
     <ClInclude Include="src\vector_math.h">
       <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\collision_detection.h">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsWorker.h">
-      <Filter>_Engine\_Physics</Filter>
     </ClInclude>
     <ClInclude Include="src\random.h">
       <Filter>_math</Filter>
@@ -204,6 +198,30 @@
     <ClInclude Include="src\htmlCompiler.h">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
+    <ClInclude Include="src\collision_detection.h">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\QuadTree.h">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionSystem.h">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionWorker.h">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\JobManager.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionCheckJob.h">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CacheAABBJob.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BuildQtreeJob.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -216,9 +234,6 @@
       <Filter>_Engine\_Rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics.cpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\QuadTree.cpp">
       <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\RenderingWorker.cpp">
@@ -238,12 +253,6 @@
     </ClCompile>
     <ClCompile Include="src\Mat3.cpp">
       <Filter>_math</Filter>
-    </ClCompile>
-    <ClCompile Include="src\collision_detection.cpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PhysicsWorker.cpp">
-      <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\PhysicsSystem.cpp">
       <Filter>_Engine\_Physics</Filter>
@@ -286,6 +295,18 @@
     </ClCompile>
     <ClCompile Include="src\htmlCompiler.cpp">
       <Filter>_Engine\_UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\collision_detection.cpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="src\QuadTree.cpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CollisionSystem.cpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="src\CollisionWorker.cpp">
+      <Filter>_Engine\_Collision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

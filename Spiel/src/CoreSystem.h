@@ -5,7 +5,7 @@
 class CoreSystem {
 public:
 	CoreSystem(World& world) : world{ world } {}
-	void execute(float deltaTime);
+	void execute(World& world, float deltaTime);
 protected:
 	World& world;
 };

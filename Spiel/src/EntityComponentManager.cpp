@@ -1,6 +1,6 @@
 #include "EntityComponentManager.h"
 
-entity_index_type EntityComponentManager::createIDX() {
+entity_index_type EntityComponentManager::index_create() {
 	if (!freeIndexQueue.empty()) {
 		entity_index_type index = freeIndexQueue.front();
 		freeIndexQueue.pop_front();
@@ -19,7 +19,7 @@ entity_index_type EntityComponentManager::createIDX() {
 
 entity_id EntityComponentManager::create()
 {
-	auto index = createIDX();
+	auto index = index_create();
 	return identify(index);
 }
 

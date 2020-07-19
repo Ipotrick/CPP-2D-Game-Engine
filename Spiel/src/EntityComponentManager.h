@@ -75,7 +75,7 @@ public:
 	bool exists(entity_id id);
 	/* index create/destruct utility */
 	/* creates blank index and returns its index, O(1) */
-	entity_index_type createIDX();
+	entity_index_type index_create();
 	entity_id create();
 	/* marks index for deletion, entities are deleted after each update, O(1) */
 	void destroy(entity_index_type index);
@@ -442,7 +442,8 @@ public:
 		inline value_type operator*() {
 			assert(index < view.endID);
 			assert(view.manager.exists(index));
-			return manager.indexToId[index];
+			auto id = view.manager.indexToId[index];
+			return entity_id(id, view.manager.idVersion[id]);
 		}
 		inline bool operator==(const self_type& rhs) {
 			return index == rhs.index;

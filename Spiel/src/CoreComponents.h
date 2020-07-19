@@ -9,7 +9,7 @@ struct Base : public CompData {
 	Vec2 position;
 	float rotation;
 	RotaVec2 rotaVec;
-	Base(Vec2 pos_ = {0,0}) :
+	Base(Vec2 pos_ = Vec2{0,0}) :
 		position{ pos_ },
 		rotation{0},
 		rotaVec{1,0}
@@ -44,7 +44,7 @@ struct Collider : public CompData {
 	Form form;
 	bool particle;
 	bool sleeping;
-	Collider(Vec2 size_ = { 1,1 }, Form form_ = Form::CIRCLE, bool particle_ = false) :
+	Collider(Vec2 size_ = { 1,1 }, Form form_ = Form::Circle, bool particle_ = false) :
 		size{ size_ }, 
 		form{ form_ },
 		particle{ particle_ },
@@ -82,7 +82,7 @@ struct Draw : public CompData {
 	Form form;
 	bool throwsShadow;
 
-	Draw(Vec4 color_ = Vec4(1, 1, 1, 1), Vec2 scale_ = Vec2(1, 1), float drawingPrio_ = 0.5f, Form form_ = Form::RECTANGLE, bool throwsShadow_ = false) :
+	Draw(Vec4 color_ = Vec4(1, 1, 1, 1), Vec2 scale_ = Vec2(1, 1), float drawingPrio_ = 0.5f, Form form_ = Form::Rectangle, bool throwsShadow_ = false) :
 		color{ color_ },
 		scale{ scale_ },
 		drawingPrio{ drawingPrio_ },

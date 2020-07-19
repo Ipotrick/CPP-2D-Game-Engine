@@ -17,10 +17,10 @@ Game::Game() :
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 
-	auto cursor = world.createIDX();
+	auto cursor = world.index_create();
 	Vec2 cursorScale = { 0.1f,0.1f };
 	world.addComp<Base>(cursor);
-	Collider cursorCollider(cursorScale, Form::RECTANGLE, true);
+	Collider cursorCollider(cursorScale, Form::Rectangle, true);
 	world.addComp<Collider>(cursor, cursorCollider);
 	//Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
 	//world.addComp<Draw>(cursor, cursorDraw);
@@ -50,13 +50,13 @@ void Game::create() {
 			bool hasID = world.hasID(ent);
 			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << std::endl;
 		}
-		auto newent = world.createIDX();
+		auto newent = world.index_create();
 		auto id = world.identify(newent);
 		bool hasIDafter = world.hasID(newent);
 		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
 		world.destroy(newent);
 
-		auto newent2 = world.createIDX();
+		auto newent2 = world.index_create();
 		bool hasIDbefore = world.hasID(newent2);
 		auto id2 = world.identify(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
@@ -66,9 +66,9 @@ void Game::create() {
 	{
 		// Test html compiler
 		std::string html =
-			"<test>"
-			"	<tester2> La La </tester2>"
-			"</test>";
+			"<div>"
+			"	<text> La La </text>"
+			"</div>";
 		UIElement uiElement;
 		uiElement.set(html);
 		bool success = uiElement.compile();
@@ -82,7 +82,8 @@ void Game::update(World& world, float deltaTime) {
 	world.defragment(World::DefragMode::FAST);
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
-		physicsSystem.execute(getDeltaTimeSafe());
+		collisionSystem.execute(world, deltaTime);
+		physicsSystem.execute(world, deltaTime, collisionSystem);
 		for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
 	}
 	{
@@ -96,7 +97,7 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 	//submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(2,2), Vec4(1, 1, 1, 1), Form::RECTANGLE, 0, true));
 	//submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(10, 10), Vec4(0.5, 0.45, 0.5, 1), Form::RECTANGLE, 0, false));
 	//attachTexture(freeDrawableID, "default");
-	submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0.0f, Vec2(100000, 10000), Vec4(0, 0, 0, 1), Form::RECTANGLE, 0));
+	submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0.0f, Vec2(100000, 10000), Vec4(0, 0, 0, 1), Form::Rectangle, 0));
 
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
@@ -143,7 +144,7 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 	dummyScript.execute(deltaTime);
 
 
-	//display performance statistics
+	/* display performance statistics */
 	std::cout << getPerfInfo(5) << '\n';
 	std::cout << "fragmentation: " << world.fragmentation() << std::endl;
 	std::cout << "ent count: " << world.entityCount() << std::endl;
@@ -230,13 +231,13 @@ void Game::cursorManipFunc()
 		// spawns:
 		if (keyPressed(KEY::U)) {
 			Vec2 scale = Vec2(0.3f, 0.3f);
-			Collider trashCollider = Collider(scale, Form::RECTANGLE);
-			Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
+			Collider trashCollider = Collider(scale, Form::Rectangle);
+			Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::Rectangle, true);
 			PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1, scale), 10.0f);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
 				Vec2 position = baseCursor.position;
-				auto trash = world.createIDX();
+				auto trash = world.index_create();
 				world.addComp<Base>(trash, Base(position, RotaVec2(0)));
 				world.addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 				world.addComp<Collider>(trash, trashCollider);
@@ -245,30 +246,30 @@ void Game::cursorManipFunc()
 				world.addComp<Health>(trash, Health(100));
 				world.spawn(trash);
 
-				auto trashAss = world.createIDX();
+				auto trashAss = world.index_create();
 				auto cmps = world.viewComps(trashAss);
 				cmps.add<Base>();
 				cmps.add<Movement>();
 				auto coll = trashCollider;
-				coll.form = Form::CIRCLE;
+				coll.form = Form::Circle;
 				cmps.add<Coll>(coll);
 				cmps.add<PhysicsBody>();
 				auto draw = trashDraw;
-				draw.form = Form::CIRCLE;
+				draw.form = Form::Circle;
 				cmps.add<Draw>(draw);
 				world.link(trashAss, trash, Vec2(0, 0.15f), 0);
 				world.spawn(trashAss);
 
-				trashAss = world.createIDX();
+				trashAss = world.index_create();
 				auto cmps2 = world.viewComps(trashAss);
 				cmps2.add<Base>();
 				cmps2.add<Movement>();
 				coll = trashCollider;
-				coll.form = Form::CIRCLE;
+				coll.form = Form::Circle;
 				cmps2.add<Coll>(coll);
 				cmps2.add<PhysicsBody>();
 				draw = trashDraw;
-				draw.form = Form::CIRCLE;
+				draw.form = Form::Circle;
 				cmps2.add<Draw>(draw);
 				world.link(trashAss, trash, Vec2(0, -0.15f), 0);
 				world.spawn(trashAss);
@@ -277,12 +278,12 @@ void Game::cursorManipFunc()
 
 		if (keyPressed(KEY::I)) {
 			Vec2 scale = Vec2(0.5f, 0.5f);
-			Collider trashCollider(scale, Form::RECTANGLE);
+			Collider trashCollider(scale, Form::Rectangle);
 			PhysicsBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale), 100.0f);
-			Draw trashDraw = Draw(Vec4(1, 1, 1, 1), scale, 0.5f, Form::RECTANGLE);
+			Draw trashDraw = Draw(Vec4(1, 1, 1, 1), scale, 0.5f, Form::Rectangle);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {
-				auto trash = world.createIDX();
+				auto trash = world.index_create();
 				world.addComp<Base>(trash, Base(cursorManipData.oldCursorPos, 0));
 				world.addComp<Collider>(trash, trashCollider);
 				world.addComp<PhysicsBody>(trash, trashSolidBody);

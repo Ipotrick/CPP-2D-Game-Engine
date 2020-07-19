@@ -24,7 +24,7 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 			mov.velocity.y += rand() % 1000 / 400.0f * 1.0f - 0.5f;
 			mov.velocity += dir * vel;
 			world.addComp<Movement>(particle, mov);
-			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), 0.49f, Form::CIRCLE));
+			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), 0.49f, Form::Circle));
 			if (rand() % 4 == 0) {
 				world.addComp<Age>(particle, Age(1.5f));
 				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.01f, 0.01f), Vec2(10, 10),
@@ -39,8 +39,8 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 					Vec4(0, 0, 0, 0)
 				));
 			}
-			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.01f, 0.0001, 0));
-			world.addComp<Collider>(particle, Collider(Vec2(0.2f, 0.2f), Form::CIRCLE, true));
+			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.001f, 0.0001, 0));
+			world.addComp<Collider>(particle, Collider(Vec2(0.2f, 0.2f), Form::Circle, true));
 			world.addComp<TextureRef>(particle, TextureRef("Cloud.png"));
 			world.spawnLater(particle);
 		}
@@ -54,8 +54,7 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 	cmps.get<Base>().rotation = newRotation;
 
 	float maxVel = 10.0f;
-	float const maxAccel = 400.0f;	// (1 unit/second^2)
-	float const maxDecel = 50.0f;
+	float const maxAccel = 20.0f;	// (1 unit/second^2)
 
 	if (engine.keyPressed(KEY::SPACE)) maxVel *= 2.5;
 	
@@ -84,13 +83,6 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 		float newVelAbs = std::min(maxVel, length(newVel));
 		cmps.get<Movement>().velocity = newVelDir * newVelAbs;
 	}
-	else {
-		// just slow down
-		Vec2 movDir = normalize(cmps.get<Movement>().velocity);
-		float movAbs = length(cmps.get<Movement>().velocity);
-		movAbs = std::max(0.0f, movAbs - maxDecel * deltaTime);
-		cmps.get<Movement>().velocity = movDir * movAbs;
-	}
 
 	if (engine.keyPressed(KEY::C)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
@@ -109,8 +101,8 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 		for (uint64_t i = 0; i < bullets; i++) {
 			float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
 			Vec2 bullCollVel = movEnt.velocity + (bulletVel + (rand() % 1000 / 1000.0f)) * rotate(Vec2(0, 1), baseEnt.rotation + velOffsetRota);
-			Collider bulletCollider = Collider(scale, Form::CIRCLE, true);
-			Draw bulletDraw = Draw(Vec4(0.f, 1.f, 0.f, 1), scale, 0.4f, Form::CIRCLE);
+			Collider bulletCollider = Collider(scale, Form::Circle, true);
+			Draw bulletDraw = Draw(Vec4(0.f, 1.f, 0.f, 1), scale, 0.4f, Form::Circle);
 			auto bullet = world.create();
 			world.addComp<Base>(bullet, Base(baseEnt.position + rotate(Vec2(-collEnt.size.y, 0.0f) * 1.3f, baseEnt.rotation + 270)));
 			world.addComp<Movement>(bullet, Movement(bullCollVel, 0));
@@ -133,8 +125,8 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 		float dummyVel = 0.0f;
 
 		float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-		Collider DummyCollider = Collider(scale, Form::CIRCLE, false);
-		Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::CIRCLE);
+		Collider DummyCollider = Collider(scale, Form::Circle, false);
+		Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::Circle);
 		
 		auto dummy = world.create();
 		world.addComp<Base>(dummy, Base(baseEnt));

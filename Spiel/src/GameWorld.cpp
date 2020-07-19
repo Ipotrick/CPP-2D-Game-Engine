@@ -9,18 +9,260 @@ void World::loadMap(std::string mapname_) {
 	else
 	{
 		auto makeWall = [&](int x, int y) {
-			auto wall = createIDX();
+			auto wall = index_create();
 			auto comp = viewComps(wall);
 			comp.add<Base>(Base(Vec2(x, y), 0));
-			comp.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(1, 1), 0.45f, Form::RECTANGLE));
-			comp.add<Collider>(Collider(Vec2(1, 1), Form::RECTANGLE));
+			comp.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(1, 1), 0.45f, Form::Rectangle));
+			comp.add<Collider>(Collider(Vec2(1, 1), Form::Rectangle));
 			comp.add<PhysicsBody>(PhysicsBody(0.0f, 10000000000000000000000000000000000.0f, 1000000000000000000000000000000000.0f, 30));
 			spawn(wall);
 		};
 
-		int const height = 16;
+		this->physics.friction = 1.0f;
+
+		int const height = 16*16;
 		int const width = 64+4;
 		std::string map = {
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
+			"################################    ################################"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"#        ###########           #    #                              #"
+			"#        #                     #    #                              #"
+			"#        #                     ######                              #"
+			"#        ##########                                                #"
+			"#                 #                                                #"
+			"#                 #            ######                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                 #            #    #                              #"
+			"#                              #    #                              #"
+			"#                              #    #                              #"
+			"################################    ################################"
 			"################################    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -50,21 +292,21 @@ void World::loadMap(std::string mapname_) {
 		auto player = create();
 		auto cmps = viewComps(player);
 		cmps.add<Base>(Base(Vec2(5,5),0));
-		cmps.add<Collider>(Collider(scalePlayer, Form::RECTANGLE));
-		cmps.add<PhysicsBody>(PhysicsBody(0.5, 1.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
+		cmps.add<Collider>(Collider(scalePlayer, Form::Rectangle));
+		cmps.add<PhysicsBody>(PhysicsBody(0.5, 10.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
 		cmps.add<Movement>();
-		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::RECTANGLE));
+		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::Rectangle));
 		cmps.add<Player>();
 		spawn(player);
 
 
-		int num = 250'000 / 4;
+		int num = 0;// 250'000;
 		for (int i = 0; i < num; i++) {
-			auto ent = createIDX();
+			auto ent = index_create();
 			auto c = viewComps(ent);
 			c.add<Base>();
 			c.add<Movement>();
-			c.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(0, 0), 0.4f, Form::RECTANGLE));
+			c.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(0, 0), 0.4f, Form::Rectangle));
 			spawn(ent);
 		}
 
@@ -104,7 +346,6 @@ void World::loadMap(std::string mapname_) {
 		link(slave, player, Vec2(0.2f, -0.4f), 30.0f);
 		spawn(slave);
 
-
 		slave = create();
 		addComp<Base>(slave);
 		addComp<Movement>(slave);
@@ -130,13 +371,13 @@ void World::loadMap(std::string mapname_) {
 		}*/
 
 		Vec2 scale = Vec2(0.1f, 0.1f);
-		Collider trashCollider = Collider(scale, Form::RECTANGLE);
-		Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::RECTANGLE, true);
-		PhysicsBody trashSolidBody(0.9f, 0.1f, calcMomentOfIntertia(1, scale), 10.0f);
-		for (int i = 0; i < 3333; i++) {
+		Collider trashCollider = Collider(scale, Form::Rectangle);
+		Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::Rectangle, true);
+		PhysicsBody trashSolidBody(0.9f, 0.8f, calcMomentOfIntertia(1, scale), 10.0f);
+		for (int i = 0; i < 3000; i++) {
 
 			Vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5 , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5 };
-			auto trash = createIDX();
+			auto trash = index_create();
 			addComp<Base>(trash, Base(position, RotaVec2(0)));
 			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 			addComp<Collider>(trash, trashCollider);
@@ -144,31 +385,31 @@ void World::loadMap(std::string mapname_) {
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(trash, Health(100));
 			spawn(trash);
-			
-			auto trashAss = createIDX();
+
+			auto trashAss = index_create();
 			auto cmps = viewComps(trashAss);
-			cmps.add<Base>();
+			cmps.add<Base>(Base(position));
 			cmps.add<Movement>();
 			auto coll = trashCollider;
-			coll.form = Form::CIRCLE;
+			coll.form = Form::Circle;
 			cmps.add<Coll>(coll);
 			cmps.add<PhysicsBody>();
 			auto draw = trashDraw;
-			draw.form = Form::CIRCLE;
+			draw.form = Form::Circle;
 			cmps.add<Draw>(draw);
 			link(trashAss, trash, Vec2(0, 0.05f), 0);
 			spawn(trashAss);
-
-			trashAss = createIDX();
+			
+			trashAss = index_create();
 			auto cmps2 = viewComps(trashAss);
-			cmps2.add<Base>();
+			cmps2.add<Base>(Base(position));
 			cmps2.add<Movement>();
 			coll = trashCollider;
-			coll.form = Form::CIRCLE;
+			coll.form = Form::Circle;
 			cmps2.add<Coll>(coll);
 			cmps2.add<PhysicsBody>();
 			draw = trashDraw;
-			draw.form = Form::CIRCLE;
+			draw.form = Form::Circle;
 			cmps2.add<Draw>(draw);
 			link(trashAss, trash, Vec2(0, -0.05f), 0);
 			spawn(trashAss);

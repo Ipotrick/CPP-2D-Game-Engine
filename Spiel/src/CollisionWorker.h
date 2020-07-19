@@ -11,8 +11,8 @@
 #include "Timing.h"
 #include "World.h"
 
-struct PhysicsSharedSyncData {
-	PhysicsSharedSyncData() : run{ true }, mut{}, cond{}, mut2{}, cond2{}, insertReady{0}  {
+struct CollisionSyncData {
+	CollisionSyncData() : run{ true }, mut{}, cond{}, mut2{}, cond2{}, insertReady{0}  {
 
 	}
 	bool run;
@@ -31,8 +31,8 @@ struct PhysicsSharedSyncData {
 	int insertReady;
 };
 
-struct PhysicsPoolData {
-	PhysicsPoolData(World& wrld, size_t qtreeCapacity) :
+struct CollisionPoolData {
+	CollisionPoolData(World& wrld, size_t qtreeCapacity) :
 		world{ wrld },
 		qtreeDynamic(0, 0, qtreeCapacity, wrld),
 		qtreeStatic(0, 0, qtreeCapacity, wrld)
@@ -54,7 +54,7 @@ struct PhysicsPoolData {
 	std::vector<Drawable> debugDrawables;
 };
 
-struct PhysicsPerThreadData {
+struct CollisionWorkerData {
 	int id = 0;
 	uint32_t beginSensor;
 	uint32_t endSensor;
@@ -66,13 +66,13 @@ struct PhysicsPerThreadData {
 	std::vector<CollisionInfo>* collisionInfos;
 };
 
-struct PhysicsWorker {
-	PhysicsWorker(std::shared_ptr<PhysicsPerThreadData> physicsData_, std::shared_ptr<PhysicsPoolData> poolData, std::shared_ptr<PhysicsSharedSyncData> syncData_, unsigned threadCount_) :
-		physicsData{ physicsData_ }, syncData{ syncData_ }, poolData{ poolData }, physicsThreadCount{ threadCount_ }
+struct CollisionWorker {
+	CollisionWorker(std::shared_ptr<CollisionWorkerData> workerData, std::shared_ptr<CollisionPoolData> poolData, std::shared_ptr<CollisionSyncData> syncData_, unsigned threadCount_) :
+		workerData{ workerData }, syncData{ syncData_ }, poolData{ poolData }, physicsThreadCount{ threadCount_ }
 	{}
-	std::shared_ptr<PhysicsPerThreadData> physicsData;
-	std::shared_ptr<PhysicsPoolData> poolData;
-	std::shared_ptr<PhysicsSharedSyncData> syncData;
+	std::shared_ptr<CollisionWorkerData> workerData;
+	std::shared_ptr<CollisionPoolData> poolData;
+	std::shared_ptr<CollisionSyncData> syncData;
 
 	std::vector<uint32_t> nearCollidablesBuffer;	// reuse heap memory for all dyn collidable collisions
 
@@ -87,7 +87,7 @@ struct PhysicsWorker {
 
 	void collisionFunction(entity_index_type collID, Quadtree2 const& quadtree, bool dynamic);
 
-	void updateStaticGrid();
+	//void updateStaticGrid();
 
 	void operator()(); 
 };
