@@ -17,15 +17,14 @@ Game::Game() :
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 
-	auto cursor = world.index_create();
+	cursorID = world.create();
 	Vec2 cursorScale = { 0.1f,0.1f };
-	world.addComp<Base>(cursor);
+	world.addComp<Base>(cursorID);
 	Collider cursorCollider(cursorScale, Form::Rectangle, true);
-	world.addComp<Collider>(cursor, cursorCollider);
-	//Draw cursorDraw(vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::CIRCLE);
-	//world.addComp<Draw>(cursor, cursorDraw);
-	world.spawn(cursor);
-	cursorID = world.identify(cursor);
+	world.addComp<Collider>(cursorID, cursorCollider);
+	Draw cursorDraw(Vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::Circle);
+	world.addComp<Draw>(cursorID, cursorDraw);
+	world.spawn(cursorID);
 }
 
 void Game::create() {
@@ -143,12 +142,11 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 	particleScript.execute(deltaTime);
 	dummyScript.execute(deltaTime);
 
-
 	/* display performance statistics */
-	std::cout << getPerfInfo(5) << '\n';
-	std::cout << "fragmentation: " << world.fragmentation() << std::endl;
-	std::cout << "ent count: " << world.entityCount() << std::endl;
-	std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
+	//std::cout << getPerfInfo(5) << '\n';
+	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
+	//std::cout << "ent count: " << world.entityCount() << std::endl;
+	//std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
 }
 
 void Game::cursorManipFunc()
@@ -232,10 +230,11 @@ void Game::cursorManipFunc()
 		if (keyPressed(KEY::U)) {
 			Vec2 scale = Vec2(0.3f, 0.3f);
 			Collider trashCollider = Collider(scale, Form::Rectangle);
-			Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::Rectangle, true);
 			PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1, scale), 10.0f);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
+				Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+				Draw trashDraw = Draw(color, scale, 0.5f, Form::Rectangle, true);
 				Vec2 position = baseCursor.position;
 				auto trash = world.index_create();
 				world.addComp<Base>(trash, Base(position, RotaVec2(0)));

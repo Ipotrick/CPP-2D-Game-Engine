@@ -1,24 +1,24 @@
 #include "Physics.h"
 
-Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float const dist, Vec2 const& primCollNormal, bool otherDynamic) {
+Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float const dist, Vec2 const& primCollNormal, bool otherDynamic, float priority) {
 	if (otherDynamic) {
 		float bothAreas = surfAreaA + surfAreaB;
 		float bPart = surfAreaB / bothAreas;
 		float collDirV1 = dot(velA, primCollNormal);
 		float collDirV2 = dot(velB, primCollNormal);
-		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f && false) {
+		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f && Physics::directionalPositionCorrection) {
 			//they move into each other
 			if (collDirV2 < 0) {
 				//coll moved into other
-				return dist * primCollNormal * 0.9f + primCollNormal * Physics::pushout;
+				return dist * primCollNormal *  (2.0f - priority) * Physics::directionalCorrectionFactor + primCollNormal * Physics::pushout;
 			}
 			else {
 				//other moved into coll
-				return dist * primCollNormal * 0.1f + primCollNormal * Physics::pushout;
+				return dist * primCollNormal * (2.0f- priority) * (1.0f - Physics::directionalCorrectionFactor) + primCollNormal * Physics::pushout;
 			}
 		}
 		else {
-			return dist * primCollNormal * bPart + primCollNormal * Physics::pushout;
+			return dist * primCollNormal * bPart * (2.0f - priority) + primCollNormal * Physics::pushout;
 		}
 	}
 	else {

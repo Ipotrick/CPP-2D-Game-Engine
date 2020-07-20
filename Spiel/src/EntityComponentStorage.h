@@ -231,11 +231,11 @@ public:
 		typedef CompType& reference;
 		typedef CompType* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_index_type entity_, storage_t& storage_) : entity{ entity_ }, storage{ storage_ } {}
+		iterator(entity_index_type entity_, storage_t& storage_, std::vector<bool>& containsVec) : entity{ entity_ }, storage{ storage_ }, containsVec{ containsVec } {}
 		self_type operator++(int dummy) {
 			assert(entity < storage.size());
 			++entity;
-			while (!contains(entity)) ++entity; //skip non valid entries
+			while (entity < storage.size() && !containsVec.at(entity)) ++entity; //skip non valid entries
 			return *this;
 		}
 		self_type operator++() {
@@ -264,13 +264,14 @@ public:
 	private:
 		entity_index_type entity;
 		storage_t& storage;
+		std::vector<bool>& containsVec;
 	};
 	inline iterator begin() {
 		entity_index_type id = 0;
 		while (!contains(id)) ++id;
-		return iterator(id, storage);
+		return iterator(id, storage, containsVec);
 	}
-	inline iterator end() { return iterator(storage.size(), storage); }
+	inline iterator end() { return iterator(storage.size(), storage, containsVec); }
 private:
 	storage_t storage;
 	std::vector<bool> containsVec;

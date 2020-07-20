@@ -13,7 +13,7 @@ public:
 	CacheAABBJob(std::vector<entity_index_type>& entities_to_cache, EntityComponentManager& manager, std::vector<Vec2>& aabbs)
 		:entities_to_cache{ entities_to_cache }, manager{ manager }, aabbs{ aabbs } 
 	{}
-	int operator()() override {
+	int operator()(int workerId) override {
 		for (auto ent : entities_to_cache) {
 			auto& base = manager.getComp<Base>(ent);
 			auto& collider = manager.getComp<Collider>(ent);

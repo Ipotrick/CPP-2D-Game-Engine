@@ -32,6 +32,7 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\CollisionCheckJob.h" />
     <ClInclude Include="src\CollisionSystem.h" />
+    <ClInclude Include="src\CollisionWorkerData.hpp" />
     <ClInclude Include="src\collision_detection.h" />
     <ClInclude Include="src\CoreCompInclude.h" />
     <ClInclude Include="src\CoreComponents.h" />
@@ -61,6 +62,7 @@
     <ClInclude Include="src\PhysicsTypes.h" />
     <ClInclude Include="src\CollisionWorker.h" />
     <ClInclude Include="src\PlayerScript.h" />
+    <ClInclude Include="src\PushoutCalcJob.hpp" />
     <ClInclude Include="src\QuadTree.h" />
     <ClInclude Include="src\random.h" />
     <ClInclude Include="src\Renderer.h" />

@@ -10,7 +10,7 @@
 
 class JobFunctor {
 public:
-    virtual int operator()() = 0;
+    virtual int operator()(int workerId) = 0;
 };
 
 struct JobWorkerPoolData {
@@ -24,7 +24,7 @@ struct JobWorkerPoolData {
     std::unordered_map<uint32_t, int> closedJobs{};           // the key is the tag and the int is the return value of the job
 };
 
-inline void jobWorkerFunction(std::shared_ptr<JobWorkerPoolData> poolData) {
+inline void jobWorkerFunction(std::shared_ptr<JobWorkerPoolData> poolData, int workerId) {
     std::unique_lock<std::mutex> lock(poolData->mut);
 
     while (!poolData->killWorkers) { 
@@ -39,7 +39,7 @@ inline void jobWorkerFunction(std::shared_ptr<JobWorkerPoolData> poolData) {
         int returnCode = -2;
         {
             lock.unlock();          // unlock here as we do not need access to the syncronisation and meta data while executing a job
-            returnCode = (*job)();  // job is a pointer to a functor (*job) dereferences the poihnter and () calls the functor function
+            returnCode = (*job)(workerId);  // job is a pointer to a functor (*job) dereferences the poihnter and () calls the functor function
             lock.lock();            // here we need to lock again, as this whole function needs secure access outside of the job execution
         }
         poolData->closedJobs[tag] = returnCode; 
@@ -49,18 +49,18 @@ inline void jobWorkerFunction(std::shared_ptr<JobWorkerPoolData> poolData) {
 
 class JobManager {
     //meta:
-    int workerCount = 0;
+    int workerNum = 0;
     int nextWorkerTag = 0;
-    std::shared_ptr<JobWorkerPoolData> poolData;
+    std::shared_ptr<JobWorkerPoolData> jobMetaData;
     std::vector<std::thread> workerThreads{};
 public:
     JobManager(int workerCount) 
-    : workerCount{ workerCount } 
+    : workerNum{ workerCount } 
     {
-        poolData = std::make_shared<JobWorkerPoolData>();
+        jobMetaData = std::make_shared<JobWorkerPoolData>();
         workerThreads.reserve(workerCount);
         for (int i = 0; i < workerCount; i++) {
-            workerThreads.push_back(std::thread(jobWorkerFunction, poolData));
+            workerThreads.push_back(std::thread(jobWorkerFunction, jobMetaData, i));
         }
     }
 
@@ -71,9 +71,9 @@ public:
     int addJob(JobFunctor* job) {
         auto tag = nextWorkerTag++;
         {
-            std::lock_guard lock(poolData->mut);
-            poolData->openJobs.push_back({ tag, job });
-            poolData->workerCV.notify_one();
+            std::lock_guard lock(jobMetaData->mut);
+            jobMetaData->openJobs.push_back({ tag, job });
+            jobMetaData->workerCV.notify_one();
         }
         return tag;
     }
@@ -83,10 +83,10 @@ public:
         returns the return value of the job.
     */
     int waitFor(int job_tag) {
-        std::unique_lock lock(poolData->mut);
+        std::unique_lock lock(jobMetaData->mut);
         int returnCode = -2;
-        poolData->clientCV.wait(lock, [&]() {
-            for (auto& [tag, retCode] : poolData->closedJobs) {
+        jobMetaData->clientCV.wait(lock, [&]() {
+            for (auto& [tag, retCode] : jobMetaData->closedJobs) {
                 if (tag == job_tag) {
                     returnCode = retCode;
                     return true;
@@ -94,19 +94,24 @@ public:
             }
             return false;
         });
-        poolData->closedJobs.erase(job_tag);
+        jobMetaData->closedJobs.erase(job_tag);
         return returnCode;
     }
 
     // kills job workers
     void end() {
         {
-            std::lock_guard<std::mutex> lock(poolData->mut);
-            poolData->killWorkers = true;
-            poolData->workerCV.notify_all();
+            std::lock_guard<std::mutex> lock(jobMetaData->mut);
+            jobMetaData->killWorkers = true;
+            jobMetaData->workerCV.notify_all();
         }
         for (auto& thread : workerThreads) thread.join();
     }
+
+    /*
+        returns current amout of worker threads
+    */
+    int workerCount() const { return workerThreads.size(); }
 };
 
 #endif

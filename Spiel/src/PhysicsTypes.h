@@ -9,6 +9,9 @@ namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;
 	constexpr float nullDelta = 0.00001f;
 	constexpr float pushout = nullDelta;
+	constexpr bool directionalPositionCorrection = true;
+	constexpr float directionalCorrectionFactor = 0.75f;
+	constexpr bool pressurebasedPositionCorrection = true;
 
 	inline std::vector<Drawable> debugDrawables;
 }

@@ -117,11 +117,14 @@ public:
 	// base
 	BaseSystem baseSystem;
 
+	JobManager jobManager;
+
 	// physics
 	CollisionSystem collisionSystem;
 	PhysicsSystem physicsSystem;
 	// perf
 	PerfLogger perfLog;
+
 
 private:
 	void rendererUpdate(World& world);

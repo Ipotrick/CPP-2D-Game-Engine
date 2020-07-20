@@ -4,7 +4,6 @@
 void World::loadMap(std::string mapname_) {
 	std::ifstream mapData(mapname_);
 	if (mapData.good()) {
-
 	}
 	else
 	{
@@ -19,6 +18,8 @@ void World::loadMap(std::string mapname_) {
 		};
 
 		this->physics.friction = 1.0f;
+		this->physics.linearEffectAccel = 0.5;
+		this->physics.linearEffectDir = Vec2(0,-1);
 
 		int const height = 16*16;
 		int const width = 64+4;
@@ -38,8 +39,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"################     ###########    ################################"
+			"################     ###########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -54,8 +55,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"###################    #########    ################################"
+			"###################    #########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -70,8 +71,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"#############     ##############    ################################"
+			"#############     ##############    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -86,8 +87,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"################     ###########    ################################"
+			"################     ###########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -102,8 +103,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"#############     ##############    ################################"
+			"#############     ##############    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -118,8 +119,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"###############           ######    ################################"
+			"###############           ######    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -134,8 +135,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"#####################   ########    ################################"
+			"#####################   ########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -150,8 +151,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"################################    #########  #####################"
+			"################################    #########  #####################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -166,8 +167,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"#####################  #########    ################################"
+			"#####################  #########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -182,8 +183,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"################################    #########  #####################"
+			"################################    #########  #####################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -198,8 +199,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"##############  ################    ################################"
+			"##############  ################    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -214,8 +215,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"########################  ######    ################################"
+			"########################  ######    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -230,8 +231,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"##################  ############    ################################"
+			"##################  ############    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -246,8 +247,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"####################  ##########    ################################"
+			"####################  ##########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -262,8 +263,8 @@ void World::loadMap(std::string mapname_) {
 			"#                 #            #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
-			"################################    ################################"
-			"################################    ################################"
+			"#####################  #########    ################################"
+			"#####################  #########    ################################"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
 			"#                              #    #                              #"
@@ -292,100 +293,40 @@ void World::loadMap(std::string mapname_) {
 		auto player = create();
 		auto cmps = viewComps(player);
 		cmps.add<Base>(Base(Vec2(5,5),0));
-		cmps.add<Collider>(Collider(scalePlayer, Form::Rectangle));
-		cmps.add<PhysicsBody>(PhysicsBody(0.5, 10.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
+		auto colliderPlayer = Collider(scalePlayer, Form::Rectangle);
+		cmps.add<Collider>(colliderPlayer);
+		cmps.add<PhysicsBody>(PhysicsBody(0.5, 50.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
 		cmps.add<Movement>();
 		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::Rectangle));
 		cmps.add<Player>();
 		spawn(player);
 
 
-		int num = 0;// 250'000;
+		int num = 2000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = index_create();
 			auto c = viewComps(ent);
-			c.add<Base>();
-			c.add<Movement>();
-			c.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(0, 0), 0.4f, Form::Rectangle));
+			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
+			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.4f, Form::Rectangle));
 			spawn(ent);
 		}
 
-
-		/*
-		Vec2 scalePlayer = { 0.4f, 0.8f };
-		physics.friction = 0.16f;
-		//physics.linearEffectDir = Vec2(0, -1);
-		//physics.linearEffectAccel = 1.f;
-
-		entity_handle player = create();
-		addComp<Base>(player, Base({ 0,0 }, 0));
-		addComp<Movement>(player, Movement(0.0f, 0.0f));
-		addComp<Draw>(player, Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.6f, Form::RECTANGLE));
-		addComp<Collider>(player, Collider(scalePlayer, Form::RECTANGLE));
-		addComp<PhysicsBody>(player, PhysicsBody(0.1f, 60, calcMomentOfIntertia(60, scalePlayer), 100));
-		addComp<TextureRef>(player, TextureRef("Dir.png"));
-		addComp<Player>(player, Player());
-		spawn(player);
-
-		auto slave = create();
-		addComp<Base>(slave);
-		addComp<Movement>(slave);
-		addComp<PhysicsBody>(slave);
-		addComp<Collider>(slave, Collider({ scalePlayer.x * 1 / sqrtf(2.0f) }, Form::RECTANGLE));
-		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), { scalePlayer.x * 1 / sqrtf(2.0f) }, 0.6f, Form::RECTANGLE));
-		link(slave, player, Vec2(0.0f, 0.4f), 45.0f);
-		spawn(slave);
-
-		Vec2 scaleLegs{ 0.1, 0.2 };
-		slave = create();
-		addComp<Base>(slave);
-		addComp<Movement>(slave);
-		addComp<PhysicsBody>(slave);
-		addComp<Collider>(slave, Collider(scaleLegs, Form::RECTANGLE));
-		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), scaleLegs, 0.6f, Form::RECTANGLE));
-		link(slave, player, Vec2(0.2f, -0.4f), 30.0f);
-		spawn(slave);
-
-		slave = create();
-		addComp<Base>(slave);
-		addComp<Movement>(slave);
-		addComp<PhysicsBody>(slave);
-		addComp<Collider>(slave, Collider(scaleLegs, Form::RECTANGLE));
-		addComp<Draw>(slave, Draw(Vec4(0, 0, 0, 1), scaleLegs, 0.6f, Form::RECTANGLE));
-		link(slave, player, Vec2(-0.2f, -0.4f), -30.0f);
-		spawn(slave);
-
-		Collider	wallCollider(Vec2(0.4f, 10.0f), Form::RECTANGLE);
-		PhysicsBody	wallSolidBody(0.5f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1'000'000'000'000'000.0f, Vec2(0.4f, 10.0f)), 100.0f);
-		Draw		wallDraw = Draw(Vec4(0, 0, 0, 1), Vec2(0.4f, 10.0f), 0.5f, Form::RECTANGLE, true);
-		for (int i = 0; i < 4; i++) {
-			auto wall = create();
-			std::cout << "wallid: " << wall << std::endl;
-			float rotation = 90.0f * i;
-			addComp<Base>(wall, Base(rotate(Vec2(-5.f, 0.0f), rotation), rotation));
-			addComp<Collider>(wall, wallCollider);
-			addComp<PhysicsBody>(wall, wallSolidBody);
-			addComp<Draw>(wall, wallDraw);
-			//addComp<TextureRef>(wall, TextureRef("test.png",vec2(0,0), vec2(1,25)));
-			spawn(wall);
-		}*/
-
 		Vec2 scale = Vec2(0.1f, 0.1f);
 		Collider trashCollider = Collider(scale, Form::Rectangle);
-		Draw trashDraw = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale, 0.5f, Form::Rectangle, true);
-		PhysicsBody trashSolidBody(0.9f, 0.8f, calcMomentOfIntertia(1, scale), 10.0f);
-		for (int i = 0; i < 3000; i++) {
-
-			Vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5 , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5 };
+		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(15, scale), 10.0f);
+		for (int i = 0; i < 3000; i ++) {
+			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+			Vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f };
 			auto trash = index_create();
 			addComp<Base>(trash, Base(position, RotaVec2(0)));
 			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 			addComp<Collider>(trash, trashCollider);
-			addComp<Draw>(trash, trashDraw);
+			addComp<Draw>(trash, Draw(color, scale, 0.5f, Form::Rectangle, true));
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(trash, Health(100));
 			spawn(trash);
 
+			auto trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);
 			auto trashAss = index_create();
 			auto cmps = viewComps(trashAss);
 			cmps.add<Base>(Base(position));

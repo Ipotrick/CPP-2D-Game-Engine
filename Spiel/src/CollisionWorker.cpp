@@ -172,7 +172,7 @@ void CollisionWorker::collisionFunction(entity_index_type collID, Quadtree2 cons
 							Vec2 newPosChange = calcPosChange(
 								collAdapter.getSurfaceArea(), movementColl.velocity,
 								otherAdapter.getSurfaceArea(), velocityOther,
-								newTestResult.clippingDist, newTestResult.collisionNormal, otherDynamic);
+								newTestResult.clippingDist, newTestResult.collisionNormal, otherDynamic,0.5f);
 
 							Vec2 oldPosChange = collisionResponses.at(collID).posChange;
 

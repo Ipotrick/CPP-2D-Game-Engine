@@ -37,13 +37,22 @@ struct Movement : public CompData {
 		angleVelocity{ anglVel_ } {}
 };
 
+
+#define COLLISION_GROUP_TYPE uint8_t
+
 // collider component
+template<int Group>
+struct CollisionGroup {
+	static const COLLISION_GROUP_TYPE mask = 1 << Group;
+};
 
 struct Collider : public CompData {
 	Vec2 size;
-	Form form;
+	COLLISION_GROUP_TYPE collisionMaskAgainst	= CollisionGroup<0>::mask;
+	COLLISION_GROUP_TYPE collisionMaskSelf		= CollisionGroup<0>::mask;
 	bool particle;
 	bool sleeping;
+	Form form;
 	Collider(Vec2 size_ = { 1,1 }, Form form_ = Form::Circle, bool particle_ = false) :
 		size{ size_ }, 
 		form{ form_ },
@@ -59,6 +68,7 @@ struct PhysicsBody : public CompData {
 	float mass;
 	float momentOfInertia;
 	float friction;
+	float overlapAccum = 0;
 	PhysicsBody(float elasticity_, float mass_, float mOI_, float friction) : 
 		elasticity{ elasticity_ },
 		mass{ mass_ }, 

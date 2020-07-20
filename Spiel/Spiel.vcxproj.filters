@@ -222,6 +222,12 @@
     <ClInclude Include="src\BuildQtreeJob.hpp">
       <Filter>_Engine\_Collision</Filter>
     </ClInclude>
+    <ClInclude Include="src\CollisionWorkerData.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PushoutCalcJob.hpp">
+      <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

@@ -7,7 +7,11 @@
 #include "Vec2.h"
 #include "PhysicsTypes.h"
 
-Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float const dist, Vec2 const& primCollNormal, bool otherDynamic);
+/*
+	the higher the priority, the lower the pushout
+	priority ranges from 0 to 2, where 2 is no pushout and 0 is whole pushout
+*/
+Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float const dist, Vec2 const& primCollNormal, bool otherDynamic, float distribution);
 
 inline float calcMomentOfIntertia(float mass, Vec2 size) {
 	return mass * (size.x * size.x + size.y * size.y) / 12.0f;

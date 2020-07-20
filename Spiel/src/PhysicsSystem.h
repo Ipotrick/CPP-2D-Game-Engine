@@ -12,20 +12,25 @@
 
 #include "CollisionSystem.h"
 
-#define DEBUG_COLLIDER_SLEEP
+//#define DEBUG_COLLIDER_SLEEP
 
 class PhysicsSystem : public CoreSystem {
 public:
-	PhysicsSystem(World& world, PerfLogger& perfLog);
+	PhysicsSystem(World& world, JobManager& jobManager, PerfLogger& perfLog);
 	void execute(World& world, float deltaTime, CollisionSystem& collSys);
 	void end();
 public:
 	std::vector<Drawable> debugDrawables;
-private:
+private: 
 	void applyPhysics(float deltaTime, CollisionSystem& collSys);
 
 	void propagateChildPushoutToParent(CollisionSystem& collSys);
 	void syncBaseChildrenToParents();
 private:
+	JobManager& jobManager;
+	const int impulseResulutionIterations = 5;
 	PerfLogger& perfLog;
+
+	//buffers:
+	std::vector<Vec2> velocityBuffer;
 };

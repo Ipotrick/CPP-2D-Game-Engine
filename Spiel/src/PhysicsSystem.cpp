@@ -1,7 +1,13 @@
 #include "PhysicsSystem.h"
+#include <set>
 
-PhysicsSystem::PhysicsSystem(World& world, PerfLogger& perfLog) :
+#include "PushoutCalcJob.hpp"
+
+#define DEBUG_COLLIDER_SLEEP
+
+PhysicsSystem::PhysicsSystem(World& world, JobManager& jobManager, PerfLogger& perfLog) :
 	CoreSystem( world ),
+	jobManager{ jobManager },
 	perfLog{ perfLog }
 {
 }
@@ -20,54 +26,74 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 {
 	Timer t3(perfLog.getInputRef("physicsexecute"));
 
+	velocityBuffer.clear();
+	velocityBuffer.resize(world.memorySize());
+	for (auto ent : world.viewIDX<Movement>()) {
+		velocityBuffer[ent] = world.getComp<Movement>(ent).velocity;
+	}
+
+	PushoutCalcJob pushOutCalcJob = PushoutCalcJob(collSys.getAllCollisions(), velocityBuffer, collSys.poolWorkerData->collisionResponses, world);
+	auto pushOutCalcJobTag = jobManager.addJob(&pushOutCalcJob);
+
 // collision info operations begin:
 	// execute inelastic collisions 
-	for (auto& collInfo : collSys.getAllCollisions()) {
-		uint32_t entA = collInfo.idA;
-		uint32_t entB = collInfo.idB;
-	
-		if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { //check if both are solid
-	
-			// owner stands in place for the slave for a collision response execution
-			if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
-				if (world.hasComp<BaseChild>(entA) && !world.hasComp<BaseChild>(entB)) {
-					entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
+	for (int i = 0; i < impulseResulutionIterations; i++) {
+		for (auto& collInfo : collSys.getAllCollisions()) {
+			uint32_t entA = collInfo.idA;
+			uint32_t entB = collInfo.idB;
+
+			if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { //check if both are solid
+
+				// owner stands in place for the slave for a collision response execution
+				if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
+					if (world.hasComp<BaseChild>(entA) && !world.hasComp<BaseChild>(entB)) {
+						entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
+					}
+					else if (!world.hasComp<BaseChild>(entA) && world.hasComp<BaseChild>(entB)) {
+						entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
+					}
+					else {
+						// both are slaves
+						entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
+						entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
+					}
 				}
-				else if (!world.hasComp<BaseChild>(entA) && world.hasComp<BaseChild>(entB)) {
-					entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
+
+				if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { // recheck if the owners are solid
+					auto& solidA = world.getComp<PhysicsBody>(entA);
+					auto& baseA = world.getComp<Base>(entA);
+					auto& moveA = world.getComp<Movement>(entA);
+					auto& solidB = world.getComp<PhysicsBody>(entB);
+					auto& baseB = world.getComp<Base>(entB);
+					Movement dummy = Movement();
+					Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
+
+					if (!world.hasComp<Movement>(entB)) {
+						solidA.overlapAccum = solidA.overlapAccum * 0.95f + collInfo.clippingDist * 3.0f;
+					}
+					else {
+						solidA.overlapAccum = solidA.overlapAccum * 0.9f + collInfo.clippingDist * 2.0f;
+					}
+
+					auto& collidB = world.getComp<Collider>(entB);
+
+					float elast = std::max(solidA.elasticity, solidB.elasticity);
+					float friction = std::min(solidA.friction, solidB.friction) * deltaTime;
+					auto [collChanges, otherChanges] = impulseResolution(
+						baseA.position, moveA.velocity, moveA.angleVelocity, solidA.mass, solidA.momentOfInertia,
+						baseB.position, moveB.velocity, moveB.angleVelocity, solidB.mass, solidB.momentOfInertia,
+						collInfo.collisionNormal, collInfo.collisionPos, elast, friction);
+					moveA.velocity += collChanges.first;
+					moveA.angleVelocity += collChanges.second;
+					moveB.velocity += otherChanges.first;
+					moveB.angleVelocity += otherChanges.second;
+
 				}
-				else {
-					// both are slaves
-					entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
-					entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
-				}
-			}
-	
-			if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { // recheck if the owners are solid
-				auto& solidA = world.getComp<PhysicsBody>(entA);
-				auto& baseA = world.getComp<Base>(entA);
-				auto& moveA = world.getComp<Movement>(entA);
-				auto& solidB = world.getComp<PhysicsBody>(entB);
-				auto& baseB = world.getComp<Base>(entB);
-				Movement dummy = Movement();
-				Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
-	
-				auto& collidB = world.getComp<Collider>(entB);
-	
-				float elast = std::max(solidA.elasticity, solidB.elasticity);
-				float friction = std::min(solidA.friction, solidB.friction) * deltaTime;
-				auto [collChanges, otherChanges] = impulseResolution(
-					baseA.position, moveA.velocity, moveA.angleVelocity, solidA.mass, solidA.momentOfInertia,
-					baseB.position, moveB.velocity, moveB.angleVelocity, solidB.mass, solidB.momentOfInertia,
-					collInfo.collisionNormal, collInfo.collisionPos, elast,friction);
-				moveA.velocity += collChanges.first;
-				moveA.angleVelocity += collChanges.second;
-				moveB.velocity += otherChanges.first;
-				moveB.angleVelocity += otherChanges.second;
-	
 			}
 		}
 	}
+
+	jobManager.waitFor(pushOutCalcJobTag);
 
 	// let entities sleep or wake them up
 	for (auto entity : world.viewIDX<Movement, Collider, Base>()) {
@@ -148,11 +174,31 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 // velocity and pushouts end!
 	syncBaseChildrenToParents();
 	t3.stop();
-
+#ifdef DEBUG_PRESSURE
 	// submit debug drawables for physics
 	for (auto& el : Physics::debugDrawables) {
 		debugDrawables.push_back(el);
 	}
+
+	float allClipping = 0.0f;
+	float maxClipping = 0.0f;
+	for (auto ent : world.view<PhysicsBody, Draw>()) {
+		auto& phys = world.getComp<PhysicsBody>(ent);
+		maxClipping = std::max(maxClipping, phys.overlapAccum);
+		allClipping += phys.overlapAccum;
+	}
+	for (auto ent : world.view<PhysicsBody, Draw>()) {
+		auto& draw = world.getComp<Draw>(ent);
+		auto& phys = world.getComp<PhysicsBody>(ent);
+
+		auto otherColors = std::min(phys.overlapAccum / maxClipping, 1.0f);
+		draw.color.r = 1;
+		draw.color.g = 1.0f - otherColors;
+		draw.color.b = 1.0f - otherColors;
+	}
+	std::cout << "clipping: " << allClipping << std::endl;
+#endif
+
 #ifdef DEBUG_QUADTREE
 	std::vector<Drawable> debug;
 	for (auto el : world.view<Player>()) {
