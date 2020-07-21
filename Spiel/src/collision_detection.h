@@ -98,8 +98,8 @@ CollisionTestResult rectangleRectangleCollisionCheck2(CollidableAdapter const& c
 CollisionTestResult checkCircleRectangleCollision(CollidableAdapter const& circle, CollidableAdapter const& rect, bool bothSolid, bool isCirclePrimary);
 
 inline bool isOverlappingAABB(Vec2 const a_pos, Vec2 const a_AABB, Vec2 const b_pos, Vec2 const b_AABB) {
-	return (std::abs(b_pos.x - a_pos.x) <= std::abs(b_AABB.x + a_AABB.x) * 0.5f)
-		& (std::abs(b_pos.y - a_pos.y) <= std::abs(b_AABB.y + a_AABB.y) * 0.5f);
+	return (std::abs(b_pos.x - a_pos.x) < std::abs(b_AABB.x + a_AABB.x) * 0.5f)
+		& (std::abs(b_pos.y - a_pos.y) < std::abs(b_AABB.y + a_AABB.y) * 0.5f);
 }
 
 

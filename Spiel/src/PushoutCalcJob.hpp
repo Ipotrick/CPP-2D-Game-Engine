@@ -9,15 +9,17 @@ class PushoutCalcJob : public JobFunctor {
 	void pushoutCalc(CollisionInfo collInfo);
 	std::vector<CollisionInfo>& collisionInfos;
 	std::vector<Vec2>& velocities;
+	std::vector<float>& overlaps;
 	std::vector<CollisionResponse>& collisionResponses;
 	EntityComponentManager& manager;
 public:
 	PushoutCalcJob(
 		std::vector<CollisionInfo>& collisionInfos,
 		std::vector<Vec2>& velocities,
+		std::vector<float>& overlaps,
 		std::vector<CollisionResponse>& collisionResponses,
 		EntityComponentManager& manager)
-		:collisionInfos{ collisionInfos }, velocities{ velocities }, collisionResponses{ collisionResponses }, manager{ manager }
+		:collisionInfos{ collisionInfos }, velocities{ velocities }, overlaps{ overlaps }, collisionResponses{ collisionResponses }, manager{ manager }
 	{}
 
 	int operator() (int workerId) override {
@@ -36,16 +38,19 @@ void PushoutCalcJob::pushoutCalc(CollisionInfo collInfo) {
 		bool otherDynamic = false;
 		if (manager.hasComp<Movement>(otherID)) otherDynamic = true;
 
+		const float surfaceAreaColl = manager.getComp<Collider>(collID).size.x * manager.getComp<Collider>(collID).size.y;
+		const float surfaceAreaOther = manager.getComp<Collider>(otherID).size.x * manager.getComp<Collider>(otherID).size.y;
+		float dimColl = (manager.getComp<Collider>(collID).size.x + manager.getComp<Collider>(collID).size.y) / 2;
+		float dimother = (manager.getComp<Collider>(otherID).size.x + manager.getComp<Collider>(otherID).size.y) / 2;
 		float pushoutPriority = 1.0f;
 		if (Physics::pressurebasedPositionCorrection) {
-			if (manager.getComp<PhysicsBody>(collID).overlapAccum > 0) {
-				pushoutPriority = 2 * manager.getComp<PhysicsBody>(collID).overlapAccum / (manager.getComp<PhysicsBody>(collID).overlapAccum + manager.getComp<PhysicsBody>(otherID).overlapAccum);
+			if (overlaps[collID] > 0) {
+				pushoutPriority = 2 * (overlaps[collID]/ dimColl) / ((overlaps[collID]/ dimColl) + (overlaps[otherID]/ dimother));
 			}
 		}
-		;
 		Vec2 newPosChange = calcPosChange(
-			manager.getComp<Collider>(collID).size.x * manager.getComp<Collider>(collID).size.y, velocities[collID],
-			manager.getComp<Collider>(otherID).size.x * manager.getComp<Collider>(otherID).size.y, velocities[otherID],
+			surfaceAreaColl, velocities[collID],
+			surfaceAreaOther, velocities[otherID],
 			collInfo.clippingDist, collInfo.collisionNormal, otherDynamic, pushoutPriority);
 
 		Vec2 oldPosChange = collisionResponses.at(collID).posChange;

@@ -7,6 +7,8 @@ ChocolateyLastPathUpdate = 132319681596169636
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
+COMPLUS_InstallRoot = 
+COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -39,7 +41,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = 36F06D88
+ServiceHubLogSessionKey = 3F03964B
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -61,11 +63,72 @@ VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
+  AgeScript.cpp
+  BulletScript.cpp
   CollisionSystem.cpp
-  GameWorld.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\GameWorld.cpp(14,32): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\GameWorld.cpp(14,29): warning C4244: "Argument": Konvertierung von "int" in "float", möglicher Datenverlust
+  CollisionWorker.cpp
+  DummyScript.cpp
+  Engine.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\CollisionSystem.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\CollisionSystem.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionSystem.cpp(20,22): warning C4018: "<": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\CollisionWorker.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\CollisionWorker.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionSystem.cpp(170,183): warning C4267: "Argument": Konvertierung von "size_t" nach "uint32_t", Datenverlust möglich
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionSystem.cpp(185,200): warning C4267: "Argument": Konvertierung von "size_t" nach "uint32_t", Datenverlust möglich
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\AgeScript.cpp)
+  Game.cpp
+  HealthScript.cpp
+  ParticleScript.cpp
+  PhysicsSystem.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Engine.cpp(119): warning C4172: Adresse einer lokalen Variablen oder eines temporären Werts "" wird zurückgegeben
+  PlayerScript.cpp
+  QuadTree.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(13,20): warning C4305: "Argument": Verkürzung von "double" in "float" (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(41,39): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.cpp(42,51): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\PhysicsSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\PhysicsSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\PhysicsSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(20,39): warning C4305: "Argument": Verkürzung von "double" in "const float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(36,1): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(45,1): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(93,18): warning C4244: "Argument": Konvertierung von "uint64_t" in "int", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(102,23): warning C4305: "Argument": Verkürzung von "double" in "float"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\PlayerScript.cpp(128,23): warning C4305: "Argument": Verkürzung von "double" in "float"
+  Vec2.h
+  algo.h
+  collision_detection.cpp
+  main.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(165,89): warning C4244: "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(165,53): warning C4244: "Argument": Konvertierung von "double" in "float", möglicher Datenverlust
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(42,27): warning C4099: "QuadtreeNode": Geben Sie den zuerst unter Verwendung von "struct" und jetzt unter Verwendung von "class" gesehenen Namen ein (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\QuadTree.h(28): message : Siehe Deklaration von "QuadtreeNode" (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(114,29): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\Game.h(13,20): warning C4305: "Argument": Verkürzung von "double" in "float" (Quelldatei wird kompiliert src\main.cpp)
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

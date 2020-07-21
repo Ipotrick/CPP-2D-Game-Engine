@@ -4,7 +4,7 @@ class BaseSystem : CoreSystem {
 public:
 	using CoreSystem::CoreSystem;
 	inline void execute() {
-		for (auto entity : world.viewIDX<Base>()) {
+		for (auto entity : world.index_view<Base>()) {
 			if (!world.hasntComp<Movement>(entity) || world.didStaticsChange())	// only update static entites when statics changed
 			{
 				auto& base = world.getComp<Base>(entity);

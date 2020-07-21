@@ -43,7 +43,7 @@ void Game::create() {
 		std::cout << "angle: " << angle << " translated angle: " << getRotation(baseVec) << std::endl;
 	}
 	{
-		for (auto ent : world.viewIDX<Player>()) {
+		for (auto ent : world.index_view<Player>()) {
 			std::cout << "ding" << std::endl;
 			auto id = world.identify(ent);
 			bool hasID = world.hasID(ent);
@@ -159,7 +159,7 @@ void Game::cursorManipFunc()
 	baseCursor.rotation = camera.rotation;
 	colliderCursor.size = Vec2(1, 1) / camera.zoom / 100.0f;
 
-	for (auto ent : world.viewIDX<Player>()) {
+	for (auto ent : world.index_view<Player>()) {
 		camera.position = world.getComp<Base>(ent).position;
 	}
 

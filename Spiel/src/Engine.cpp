@@ -5,7 +5,7 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 100 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
 	maxDeltaTime{0.02f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
@@ -165,10 +165,10 @@ Drawable buildWorldSpaceDrawable(World& world, entity_index_type entity) {
 
 void Engine::rendererUpdate(World& world)
 {
-	for (auto ent : world.viewIDX<Base,Draw>()) {
+	for (auto ent : world.index_view<Base,Draw>()) {
 		renderer.submit(buildWorldSpaceDrawable(world, ent));
 	}
-	for (auto ent : world.viewIDX<TextureRef>()) {
+	for (auto ent : world.index_view<TextureRef>()) {
 		renderer.attachTex(ent, world.getComp<TextureRef>(ent));
 	}
 	renderer.setCamera(camera);

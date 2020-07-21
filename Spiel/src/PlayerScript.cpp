@@ -4,6 +4,7 @@
 
 void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 	World& world = engine.world;
+
 	auto cmps = world.viewComps(me);
 	auto [begin, end] = engine.getCollisions(me);
 	for (auto iter = begin; iter != end; ++iter) {
@@ -11,6 +12,8 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 			engine.events.triggerEvent("playerHit");
 		}
 	}
+
+	std::cout << "playerpos: " << cmps.get<Base>().position << std::endl;
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
@@ -24,25 +27,26 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 			mov.velocity.y += rand() % 1000 / 400.0f * 1.0f - 0.5f;
 			mov.velocity += dir * vel;
 			world.addComp<Movement>(particle, mov);
-			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), 0.49f, Form::Circle));
+			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), rand() % 1000 * 0.0052f, Form::Circle));
 			if (rand() % 4 == 0) {
 				world.addComp<Age>(particle, Age(1.5f));
 				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.01f, 0.01f), Vec2(10, 10),
-					Vec4(220 / 256.f, 20 / 256.f, 20 / 256.f, 0.9f),
+					Vec4(220 / 256.f, 20 / 256.f, 20 / 256.f, 0.6),
 					Vec4(0, 0, 0, 0)
 				));
 			}
 			else {
 				world.addComp<Age>(particle, Age(1.0f));
 				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.8f, 0.8f), Vec2(4, 4),
-					Vec4(202 / 256.f, 40 / 256.f, 20 / 256.f, 0.9f),
+					Vec4(202 / 256.f, 40 / 256.f, 20 / 256.f, 0.6f),
 					Vec4(0, 0, 0, 0)
 				));
 			}
-			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.001f, 0.0001, 0));
+			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.002f, 0.0001, 0));
 			world.addComp<Collider>(particle, Collider(Vec2(0.2f, 0.2f), Form::Circle, true));
 			world.addComp<TextureRef>(particle, TextureRef("Cloud.png"));
 			world.spawnLater(particle);
+			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass / world.getComp<PhysicsBody>(me).mass;
 		}
 	};
 

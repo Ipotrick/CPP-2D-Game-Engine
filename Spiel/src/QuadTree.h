@@ -96,10 +96,10 @@ private:
 
 	inline std::tuple<bool, bool, bool, bool> isInSubtrees(Vec2 treePos, Vec2 treeSize, Vec2 pos, Vec2 size) const {
 		return {
-			isOverlappingAABB(treePos + Vec2(-treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
-			isOverlappingAABB(treePos + Vec2( treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
-			isOverlappingAABB(treePos + Vec2(-treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size),
-			isOverlappingAABB(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.5f, pos, size)
+			isOverlappingAABB(treePos + Vec2(-treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size),
+			isOverlappingAABB(treePos + Vec2( treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size),
+			isOverlappingAABB(treePos + Vec2(-treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size),
+			isOverlappingAABB(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size)
 		};
 	}
 

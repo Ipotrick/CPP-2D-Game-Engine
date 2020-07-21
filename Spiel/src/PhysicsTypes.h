@@ -12,6 +12,7 @@ namespace Physics {
 	constexpr bool directionalPositionCorrection = true;
 	constexpr float directionalCorrectionFactor = 0.75f;
 	constexpr bool pressurebasedPositionCorrection = true;
+	constexpr float pressureFalloff = 0.90f;
 
 	inline std::vector<Drawable> debugDrawables;
 }

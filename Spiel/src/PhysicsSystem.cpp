@@ -3,7 +3,7 @@
 
 #include "PushoutCalcJob.hpp"
 
-#define DEBUG_COLLIDER_SLEEP
+//#define DEBUG_PRESSURE
 
 PhysicsSystem::PhysicsSystem(World& world, JobManager& jobManager, PerfLogger& perfLog) :
 	CoreSystem( world ),
@@ -28,21 +28,34 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 
 	velocityBuffer.clear();
 	velocityBuffer.resize(world.memorySize());
-	for (auto ent : world.viewIDX<Movement>()) {
+	overlapAccumBuffer.clear();
+	overlapAccumBuffer.resize(world.memorySize());
+	for (auto ent : world.index_view<Movement, PhysicsBody>()) {
 		velocityBuffer[ent] = world.getComp<Movement>(ent).velocity;
+		overlapAccumBuffer[ent] = world.getComp<PhysicsBody>(ent).overlapAccum;
 	}
 
-	PushoutCalcJob pushOutCalcJob = PushoutCalcJob(collSys.getAllCollisions(), velocityBuffer, collSys.poolWorkerData->collisionResponses, world);
+	PushoutCalcJob pushOutCalcJob = PushoutCalcJob(collSys.getAllCollisions(), velocityBuffer, overlapAccumBuffer, collSys.poolWorkerData->collisionResponses, world);
 	auto pushOutCalcJobTag = jobManager.addJob(&pushOutCalcJob);
 
 // collision info operations begin:
+	for (auto ent : world.index_view<PhysicsBody>()) {
+		world.getComp<PhysicsBody>(ent).overlapAccum *= 1 - (Physics::pressureFalloff * deltaTime);
+	}
 	// execute inelastic collisions 
 	for (int i = 0; i < impulseResulutionIterations; i++) {
 		for (auto& collInfo : collSys.getAllCollisions()) {
 			uint32_t entA = collInfo.idA;
 			uint32_t entB = collInfo.idB;
 
+
 			if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { //check if both are solid
+				if (!world.hasComp<Movement>(entB)) {
+					world.getComp<PhysicsBody>(entA).overlapAccum += collInfo.clippingDist * 2.0f;	// collision with wall makes greater pressure
+				}
+				else {
+					world.getComp<PhysicsBody>(entA).overlapAccum += collInfo.clippingDist;
+				}
 
 				// owner stands in place for the slave for a collision response execution
 				if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
@@ -68,12 +81,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 					Movement dummy = Movement();
 					Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
 
-					if (!world.hasComp<Movement>(entB)) {
-						solidA.overlapAccum = solidA.overlapAccum * 0.95f + collInfo.clippingDist * 3.0f;
-					}
-					else {
-						solidA.overlapAccum = solidA.overlapAccum * 0.9f + collInfo.clippingDist * 2.0f;
-					}
+					
 
 					auto& collidB = world.getComp<Collider>(entB);
 
@@ -96,7 +104,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 	jobManager.waitFor(pushOutCalcJobTag);
 
 	// let entities sleep or wake them up
-	for (auto entity : world.viewIDX<Movement, Collider, Base>()) {
+	for (auto entity : world.index_view<Movement, Collider, Base>()) {
 		auto& collider = world.getComp<Collider>(entity);
 		auto& movement = world.getComp<Movement>(entity);
 		auto& base = world.getComp<Base>(entity);
@@ -112,7 +120,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 // collision info operations end!
 // effector operations begin:
 	// linear effector execution
-	for (auto ent : world.viewIDX<LinearEffector>()) {
+	for (auto ent : world.index_view<LinearEffector>()) {
 		auto& moveField = world.getComp<LinearEffector>(ent);
 		auto [begin, end] = collSys.getCollisions(ent);
 		for (auto iter = begin; iter != end; ++iter) {
@@ -126,7 +134,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 	}
 
 	// friction effector execution
-	for (auto ent : world.viewIDX<FrictionEffector>()) {
+	for (auto ent : world.index_view<FrictionEffector>()) {
 		auto& moveField = world.getComp<FrictionEffector>(ent);
 		auto [begin, end] = collSys.getCollisions(ent);
 		for (auto iter = begin; iter != end; ++iter) {
@@ -138,7 +146,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 	}
 
 	// uniform effector execution :
-	for (auto ent : world.viewIDX<Movement, PhysicsBody>()) {
+	for (auto ent : world.index_view<Movement, PhysicsBody>()) {
 		auto& mov = world.getComp<Movement>(ent);
 		auto& solid = world.getComp<PhysicsBody>(ent);
 		mov.velocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
@@ -153,13 +161,13 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 	propagateChildPushoutToParent(collSys);
 
 	// apply pushout
-	for (auto ent : world.viewIDX<Movement, PhysicsBody, Base>()) {
+	for (auto ent : world.index_view<Movement, PhysicsBody, Base>()) {
 		auto& base = world.getComp<Base>(ent);
 		base.position += collSys.poolWorkerData->collisionResponses[ent].posChange;
 	}
 
 	// execute physics changes in pos, rota
-	for (auto ent : world.viewIDX<Movement, Base>()) {
+	for (auto ent : world.index_view<Movement, Base>()) {
 
 		auto& movement = world.getComp<Movement>(ent);
 		auto& base = world.getComp<Base>(ent);
@@ -174,11 +182,11 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 // velocity and pushouts end!
 	syncBaseChildrenToParents();
 	t3.stop();
-#ifdef DEBUG_PRESSURE
 	// submit debug drawables for physics
 	for (auto& el : Physics::debugDrawables) {
 		debugDrawables.push_back(el);
 	}
+#ifdef DEBUG_PRESSURE
 
 	float allClipping = 0.0f;
 	float maxClipping = 0.0f;
@@ -241,7 +249,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 
 void PhysicsSystem::propagateChildPushoutToParent(CollisionSystem& collSys)
 {
-	for (auto child : world.viewIDX<BaseChild, PhysicsBody>()) {
+	for (auto child : world.index_view<BaseChild, PhysicsBody>()) {
 		auto relationship = world.getComp<BaseChild>(child);
 		auto parent = world.getIndex(relationship.parent);
 		float childWeight = norm(collSys.poolWorkerData->collisionResponses[child].posChange);
@@ -254,7 +262,7 @@ void PhysicsSystem::propagateChildPushoutToParent(CollisionSystem& collSys)
 }
 
 void PhysicsSystem::syncBaseChildrenToParents() {
-	for (auto child : world.viewIDX<BaseChild>()) {
+	for (auto child : world.index_view<BaseChild>()) {
 		auto& base = world.getComp<Base>(child);
 		auto& movement = world.getComp<Movement>(child);
 		auto& relationship = world.getComp<BaseChild>(child);

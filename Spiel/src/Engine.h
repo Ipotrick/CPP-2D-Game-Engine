@@ -103,7 +103,29 @@ public:
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_index_type index);
 	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_id id);
-	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object 
+
+	friend class CollisionsView;
+	template<typename entityReference>
+	class CollisionsView {
+		using iterator = std::vector<CollisionInfo>::iterator;
+		Engine& engine; iterator beginIter; iterator endIter;
+	public:
+		CollisionsView(Engine& engine, entityReference ent) : engine{ engine } {
+			auto [begin, end] = engine.getCollisions(ent); this->beginIter = begin; this->endIter = end;
+		}
+		inline iterator begin() { return beginIter; }
+		inline iterator end() { return endIter; }
+	};
+
+	/*
+		returns a view to the collisions of an entity id or entity index this is only slightly slower then getCollisions(entRef entity)
+	*/
+	template<typename entityReference>
+	CollisionsView<entityReference> collisions_view(entityReference entity) {
+		return CollisionsView<entityReference>(*this, entity);
+	}
+
+	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object
 		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
 	GridPhysics<bool> const& getStaticGrid();
 
@@ -114,17 +136,14 @@ public:
 
 	uint32_t freeDrawableID{ 0x80000000 };
 
-	// base
-	BaseSystem baseSystem;
-
 	JobManager jobManager;
 
-	// physics
+	// core systems
+	BaseSystem baseSystem;
 	CollisionSystem collisionSystem;
 	PhysicsSystem physicsSystem;
-	// perf
-	PerfLogger perfLog;
 
+	PerfLogger perfLog;
 
 private:
 	void rendererUpdate(World& world);

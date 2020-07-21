@@ -62,7 +62,7 @@ void CollisionSystem::prepare()
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
 	Vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
-	for (auto colliderID : world.viewIDX<Collider>()) {
+	for (auto colliderID : world.index_view<Collider>()) {
 		auto& collider = world.getComp<Collider>(colliderID);
 		auto& baseCollider = world.getComp<Base>(colliderID);
 

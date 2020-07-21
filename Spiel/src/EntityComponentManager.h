@@ -6,6 +6,8 @@
 #include <queue>
 #include <deque>
 #include <bitset>
+#include <tuple>
+#include <type_traits>
 
 #include "robin_hood.h"
 #include "json.h"
@@ -126,6 +128,8 @@ public:
 	/* returnes refference the component data of one entitiy, ~O(1) */
 	template<typename CompType> CompType& getComp(entity_index_type index);
 	template<typename CompType> CompType& getComp(entity_id id);
+	template<typename ... CompTypes> auto getCompPtrs(entity_index_type index)-> const std::tuple<CompTypes...>;
+	template<typename ... CompTypes> auto getCompPtrs(entity_id id)-> const std::tuple<CompTypes...>;
 	/* returns bool whether or not the given index has the component added/registered, ~O(1) */
 	template<typename CompType> bool hasComp(entity_index_type index);
 	template<typename CompType> bool hasComp(entity_id id);
@@ -146,8 +150,8 @@ public:
 	template<typename CompType> void remComp(entity_index_type index);
 	template<typename CompType> void remComp(entity_id id);
 	/* returnes a View, and iterable object that only iterates over the entities with the given Components, ignored despawned entities */
-	template<typename First, typename Second, typename ... CompTypes> MultiViewIDX<First, Second, CompTypes...> viewIDX();
-	template<typename CompType> SingleViewIDX<CompType> viewIDX();
+	template<typename First, typename Second, typename ... CompTypes> MultiViewIDX<First, Second, CompTypes...> index_view();
+	template<typename CompType> SingleViewIDX<CompType> index_view();
 	template<typename First, typename Second, typename ... CompTypes> MultiView<First, Second, CompTypes...> view();
 	template<typename CompType> SingleView<CompType> view();
 	ComponentView viewComps(entity_index_type index);
@@ -208,6 +212,22 @@ template<typename CompType>
 inline CompType& EntityComponentManager::getComp(entity_id id)
 {
 	return getComp<CompType>(idToIndex[id.id]);
+}
+
+template<typename ... CompTypes> auto EntityComponentManager::getCompPtrs(entity_index_type index) -> const std::tuple<CompTypes...> {
+	std::tuple<CompTypes...> res;
+	for_each(res, [&](auto ref) {
+		ref = &(getComp<std::remove_pointer<decltype(ref)>::type>(index));
+		}, CompTypes...);
+	return res;
+}
+
+template<typename ... CompTypes> auto EntityComponentManager::getCompPtrs(entity_id id) -> const std::tuple<CompTypes...> {
+	std::tuple<CompTypes...> res;
+	for_each(res, [&](auto& ref) {
+		ref = &(getComp<std::remove_pointer<std::remove_reference<decltype(ref)>::type>::type>(id));
+		});
+	return res;
 }
 
 template<typename CompType> __forceinline bool EntityComponentManager::hasComp(entity_index_type index) {
@@ -280,13 +300,7 @@ namespace _HasCompsTesterImpl {
 	template<typename Head, typename... CompTypes>
 	struct HasCompsTester<Head, CompTypes...> {
 		HasCompsTester(entity_index_type index, EntityComponentManager& manager) {
-			if (manager.hasComp<Head>(index)) {
-				HasCompsTester<CompTypes...> recursiveTester(index, manager);
-				result = recursiveTester.result;
-			}
-			else {
-				result = false;
-			}
+			result = manager.hasComp<Head>(index) & HasCompsTester<CompTypes...>(index, manager).result;
 		}
 		bool result;
 	};
@@ -403,7 +417,7 @@ private:
 };
 
 template<typename First, typename Second, typename ... CompTypes>
-inline MultiViewIDX<First, Second, CompTypes...> EntityComponentManager::viewIDX() {
+inline MultiViewIDX<First, Second, CompTypes...> EntityComponentManager::index_view() {
 	return MultiViewIDX<First, Second, CompTypes...>(*this);
 }
 
@@ -535,7 +549,7 @@ private:
 };
 
 template<typename CompType>
-inline SingleViewIDX<CompType> EntityComponentManager::viewIDX() {
+inline SingleViewIDX<CompType> EntityComponentManager::index_view() {
 	return SingleViewIDX<CompType>(*this);
 }
 

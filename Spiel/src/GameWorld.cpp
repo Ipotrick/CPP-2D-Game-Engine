@@ -18,7 +18,7 @@ void World::loadMap(std::string mapname_) {
 		};
 
 		this->physics.friction = 1.0f;
-		this->physics.linearEffectAccel = 0.5;
+		this->physics.linearEffectAccel = 5.5;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 		int const height = 16*16;
@@ -295,28 +295,28 @@ void World::loadMap(std::string mapname_) {
 		cmps.add<Base>(Base(Vec2(5,5),0));
 		auto colliderPlayer = Collider(scalePlayer, Form::Rectangle);
 		cmps.add<Collider>(colliderPlayer);
-		cmps.add<PhysicsBody>(PhysicsBody(0.5, 50.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
+		cmps.add<PhysicsBody>(PhysicsBody(0.5, 5.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
 		cmps.add<Movement>();
 		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::Rectangle));
 		cmps.add<Player>();
 		spawn(player);
 
 
-		int num = 2000;// 250'000;
+		int num = 10000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = index_create();
 			auto c = viewComps(ent);
 			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
-			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.4f, Form::Rectangle));
+			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.3f, Form::Rectangle));
 			spawn(ent);
 		}
 
 		Vec2 scale = Vec2(0.1f, 0.1f);
 		Collider trashCollider = Collider(scale, Form::Rectangle);
-		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(15, scale), 10.0f);
-		for (int i = 0; i < 3000; i ++) {
+		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(1.2, scale), 1.0f);
+		for (int i = 0; i < 1100; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
-			Vec2 position = { static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f };
+			Vec2 position = { static_cast<float>(rand() % 1001 / 500.0f - 1.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f };
 			auto trash = index_create();
 			addComp<Base>(trash, Base(position, RotaVec2(0)));
 			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));

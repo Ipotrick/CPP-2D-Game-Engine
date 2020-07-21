@@ -44,24 +44,25 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 				{
 					if (isInUl)
 					{
-						insert(pcoll, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
+						insert(pcoll, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f);
 					}
 					else if (isInUr)
 					{
-						insert(pcoll, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
+						insert(pcoll, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f);
 					}
 					else if (isInDl)
 					{
-						insert(pcoll, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
+						insert(pcoll, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
 					}
 					else if (isInDr)
 					{
-						insert(pcoll, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
+						insert(pcoll, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
 					}
 					else {
 						std::cerr << "FAILURE TO INSERT FOUND " << isInCount << " FITTING SUBTREES" << std::endl;
 						std::cerr << "AABB: " << aabbBounds(world.getComp<Collider>(pcoll).size, world.getComp<Base>(pcoll).rotaVec) << " pos: " << world.getComp<Base>(pcoll).position << std::endl;
 						std::cerr << "AABB MotherNode: " << thisSize << " Pos MotherNode: " << thisPos << std::endl;
+						assert(false);
 					}
 				}
 			}
@@ -80,24 +81,25 @@ void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSi
 		{
 			if (isInUl)
 			{
-				insert(coll, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
+				insert(coll, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f);
 			}
 			else if (isInUr)
 			{
-				insert(coll, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
+				insert(coll, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f);
 			}
 			else if (isInDl)
 			{
-				insert(coll, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
+				insert(coll, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
 			}
 			else if (isInDr)
 			{
-				insert(coll, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f);
+				insert(coll, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
 			}
 			else {
 				std::cerr << "FAILURE TO INSERT FOUND " << isInCount << " FITTING SUBTREES" << std::endl;
 				std::cerr << "AABB: " << aabbBounds(world.getComp<Collider>(coll).size, world.getComp<Base>(coll).rotaVec) << " pos: " << world.getComp<Base>(coll).position << std::endl;
 				std::cerr << "AABB MotherNode: " << thisSize << " Pos MotherNode: " << thisPos << std::endl;
+				assert(false);
 			}
 		}
 	}
@@ -109,19 +111,19 @@ void Quadtree2::querry(std::vector<uint32_t>& rVec, PosSize const& posSize, uint
 		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, posSize.pos, posSize.size);
 		if (isInUl)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f );
+			querry(rVec, posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f );
 		}
 		if (isInUr)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f);
 		}
 		if (isInDl)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5f);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
 		}
 		if (isInDr)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5f);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
 		}
 	}
 	rVec.reserve(rVec.size() + trees[thisID].collidables.size());
@@ -135,19 +137,19 @@ void Quadtree2::querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPo
 
 		if (inUl)
 		{
-			querryDebug(posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f, draw);
+			querryDebug(posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f, draw);
 		}
 		if (inUr)
 		{
-			querryDebug(posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5f, draw);
+			querryDebug(posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2( thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f, draw);
 		}
 		if (inDl)
 		{
-			querryDebug(posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw);
+			querryDebug(posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.500001f, draw);
 		}
 		if (inDr)
 		{
-			querryDebug(posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.5f, draw);
+			querryDebug(posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2( thisSize.x,  thisSize.y) * 0.25f, thisSize * 0.500001f, draw);
 		}
 	}
 	else {

@@ -28,9 +28,10 @@ private:
 	void syncBaseChildrenToParents();
 private:
 	JobManager& jobManager;
-	const int impulseResulutionIterations = 5;
+	const int impulseResulutionIterations = 25;
 	PerfLogger& perfLog;
 
 	//buffers:
+	std::vector<float> overlapAccumBuffer;
 	std::vector<Vec2> velocityBuffer;
 };
