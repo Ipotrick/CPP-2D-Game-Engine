@@ -1,4 +1,4 @@
-#include "Physics.h"
+#include "Physics.hpp"
 
 Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float const dist, Vec2 const& primCollNormal, bool otherDynamic, float priority) {
 	if (otherDynamic) {

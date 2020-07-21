@@ -1,9 +1,9 @@
-#include "RenderingWorker.h"
+#include "RenderingWorker.hpp"
 
 #include <sstream>
 #include <fstream>
 
-#include "Timing.h"
+#include "Timing.hpp"
 
 static unsigned int compileShader(unsigned int type_, const std::string source_) {
 	unsigned id = glCreateShader(type_);

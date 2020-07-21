@@ -1,8 +1,8 @@
 #pragma once
 
 #include "JobManager.hpp"
-#include "EntityComponentManager.h"
-#include "QuadTree.h"
+#include "EntityComponentManager.hpp"
+#include "QuadTree.hpp"
 
 class BuildQtreeJob : public JobFunctor {
 	EntityComponentManager& manager;

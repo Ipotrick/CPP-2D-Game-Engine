@@ -1,5 +1,5 @@
-#include "Game.h"
-#include "htmlCompiler.h"
+#include "Game.hpp"
+#include "htmlCompiler.hpp"
 
 using namespace std_extra;
 using std::cout;

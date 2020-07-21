@@ -1,4 +1,4 @@
-#include "EventHandler.h"
+#include "EventHandler.hpp"
 
 bool operator==(EventSubscribtion const& a, EventSubscribtion const& b) {
 	return a.onEventTrigger == b.onEventTrigger && a.data == b.data;

@@ -1,9 +1,9 @@
 #pragma once
-#include "PhysicsTypes.h"
+#include "PhysicsTypes.hpp"
 #include "JobManager.hpp"
-#include "EntityComponentManager.h"
-#include "Physics.h"
-#include "collision_detection.h"
+#include "EntityComponentManager.hpp"
+#include "Physics.hpp"
+#include "collision_detection.hpp"
 
 class PushoutCalcJob : public JobFunctor {
 	void pushoutCalc(CollisionInfo collInfo);

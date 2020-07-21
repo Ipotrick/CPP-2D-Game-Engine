@@ -1,7 +1,7 @@
 #pragma once
-#include "CollisionSystem.h"
+#include "CollisionSystem.hpp"
 
-#include "PhysicsSystem.h"
+#include "PhysicsSystem.hpp"
 #include "CacheAABBJob.hpp"
 #include "BuildQtreeJob.hpp"
 

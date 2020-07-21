@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PlayerScript.h"
+#include "PlayerScript.hpp"
 
 void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 	World& world = engine.world;
@@ -12,8 +12,6 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 			engine.events.triggerEvent("playerHit");
 		}
 	}
-
-	std::cout << "playerpos: " << cmps.get<Base>().position << std::endl;
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {

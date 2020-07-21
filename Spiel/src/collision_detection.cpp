@@ -1,4 +1,4 @@
-#include "collision_detection.h"
+#include "collision_detection.hpp"
 
 CollisionTestResult checkCircleRectangleCollision(CollidableAdapter const& circle, CollidableAdapter const& rect, bool isCirclePrimary) {
 	CollisionTestResult result = CollisionTestResult();

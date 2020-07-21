@@ -1,4 +1,4 @@
-#include "EntityComponentManager.h"
+#include "EntityComponentManager.hpp"
 
 entity_index_type EntityComponentManager::index_create() {
 	if (!freeIndexQueue.empty()) {

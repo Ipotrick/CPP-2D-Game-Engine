@@ -1,9 +1,9 @@
 #pragma once
 
 #include "JobManager.hpp"
-#include "EntityComponentStorage.h"
-#include "EntityComponentManager.h"
-#include "Vec2.h"
+#include "EntityComponentStorage.hpp"
+#include "EntityComponentManager.hpp"
+#include "Vec2.hpp"
 
 class CacheAABBJob : public JobFunctor{
 	std::vector<entity_index_type>& entities_to_cache;

@@ -1,5 +1,5 @@
-#include "GameWorld.h"
-#include "Physics.h"
+#include "GameWorld.hpp"
+#include "Physics.hpp"
 
 void World::loadMap(std::string mapname_) {
 	std::ifstream mapData(mapname_);
@@ -18,7 +18,7 @@ void World::loadMap(std::string mapname_) {
 		};
 
 		this->physics.friction = 1.0f;
-		this->physics.linearEffectAccel = 5.5;
+		this->physics.linearEffectAccel = 9.8;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 		int const height = 16*16;
@@ -301,7 +301,6 @@ void World::loadMap(std::string mapname_) {
 		cmps.add<Player>();
 		spawn(player);
 
-
 		int num = 10000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = index_create();
@@ -312,48 +311,48 @@ void World::loadMap(std::string mapname_) {
 		}
 
 		Vec2 scale = Vec2(0.1f, 0.1f);
-		Collider trashCollider = Collider(scale, Form::Rectangle);
+		Collider trashCollider = Collider(scale, Form::Circle);
 		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(1.2, scale), 1.0f);
-		for (int i = 0; i < 1100; i ++) {
+		for (int i = 0; i < 2000; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 500.0f - 1.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f };
 			auto trash = index_create();
 			addComp<Base>(trash, Base(position, RotaVec2(0)));
 			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
 			addComp<Collider>(trash, trashCollider);
-			addComp<Draw>(trash, Draw(color, scale, 0.5f, Form::Rectangle, true));
+			addComp<Draw>(trash, Draw(color, scale, 0.5f, Form::Circle, true));
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(trash, Health(100));
 			spawn(trash);
 
-			auto trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);
-			auto trashAss = index_create();
-			auto cmps = viewComps(trashAss);
-			cmps.add<Base>(Base(position));
-			cmps.add<Movement>();
-			auto coll = trashCollider;
-			coll.form = Form::Circle;
-			cmps.add<Coll>(coll);
-			cmps.add<PhysicsBody>();
-			auto draw = trashDraw;
-			draw.form = Form::Circle;
-			cmps.add<Draw>(draw);
-			link(trashAss, trash, Vec2(0, 0.05f), 0);
-			spawn(trashAss);
-			
-			trashAss = index_create();
-			auto cmps2 = viewComps(trashAss);
-			cmps2.add<Base>(Base(position));
-			cmps2.add<Movement>();
-			coll = trashCollider;
-			coll.form = Form::Circle;
-			cmps2.add<Coll>(coll);
-			cmps2.add<PhysicsBody>();
-			draw = trashDraw;
-			draw.form = Form::Circle;
-			cmps2.add<Draw>(draw);
-			link(trashAss, trash, Vec2(0, -0.05f), 0);
-			spawn(trashAss);
+			//auto trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);
+			//auto trashAss = index_create();
+			//auto cmps = viewComps(trashAss);
+			//cmps.add<Base>(Base(position));
+			//cmps.add<Movement>();
+			//auto coll = trashCollider;
+			//coll.form = Form::Circle;
+			//cmps.add<Coll>(coll);
+			//cmps.add<PhysicsBody>();
+			//auto draw = trashDraw;
+			//draw.form = Form::Circle;
+			//cmps.add<Draw>(draw);
+			//link(trashAss, trash, Vec2(0, 0.05f), 0);
+			//spawn(trashAss);
+			//
+			//trashAss = index_create();
+			//auto cmps2 = viewComps(trashAss);
+			//cmps2.add<Base>(Base(position));
+			//cmps2.add<Movement>();
+			//coll = trashCollider;
+			//coll.form = Form::Circle;
+			//cmps2.add<Coll>(coll);
+			//cmps2.add<PhysicsBody>();
+			//draw = trashDraw;
+			//draw.form = Form::Circle;
+			//cmps2.add<Draw>(draw);
+			//link(trashAss, trash, Vec2(0, -0.05f), 0);
+			//spawn(trashAss);
 		}
 		/*
 		int num2 = 0;

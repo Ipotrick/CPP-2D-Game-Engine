@@ -1,4 +1,4 @@
-#include "ParticleScript.h"
+#include "ParticleScript.hpp"
 
 void ParticleScript::script(entity_id entity, ParticleScriptComp& data, float deltaTime) {
 	assert(world.hasComp<Age>(entity));

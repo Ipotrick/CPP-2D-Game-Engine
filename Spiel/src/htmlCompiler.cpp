@@ -1,4 +1,4 @@
-#include "htmlCompiler.h"
+#include "htmlCompiler.hpp"
 
 std::optional<std::string_view> UIElement::matchComponentName(int begin)
 {

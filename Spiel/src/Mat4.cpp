@@ -1,4 +1,4 @@
-#include "Mat4.h"
+#include "Mat4.hpp"
 
 Vec4 operator*(Mat4 const& m, Vec4 const& v0)
 {

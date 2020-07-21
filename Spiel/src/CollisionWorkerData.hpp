@@ -3,12 +3,12 @@
 #include <sstream>
 #include <condition_variable>
 
-#include "Physics.h"
-#include "collision_detection.h"
+#include "Physics.hpp"
+#include "collision_detection.hpp"
 #include "robin_hood.h"
-#include "QuadTree.h"
-#include "Timing.h"
-#include "World.h"
+#include "QuadTree.hpp"
+#include "Timing.hpp"
+#include "World.hpp"
 struct CollisionPoolData {
 	CollisionPoolData(World& wrld, size_t qtreeCapacity, int workerCount) :
 		world{ wrld },

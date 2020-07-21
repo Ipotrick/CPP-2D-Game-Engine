@@ -45,176 +45,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Game.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Script.h">
-      <Filter>_Engine\_Executors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Camera.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Renderer.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Window.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreComponents.h">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsTypes.h">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\RenderingWorker.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\TextureHandler.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\RenderTypes.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
       <Filter>_stbi</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameWorld.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\basic_math.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vec3.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vec4.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vec.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mat3.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mat4.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vector_math.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\random.h">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsSystem.h">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\debug.h">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Physics.h">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreSystemUniforms.h">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreSystem.h">
-      <Filter>_Engine\_Executors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystem.h">
-      <Filter>_Engine\_Executors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BaseTypes.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BaseSystem.h">
-      <Filter>_Engine</Filter>
     </ClInclude>
     <ClInclude Include="src\ai.h">
       <Filter>_Engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EventHandler.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Perf.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Timing.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\AgeScript.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BasicScripts.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BulletScript.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HealthScript.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PlayerScript.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameComponents.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystemUnifroms.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ParticleScript.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityComponentStorage.h">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreCompInclude.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameCompInclude.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityComponentManager.h">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\World.h">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
     <ClInclude Include="src\fileUtility.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\DummyScript.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\std_extra.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\htmlCompiler.h">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\collision_detection.h">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\QuadTree.h">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollisionSystem.h">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollisionWorker.h">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
     <ClInclude Include="src\JobManager.hpp">
       <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollisionCheckJob.h">
-      <Filter>_Engine\_Collision</Filter>
     </ClInclude>
     <ClInclude Include="src\CacheAABBJob.hpp">
       <Filter>_Engine\_Collision</Filter>
@@ -227,6 +68,165 @@
     </ClInclude>
     <ClInclude Include="src\PushoutCalcJob.hpp">
       <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\collision_detection.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionCheckJob.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionSystem.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionWorker.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\QuadTree.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreComponents.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreSystemUniforms.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EntityComponentManager.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EntityComponentStorage.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\World.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreSystem.hpp">
+      <Filter>_Engine\_Executors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystem.hpp">
+      <Filter>_Engine\_Executors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Script.hpp">
+      <Filter>_Engine\_Executors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Physics.hpp">
+      <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsSystem.hpp">
+      <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PhysicsTypes.hpp">
+      <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camera.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\debug.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderingWorker.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderTypes.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureHandler.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Window.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BaseSystem.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BaseTypes.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreCompInclude.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventHandler.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Perf.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\std_extra.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Timing.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\basic_math.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mat3.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Mat4.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\random.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vec.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vec3.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vec4.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vector_math.hpp">
+      <Filter>_math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AgeScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BasicScripts.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BulletScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DummyScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Game.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameCompInclude.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameComponents.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameSystemUnifroms.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameWorld.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HealthScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ParticleScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlayerScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\htmlCompiler.hpp">
+      <Filter>_Engine\_UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -251,9 +251,6 @@
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
       <Filter>_stbi</Filter>
     </ClCompile>
-    <ClCompile Include="src\Vec2.h">
-      <Filter>_math</Filter>
-    </ClCompile>
     <ClCompile Include="src\Mat4.cpp">
       <Filter>_math</Filter>
     </ClCompile>
@@ -262,9 +259,6 @@
     </ClCompile>
     <ClCompile Include="src\PhysicsSystem.cpp">
       <Filter>_Engine\_Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\algo.h">
-      <Filter>_Engine</Filter>
     </ClCompile>
     <ClCompile Include="src\Engine.cpp">
       <Filter>_Engine</Filter>
@@ -313,6 +307,12 @@
     </ClCompile>
     <ClCompile Include="src\CollisionWorker.cpp">
       <Filter>_Engine\_Collision</Filter>
+    </ClCompile>
+    <ClCompile Include="src\algo.hpp">
+      <Filter>_Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vec2.hpp">
+      <Filter>_math</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

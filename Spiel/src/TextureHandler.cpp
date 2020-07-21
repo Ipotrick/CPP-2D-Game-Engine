@@ -1,4 +1,4 @@
-﻿#include "TextureHandler.h"
+﻿#include "TextureHandler.hpp"
 
 #include "GL/glew.h"
 

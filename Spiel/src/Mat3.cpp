@@ -1,4 +1,4 @@
-#include "Mat3.h"
+#include "Mat3.hpp"
 
 Mat3 Mat3::identity()
 {

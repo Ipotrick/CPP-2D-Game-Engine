@@ -1,4 +1,4 @@
-#include "CollisionWorker.h"
+#include "CollisionWorker.hpp"
 #include <algorithm>
 #include <random>
 

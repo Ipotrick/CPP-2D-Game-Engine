@@ -1,4 +1,4 @@
-#include "AgeScript.h"
+#include "AgeScript.hpp"
 
 void AgeScript::script(entity_id id, Age& data, float deltaTime) {
 

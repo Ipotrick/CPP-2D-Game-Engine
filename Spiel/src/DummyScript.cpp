@@ -1,4 +1,4 @@
-#include "DummyScript.h"
+#include "DummyScript.hpp"
 
 void DummyScript::script(entity_id me, Dummy& data, float deltaTime) {
 	assert(engine.world.exists(me));

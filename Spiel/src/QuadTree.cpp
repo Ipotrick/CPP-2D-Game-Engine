@@ -1,4 +1,4 @@
-#include "QuadTree.h"
+#include "QuadTree.hpp"
 
 void Quadtree2::insert(uint32_t coll, uint32_t thisID, Vec2 thisPos, Vec2 thisSize)
 {

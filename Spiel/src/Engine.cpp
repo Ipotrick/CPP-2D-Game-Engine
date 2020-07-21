@@ -1,12 +1,12 @@
-#include "Engine.h"
+#include "Engine.hpp"
 
 
 Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
-	maxDeltaTime{0.02f},
+	minimunLoopTime{ 100 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	maxDeltaTime{0.01f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	baseSystem( wrld ),
