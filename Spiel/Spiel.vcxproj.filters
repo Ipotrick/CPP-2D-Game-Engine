@@ -228,6 +228,15 @@
     <ClInclude Include="src\htmlCompiler.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
+    <ClInclude Include="src\EntityTypes.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IndexSet.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CollisionResolutionJob.hpp">
+      <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

@@ -10,7 +10,7 @@ void ParticleScript::script(entity_id entity, ParticleScriptComp& data, float de
  
 	auto [begin, end] = engine.getCollisions(entity);
 	for (auto iter = begin; iter != end; ++iter) {
-		if (world.hasComps<Collider, PhysicsBody>(iter->idB)) {
+		if (world.hasComps<Collider, PhysicsBody>(iter->indexB)) {
 			data.startSize *= 0.5f;
 			data.endSize *= 0.9f;
 		}

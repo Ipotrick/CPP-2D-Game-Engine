@@ -206,13 +206,13 @@ void Game::cursorManipFunc()
 			auto [begin, end] = getCollisions(cursor);
 			auto iterWIthHighestDrawPrio = begin;
 			for (auto iter = begin; iter != end; ++iter) {
-				if (world.getComp<Draw>(iter->idB).drawingPrio > world.getComp<Draw>(iterWIthHighestDrawPrio->idB).drawingPrio) {	//higher drawprio found
+				if (world.getComp<Draw>(iter->indexB).drawingPrio > world.getComp<Draw>(iterWIthHighestDrawPrio->indexB).drawingPrio) {	//higher drawprio found
 					iterWIthHighestDrawPrio = iter;
 				}
 			}
 			if (begin != end) {
-				cursorManipData.lockedID = iterWIthHighestDrawPrio->idB;
-				cursorManipData.lockedIDDist = world.getComp<Base>(iterWIthHighestDrawPrio->idB).position - baseCursor.position;
+				cursorManipData.lockedID = iterWIthHighestDrawPrio->indexB;
+				cursorManipData.lockedIDDist = world.getComp<Base>(iterWIthHighestDrawPrio->indexB).position - baseCursor.position;
 				cursorManipData.locked = true;
 			}
 		}

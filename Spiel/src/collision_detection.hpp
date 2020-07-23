@@ -3,8 +3,8 @@
 #include <array>
 
 #include "BaseTypes.hpp"
-
 #include "Vec2.hpp"
+#include "EntityTypes.hpp"
 
 struct CollidableAdapter {
 	CollidableAdapter(Vec2 const& pos_, float const& rota_, Vec2 const& size_, Form const& form_, bool dyn_, RotaVec2 rotationVec_) :
@@ -39,14 +39,23 @@ struct CollisionTestResult {
 	CollisionTestResult() : collisionPos{ 0, 0 }, collided{ false }, clippingDist{ 0.0f }, collisionNormal{ 1,0 } {}
 };
 
-struct CollisionInfo {
-	uint32_t idA;
-	uint32_t idB;
+struct IndexCollisionInfo {
+	entity_index_type indexA;
+	entity_index_type indexB;
 	float clippingDist;
 	Vec2 collisionNormal;
 	Vec2 collisionPos;
 
-	CollisionInfo(uint32_t idA_, uint32_t idB_, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :idA{ idA_ }, idB{ idB_ }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
+	IndexCollisionInfo(entity_index_type idA_, entity_index_type idB_, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :indexA{ idA_ }, indexB{ idB_ }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
+};
+
+struct CollisionInfo {
+	entity_id otherId;
+	float clippingDist;
+	Vec2 collisionNormal;
+	Vec2 collisionPos;
+
+	CollisionInfo(entity_id otherId, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :otherId{ otherId }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
 };
 
 struct CollisionResponse {

@@ -66,7 +66,7 @@ struct CollisionWorkerData {
 	uint32_t beginStat;
 	uint32_t endStat;
 
-	std::vector<CollisionInfo>* collisionInfos;
+	std::vector<IndexCollisionInfo>* collisionInfos;
 };
 
 struct CollisionWorker {

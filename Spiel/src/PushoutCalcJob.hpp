@@ -6,15 +6,15 @@
 #include "collision_detection.hpp"
 
 class PushoutCalcJob : public JobFunctor {
-	void pushoutCalc(CollisionInfo collInfo);
-	std::vector<CollisionInfo>& collisionInfos;
+	void pushoutCalc(IndexCollisionInfo collInfo);
+	std::vector<IndexCollisionInfo>& collisionInfos;
 	std::vector<Vec2>& velocities;
 	std::vector<float>& overlaps;
 	std::vector<CollisionResponse>& collisionResponses;
 	EntityComponentManager& manager;
 public:
 	PushoutCalcJob(
-		std::vector<CollisionInfo>& collisionInfos,
+		std::vector<IndexCollisionInfo>& collisionInfos,
 		std::vector<Vec2>& velocities,
 		std::vector<float>& overlaps,
 		std::vector<CollisionResponse>& collisionResponses,
@@ -30,10 +30,10 @@ public:
 	}
 };
 
-void PushoutCalcJob::pushoutCalc(CollisionInfo collInfo) {
-	auto& collID = collInfo.idA;
+void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
+	auto& collID = collInfo.indexA;
 	if (manager.hasComp<Movement>(collID)) {
-		auto& otherID = collInfo.idB;
+		auto& otherID = collInfo.indexB;
 
 		bool otherDynamic = false;
 		if (manager.hasComp<Movement>(otherID)) otherDynamic = true;

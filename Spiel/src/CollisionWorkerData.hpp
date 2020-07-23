@@ -17,7 +17,7 @@ struct CollisionPoolData {
 	{
 		for (int i = 0; i < workerCount; i++) {
 			nearCollidablesBuffers.push_back(std::vector<entity_index_type>());
-			collisionInfoBuffers.push_back(std::vector<CollisionInfo>());
+			collisionInfoBuffers.push_back(std::vector<IndexCollisionInfo>());
 		}
 	}
 
@@ -33,7 +33,7 @@ struct CollisionPoolData {
 	Quadtree2 qtreeStatic;
 
 	std::vector<std::vector<entity_index_type>> nearCollidablesBuffers;
-	std::vector<std::vector<CollisionInfo>> collisionInfoBuffers;
+	std::vector<std::vector<IndexCollisionInfo>> collisionInfoBuffers;
 
 	GridPhysics<bool> staticCollisionGrid;
 

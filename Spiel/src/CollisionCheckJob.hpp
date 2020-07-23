@@ -18,7 +18,7 @@ protected:
 		bool otherDynamic,
 		Quadtree2& qtree,
 		std::vector<entity_index_type>& nearCollidablesBuffer,
-		std::vector<CollisionInfo>& collisionInfos);
+		std::vector<IndexCollisionInfo>& collisionInfos);
 public:
 	CollisionCheckJob(
 		std::shared_ptr<CollisionPoolData> poolData,
@@ -78,7 +78,7 @@ inline void CollisionCheckJob::collisionFunction(
 	bool otherDynamic,
 	Quadtree2& qtree,
 	std::vector<entity_index_type>& nearCollidablesBuffer,
-	std::vector<CollisionInfo>& collisionInfos)
+	std::vector<IndexCollisionInfo>& collisionInfos)
 {
 	auto& manager = poolData->world;
 	auto& aabbCache = poolData->aabbCache;
@@ -101,19 +101,19 @@ inline void CollisionCheckJob::collisionFunction(
 		qtree.querry(nearCollidablesBuffer, posSize);
 		for (auto& otherID : nearCollidablesBuffer) {
 			if (collID != otherID) { //do not check against self
-				if (((manager.getComp<Collider>(collID).collisionMaskAgainst & manager.getComp<Collider>(otherID).collisionMaskSelf) != 0x00'00'00'00)) {
-					CollidableAdapter otherAdapter = CollidableAdapter(
-						manager.getComp<Base>(otherID).position,
-						manager.getComp<Base>(otherID).rotation,
-						manager.getComp<Collider>(otherID).size,
-						manager.getComp<Collider>(otherID).form,
-						otherDynamic,
-						manager.getComp<Base>(otherID).rotaVec);
+				CollidableAdapter otherAdapter = CollidableAdapter(
+					manager.getComp<Base>(otherID).position,
+					manager.getComp<Base>(otherID).rotation,
+					manager.getComp<Collider>(otherID).size,
+					manager.getComp<Collider>(otherID).form,
+					otherDynamic,
+					manager.getComp<Base>(otherID).rotaVec);
 
-					auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, aabbCache.at(collID), aabbCache.at(otherID));
-					if (newTestResult.collided) {
-						if (!manager.areRelated(collID, otherID)) {
-							collisionInfos.push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
+				auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, aabbCache.at(collID), aabbCache.at(otherID));
+				if (newTestResult.collided) {
+					if (!manager.areRelated(collID, otherID)) {
+						if ((manager.getComp<Collider>(collID).collisionMaskAgainst & manager.getComp<Collider>(otherID).collisionMaskSelf)) {
+							collisionInfos.push_back(IndexCollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 						}
 					}
 				}

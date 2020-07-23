@@ -17,8 +17,8 @@ void World::loadMap(std::string mapname_) {
 			spawn(wall);
 		};
 
-		this->physics.friction = 1.0f;
-		this->physics.linearEffectAccel = 9.8;
+		this->physics.friction = 0.01f;
+		this->physics.linearEffectAccel = 3.8;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 		int const height = 16*16;
@@ -312,8 +312,8 @@ void World::loadMap(std::string mapname_) {
 
 		Vec2 scale = Vec2(0.1f, 0.1f);
 		Collider trashCollider = Collider(scale, Form::Circle);
-		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(1.2, scale), 1.0f);
-		for (int i = 0; i < 2000; i ++) {
+		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(1.2, scale), 30.0f);
+		for (int i = 0; i < 4000; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 500.0f - 1.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 500.0f - 1.0f) * 4.6f + 5.5f };
 			auto trash = index_create();
@@ -323,6 +323,7 @@ void World::loadMap(std::string mapname_) {
 			addComp<Draw>(trash, Draw(color, scale, 0.5f, Form::Circle, true));
 			addComp<PhysicsBody>(trash, trashSolidBody);
 			addComp<Health>(trash, Health(100));
+			//addComp(trash, TexRef("Dir.png"));
 			spawn(trash);
 
 			//auto trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);

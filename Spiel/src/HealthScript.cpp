@@ -5,7 +5,7 @@ void HealthScript::script(entity_id id, Health& data, float deltaTime) {
 	auto [begin, end] = engine.getCollisions(id);
 	bool gotHitByBullet{ false };
 	for (auto iter = begin; iter != end; ++iter) {
-		if (world.hasComp<Bullet>(iter->idB)) {
+		if (world.hasComp<Bullet>(iter->indexB)) {
 			gotHitByBullet = true;
 		}
 	}

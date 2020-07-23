@@ -110,7 +110,7 @@ Vec2 Engine::getPosWorldSpace(Vec2 windowSpacePos_) {
 	return { transformedPos.x, transformedPos.y };
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(entity_index_type entity) {
+std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(entity_index_type entity) {
 	return collisionSystem.getCollisions(entity);
 }
 

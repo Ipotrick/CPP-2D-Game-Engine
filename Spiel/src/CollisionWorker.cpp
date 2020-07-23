@@ -157,7 +157,7 @@ void CollisionWorker::collisionFunction(entity_index_type collID, Quadtree2 cons
 
 				if (newTestResult.collided) {
 					if (!world.areRelated(collID, otherID)) {
-						workerData->collisionInfos->push_back(CollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
+						workerData->collisionInfos->push_back(IndexCollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
 						if (world.hasComp<Movement>(collID)) {
 							auto& movementColl = world.getComp<Movement>(collID);
 							Vec2 velocityOther;

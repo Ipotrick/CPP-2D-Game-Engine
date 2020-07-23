@@ -22,21 +22,21 @@ void CollisionSystem::execute(World& world, float deltaTime)
 	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
-std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> CollisionSystem::getCollisions(entity_index_type entity)
+std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> CollisionSystem::getCollisions(entity_index_type entity)
 {
-	auto begin = collisionInfoBegins.find(entity);
-	auto end = collisionInfoEnds.find(entity);
-	if (begin != collisionInfoBegins.end() && end != collisionInfoEnds.end()) {	// is there even collisionInfo for the id?
+	auto begin = indexCollisionInfoBegins.find(entity);
+	auto end = indexCollisionInfoEnds.find(entity);
+	if (begin != indexCollisionInfoBegins.end() && end != indexCollisionInfoEnds.end()) {	// is there even collisionInfo for the id?
 		return std::make_tuple(begin->second, end->second);
 	}
 	else {
-		return std::make_tuple(collisionInfos.end(), collisionInfos.end());
+		return std::make_tuple(indexCollisionInfos.end(), indexCollisionInfos.end());
 	}
 }
 
-std::vector<CollisionInfo>& CollisionSystem::getAllCollisions()
+std::vector<IndexCollisionInfo>& CollisionSystem::getAllCollisions()
 {
-	return this->collisionInfos;
+	return this->indexCollisionInfos;
 }
 
 GridPhysics<bool> CollisionSystem::getStaticGrid()
@@ -145,6 +145,9 @@ void CollisionSystem::cleanBuffers()
 	cleanAndShrink(poolWorkerData->aabbCache);
 	if (poolWorkerData->aabbCache.size() != world.memorySize()) poolWorkerData->aabbCache.resize(world.memorySize());
 	for (auto& split : poolWorkerData->collisionInfoBuffers) cleanAndShrink(split);
+	cleanAndShrink(indexCollisionInfos);
+	indexCollisionInfoBegins.clear();
+	indexCollisionInfoEnds.clear();
 	cleanAndShrink(collisionInfos);
 	collisionInfoBegins.clear();
 	collisionInfoEnds.clear();
@@ -202,23 +205,34 @@ void CollisionSystem::collisionDetection()
 
 	// store all collisioninfos in one vectorcapacity
 	for (auto collisionInfosplit : poolWorkerData->collisionInfoBuffers) {
-		collisionInfos.insert(collisionInfos.end(), collisionInfosplit.begin(), collisionInfosplit.end());
+		indexCollisionInfos.insert(indexCollisionInfos.end(), collisionInfosplit.begin(), collisionInfosplit.end());
 	}
 
 	// build hashtables for first and last iterator element of collisioninfo
 	uint32_t lastIDA{};
-	for (auto iter = collisionInfos.begin(); iter != collisionInfos.end(); ++iter) {
-		if (iter == collisionInfos.begin()) {	//initialize values from first element
-			lastIDA = iter->idA;
-			collisionInfoBegins.insert({ iter->idA, iter });
+	for (auto iter = indexCollisionInfos.begin(); iter != indexCollisionInfos.end(); ++iter) {
+		if (iter == indexCollisionInfos.begin()) {	//initialize values from first element
+			lastIDA = iter->indexA;
+			indexCollisionInfoBegins.insert({ iter->indexA, iter });
 		}
-		if (lastIDA != iter->idA) {	//new idA found
-			collisionInfoEnds.insert({ lastIDA, iter });
-			collisionInfoBegins.insert({ iter->idA, iter });
-			lastIDA = iter->idA;	//set lastId to new id
+		if (lastIDA != iter->indexA) {	//new idA found
+			indexCollisionInfoEnds.insert({ lastIDA, iter });
+			indexCollisionInfoBegins.insert({ iter->indexA, iter });
+			lastIDA = iter->indexA;	//set lastId to new id
 		}
 	}
-	collisionInfoEnds.insert({ lastIDA, collisionInfos.end() });
+	indexCollisionInfoEnds.insert({ lastIDA, indexCollisionInfos.end() });
+
+	// build collisionInfo tables and vector from index Collisioninfos
+	for (auto collInfo : indexCollisionInfos) {
+		collisionInfos.emplace_back(world.identify(collInfo.indexB), collInfo.clippingDist, collInfo.collisionNormal, collInfo.collisionPos);
+	}
+	for (auto [key, value] : indexCollisionInfoBegins) {
+		collisionInfoBegins[world.identify(key).id] = collisionInfos.begin() + std::distance(indexCollisionInfos.begin(), indexCollisionInfoBegins[key]);
+	}
+	for (auto [key, value] : indexCollisionInfoEnds) {
+		collisionInfoEnds[world.identify(key).id] = collisionInfos.begin() + std::distance(indexCollisionInfos.begin(), indexCollisionInfoEnds[key]);
+	}
 
 	t2.stop();
 }

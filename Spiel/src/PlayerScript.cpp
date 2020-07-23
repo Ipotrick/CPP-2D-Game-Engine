@@ -8,7 +8,7 @@ void PlayerScript::script(entity_id me, Player& data, float deltaTime) {
 	auto cmps = world.viewComps(me);
 	auto [begin, end] = engine.getCollisions(me);
 	for (auto iter = begin; iter != end; ++iter) {
-		if (engine.world.hasComp<PhysicsBody>(iter->idB)) {
+		if (engine.world.hasComp<PhysicsBody>(iter->indexB)) {
 			engine.events.triggerEvent("playerHit");
 		}
 	}

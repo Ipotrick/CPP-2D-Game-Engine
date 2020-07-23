@@ -101,13 +101,13 @@ public:
 
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_index_type index);
-	std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> getCollisions(entity_id id);
+	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(entity_index_type index);
+	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(entity_id id);
 
 	friend class CollisionsView;
 	template<typename entityReference>
 	class CollisionsView {
-		using iterator = std::vector<CollisionInfo>::iterator;
+		using iterator = std::vector<IndexCollisionInfo>::iterator;
 		Engine& engine; iterator beginIter; iterator endIter;
 	public:
 		CollisionsView(Engine& engine, entityReference ent) : engine{ engine } {
@@ -115,6 +115,7 @@ public:
 		}
 		inline iterator begin() { return beginIter; }
 		inline iterator end() { return endIter; }
+		inline size_t size() { return std::distance(beginIter, endIter); }
 	};
 
 	/*
@@ -177,7 +178,7 @@ __forceinline void Engine::attachTexture(uint32_t drawableID, std::string_view n
 	renderer.attachTex(drawableID, name, min, max);
 }
 
-__forceinline std::tuple<std::vector<CollisionInfo>::iterator, std::vector<CollisionInfo>::iterator> Engine::getCollisions(entity_id id)
+__forceinline std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(entity_id id)
 {
 	return getCollisions(world.getIndex(id));
 }

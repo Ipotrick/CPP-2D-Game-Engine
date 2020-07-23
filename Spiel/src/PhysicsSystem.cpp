@@ -22,8 +22,93 @@ void PhysicsSystem::end()
 {
 }
 
+
+void PhysicsSystem::findIslands(float deltaTime, CollisionSystem& collSys) {
+	entityIslandMarks.clear();
+	entityIslandMarks.resize(world.memorySize(), 0);
+
+	int islandCount = 1;
+	for (auto collInfo : collSys.indexCollisionInfos) {
+		if (entityIslandMarks[collInfo.indexB] > 0) {
+		entityIslandMarks[collInfo.indexA] = entityIslandMarks[collInfo.indexB];
+		}
+		else if (entityIslandMarks[collInfo.indexA] > 0) {
+			entityIslandMarks[collInfo.indexB] = entityIslandMarks[collInfo.indexA];
+		}
+		else {
+			entityIslandMarks[collInfo.indexA] = entityIslandMarks[collInfo.indexB] = islandCount;
+			islandCount++;
+		}
+	}
+	for (auto collInfo : collSys.indexCollisionInfos) {
+		if (entityIslandMarks[collInfo.indexB] > entityIslandMarks[collInfo.indexA]) {
+			entityIslandMarks[collInfo.indexB] = entityIslandMarks[collInfo.indexA];
+		}
+		else if (entityIslandMarks[collInfo.indexB] < entityIslandMarks[collInfo.indexA]) {
+			entityIslandMarks[collInfo.indexA] = entityIslandMarks[collInfo.indexB];
+		}
+	}
+	int borderCollisions = 0;
+	int allCollisions = 0;
+	for (auto collInfo : collSys.indexCollisionInfos) {
+		if (entityIslandMarks[collInfo.indexA] != entityIslandMarks[collInfo.indexB]) borderCollisions++;
+		allCollisions++;
+	}
+#ifdef DEBUG_ISLANDS
+	std::array<Vec4, 10> colors{
+		Vec4(1,1,0,1),
+		Vec4(1,0,1,1),
+		Vec4(0,1,1,1),
+		Vec4(0.75,0.25,0,1),
+		Vec4(0,1,0,1),
+		Vec4(0,0,1,1),
+		Vec4(1,1,0.5,1),
+		Vec4(1,0.5,1,1),
+		Vec4(0.5,1,1,1),
+		Vec4(0.7,0.7,0.5,1),
+	};
+	for (auto ent : world.index_view<PhysicsBody, Movement>()) {
+		world.getComp<Draw>(ent).color = colors[entityIsland[ent] % 10];
+	}
+	
+	printf("collisions inside of islands: %i, collisions between islands: %i, ratio: %f\n", allCollisions- borderCollisions, borderCollisions, (float)(allCollisions - borderCollisions) / (float)borderCollisions);
+#endif
+	for (auto& batch : collInfoIslands) 
+		batch.clear();
+	collInfoIslands.resize(islandCount);
+	collInfoIslandsBorder.clear();
+	for (auto collInfo : collSys.indexCollisionInfos) {
+		if (entityIslandMarks.at(collInfo.indexA) == entityIslandMarks.at(collInfo.indexB)) {
+			collInfoIslands[entityIslandMarks[collInfo.indexA]].push_back(collInfo);
+		}
+		else {
+			collInfoIslandsBorder.push_back(collInfo);
+		}
+	}
+
+	const int maxCollisionCountInBatch = std::max(allCollisions / impulseResolutionJobCount,1);
+	int currentBatchCollCount = 0;
+	int currentIslandHead = 1;
+
+	islandBatches.clear();
+	islandBatches.reserve(islandCount / maxCollisionCountInBatch + 1);
+	for (int island = 1; island < islandCount; ++island) {
+		currentBatchCollCount += collInfoIslands.at(island).size();
+		if (currentBatchCollCount >= maxCollisionCountInBatch) {
+			islandBatches.push_back(std::pair(currentIslandHead, island));
+			currentIslandHead = island + 1;
+			currentBatchCollCount = 0;
+		}
+	}
+	if (currentIslandHead != islandCount) {
+		islandBatches.push_back(std::pair(currentIslandHead, islandCount-1));
+	}
+}
+
 void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 {
+	findIslands(deltaTime, collSys);
+
 	Timer t3(perfLog.getInputRef("physicsexecute"));
 
 	velocityBuffer.clear();
@@ -38,70 +123,84 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 	PushoutCalcJob pushOutCalcJob = PushoutCalcJob(collSys.getAllCollisions(), velocityBuffer, overlapAccumBuffer, collSys.poolWorkerData->collisionResponses, world);
 	auto pushOutCalcJobTag = jobManager.addJob(&pushOutCalcJob);
 
-// collision info operations begin:
 	for (auto ent : world.index_view<PhysicsBody>()) {
 		world.getComp<PhysicsBody>(ent).overlapAccum *= 1 - (Physics::pressureFalloff * deltaTime);
 	}
-	// execute inelastic collisions 
-	for (int i = 0; i < impulseResulutionIterations; i++) {
-		for (auto& collInfo : collSys.getAllCollisions()) {
-			uint32_t entA = collInfo.idA;
-			uint32_t entB = collInfo.idB;
 
+	auto collisionResolution = [&](IndexCollisionInfo& collInfo) {
+		uint32_t entA = collInfo.indexA;
+		uint32_t entB = collInfo.indexB;
 
-			if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { //check if both are solid
-				if (!world.hasComp<Movement>(entB)) {
-					world.getComp<PhysicsBody>(entA).overlapAccum += collInfo.clippingDist * 2.0f;	// collision with wall makes greater pressure
+		if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { //check if both are solid
+			if (!world.hasComp<Movement>(entB)) {
+				world.getComp<PhysicsBody>(entA).overlapAccum += collInfo.clippingDist * 2.0f;	// collision with wall makes greater pressure
+			}
+			else {
+				world.getComp<PhysicsBody>(entA).overlapAccum += collInfo.clippingDist;
+			}
+
+			// owner stands in place for the slave for a collision response execution
+			if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
+				if (world.hasComp<BaseChild>(entA) && !world.hasComp<BaseChild>(entB)) {
+					entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
+				}
+				else if (!world.hasComp<BaseChild>(entA) && world.hasComp<BaseChild>(entB)) {
+					entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
 				}
 				else {
-					world.getComp<PhysicsBody>(entA).overlapAccum += collInfo.clippingDist;
-				}
-
-				// owner stands in place for the slave for a collision response execution
-				if (world.hasComp<BaseChild>(entA) | world.hasComp<BaseChild>(entB)) {
-					if (world.hasComp<BaseChild>(entA) && !world.hasComp<BaseChild>(entB)) {
-						entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
-					}
-					else if (!world.hasComp<BaseChild>(entA) && world.hasComp<BaseChild>(entB)) {
-						entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
-					}
-					else {
-						// both are slaves
-						entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
-						entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
-					}
-				}
-
-				if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { // recheck if the owners are solid
-					auto& solidA = world.getComp<PhysicsBody>(entA);
-					auto& baseA = world.getComp<Base>(entA);
-					auto& moveA = world.getComp<Movement>(entA);
-					auto& solidB = world.getComp<PhysicsBody>(entB);
-					auto& baseB = world.getComp<Base>(entB);
-					Movement dummy = Movement();
-					Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
-
-					
-
-					auto& collidB = world.getComp<Collider>(entB);
-
-					float elast = std::max(solidA.elasticity, solidB.elasticity);
-					float friction = std::min(solidA.friction, solidB.friction) * deltaTime;
-					auto [collChanges, otherChanges] = impulseResolution(
-						baseA.position, moveA.velocity, moveA.angleVelocity, solidA.mass, solidA.momentOfInertia,
-						baseB.position, moveB.velocity, moveB.angleVelocity, solidB.mass, solidB.momentOfInertia,
-						collInfo.collisionNormal, collInfo.collisionPos, elast, friction);
-					moveA.velocity += collChanges.first;
-					moveA.angleVelocity += collChanges.second;
-					moveB.velocity += otherChanges.first;
-					moveB.angleVelocity += otherChanges.second;
-
+					// both are slaves
+					entA = world.getIndex(world.getComp<BaseChild>(entA).parent);
+					entB = world.getIndex(world.getComp<BaseChild>(entB).parent);
 				}
 			}
+
+			if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { // recheck if the owners are solid
+				auto& solidA = world.getComp<PhysicsBody>(entA);
+				auto& baseA = world.getComp<Base>(entA);
+				auto& moveA = world.getComp<Movement>(entA);
+				auto& solidB = world.getComp<PhysicsBody>(entB);
+				auto& baseB = world.getComp<Base>(entB);
+				Movement dummy = Movement();
+				Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
+
+				auto& collidB = world.getComp<Collider>(entB);
+
+				float elast = std::max(solidA.elasticity, solidB.elasticity);
+				float friction = std::min(solidA.friction, solidB.friction) * deltaTime;
+				auto [collChanges, otherChanges] = impulseResolution(
+					baseA.position, moveA.velocity, moveA.angleVelocity, solidA.mass, solidA.momentOfInertia,
+					baseB.position, moveB.velocity, moveB.angleVelocity, solidB.mass, solidB.momentOfInertia,
+					collInfo.collisionNormal, collInfo.collisionPos, elast, friction);
+				moveA.velocity += collChanges.first;
+				moveA.angleVelocity += collChanges.second;
+				moveB.velocity += otherChanges.first;
+				moveB.angleVelocity += otherChanges.second;
+
+			}
+		}
+	};
+
+	// execute inelastic collisions 
+	for (int i = 0; i < impulseResulutionIterations; i++) {
+		resolutionJobs.clear(),
+		resolutionJobs.reserve(collInfoIslands.size());
+		resolutionJobTags.clear();
+		resolutionJobTags.reserve(collInfoIslands.size());
+		for (auto& batch : islandBatches) {
+			resolutionJobs.push_back(CollisionResolutionJob(world, deltaTime, collInfoIslands, batch));
+			resolutionJobTags.push_back(jobManager.addJob(&resolutionJobs.back()));
+		}
+		for (auto tag : resolutionJobTags) {
+			jobManager.waitFor(tag);
+		}
+
+		for (auto& collInfo : collInfoIslandsBorder) {
+			collisionResolution(collInfo);
 		}
 	}
 
 	jobManager.waitFor(pushOutCalcJobTag);
+	propagateChildPushoutToParent(collSys);
 
 	// let entities sleep or wake them up
 	for (auto entity : world.index_view<Movement, Collider, Base>()) {
@@ -117,16 +216,14 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 		}
 	}
 
-// collision info operations end!
-// effector operations begin:
 	// linear effector execution
 	for (auto ent : world.index_view<LinearEffector>()) {
 		auto& moveField = world.getComp<LinearEffector>(ent);
 		auto [begin, end] = collSys.getCollisions(ent);
 		for (auto iter = begin; iter != end; ++iter) {
-			if (world.hasComps<Movement, PhysicsBody>(iter->idB)) {
-				auto& mov = world.getComp<Movement>(iter->idB);
-				auto& solid = world.getComp<PhysicsBody>(iter->idB);
+			if (world.hasComps<Movement, PhysicsBody>(iter->indexB)) {
+				auto& mov = world.getComp<Movement>(iter->indexB);
+				auto& solid = world.getComp<PhysicsBody>(iter->indexB);
 				mov.velocity += moveField.movdir * moveField.acceleration * deltaTime;
 				mov.velocity += moveField.movdir * moveField.force / solid.mass * deltaTime;
 			}
@@ -138,48 +235,33 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 		auto& moveField = world.getComp<FrictionEffector>(ent);
 		auto [begin, end] = collSys.getCollisions(ent);
 		for (auto iter = begin; iter != end; ++iter) {
-			if (world.hasComps<Movement, PhysicsBody>(iter->idB)) {
-				world.getComp<Movement>(iter->idB).velocity *= (1 / (1 + deltaTime * world.getComp<FrictionEffector>(ent).friction));
-				world.getComp<Movement>(iter->idB).angleVelocity *= (1 / (1 + deltaTime * world.getComp<FrictionEffector>(ent).rotationalFriction));
+			if (world.hasComps<Movement, PhysicsBody>(iter->indexB)) {
+				world.getComp<Movement>(iter->indexB).velocity *= (1 / (1 + deltaTime * world.getComp<FrictionEffector>(ent).friction));
+				world.getComp<Movement>(iter->indexB).angleVelocity *= (1 / (1 + deltaTime * world.getComp<FrictionEffector>(ent).rotationalFriction));
 			}
 		}
 	}
-
-	// uniform effector execution :
-	for (auto ent : world.index_view<Movement, PhysicsBody>()) {
+	
+	for (auto ent : world.index_view<Movement, Base>()) {
 		auto& mov = world.getComp<Movement>(ent);
-		auto& solid = world.getComp<PhysicsBody>(ent);
-		mov.velocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
-		mov.angleVelocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
-		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
-		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce / solid.mass * deltaTime;
-	}
-// effector operations end!
-// velocity and pushout operations:
-
-	// apply dampened collision response pushout of slave to owner
-	propagateChildPushoutToParent(collSys);
-
-	// apply pushout
-	for (auto ent : world.index_view<Movement, PhysicsBody, Base>()) {
+		if (world.hasComp<PhysicsBody>(ent)) {
+			// uniform effector execution :
+			auto& solid = world.getComp<PhysicsBody>(ent);
+			mov.velocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
+			mov.angleVelocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
+			mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
+			mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce / solid.mass * deltaTime;
+		}
+		// apply pushout:
 		auto& base = world.getComp<Base>(ent);
 		base.position += collSys.poolWorkerData->collisionResponses[ent].posChange;
+		// execute physics changes in pos, rota:
+		if (fabs(mov.velocity.x) + fabs(mov.velocity.y) < Physics::nullDelta) mov.velocity = Vec2(0, 0);
+		if (fabs(mov.angleVelocity) < Physics::nullDelta) mov.angleVelocity = 0;
+		base.position += mov.velocity * deltaTime;
+		base.rotation += mov.angleVelocity * deltaTime;
 	}
 
-	// execute physics changes in pos, rota
-	for (auto ent : world.index_view<Movement, Base>()) {
-
-		auto& movement = world.getComp<Movement>(ent);
-		auto& base = world.getComp<Base>(ent);
-
-		if (fabs(movement.velocity.x) + fabs(movement.velocity.y) < Physics::nullDelta) movement.velocity = Vec2(0, 0);
-		if (fabs(movement.angleVelocity) < Physics::nullDelta) movement.angleVelocity = 0;
-
-		base.position += movement.velocity * deltaTime;
-		base.rotation += movement.angleVelocity * deltaTime;
-
-	}
-// velocity and pushouts end!
 	syncBaseChildrenToParents();
 	t3.stop();
 	// submit debug drawables for physics

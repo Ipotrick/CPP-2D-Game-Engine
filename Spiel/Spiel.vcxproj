@@ -31,6 +31,7 @@
     <ClInclude Include="src\CacheAABBJob.hpp" />
     <ClInclude Include="src\Camera.hpp" />
     <ClInclude Include="src\CollisionCheckJob.hpp" />
+    <ClInclude Include="src\CollisionResolutionJob.hpp" />
     <ClInclude Include="src\CollisionSystem.hpp" />
     <ClInclude Include="src\CollisionWorkerData.hpp" />
     <ClInclude Include="src\collision_detection.hpp" />
@@ -42,6 +43,7 @@
     <ClInclude Include="src\DummyScript.hpp" />
     <ClInclude Include="src\EntityComponentStorage.hpp" />
     <ClInclude Include="src\Engine.hpp" />
+    <ClInclude Include="src\EntityTypes.hpp" />
     <ClInclude Include="src\EventHandler.hpp" />
     <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.hpp" />
@@ -51,6 +53,7 @@
     <ClInclude Include="src\GameWorld.hpp" />
     <ClInclude Include="src\HealthScript.hpp" />
     <ClInclude Include="src\htmlCompiler.hpp" />
+    <ClInclude Include="src\IndexSet.hpp" />
     <ClInclude Include="src\Input.hpp" />
     <ClInclude Include="src\JobManager.hpp" />
     <ClInclude Include="src\Mat3.hpp" />
