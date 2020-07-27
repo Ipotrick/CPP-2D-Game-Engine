@@ -234,8 +234,14 @@
     <ClInclude Include="src\IndexSet.hpp">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
-    <ClInclude Include="src\CollisionResolutionJob.hpp">
+    <ClInclude Include="src\ImpulseResolutionJob.hpp">
       <Filter>_Engine\_Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SuckerScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MovementSystem.hpp">
+      <Filter>_Engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -322,6 +328,12 @@
     </ClCompile>
     <ClCompile Include="src\Vec2.hpp">
       <Filter>_math</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SuckerScript.cpp">
+      <Filter>Quelldateien</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MovementSystem.cpp">
+      <Filter>_Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,19 +1,28 @@
 #pragma once
 
+#include <thread>
+
 #include "JobManager.hpp"
 #include "PhysicsTypes.hpp"
 #include "Physics.hpp"
 #include "collision_detection.hpp"
 #include "EntityComponentManager.hpp"
 
-class CollisionResolutionJob : public JobFunctor {
+class ImpulseResolutionJob : public JobFunctor {
 	void collisionResolution(IndexCollisionInfo& collinfo);
 	EntityComponentManager& world;
 	float deltaTime;
 	std::vector<std::vector<IndexCollisionInfo>>& collisionBatches;
 	std::pair<int, int> batch;
 public:
-	CollisionResolutionJob(
+	inline size_t batchSize() { 
+		size_t size = 0;
+		for (int i = batch.first; i < batch.second; i++) {
+			size += collisionBatches[i].size();
+		}
+		return size;
+	}
+	ImpulseResolutionJob(
 		EntityComponentManager& world,
 		float deltaTime,
 		std::vector<std::vector<IndexCollisionInfo>>& collisionBatches,
@@ -21,7 +30,7 @@ public:
 		:world{ world }, deltaTime{ deltaTime }, collisionBatches{ collisionBatches }, batch{ batch }
 	{}
 	int operator()(int workerId) override {
-		for (int i = batch.first; i <= batch.second; i++) {
+		for (int i = batch.first; i < batch.second; i++) {
 			for (auto& coll : collisionBatches[i]) {
 				collisionResolution(coll);
 			}
@@ -30,7 +39,7 @@ public:
 	}
 };
 
-inline void CollisionResolutionJob::collisionResolution(IndexCollisionInfo& collInfo) {
+inline void ImpulseResolutionJob::collisionResolution(IndexCollisionInfo& collInfo) {
 	uint32_t entA = collInfo.indexA;
 	uint32_t entB = collInfo.indexB;
 

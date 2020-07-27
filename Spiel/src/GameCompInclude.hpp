@@ -5,4 +5,6 @@ ComponentStorage<Player, hashing>, \
 ComponentStorage<Bullet, hashing>, \
 ComponentStorage<Enemy, hashing>, \
 ComponentStorage<ParticleScriptComp, hashing>, \
-ComponentStorage<Dummy, hashing>
+ComponentStorage<Dummy, hashing>, \
+ComponentStorage<SpawnerComp, hashing>, \
+ComponentStorage<SuckerComp, hashing>

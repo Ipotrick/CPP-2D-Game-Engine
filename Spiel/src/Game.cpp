@@ -12,7 +12,8 @@ Game::Game() :
 	ageScript   { *this },
 	bulletScript{ *this },
 	particleScript{ *this },
-	dummyScript{ *this }
+	dummyScript{ *this },
+	suckerScript{ *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
@@ -61,7 +62,6 @@ void Game::create() {
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
 	}
 
-
 	{
 		// Test html compiler
 		std::string html =
@@ -81,23 +81,19 @@ void Game::update(World& world, float deltaTime) {
 	world.defragment(World::DefragMode::FAST);
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
+		movementSystem.execute(world, deltaTime);
 		collisionSystem.execute(world, deltaTime);
 		physicsSystem.execute(world, deltaTime, collisionSystem);
 		for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
 	}
 	{
 		Timer t(perfLog.getInputRef("calcRotaVecTime"));
-		baseSystem.execute();
+		baseSystem.execute(world);
 	}
 }
 
 void Game::gameplayUpdate(World& world, float deltaTime)
 {
-	//submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(2,2), Vec4(1, 1, 1, 1), Form::RECTANGLE, 0, true));
-	//submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0, Vec2(10, 10), Vec4(0.5, 0.45, 0.5, 1), Form::RECTANGLE, 0, false));
-	//attachTexture(freeDrawableID, "default");
-	submitDrawable(Drawable(++freeDrawableID, Vec2(0, 0), 0.0f, Vec2(100000, 10000), Vec4(0, 0, 0, 1), Form::Rectangle, 0));
-
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();
@@ -141,12 +137,31 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 	bulletScript.execute(deltaTime);
 	particleScript.execute(deltaTime);
 	dummyScript.execute(deltaTime);
+	suckerScript.execute(deltaTime);
+
+	for (auto ent : world.index_view<SpawnerComp>()) {
+		auto base = world.getComp<Base>(ent);
+		for (int i = 1; i < 100; i++) {
+			float rotation = (float)(rand() % 360);
+			auto particle = world.index_create();
+			Vec2 movement = rotate(Vec2(5,0), rotation);
+			world.addComp<Base>(particle, Base(base.position));
+			auto size = Vec2(0.26, 0.26) * ((rand() % 1000) / 1000.0f);
+			world.addComp<Draw>(particle, Draw(Vec4(0.4, 0.9, 0.2 + (rand()%1000/1000.0f), 0.3), size, rand() % 1000 / 1000.0f, Form::Rectangle));
+			world.addComp<Movement>(particle, Movement(movement, rand()%1000/100.0f -5.0f));
+			//world.addComp<Collider>(particle, Collider(size, Form::Rectangle, true));
+			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 10, 10, 100));
+			world.addComp<Age>(particle, Age(rand()%1000/4000.0f));
+			world.spawn(particle);
+		}
+	}
+
 
 	/* display performance statistics */
-	//std::cout << getPerfInfo(5) << '\n';
-	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
-	//std::cout << "ent count: " << world.entityCount() << std::endl;
-	//std::cout << "ent memsize: " << world.memorySize() << std::endl << std::endl;
+	std::cout << getPerfInfo(5) << '\n';
+	std::cout << "fragmentation: " << world.fragmentation() << std::endl;
+	std::cout << "ent count: " << world.entityCount() << std::endl;
+	std::cout << "ent memsize: " << world.maxEntityIndex() << std::endl << std::endl;
 }
 
 void Game::cursorManipFunc()
@@ -229,12 +244,12 @@ void Game::cursorManipFunc()
 		// spawns:
 		if (keyPressed(KEY::U)) {
 			Vec2 scale = Vec2(0.3f, 0.3f);
-			Collider trashCollider = Collider(scale, Form::Rectangle);
+			Collider trashCollider = Collider(scale, Form::Circle);
 			PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1, scale), 10.0f);
 
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
 				Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
-				Draw trashDraw = Draw(color, scale, 0.5f, Form::Rectangle, true);
+				Draw trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);
 				Vec2 position = baseCursor.position;
 				auto trash = world.index_create();
 				world.addComp<Base>(trash, Base(position, RotaVec2(0)));
@@ -245,33 +260,33 @@ void Game::cursorManipFunc()
 				world.addComp<Health>(trash, Health(100));
 				world.spawn(trash);
 
-				auto trashAss = world.index_create();
-				auto cmps = world.viewComps(trashAss);
-				cmps.add<Base>();
-				cmps.add<Movement>();
-				auto coll = trashCollider;
-				coll.form = Form::Circle;
-				cmps.add<Coll>(coll);
-				cmps.add<PhysicsBody>();
-				auto draw = trashDraw;
-				draw.form = Form::Circle;
-				cmps.add<Draw>(draw);
-				world.link(trashAss, trash, Vec2(0, 0.15f), 0);
-				world.spawn(trashAss);
-
-				trashAss = world.index_create();
-				auto cmps2 = world.viewComps(trashAss);
-				cmps2.add<Base>();
-				cmps2.add<Movement>();
-				coll = trashCollider;
-				coll.form = Form::Circle;
-				cmps2.add<Coll>(coll);
-				cmps2.add<PhysicsBody>();
-				draw = trashDraw;
-				draw.form = Form::Circle;
-				cmps2.add<Draw>(draw);
-				world.link(trashAss, trash, Vec2(0, -0.15f), 0);
-				world.spawn(trashAss);
+				//auto trashAss = world.index_create();
+				//auto cmps = world.viewComps(trashAss);
+				//cmps.add<Base>();
+				//cmps.add<Movement>();
+				//auto coll = trashCollider;
+				//coll.form = Form::Circle;
+				//cmps.add<Coll>(coll);
+				//cmps.add<PhysicsBody>();
+				//auto draw = trashDraw;
+				//draw.form = Form::Circle;
+				//cmps.add<Draw>(draw);
+				//world.link(trashAss, trash, Vec2(0, 0.15f), 0);
+				//world.spawn(trashAss);
+				//
+				//trashAss = world.index_create();
+				//auto cmps2 = world.viewComps(trashAss);
+				//cmps2.add<Base>();
+				//cmps2.add<Movement>();
+				//coll = trashCollider;
+				//coll.form = Form::Circle;
+				//cmps2.add<Coll>(coll);
+				//cmps2.add<PhysicsBody>();
+				//draw = trashDraw;
+				//draw.form = Form::Circle;
+				//cmps2.add<Draw>(draw);
+				//world.link(trashAss, trash, Vec2(0, -0.15f), 0);
+				//world.spawn(trashAss);
 			}
 		}
 

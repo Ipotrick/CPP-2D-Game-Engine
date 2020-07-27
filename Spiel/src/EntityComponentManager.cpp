@@ -12,6 +12,10 @@ entity_index_type EntityComponentManager::index_create() {
 	else {
 		entityStorageInfo.emplace_back( true );
 		latestIndex = static_cast<entity_index_type>(entityStorageInfo.size() - 1);
+
+		for_each(componentStorageTuple, [&](auto& componentStorage) {
+			componentStorage.updateMaxEntNum(entityStorageInfo.size());
+			});
 	}
 	identify(latestIndex);	// TODO replace with optimised version
 	return latestIndex;
@@ -38,11 +42,11 @@ void EntityComponentManager::link(entity_index_type slave, entity_index_type mas
 	baseChild.parent = identify(master);
 }
 
-void EntityComponentManager::destroy(entity_index_type entitiy_id) {
-	if (entitiy_id < entityStorageInfo.size() && !entityStorageInfo[entitiy_id].isDestroyMarked()) {
-		assert(entityStorageInfo[entitiy_id].isValid());
-		entityStorageInfo[entitiy_id].setDestroyMark(true);
-		despawnList.push_back(entitiy_id);
+void EntityComponentManager::destroy(entity_index_type index) {
+	if (index < entityStorageInfo.size() && !entityStorageInfo[index].isDestroyMarked()) {
+		assert(entityStorageInfo[index].isValid());
+		entityStorageInfo[index].setDestroyMark(true);
+		despawnList.push_back(index);
 	}
 }
 
@@ -195,7 +199,7 @@ void EntityComponentManager::defragment(DefragMode const mode)
 		minFragmentation = 0.01f;
 		break;
 	case DefragMode::COMPLETE:
-		maxDefragEntCount = memorySize();
+		maxDefragEntCount = maxEntityIndex();
 		minFragmentation = 0.00001f;
 		break;
 	}
@@ -253,7 +257,7 @@ size_t const EntityComponentManager::entityCount() {
 	return entityStorageInfo.size() - (freeIndexQueue.size() + 1);
 }
 
-size_t const EntityComponentManager::memorySize() {
+size_t const EntityComponentManager::maxEntityIndex() {
 	return entityStorageInfo.size();
 }
 
@@ -269,7 +273,7 @@ bool EntityComponentManager::didStaticsChange()
 
 float EntityComponentManager::fragmentation()
 {
-	return (float)freeIndexQueue.size() / (float)memorySize();
+	return (float)freeIndexQueue.size() / (float)maxEntityIndex();
 }
 
 float randomFloatd(float MaxAbsVal) {

@@ -59,7 +59,7 @@ struct CollisionInfo {
 };
 
 struct CollisionResponse {
-	Vec2 posChange;
+	Vec2 posChange = Vec2(0,0);
 };
 
 __forceinline float circleDist(Vec2 const pos1, float rad1, Vec2 const pos2, float rad2)

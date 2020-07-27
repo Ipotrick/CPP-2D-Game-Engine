@@ -6,12 +6,13 @@
 #include "collision_detection.hpp"
 
 class PushoutCalcJob : public JobFunctor {
-	void pushoutCalc(IndexCollisionInfo collInfo);
 	std::vector<IndexCollisionInfo>& collisionInfos;
 	std::vector<Vec2>& velocities;
 	std::vector<float>& overlaps;
 	std::vector<CollisionResponse>& collisionResponses;
 	EntityComponentManager& manager;
+
+	void pushoutCalc(IndexCollisionInfo collInfo);
 public:
 	PushoutCalcJob(
 		std::vector<IndexCollisionInfo>& collisionInfos,
@@ -32,11 +33,11 @@ public:
 
 void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
 	auto& collID = collInfo.indexA;
-	if (manager.hasComp<Movement>(collID)) {
+	if (manager.hasComps<PhysicsBody, Movement>(collID) && manager.hasComp<PhysicsBody>(collInfo.indexB)) {
 		auto& otherID = collInfo.indexB;
 
 		bool otherDynamic = false;
-		if (manager.hasComp<Movement>(otherID)) otherDynamic = true;
+		if (manager.hasComps<Movement>(otherID)) otherDynamic = true;
 
 		const float surfaceAreaColl = manager.getComp<Collider>(collID).size.x * manager.getComp<Collider>(collID).size.y;
 		const float surfaceAreaOther = manager.getComp<Collider>(otherID).size.x * manager.getComp<Collider>(otherID).size.y;

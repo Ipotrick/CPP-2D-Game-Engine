@@ -102,7 +102,8 @@ private:
 			isOverlappingAABB(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size)
 		};
 	}
-
+public:
+	World& world;
 private:
 	Vec2 m_pos;
 	Vec2 m_size;
@@ -110,6 +111,5 @@ private:
 	std::vector<QuadtreeNode> trees;
 	uint32_t nextFreeIndex;
 	std::queue<uint32_t> freeIndices;
-	World& world;
 };
 

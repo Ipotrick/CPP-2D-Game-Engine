@@ -8,6 +8,7 @@
 #include "BasicScripts.hpp"
 #include "ParticleScript.hpp"
 #include "DummyScript.hpp"
+#include "SuckerScript.hpp"
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
@@ -40,6 +41,7 @@ public:
 	BulletScript	bulletScript;
 	ParticleScript	particleScript;
 	DummyScript		dummyScript;
+	SuckerScript	suckerScript;
 
 	entity_id cursorID;
 

@@ -1,9 +1,8 @@
 #include "CoreSystem.hpp"
 
-class BaseSystem : CoreSystem {
+class BaseSystem {
 public:
-	using CoreSystem::CoreSystem;
-	inline void execute() {
+	inline void execute(World& world) {
 		for (auto entity : world.index_view<Base>()) {
 			if (!world.hasntComp<Movement>(entity) || world.didStaticsChange())	// only update static entites when statics changed
 			{

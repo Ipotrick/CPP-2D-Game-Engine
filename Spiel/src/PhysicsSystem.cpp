@@ -3,10 +3,8 @@
 
 #include "PushoutCalcJob.hpp"
 
-//#define DEBUG_PRESSURE
 
-PhysicsSystem::PhysicsSystem(World& world, JobManager& jobManager, PerfLogger& perfLog) :
-	CoreSystem( world ),
+PhysicsSystem::PhysicsSystem(JobManager& jobManager, PerfLogger& perfLog) :
 	jobManager{ jobManager },
 	perfLog{ perfLog }
 {
@@ -15,7 +13,7 @@ PhysicsSystem::PhysicsSystem(World& world, JobManager& jobManager, PerfLogger& p
 void PhysicsSystem::execute(World& world, float deltaTime, CollisionSystem& collSys)
 {
 	debugDrawables.clear();
-	applyPhysics(deltaTime, collSys);
+	applyPhysics(deltaTime, collSys, world);
 }
 
 void PhysicsSystem::end()
@@ -23,35 +21,61 @@ void PhysicsSystem::end()
 }
 
 
-void PhysicsSystem::findIslands(float deltaTime, CollisionSystem& collSys) {
-	entityIslandMarks.clear();
-	entityIslandMarks.resize(world.memorySize(), 0);
+void PhysicsSystem::findIslands(CollisionSystem& collSys, World& world) {
+	entityToIsland.clear();
+	entityToIsland.resize(world.maxEntityIndex(), -1);
 
-	int islandCount = 1;
+	islandSizes.clear();
+	int islandCount = 0;
 	for (auto collInfo : collSys.indexCollisionInfos) {
-		if (entityIslandMarks[collInfo.indexB] > 0) {
-		entityIslandMarks[collInfo.indexA] = entityIslandMarks[collInfo.indexB];
+		int a = collInfo.indexA; int b = collInfo.indexB;
+		if (entityToIsland.at(b) != -1) {
+			if (islandSizes.at(entityToIsland.at(b)) < maxIslandSize) {
+				if (entityToIsland.at(a) != -1)
+					islandSizes.at(entityToIsland.at(a)) -= 1;
+				islandSizes.at(entityToIsland.at(b)) += 1;
+				entityToIsland.at(a) = entityToIsland.at(b);
+			}
 		}
-		else if (entityIslandMarks[collInfo.indexA] > 0) {
-			entityIslandMarks[collInfo.indexB] = entityIslandMarks[collInfo.indexA];
+		else if (entityToIsland.at(a) != -1) {
+			if (islandSizes.at(entityToIsland.at(a)) < maxIslandSize) {
+				if (entityToIsland.at(b) != -1)
+					islandSizes.at(entityToIsland.at(b)) -= 1;
+				islandSizes.at(entityToIsland.at(a)) += 1;
+				entityToIsland.at(collInfo.indexB) = entityToIsland.at(a);
+			}
 		}
 		else {
-			entityIslandMarks[collInfo.indexA] = entityIslandMarks[collInfo.indexB] = islandCount;
+			entityToIsland.at(collInfo.indexA) = islandCount;
+			entityToIsland.at(collInfo.indexB) = islandCount;
 			islandCount++;
+			islandSizes.push_back(2);
 		}
 	}
-	for (auto collInfo : collSys.indexCollisionInfos) {
-		if (entityIslandMarks[collInfo.indexB] > entityIslandMarks[collInfo.indexA]) {
-			entityIslandMarks[collInfo.indexB] = entityIslandMarks[collInfo.indexA];
-		}
-		else if (entityIslandMarks[collInfo.indexB] < entityIslandMarks[collInfo.indexA]) {
-			entityIslandMarks[collInfo.indexA] = entityIslandMarks[collInfo.indexB];
+	for (int mergeIter = 0; mergeIter < islandMergeIterations; mergeIter++) {
+		for (auto collInfo : collSys.indexCollisionInfos) {
+			int a = collInfo.indexA; int b = collInfo.indexB;
+			if (entityToIsland.at(a) < entityToIsland.at(b) && entityToIsland.at(a) != -1 && entityToIsland.at(b) != -1) {
+				if (islandSizes.at(entityToIsland.at(a)) < maxIslandSize) {
+					islandSizes.at(entityToIsland.at(b)) -= 1;
+					islandSizes.at(entityToIsland.at(a)) += 1;
+					entityToIsland.at(b) = entityToIsland.at(a);
+				}
+			}
+			else if (entityToIsland.at(b) < entityToIsland.at(a) && entityToIsland.at(b) != -1 && entityToIsland.at(a) != -1) {
+				if (islandSizes.at(entityToIsland.at(b)) < maxIslandSize) {
+					islandSizes.at(entityToIsland.at(a)) -= 1;
+					islandSizes.at(entityToIsland.at(b)) += 1;
+					entityToIsland.at(a) = entityToIsland.at(b);
+				}
+			}
 		}
 	}
+
 	int borderCollisions = 0;
 	int allCollisions = 0;
 	for (auto collInfo : collSys.indexCollisionInfos) {
-		if (entityIslandMarks[collInfo.indexA] != entityIslandMarks[collInfo.indexB]) borderCollisions++;
+		if (entityToIsland.at(collInfo.indexA) != entityToIsland.at(collInfo.indexB)) borderCollisions++;
 		allCollisions++;
 	}
 #ifdef DEBUG_ISLANDS
@@ -68,53 +92,98 @@ void PhysicsSystem::findIslands(float deltaTime, CollisionSystem& collSys) {
 		Vec4(0.7,0.7,0.5,1),
 	};
 	for (auto ent : world.index_view<PhysicsBody, Movement>()) {
-		world.getComp<Draw>(ent).color = colors[entityIsland[ent] % 10];
+		if (entityToIsland.at(ent) == -1) {
+
+			world.getComp<Draw>(ent).color = Vec4(1,1,1,1);
+		}
+		else {
+			int val = entityToIsland.at(ent) % 10;
+			world.getComp<Draw>(ent).color = colors.at(val);
+		}
+	}
+
+	for (auto collInfo : collSys.indexCollisionInfos)
+	{
+		auto pos = world.getComp<Base>(collInfo.indexA).position;
+		auto pos2 = world.getComp<Base>(collInfo.indexB).position;
+		float dist = distance(pos, pos2);
+		float rota = getRotation(pos2 - pos);
+		if (entityToIsland.at( collInfo.indexA) == entityToIsland.at(collInfo.indexB)) {
+			auto scale = Vec2(dist, 0.02f);
+			Drawable d(0, pos + normalize(pos2-pos) * dist*0.5f,1, scale, Vec4(0,0,0,1),Form::Rectangle, RotaVec2(rota));
+			debugDrawables.push_back(d);
+		}
+		else {
+			auto scale = Vec2(dist, 0.04f);
+			Drawable d(0, pos + normalize(pos2 - pos) * dist * 0.5f, 1, scale, Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(rota));
+			debugDrawables.push_back(d);
+		}
 	}
 	
 	printf("collisions inside of islands: %i, collisions between islands: %i, ratio: %f\n", allCollisions- borderCollisions, borderCollisions, (float)(allCollisions - borderCollisions) / (float)borderCollisions);
 #endif
+	// build vectors of collision info islands:
 	for (auto& batch : collInfoIslands) 
 		batch.clear();
 	collInfoIslands.resize(islandCount);
 	collInfoIslandsBorder.clear();
 	for (auto collInfo : collSys.indexCollisionInfos) {
-		if (entityIslandMarks.at(collInfo.indexA) == entityIslandMarks.at(collInfo.indexB)) {
-			collInfoIslands[entityIslandMarks[collInfo.indexA]].push_back(collInfo);
+		bool test1 = entityToIsland.at(collInfo.indexA) == entityToIsland.at(collInfo.indexB);
+		bool test2 = entityToIsland.at(collInfo.indexA) != -1;
+
+		if (test1 && test2) {
+			int index = entityToIsland.at(collInfo.indexA);
+			collInfoIslands.at(index).push_back(collInfo);
 		}
 		else {
 			collInfoIslandsBorder.push_back(collInfo);
 		}
 	}
 
-	const int maxCollisionCountInBatch = std::max(allCollisions / impulseResolutionJobCount,1);
-	int currentBatchCollCount = 0;
-	int currentIslandHead = 1;
+	int currentIslandHead = 0;
+	int currentBatchCollCount = collInfoIslands.at(0).size();
 
 	islandBatches.clear();
-	islandBatches.reserve(islandCount / maxCollisionCountInBatch + 1);
+	islandBatches.reserve(islandCount / impulseResolutionMaxBatchSize + 1);
 	for (int island = 1; island < islandCount; ++island) {
-		currentBatchCollCount += collInfoIslands.at(island).size();
-		if (currentBatchCollCount >= maxCollisionCountInBatch) {
+		if ((currentBatchCollCount + collInfoIslands.at(island).size()) > impulseResolutionMaxBatchSize) {
 			islandBatches.push_back(std::pair(currentIslandHead, island));
-			currentIslandHead = island + 1;
-			currentBatchCollCount = 0;
+			currentIslandHead = island;
+			currentBatchCollCount = collInfoIslands.at(island).size();
+		}
+		else {
+			currentBatchCollCount += collInfoIslands.at(island).size();
 		}
 	}
 	if (currentIslandHead != islandCount) {
-		islandBatches.push_back(std::pair(currentIslandHead, islandCount-1));
+		islandBatches.push_back(std::pair(currentIslandHead, islandCount));
 	}
+
+	// execute big badges first
+	std::sort(islandBatches.begin(), islandBatches.end(), [&](std::pair<int,int> a, std::pair<int, int> b) {
+		size_t sizeA = 0;
+		for (int i = a.first; i < a.second; ++i) {
+			sizeA += collInfoIslands[i].size();
+		}
+		size_t sizeB = 0;
+		for (int i = b.first; i < b.second; ++i) {
+			sizeB += collInfoIslands[i].size();
+		}
+		return sizeA > sizeB;
+	});
 }
 
-void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
+void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys, World& world)
 {
-	findIslands(deltaTime, collSys);
-
+	// generate collisions islands and island batches
+	findIslands(collSys, world);
 	Timer t3(perfLog.getInputRef("physicsexecute"));
 
+	// Pushout job buffer fill and start
 	velocityBuffer.clear();
-	velocityBuffer.resize(world.memorySize());
+	velocityBuffer.resize(world.maxEntityIndex());
 	overlapAccumBuffer.clear();
-	overlapAccumBuffer.resize(world.memorySize());
+	overlapAccumBuffer.resize(world.maxEntityIndex());
 	for (auto ent : world.index_view<Movement, PhysicsBody>()) {
 		velocityBuffer[ent] = world.getComp<Movement>(ent).velocity;
 		overlapAccumBuffer[ent] = world.getComp<PhysicsBody>(ent).overlapAccum;
@@ -180,27 +249,27 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 		}
 	};
 
-	// execute inelastic collisions 
+	// execute impulse resolution
 	for (int i = 0; i < impulseResulutionIterations; i++) {
 		resolutionJobs.clear(),
 		resolutionJobs.reserve(collInfoIslands.size());
 		resolutionJobTags.clear();
 		resolutionJobTags.reserve(collInfoIslands.size());
-		for (auto& batch : islandBatches) {
-			resolutionJobs.push_back(CollisionResolutionJob(world, deltaTime, collInfoIslands, batch));
+		for (auto& batch : islandBatches) {				// start jobs for island solving
+			resolutionJobs.push_back(ImpulseResolutionJob(world, deltaTime, collInfoIslands, batch)); 
 			resolutionJobTags.push_back(jobManager.addJob(&resolutionJobs.back()));
 		}
-		for (auto tag : resolutionJobTags) {
+		for (auto tag : resolutionJobTags) {			// join jobs
 			jobManager.waitFor(tag);
 		}
-
-		for (auto& collInfo : collInfoIslandsBorder) {
+		for (auto& collInfo : collInfoIslandsBorder) {	// compute the rest (borders wbbetween badges) sequential
 			collisionResolution(collInfo);
 		}
 	}
 
 	jobManager.waitFor(pushOutCalcJobTag);
-	propagateChildPushoutToParent(collSys);
+
+	propagateChildPushoutToParent(collSys, world);	// propagate child overlap ppushout to childs
 
 	// let entities sleep or wake them up
 	for (auto entity : world.index_view<Movement, Collider, Base>()) {
@@ -241,28 +310,22 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 			}
 		}
 	}
-	
-	for (auto ent : world.index_view<Movement, Base>()) {
+
+	for (auto ent : world.index_view<PhysicsBody, Movement, Base>()) {
 		auto& mov = world.getComp<Movement>(ent);
-		if (world.hasComp<PhysicsBody>(ent)) {
-			// uniform effector execution :
-			auto& solid = world.getComp<PhysicsBody>(ent);
-			mov.velocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
-			mov.angleVelocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
-			mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
-			mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce / solid.mass * deltaTime;
-		}
-		// apply pushout:
 		auto& base = world.getComp<Base>(ent);
+		// uniform effector execution :
+		auto& solid = world.getComp<PhysicsBody>(ent);
+		mov.velocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
+		mov.angleVelocity *= (1 / (1 + deltaTime * std::min(world.physics.friction, solid.friction)));
+		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
+		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce / solid.mass * deltaTime;
+		// apply pushout:
 		base.position += collSys.poolWorkerData->collisionResponses[ent].posChange;
-		// execute physics changes in pos, rota:
-		if (fabs(mov.velocity.x) + fabs(mov.velocity.y) < Physics::nullDelta) mov.velocity = Vec2(0, 0);
-		if (fabs(mov.angleVelocity) < Physics::nullDelta) mov.angleVelocity = 0;
-		base.position += mov.velocity * deltaTime;
-		base.rotation += mov.angleVelocity * deltaTime;
 	}
 
-	syncBaseChildrenToParents();
+	syncBaseChildrenToParents(world);
+
 	t3.stop();
 	// submit debug drawables for physics
 	for (auto& el : Physics::debugDrawables) {
@@ -329,7 +392,7 @@ void PhysicsSystem::applyPhysics(float deltaTime, CollisionSystem& collSys)
 #endif
 }
 
-void PhysicsSystem::propagateChildPushoutToParent(CollisionSystem& collSys)
+void PhysicsSystem::propagateChildPushoutToParent(CollisionSystem& collSys, World& world)
 {
 	for (auto child : world.index_view<BaseChild, PhysicsBody>()) {
 		auto relationship = world.getComp<BaseChild>(child);
@@ -343,7 +406,7 @@ void PhysicsSystem::propagateChildPushoutToParent(CollisionSystem& collSys)
 	}
 }
 
-void PhysicsSystem::syncBaseChildrenToParents() {
+void PhysicsSystem::syncBaseChildrenToParents(World& world) {
 	for (auto child : world.index_view<BaseChild>()) {
 		auto& base = world.getComp<Base>(child);
 		auto& movement = world.getComp<Movement>(child);

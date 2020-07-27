@@ -31,6 +31,7 @@
 #include "World.hpp"
 
 // Core Systems
+#include "MovementSystem.hpp"
 #include "CollisionSystem.hpp"
 #include "PhysicsSystem.hpp"
 #include "BaseSystem.hpp"
@@ -141,6 +142,7 @@ public:
 
 	// core systems
 	BaseSystem baseSystem;
+	MovementSystem movementSystem;
 	CollisionSystem collisionSystem;
 	PhysicsSystem physicsSystem;
 

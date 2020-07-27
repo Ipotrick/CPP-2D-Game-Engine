@@ -4,8 +4,6 @@
 
 class CoreSystem {
 public:
-	CoreSystem(World& world) : world{ world } {}
-	void execute(World& world, float deltaTime);
+	virtual void execute(World& world, float deltaTime) = 0;
 protected:
-	World& world;
 };

@@ -5,14 +5,13 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 100 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
 	maxDeltaTime{0.01f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
-	baseSystem( wrld ),
 	jobManager(std::thread::hardware_concurrency() - 1),
 	collisionSystem{ world, jobManager, perfLog },
-	physicsSystem{ world, jobManager, perfLog },
+	physicsSystem{ jobManager, perfLog },
 	renderer{ window }
 {
 	perfLog.submitTime("maintime");
@@ -35,7 +34,7 @@ Engine::~Engine() {
 
 std::string Engine::getPerfInfo(int detail) {
 	std::stringstream ss;
-	if (detail >= 4) ss << "Entity Max: " << world.memorySize() << "\n";
+	if (detail >= 4) ss << "Entity Max: " << world.maxEntityIndex() << "\n";
 	if (detail >= 1) ss << "Entity Count: " << world.entityCount() << "\n";
 	if (detail >= 1) {
 		ss << "    deltaTime(s): " << perfLog.getTime("maintime") << "\n"

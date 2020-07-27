@@ -35,10 +35,10 @@ struct CollisionSyncData {
 };
 
 struct CollisionPoolData {
-	CollisionPoolData(World& wrld, size_t qtreeCapacity) :
-		world{ wrld },
-		qtreeDynamic(0, 0, qtreeCapacity, wrld),
-		qtreeStatic(0, 0, qtreeCapacity, wrld)
+	CollisionPoolData(size_t qtreeCapacity, World& world) :
+		world{ world },
+		qtreeDynamic(0, 0, qtreeCapacity, world),
+		qtreeStatic(0, 0, qtreeCapacity, world)
 	{}
 
 	World& world;

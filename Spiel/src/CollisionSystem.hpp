@@ -13,7 +13,7 @@
 #include "JobManager.hpp"
 #include "CollisionCheckJob.hpp"
 
-class CollisionSystem : public CoreSystem {
+class CollisionSystem {
 	friend class PhysicsSystem;
 public:
 	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, float staticGridResolution = 0.5f, uint32_t qtreeCapacity = 6);
@@ -26,9 +26,9 @@ public:
 	std::vector<Drawable> debugDrawables;
 	JobManager& jobManager;
 private:
-	void prepare();
-	void cleanBuffers();
-	void collisionDetection();
+	void prepare(World& world);
+	void cleanBuffers(World& world);
+	void collisionDetection(World& world);
 private:
 	// constants:
 	const int jobMaxEntityCount = 50;

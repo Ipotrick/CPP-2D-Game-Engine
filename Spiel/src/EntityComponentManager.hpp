@@ -34,6 +34,7 @@ class SingleView;
 class ComponentView;
 
 class EntityComponentManager {
+	friend class Game;
 public:
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiViewIDX;
@@ -113,7 +114,7 @@ public:
 	/* returns count of entities, O(1) */
 	size_t const entityCount();
 	/* returns the size of the vector that holds the entities, O(1) */
-	size_t const memorySize();
+	size_t const maxEntityIndex();
 	/* sets static entities changed flag */
 	void setStaticsChanged(bool boolean = true);
 	/* returns wheter or not static entities changed */
@@ -361,7 +362,7 @@ inline bool EntityComponentManager::hasntComps(entity_id id)
 template<typename First, typename Second, typename ... CompTypes>
 class MultiViewIDX {
 public:
-	MultiViewIDX(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.memorySize()) } {
+	MultiViewIDX(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.maxEntityIndex()) } {
 
 	}
 	template<typename First, typename Second, typename ... CompTypes>
@@ -405,7 +406,7 @@ public:
 	};
 	inline iterator<First, Second, CompTypes...> begin() {
 		entity_index_type index = 1;
-		while (!(manager.hasComp<First>(index) && manager.hasComp<Second>(index) && manager.hasComps<CompTypes...>(index)) && index < endID) index++;
+		while (index < endID && !(manager.hasComp<First>(index) && manager.hasComp<Second>(index) && manager.hasComps<CompTypes...>(index))) index++;
 		return iterator<First, Second, CompTypes...>(std::min(index, endID), *this);
 	}
 	inline iterator<First, Second, CompTypes...> end() { 
@@ -426,7 +427,7 @@ inline MultiViewIDX<First, Second, CompTypes...> EntityComponentManager::index_v
 template<typename First, typename Second, typename ... CompTypes>
 class MultiView {
 public:
-	MultiView(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.memorySize()) } {
+	MultiView(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.maxEntityIndex()) } {
 
 	}
 	template<typename First, typename Second, typename ... CompTypes>
@@ -491,7 +492,7 @@ inline MultiView<First, Second, CompTypes...> EntityComponentManager::view() {
 template<typename CompType>
 class SingleViewIDX {
 public:
-	SingleViewIDX(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.memorySize()) } {
+	SingleViewIDX(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.maxEntityIndex()) } {
 #ifdef _DEBUG
 		componentStorageSizeOnCreate = manager.getAll<CompType>().size();
 #endif
@@ -536,7 +537,7 @@ public:
 	};
 	inline iterator<CompType> begin() {
 		entity_index_type index = 1;
-		while (!manager.hasComps<CompType>(index) && index < endID) index++;
+		while (index < endID && !manager.hasComps<CompType>(index)) index++;
 		return iterator<CompType>(std::min(index, endID), *this);
 	}
 	inline iterator<CompType> end() { return iterator<CompType>(endID, *this); }
@@ -559,7 +560,7 @@ inline SingleViewIDX<CompType> EntityComponentManager::index_view() {
 template<typename CompType>
 class SingleView {
 public:
-	SingleView(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.memorySize()) } {
+	SingleView(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<entity_index_type>(manager.maxEntityIndex()) } {
 #ifdef _DEBUG
 		componentStorageSizeOnCreate = manager.getAll<CompType>().size();
 #endif
@@ -605,7 +606,7 @@ public:
 	};
 	inline iterator<CompType> begin() {
 		entity_index_type index = 1;
-		while (!manager.hasComps<CompType>(index) && index < endID) index++;
+		while (index < endID && !manager.hasComps<CompType>(index)) index++;
 		return iterator<CompType>(std::min(index, endID), *this);
 	}
 	inline iterator<CompType> end() { return iterator<CompType>(endID, *this); }

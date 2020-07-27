@@ -31,7 +31,7 @@
     <ClInclude Include="src\CacheAABBJob.hpp" />
     <ClInclude Include="src\Camera.hpp" />
     <ClInclude Include="src\CollisionCheckJob.hpp" />
-    <ClInclude Include="src\CollisionResolutionJob.hpp" />
+    <ClInclude Include="src\ImpulseResolutionJob.hpp" />
     <ClInclude Include="src\CollisionSystem.hpp" />
     <ClInclude Include="src\CollisionWorkerData.hpp" />
     <ClInclude Include="src\collision_detection.hpp" />
@@ -58,6 +58,7 @@
     <ClInclude Include="src\JobManager.hpp" />
     <ClInclude Include="src\Mat3.hpp" />
     <ClInclude Include="src\Mat4.hpp" />
+    <ClInclude Include="src\MovementSystem.hpp" />
     <ClInclude Include="src\ParticleScript.hpp" />
     <ClInclude Include="src\Perf.hpp" />
     <ClInclude Include="src\Physics.hpp" />
@@ -74,6 +75,7 @@
     <ClInclude Include="src\Script.hpp" />
     <ClInclude Include="src\GameSystem.hpp" />
     <ClInclude Include="src\std_extra.hpp" />
+    <ClInclude Include="src\SuckerScript.hpp" />
     <ClInclude Include="src\TextureHandler.hpp" />
     <ClInclude Include="src\Timing.hpp" />
     <ClInclude Include="src\Vec.hpp" />
@@ -101,6 +103,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mat3.cpp" />
     <ClCompile Include="src\Mat4.cpp" />
+    <ClCompile Include="src\MovementSystem.cpp" />
     <ClCompile Include="src\ParticleScript.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PhysicsSystem.cpp" />
@@ -109,6 +112,7 @@
     <ClCompile Include="src\QuadTree.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\RenderingWorker.cpp" />
+    <ClCompile Include="src\SuckerScript.cpp" />
     <ClCompile Include="src\TextureHandler.cpp" />
     <ClCompile Include="src\Vec2.hpp" />
     <ClCompile Include="src\EntityComponentManager.cpp" />

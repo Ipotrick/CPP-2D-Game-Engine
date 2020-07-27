@@ -5,6 +5,14 @@
 
 #include "EntityComponentStorage.hpp"
 
+struct SpawnerComp : public CompData {
+	entity_id sucker;
+};
+
+struct SuckerComp : public CompData {
+	entity_id spawner;
+};
+
 struct ParticleScriptComp : public CompData {
 	ParticleScriptComp() {}
 	ParticleScriptComp(Vec2 startSize, Vec2 endSize, Vec4 startColor, Vec4 endColor) : startSize{ startSize }, endSize{ endSize }, startColor{ startColor }, endColor{ endColor } {}

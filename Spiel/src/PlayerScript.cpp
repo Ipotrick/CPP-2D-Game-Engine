@@ -1,5 +1,3 @@
-#pragma once
-
 #include "PlayerScript.hpp"
 
 void PlayerScript::script(entity_id me, Player& data, float deltaTime) {

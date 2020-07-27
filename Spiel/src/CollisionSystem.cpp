@@ -6,7 +6,6 @@
 #include "BuildQtreeJob.hpp"
 
 CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, float statCollGridRes, uint32_t qtreeCapacity) :
-	CoreSystem(world),
 	jobManager{ jobManager },
 	perfLog{ perfLog },
 	qtreeCapacity{ qtreeCapacity }
@@ -16,9 +15,8 @@ CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogge
 
 void CollisionSystem::execute(World& world, float deltaTime)
 {
-	poolWorkerData->world = world;
-	prepare();
-	collisionDetection();
+	prepare(world);
+	collisionDetection(world);
 	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
@@ -48,15 +46,18 @@ void CollisionSystem::end()
 {
 }
 
-void CollisionSystem::prepare()
+void CollisionSystem::prepare(World& world)
 {
 	Timer t1(perfLog.getInputRef("physicsprepare"));
+	poolWorkerData->world = world;
+	poolWorkerData->qtreeDynamic.world = world;
+	poolWorkerData->qtreeStatic.world = world;
 
 	poolWorkerData->rebuildDynQuadTrees = true; // allways rebuild dynamic quadtree
 	poolWorkerData->rebuildStatQuadTrees = world.didStaticsChange(); // only rebuild static quadtree if static Entities changed
 
-	// allocate memory for collider groups
-	cleanBuffers();
+	// allocate memory for collider groups and or clean them
+	cleanBuffers(world);
 
 	// split collidables
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
@@ -117,16 +118,22 @@ void CollisionSystem::prepare()
 	CacheAABBJob aabbJob3 = CacheAABBJob(poolWorkerData->sensorCollidables, world, poolWorkerData->aabbCache);
 	auto jobTagAABBSensor = jobManager.addJob(&aabbJob3);
 
+	if (poolWorkerData->rebuildDynQuadTrees) {	// we must wait for this job to finish before insertein sensors into dyn treee
+		jobManager.waitFor(jobTagQtreeDyn);
+		int jobTagQtreeDynSensor = -1;
+		BuildQtreeJob dynSensorqTreeJob = BuildQtreeJob(world, poolWorkerData->sensorCollidables, poolWorkerData->qtreeDynamic);
+		jobTagQtreeDynSensor = jobManager.addJob(&dynSensorqTreeJob);
+		jobManager.waitFor(jobTagQtreeDynSensor);
+	}
+
+	if (poolWorkerData->rebuildStatQuadTrees)
+		jobManager.waitFor(jobTagStaticRebuild);
 	jobManager.waitFor(jobTagAABBDyn);
 	jobManager.waitFor(jobTagAABBStat);
 	jobManager.waitFor(jobTagAABBSensor);
-	if (poolWorkerData->rebuildStatQuadTrees)
-		jobManager.waitFor(jobTagStaticRebuild);
-	if (poolWorkerData->rebuildDynQuadTrees)
-		jobManager.waitFor(jobTagQtreeDyn);
 }
 
-void CollisionSystem::cleanBuffers()
+void CollisionSystem::cleanBuffers(World& world)
 {
 	auto cleanAndShrink = [this] (auto& vector) {
 		if (vector.capacity() >= vector.size() * 50) {
@@ -141,9 +148,9 @@ void CollisionSystem::cleanBuffers()
 	cleanAndShrink(poolWorkerData->dynCollidables);
 	cleanAndShrink(poolWorkerData->statCollidables);
 	cleanAndShrink(poolWorkerData->collisionResponses);
-	if (poolWorkerData->collisionResponses.size() != world.memorySize()) poolWorkerData->collisionResponses.resize(world.memorySize());
+	if (poolWorkerData->collisionResponses.size() < world.maxEntityIndex()) poolWorkerData->collisionResponses.resize(world.maxEntityIndex());
 	cleanAndShrink(poolWorkerData->aabbCache);
-	if (poolWorkerData->aabbCache.size() != world.memorySize()) poolWorkerData->aabbCache.resize(world.memorySize());
+	if (poolWorkerData->aabbCache.size() < world.maxEntityIndex()) poolWorkerData->aabbCache.resize(world.maxEntityIndex());
 	for (auto& split : poolWorkerData->collisionInfoBuffers) cleanAndShrink(split);
 	cleanAndShrink(indexCollisionInfos);
 	indexCollisionInfoBegins.clear();
@@ -158,7 +165,7 @@ void CollisionSystem::cleanBuffers()
 	cleanAndShrink(sensorTags);
 }
 
-void CollisionSystem::collisionDetection()
+void CollisionSystem::collisionDetection(World& world)
 {
 	Timer t2(perfLog.getInputRef("physicscollide"));
 
