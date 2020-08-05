@@ -35,10 +35,10 @@ struct CollisionSyncData {
 };
 
 struct CollisionPoolData {
-	CollisionPoolData(World& wrld, size_t qtreeCapacity) :
-		world{ wrld },
-		qtreeDynamic(0, 0, qtreeCapacity, wrld),
-		qtreeStatic(0, 0, qtreeCapacity, wrld)
+	CollisionPoolData(size_t qtreeCapacity, World& world) :
+		world{ world },
+		qtreeDynamic(0, 0, qtreeCapacity, world),
+		qtreeStatic(0, 0, qtreeCapacity, world)
 	{}
 
 	World& world;
@@ -82,13 +82,13 @@ struct CollisionWorker {
 	unsigned const physicsThreadCount;
 	bool run{ true };
 
-	void cacheAABBs(std::vector<entity_index_type>& colliders);
+	void cacheAABBs(std::vector<Entity>& colliders);
 
 	void waitForUpdate();
 
 	void waitForOtherWorkers();
 
-	void collisionFunction(entity_index_type collID, Quadtree2 const& quadtree, bool dynamic);
+	void collisionFunction(Entity collID, Quadtree2 const& quadtree, bool dynamic);
 
 	//void updateStaticGrid();
 

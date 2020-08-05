@@ -19,8 +19,8 @@
 //#define DEBUG_COLLIDER_SLEEP
 //#define DEBUG_PRESSURE
 //#define DEBUG_ISLANDS
-#define DEBUG_COLLISION_LINES
-#define DEBUG_COLLISION_POINTS
+//#define DEBUG_COLLISION_LINES
+//#define DEBUG_COLLISION_POINTS
 
 class PhysicsSystem {
 public:
@@ -39,7 +39,7 @@ private:
 	JobManager& jobManager;
 	PerfLogger& perfLog;
 	// configuration:
-	const int impulseResulutionIterations = 15;		// number of iterations of impulse propagation per frame									(recommendet value = 3 with low forces to 15 with high forces)
+	const int impulseResulutionIterations = 3;		// number of iterations of impulse propagation per frame									(recommendet value = 3 with low forces to 15 with high forces)
 	int maxIslandSize = 300;						// maximum size (number of entities) in an collision island									(recommendet value = 300)
 	const int islandMergeIterations = 2;			// amount if iterations used to merge collision islands (more iterations=> smaller border)	(recommendet value = 2)
 	const int impulseResolutionMaxBatchSize = 200;	// if a single island has more collisions than the maximum, it will get it's very own batch (recommendet value = 200)

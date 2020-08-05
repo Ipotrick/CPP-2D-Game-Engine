@@ -48,7 +48,7 @@ struct CollisionGroup {
 
 struct Collider : public CompData {
 	Vec2 size;
-	COLLISION_GROUP_TYPE collisionMaskAgainst	= CollisionGroup<0>::mask;
+	COLLISION_GROUP_TYPE collisionMaskAgainst	= 0;
 	COLLISION_GROUP_TYPE collisionMaskSelf		= CollisionGroup<0>::mask;
 	bool particle;
 	bool sleeping;
@@ -106,15 +106,15 @@ struct Draw : public CompData {
 
 struct Parent {
 	Parent() {}
-	std::vector<entity_id> children;
+	std::vector<EntityId> children;
 };
 
 // BaseSlave component
 
 struct BaseChild {
-	BaseChild() : parent{ entity_id(0) }, relativePos{ 0, 0 }, relativeRota{ 0 } {}
-	BaseChild(entity_id parent, Vec2 relativePos, float relativeRota) : parent{ parent }, relativePos{ relativePos }, relativeRota { relativeRota } {}
-	entity_id parent;
+	BaseChild() : parent{ EntityId(0) }, relativePos{ 0, 0 }, relativeRota{ 0 } {}
+	BaseChild(EntityId parent, Vec2 relativePos, float relativeRota) : parent{ parent }, relativePos{ relativePos }, relativeRota { relativeRota } {}
+	EntityId parent;
 	Vec2 relativePos;
 	float relativeRota;
 };

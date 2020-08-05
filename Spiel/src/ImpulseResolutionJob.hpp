@@ -1,36 +1,44 @@
 #pragma once
 
+#include <thread>
+
 #include "JobManager.hpp"
 #include "PhysicsTypes.hpp"
 #include "Physics.hpp"
 #include "collision_detection.hpp"
 #include "EntityComponentManager.hpp"
 
-class CollisionResolutionJob : public JobFunctor {
+class ImpulseResolutionJob : public JobFunctor {
 	void collisionResolution(IndexCollisionInfo& collinfo);
 	EntityComponentManager& world;
 	float deltaTime;
 	std::vector<std::vector<IndexCollisionInfo>>& collisionBatches;
 	std::pair<int, int> batch;
 public:
-	CollisionResolutionJob(
+	inline size_t batchSize() { 
+		size_t size = 0;
+		for (int i = batch.first; i < batch.second; i++) {
+			size += collisionBatches[i].size();
+		}
+		return size;
+	}
+	ImpulseResolutionJob(
 		EntityComponentManager& world,
 		float deltaTime,
 		std::vector<std::vector<IndexCollisionInfo>>& collisionBatches,
 		std::pair<int, int> batch)
 		:world{ world }, deltaTime{ deltaTime }, collisionBatches{ collisionBatches }, batch{ batch }
 	{}
-	int operator()(int workerId) override {
-		for (int i = batch.first; i <= batch.second; i++) {
+	void execute(int workerId) override {
+		for (int i = batch.first; i < batch.second; i++) {
 			for (auto& coll : collisionBatches[i]) {
 				collisionResolution(coll);
 			}
 		}
-		return 0;
 	}
 };
 
-inline void CollisionResolutionJob::collisionResolution(IndexCollisionInfo& collInfo) {
+inline void ImpulseResolutionJob::collisionResolution(IndexCollisionInfo& collInfo) {
 	uint32_t entA = collInfo.indexA;
 	uint32_t entB = collInfo.indexB;
 
@@ -60,11 +68,11 @@ inline void CollisionResolutionJob::collisionResolution(IndexCollisionInfo& coll
 		if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { // recheck if the owners are solid
 			auto& solidA = world.getComp<PhysicsBody>(entA);
 			auto& baseA = world.getComp<Base>(entA);
-			auto& moveA = world.getComp<Movement>(entA);
 			auto& solidB = world.getComp<PhysicsBody>(entB);
 			auto& baseB = world.getComp<Base>(entB);
 			Movement dummy = Movement();
 			Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
+			auto& moveA = world.hasComp<Movement>(entA) ? world.getComp<Movement>(entA) : dummy;
 
 			auto& collidB = world.getComp<Collider>(entB);
 

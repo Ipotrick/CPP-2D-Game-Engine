@@ -11,19 +11,7 @@
 #include "World.hpp"
 #include "collision_detection.hpp"
 
-
-struct PosSize {
-	PosSize(Vec2 pos_, Vec2 size_) :
-		pos{pos_},
-		size{size_} 
-	{}
-
-	inline Vec2 const& getPos() const { return pos; }
-	inline Vec2 const& getSize() const { return size; }
-
-	Vec2 pos;
-	Vec2 size;
-};
+#include "PosSize.hpp"
 
 struct QuadtreeNode {
 	QuadtreeNode() :
@@ -40,6 +28,7 @@ struct QuadtreeNode {
 
 class Quadtree2 {
 	friend class QuadtreeNode;
+	const int stability = 2;	// 1 = high stability lower speed 2 = lower stability higher speed
 public:
 	Quadtree2(Vec2 minPos_, Vec2 maxPos_, size_t capacity_, World& wrld) :
 		m_pos{ (maxPos_ - minPos_) / 2 + minPos_ },
@@ -52,18 +41,18 @@ public:
 		trees.push_back(QuadtreeNode());
 	}
 
-	void insert(uint32_t ent, uint32_t thisID, Vec2 thisPos, Vec2 thisSize);
-	__forceinline void insert(uint32_t ent) {
-		insert(ent, 0, m_pos, m_size);
+	void insert(Entity ent, std::vector<Vec2>& aabbs, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, int depth = 0);
+	__forceinline void insert(Entity ent, std::vector<Vec2>& aabbs) {
+		insert(ent, aabbs, 0, m_pos, m_size);
 	}
-	void querry(std::vector<uint32_t>& rVec, PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize) const;
-	__forceinline void querry(std::vector<uint32_t>& rVec, PosSize const& posSize) const {
+	void querry(std::vector<Entity>& rVec, PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize) const;
+	__forceinline void querry(std::vector<Entity>& rVec, PosSize const& posSize) const {
 		querry(rVec, posSize, 0, m_pos, m_size);
 	}
 	
-	void querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw) const;
+	void querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw, int depth) const;
 	__forceinline void querryDebug(PosSize const& posSize, std::vector<Drawable>& draw) const {
-		querryDebug(posSize, 0, m_pos, m_size, draw);
+		querryDebug(posSize, 0, m_pos, m_size, draw, 0);
 	}
 	void querryDebugAll(uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw, Vec4 color, int depth) const;
 	__forceinline void querryDebugAll(std::vector<Drawable>& draw, Vec4 color) const {
@@ -94,15 +83,20 @@ public:
 
 private:
 
-	inline std::tuple<bool, bool, bool, bool> isInSubtrees(Vec2 treePos, Vec2 treeSize, Vec2 pos, Vec2 size) const {
+	__forceinline std::tuple<bool, bool, bool, bool> isInSubtrees(Vec2 treePos, Vec2 treeSize, Vec2 pos, Vec2 size) const {
+		bool u = pos.y + size.y * 0.5f > treePos.y;
+		bool d = pos.y - size.y * 0.5f < treePos.y;
+		auto r = pos.x + size.x * 0.5f > treePos.x;
+		auto l = pos.x - size.x * 0.5f < treePos.x;
 		return {
-			isOverlappingAABB(treePos + Vec2(-treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size),
-			isOverlappingAABB(treePos + Vec2( treeSize.x, -treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size),
-			isOverlappingAABB(treePos + Vec2(-treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size),
-			isOverlappingAABB(treePos + Vec2( treeSize.x,  treeSize.y) * 0.25f, treeSize * 0.500001f, pos, size)
+			d & l,
+			d & r,
+			u & l,
+			u & r
 		};
 	}
-
+public:
+	World& world;
 private:
 	Vec2 m_pos;
 	Vec2 m_size;
@@ -110,6 +104,5 @@ private:
 	std::vector<QuadtreeNode> trees;
 	uint32_t nextFreeIndex;
 	std::queue<uint32_t> freeIndices;
-	World& world;
 };
 

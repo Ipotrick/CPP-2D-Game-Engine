@@ -73,7 +73,7 @@ void RenderingWorker::initiate()
 
 	glEnable(GL_MULTISAMPLE);
 
-	texHandler.initialize();
+	texCache.initialize();
 	
 	verteciesRawBuffer = (float*)malloc(sizeof(Vertex) * maxVertexCount);
 	indices = (uint32_t*)malloc(sizeof(uint32_t) * maxIndicesCount);
@@ -111,13 +111,14 @@ void RenderingWorker::operator()()
 	
 	while (data->run) {
 		auto& drawables = data->renderBuffer->drawables;
-		auto& camera = data->renderBuffer->camera;
+		auto& camera = data->renderBuffer->camera; 
 		{	
 			Timer<> t(data->new_renderTime);
 			// refresh texture Refs
-			texHandler.refreshRefMap(data->renderBuffer->newTextureRefs);
+			texCache.cacheTextures(data->renderBuffer->drawables);
 
 			Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
+			Mat3 pixelProjectionMatrix = Mat3::translate(Vec2(-1, -1)) * Mat3::scale(Vec2(1.0f / window->width, 1.0f / window->height)) * Mat3::scale(Vec2(2, 2));
 
 			std::sort(drawables.begin(), drawables.end(),
 				[](Drawable const& a, Drawable const& b) {
@@ -129,7 +130,7 @@ void RenderingWorker::operator()()
 
 			int lastIndex{ 0 };
 			while (lastIndex != drawables.size()) {
-				lastIndex = drawBatch(drawables, viewProjectionMatrix, lastIndex);
+				lastIndex = drawBatch(drawables, viewProjectionMatrix, pixelProjectionMatrix, lastIndex);
 			}
 
 			{	// push rendered image into image buffer
@@ -183,19 +184,28 @@ std::string RenderingWorker::readShader(std::string path_)
 	return ss.str();
 }
 
-std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat) {
+std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat, Mat3 const& pixelProjectionMatrix) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
-	if (texHandler.hasTexture(d.id) && texHandler.isTextureLoaded(texHandler.getTexRef(d.id).textureName)) {
-		minTex = texHandler.getTexRef(d.id).minPos;
-		maxTex = texHandler.getTexRef(d.id).maxPos;
+	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value().textureName)) {
+		minTex = d.texRef.value().minPos;
+		maxTex = d.texRef.value().maxPos;
 	}
 
 	bool isCircle = d.form == Form::Circle ? 1.0f : 0.0f;
 
 	Mat3 modelMatrix2 = Mat3::translate(Vec2(d.position.x, d.position.y)) * Mat3::rotate(d.rotationVec) * Mat3::scale(Vec2(d.scale.x, d.scale.y));
-	if (!d.isInWindowSpace()) {
-		modelMatrix2 = viewProjMat * modelMatrix2;
+	switch (d.getDrawMode()) {
+	case DrawMode::WorldSpace:
+		modelMatrix2 = viewProjMat * modelMatrix2; break;
+	case DrawMode::WindowSpace:
+		break;
+	case DrawMode::UniformWindowSpace:
+		modelMatrix2 = Mat3::scale(data->renderBuffer->camera.frustumBend) * modelMatrix2; break;
+	case DrawMode::PixelSpace: 
+		modelMatrix2 = pixelProjectionMatrix * modelMatrix2; break;
+	default:
+		break;
 	}
 
 	Vertex v1;
@@ -228,7 +238,7 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 
 
 
-size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, size_t startIndex)
+size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix, size_t startIndex)
 {
 	glUseProgram(shader);
 	glBindBuffer(GL_ARRAY_BUFFER, verteciesBuffer);
@@ -250,12 +260,12 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 		int drawableSamplerSlot{ 0 };
 
 		// check if drawable has texture
-		if (texHandler.hasTexture(d.id)) {
-			if (texHandler.isTextureLoaded(texHandler.getTexRef(d.id).textureName)) { 
+		if (d.texRef.has_value()) {
+			if (texCache.isTextureLoaded(d.texRef.value().textureName)) {
 				// is texture allready in the usedSamplerMap?
-				if (usedTexturesSamplerSlots.contains(texHandler.getTexRef(d.id).textureName)) {
+				if (usedTexturesSamplerSlots.contains(d.texRef.value().textureName)) {
 					// then just use the allready sloted texture sampler:
-					drawableSamplerSlot = usedTexturesSamplerSlots[texHandler.getTexRef(d.id).textureName];
+					drawableSamplerSlot = usedTexturesSamplerSlots[d.texRef.value().textureName];
 				}
 				else { 
 					// if all texture sampler slots are used flush the batch
@@ -263,9 +273,9 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 
 					// there is a free texture sampler slot
 					// add texture to usedSamplerSlotMap:
-					usedTexturesSamplerSlots.insert({ texHandler.getTexRef(d.id).textureName , nextTextureSamplerSlot });
+					usedTexturesSamplerSlots.insert({ d.texRef.value().textureName , nextTextureSamplerSlot });
 					// bind texture to sampler slot
-					bindTexture(texHandler.getTexRef(d.id).textureName, nextTextureSamplerSlot);
+					bindTexture(d.texRef.value().textureName, nextTextureSamplerSlot);
 					drawableSamplerSlot = nextTextureSamplerSlot;
 					nextTextureSamplerSlot++;
 				}
@@ -280,12 +290,15 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 			drawableSamplerSlot = -1;
 		}
 
-		auto vertecies = generateVertices(d, drawableSamplerSlot, viewProjectionMatrix);
+		auto vertecies = generateVertices(d, drawableSamplerSlot, viewProjectionMatrix, pixelProjectionMatrix);
 		// push vertex data in the rawBuffer
+		int vertexOffset = 0;
+		int dr = drawableCount * 4 * Vertex::floatCount;
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < Vertex::floatCount; j++) {
-				verteciesRawBuffer[(i * Vertex::floatCount + j) + (drawableCount * 4 * Vertex::floatCount)] = vertecies[i][j];
+				verteciesRawBuffer[(vertexOffset + j) + (dr)] = vertecies[i][j];
 			}
+			vertexOffset += Vertex::floatCount;
 		}
 	}
 	// push vertex data to the gpu
@@ -315,16 +328,16 @@ void RenderingWorker::bindTexture(std::string_view name, int slot)
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexCount);
 	assert(slot < maxTexCount);
 #endif
-	assert(texHandler.isTextureLoaded(name)); 
+	assert(texCache.isTextureLoaded(name)); 
 	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, texHandler.getTexture(name).openglTexID);
+	glBindTexture(GL_TEXTURE_2D, texCache.getTexture(name).openglTexID);
 }
 
-void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix)
+void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix)
 {
 	int texSlot{ 0 };
 
-	auto vertecies = generateVertices(d, texSlot, viewProjectionMatrix);
+	auto vertecies = generateVertices(d, texSlot, viewProjectionMatrix, pixelProjectionMatrix);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < Vertex::floatCount; j++) {
 			verteciesRawBuffer[i * Vertex::floatCount + j] = vertecies[i][j];
@@ -334,9 +347,9 @@ void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjection
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * maxVertexCount, verteciesRawBuffer);
 
 
-	if (texHandler.hasTexture(d.id)) {
-		if (texHandler.isTextureLoaded(texHandler.getTexRef(d.id).textureName)) {
-			bindTexture(texHandler.getTexRef(d.id).textureName, texSlot);
+	if (d.texRef.has_value()) {
+		if (texCache.isTextureLoaded(d.texRef.value().textureName)) {
+			bindTexture(d.texRef.value().textureName, texSlot);
 		}
 		else {
 			bindTexture("default", texSlot);

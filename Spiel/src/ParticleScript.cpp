@@ -1,6 +1,6 @@
 #include "ParticleScript.hpp"
 
-void ParticleScript::script(entity_id entity, ParticleScriptComp& data, float deltaTime) {
+void ParticleScript::script(Entity entity, ParticleScriptComp& data, float deltaTime) {
 	assert(world.hasComp<Age>(entity));
 	auto& age = world.getComp<Age>(entity);
 	assert(world.hasComp<Draw>(entity)); 
@@ -14,6 +14,15 @@ void ParticleScript::script(entity_id entity, ParticleScriptComp& data, float de
 			data.startSize *= 0.5f;
 			data.endSize *= 0.9f;
 		}
+	}
+
+	if (age.curAge / age.maxAge > 0.05f) {
+		collider.collisionMaskAgainst = 0;
+	}
+
+
+	if (age.curAge / age.maxAge > 0.7f) {
+		collider.collisionMaskAgainst = 0xFFFFFFFF;
 	}
 
 	draw.scale = data.startSize * (1 - age.curAge / age.maxAge) + data.endSize * age.curAge / age.maxAge;

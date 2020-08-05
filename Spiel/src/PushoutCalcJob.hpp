@@ -6,12 +6,13 @@
 #include "collision_detection.hpp"
 
 class PushoutCalcJob : public JobFunctor {
-	void pushoutCalc(IndexCollisionInfo collInfo);
 	std::vector<IndexCollisionInfo>& collisionInfos;
 	std::vector<Vec2>& velocities;
 	std::vector<float>& overlaps;
 	std::vector<CollisionResponse>& collisionResponses;
 	EntityComponentManager& manager;
+
+	void pushoutCalc(IndexCollisionInfo collInfo);
 public:
 	PushoutCalcJob(
 		std::vector<IndexCollisionInfo>& collisionInfos,
@@ -22,21 +23,19 @@ public:
 		:collisionInfos{ collisionInfos }, velocities{ velocities }, overlaps{ overlaps }, collisionResponses{ collisionResponses }, manager{ manager }
 	{}
 
-	int operator() (int workerId) override {
+	void execute(int workerId) override {
 		for (auto& collInfo : collisionInfos) {
 			pushoutCalc(collInfo);
 		}
-		return 0;
 	}
 };
 
 void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
 	auto& collID = collInfo.indexA;
-	if (manager.hasComp<Movement>(collID)) {
-		auto& otherID = collInfo.indexB;
+	if (manager.hasComps<PhysicsBody, Movement>(collID) && manager.hasComp<PhysicsBody>(collInfo.indexB)) {
+		const auto otherID = collInfo.indexB;
 
-		bool otherDynamic = false;
-		if (manager.hasComp<Movement>(otherID)) otherDynamic = true;
+		bool otherDynamic = manager.hasComps<Movement>(otherID);
 
 		const float surfaceAreaColl = manager.getComp<Collider>(collID).size.x * manager.getComp<Collider>(collID).size.y;
 		const float surfaceAreaOther = manager.getComp<Collider>(otherID).size.x * manager.getComp<Collider>(otherID).size.y;
@@ -51,7 +50,7 @@ void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
 		Vec2 newPosChange = calcPosChange(
 			surfaceAreaColl, velocities[collID],
 			surfaceAreaOther, velocities[otherID],
-			collInfo.clippingDist, collInfo.collisionNormal, otherDynamic, pushoutPriority);
+			collInfo.clippingDist, collInfo.collisionNormal, otherDynamic, 1);
 
 		Vec2 oldPosChange = collisionResponses.at(collID).posChange;
 

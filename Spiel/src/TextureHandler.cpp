@@ -2,7 +2,7 @@
 
 #include "GL/glew.h"
 
-void TextureHandler::initialize()
+void TextureCache::initialize()
 {
 	{
 		uint8_t* whitePoint = (uint8_t*)malloc(sizeof(uint8_t) * 4);
@@ -62,7 +62,7 @@ void TextureHandler::initialize()
 	}
 }
 
-bool TextureHandler::loadTexture(std::string_view name)
+bool TextureCache::loadTexture(std::string_view name)
 {
 	bool success{ false };
 	if (!isTextureLoaded(name)) {
@@ -102,16 +102,4 @@ bool TextureHandler::loadTexture(std::string_view name)
 		success = true;
 	}
 	return success;
-}
-
-void TextureHandler::refreshRefMap(std::vector<std::pair<uint32_t, TextureRef>>& texRefs)
-{
-	textureRefMap.clear();
-	for (auto& tex : texRefs) {
-		if (!isTextureLoaded(tex.second.textureName)) {
-			// load all not loaded  textures from file
-			auto success = loadTexture(tex.second.textureName);
-		}
-		textureRefMap.insert({ tex.first, tex.second });
-	}
 }

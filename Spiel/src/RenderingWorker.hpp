@@ -92,14 +92,14 @@ public:
 	std::shared_ptr<RenderingSharedData> data;
 private:
 	std::string readShader(std::string path_);
-	std::array<Vertex, 4> generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat);
-	void drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix);
+	std::array<Vertex, 4> generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat, Mat3 const& pixelProjectionMatrix);
+	void drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix);
 	// returns the index after the last element that was drawn in the batch
-	size_t drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, size_t startIndex);
+	size_t drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix, size_t startIndex);
 	void bindTexture(GLuint texID, int slot = 0);
 	void bindTexture(std::string_view name, int slot = 0);
 private:
-	TextureHandler texHandler{ "ressources/" };
+	TextureCache texCache{ "ressources/" };
 
 	int maxTextureSlots{};
 

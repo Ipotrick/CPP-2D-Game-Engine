@@ -7,13 +7,13 @@
 
 #include "RenderTypes.hpp"
 
-class TextureHandler {
+class TextureCache {
 public:
-	TextureHandler(std::string_view texturePath_ = "") :
+	TextureCache(std::string_view texturePath_ = "") :
 		texturesPath{ texturePath_ }
 	{
 	}
-	~TextureHandler() {
+	~TextureCache() {
 		for (auto el : textureMap) {
 			glDeleteTextures(1, &el.second.openglTexID);
 		}
@@ -26,21 +26,18 @@ public:
 	Texture& getTexture(std::string_view name);
 
 	// textureRefMap functions
-	void refreshRefMap(std::vector<std::pair<uint32_t, TextureRef>>& texRefs);
-	bool hasTexture(uint32_t drawableID);
-	TextureRef& getTexRef(uint32_t drawableID);
+	void cacheTextures(std::vector<Drawable>& drawables);
 private:
 	std::string_view texturesPath;
 	robin_hood::unordered_map<std::string_view, Texture> textureMap;
-	robin_hood::unordered_map<uint32_t, TextureRef> textureRefMap;
 };
 
-__forceinline bool TextureHandler::isTextureLoaded(std::string_view name)
+__forceinline bool TextureCache::isTextureLoaded(std::string_view name)
 {
 	return textureMap.contains(name);
 }
 
-__forceinline Texture& TextureHandler::getTexture(std::string_view name) 
+__forceinline Texture& TextureCache::getTexture(std::string_view name) 
 {
 	if (!isTextureLoaded(name)) {
 #ifdef _DEBUG
@@ -51,21 +48,19 @@ __forceinline Texture& TextureHandler::getTexture(std::string_view name)
 	return textureMap[name];
 }
 
+inline void TextureCache::cacheTextures(std::vector<Drawable>& drawables)
+{
+	for (auto const& d : drawables) {
+		if (d.texRef.has_value() && !isTextureLoaded(d.texRef.value().textureName)) {
+			loadTexture(d.texRef.value().textureName);
+		}
+	}
+}
+
 __forceinline void checkGLError()
 {
 	GLenum err;
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		std::cout << err;
 	}
-}
-
-__forceinline bool TextureHandler::hasTexture(uint32_t drawableID)
-{
-	return textureRefMap.contains(drawableID);
-}
-
-__forceinline TextureRef& TextureHandler::getTexRef(uint32_t drawableID)
-{
-	assert(textureRefMap.contains(drawableID));
-	return textureRefMap[drawableID];
 }
