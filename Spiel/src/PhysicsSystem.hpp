@@ -19,8 +19,8 @@
 //#define DEBUG_COLLIDER_SLEEP
 //#define DEBUG_PRESSURE
 //#define DEBUG_ISLANDS
-//#define DEBUG_COLLISION_LINES
-//#define DEBUG_COLLISION_POINTS
+#define DEBUG_COLLISION_LINES
+#define DEBUG_COLLISION_POINTS
 
 class PhysicsSystem {
 public:

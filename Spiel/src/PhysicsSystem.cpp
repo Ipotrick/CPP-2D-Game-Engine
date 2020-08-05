@@ -140,7 +140,7 @@ void PhysicsSystem::findIslands(CollisionSystem& collSys, World& world) {
 	printf("collisions inside of islands: %i, collisions between islands: %i, ratio: %f\n", allCollisions- borderCollisions, borderCollisions, islandToBorderRatio);
 #else
 #ifdef DEBUG_COLLISION_LINES
-	for (auto collInfo : collSys.indexCollisionInfos)
+	for (auto collInfo : collSys.collisionInfos)
 	{
 		auto pos = world.getComp<Base>(collInfo.indexA).position;
 		auto pos2 = world.getComp<Base>(collInfo.indexB).position;
@@ -153,7 +153,7 @@ void PhysicsSystem::findIslands(CollisionSystem& collSys, World& world) {
 #endif
 #endif
 #ifdef DEBUG_COLLISION_POINTS
-	for (auto collInfo : collSys.indexCollisionInfos) {
+	for (auto collInfo : collSys.collisionInfos) {
 		Vec2 scale = Vec2(0.06, 0.06);
 		Drawable d(0, collInfo.collisionPos, 1, scale, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0));
 		debugDrawables.push_back(d);

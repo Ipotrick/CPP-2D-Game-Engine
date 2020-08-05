@@ -6,7 +6,7 @@ Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float
 		float bPart = surfAreaB / bothAreas;
 		float collDirV1 = dot(velA, primCollNormal);
 		float collDirV2 = dot(velB, primCollNormal);
-		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.95f && bPart > 0.05f && Physics::directionalPositionCorrection) {
+		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f && Physics::directionalPositionCorrection) {
 			//they move into each other
 			if (collDirV2 < 0) {
 				//coll moved into other

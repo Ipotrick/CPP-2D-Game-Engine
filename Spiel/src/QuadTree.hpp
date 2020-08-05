@@ -28,7 +28,7 @@ struct QuadtreeNode {
 
 class Quadtree2 {
 	friend class QuadtreeNode;
-	const int stability = 2;	// 1 = high stability lower speed 2 = lower stability higher speed
+	const int stability = 1;	// 1 = high stability lower speed 2 = lower stability higher speed
 public:
 	Quadtree2(Vec2 minPos_, Vec2 maxPos_, size_t capacity_, World& wrld) :
 		m_pos{ (maxPos_ - minPos_) / 2 + minPos_ },

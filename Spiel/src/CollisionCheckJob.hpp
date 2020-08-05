@@ -5,6 +5,7 @@
 #include "collision_detection.hpp"
 #include "Physics.hpp"
 #include "CollisionWorkerData.hpp"
+#include "robin_hood.h"
 
 class CollisionCheckJob : public JobFunctor {
 protected:
@@ -26,7 +27,8 @@ public:
 		uint32_t begin,
 		uint32_t end)
 		:poolData{ poolData }, entities{ entities }, begin{ begin }, end{ end }
-	{}
+	{
+	}
 
 	void execute(int workerId) override = 0;
 };
@@ -99,6 +101,7 @@ inline void CollisionCheckJob::collisionFunction(
 
 		nearCollidablesBuffer.clear();
 		qtree.querry(nearCollidablesBuffer, posSize);
+
 		for (auto& otherID : nearCollidablesBuffer) {
 			if (collID != otherID) { //do not check against self
 				const auto baseOther = manager.getComp<Base>(otherID);

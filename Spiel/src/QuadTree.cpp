@@ -35,26 +35,26 @@ void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos
 			{
 				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(pcoll).position,
 					entAABB);
-				int isInCount = isInUl + isInDl + isInUr + isInDr;
+				int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 				if (isInCount > stability) {
 					trees[thisID].collidables.push_back(pcoll);
 				}
 				else {
 					if (isInUl)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+						insert(pcoll, entAABB, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 					if (isInUr)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+						insert(pcoll, entAABB, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 					if (isInDl)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+						insert(pcoll, entAABB, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 					if (isInDr)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+						insert(pcoll, entAABB, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 				}
 			}
@@ -64,54 +64,53 @@ void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos
 		// this node has subtrees and tries to distribute them into the subtrees
 		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(ent).position,
 			entAABB);
-		int isInCount = isInUl + isInDl + isInUr + isInDr;
+		int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 		if (isInCount > stability) {
 			trees[thisID].collidables.push_back(ent);
 		}
 		else {
 			if (isInUl)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+				insert(ent, entAABB, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 			if (isInUr)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+				insert(ent, entAABB, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 			if (isInDl)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+				insert(ent, entAABB, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 			if (isInDr)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f, depth + 1);
+				insert(ent, entAABB, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 		}
 	}
 }
 
 void Quadtree2::querry(std::vector<uint32_t>& rVec, PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize) const {
+	rVec.insert(rVec.end(), trees[thisID].collidables.begin(), trees[thisID].collidables.end());
 	if (trees[thisID].hasSubTrees())
 	{
 		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, posSize.pos, posSize.size);
 		if (isInUl)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f );
+			querry(rVec, posSize, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f );
 		}
 		if (isInUr)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.500001f);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f);
 		}
 		if (isInDl)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f);
 		}
 		if (isInDr)
 		{
-			querry(rVec, posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.500001f);
+			querry(rVec, posSize, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f);
 		}
 	}
-	//rVec.reserve(rVec.size() + trees[thisID].collidables.size());
-	rVec.insert(rVec.end(), trees[thisID].collidables.begin(), trees[thisID].collidables.end());
 }
 
 void Quadtree2::querryDebug(PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, std::vector<Drawable>& draw, int depth) const {

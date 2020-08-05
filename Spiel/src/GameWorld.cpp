@@ -124,7 +124,7 @@ void World::loadMap(std::string mapname_) {
 		cmps.add(colliderPlayer);
 		cmps.add(PhysicsBody(0.5, 50.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
 		cmps.add<Movement>();
-		cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::Rectangle));
+		cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.4, Form::Rectangle));
 		cmps.add<Player>();
 		spawn(player);
 
@@ -133,7 +133,7 @@ void World::loadMap(std::string mapname_) {
 			auto ent = index_create();
 			auto c = viewComps(ent);
 			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
-			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.3f, Form::Rectangle));
+			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.1f, Form::Rectangle));
 			c.add(TexRef("test.png"));
 			spawn(ent);
 		}

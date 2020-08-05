@@ -145,17 +145,17 @@ void CollisionSystem::prepare(World& world)
 		PosSize p(world.getComp<Base>(player).position, poolWorkerData->aabbCache.at(player));
 		poolWorkerData->qtreeDynamic.querry(near, p);
 		std::cout << "collchecks player: " << near.size() << std::endl;
-		//poolWorkerData->qtreeDynamic.querryDebug(p, debugDrawables);
-	
-		//for (auto const ent : near) {
-		//	if (world.hasComps<Collider, Movement, Base, Draw>(ent)) {
-		//		auto pos = world.getComp<Base>(ent).position;
-		//		auto draw = world.getComp<Draw>(ent);
-		//
-		//		auto d = Drawable(0, pos, 1, draw.scale, Vec4(1, 0, 0, 1), Form::Circle, 0);
-		//		debugDrawables.push_back(d);
-		//	}
-		//}
+		poolWorkerData->qtreeDynamic.querryDebug(p, debugDrawables);
+
+		for (auto const ent : near) {
+			if (world.hasComps<Collider, Movement, Base, Draw>(ent)) {
+				auto pos = world.getComp<Base>(ent).position;
+				auto draw = world.getComp<Draw>(ent);
+		
+				auto d = Drawable(0, pos, 1, draw.scale*0.5, Vec4(1, 0, 0, 1), Form::Circle, 0);
+				debugDrawables.push_back(d);
+			}
+		}
 	
 	}
 }
@@ -255,4 +255,13 @@ void CollisionSystem::collisionDetection(World& world)
 	}
 	collisionInfoEnds.insert({ lastIDA, collisionInfos.end() });
 
+	float max = 0;
+	for (auto player : world.entity_view<Player>()) {
+		auto b = collisionInfoBegins[player];
+		auto e = collisionInfoEnds[player];
+		for (auto iter = b; iter != e; ++iter) {
+			max = std::max(max, iter->clippingDist);
+		}
+	}
+	std::cout << "playerMaxClip: " << max << std::endl;
 }
