@@ -22,11 +22,9 @@ struct CompData {
 using storage_t = int;
 
 constexpr storage_t direct_indexing = 0;
-constexpr storage_t hashing = 1;
-constexpr storage_t lookup_table = 2;
-constexpr storage_t sorted_lookup_table = 3;
-constexpr storage_t sparse_set = 4;
-constexpr storage_t shit = 5;
+constexpr storage_t sparse_indexing = 1;
+constexpr storage_t sorted_lookup_table = 2;
+constexpr storage_t sparse_set = 3;
 
 template<typename CompType, storage_t storageType>
 class ComponentStorage {
@@ -34,11 +32,11 @@ public:
 	using Component = CompType;
 	inline void updateMaxEntNum(size_t newEntNum);
 	inline size_t memoryConsumtion();
-	inline void insert(entity_index_type entity, CompType const& comp);
-	inline void remove(entity_index_type entity);
-	inline bool contains(entity_index_type entity) const;
-	inline CompType& get(entity_index_type entity);
-	inline CompType& operator[](entity_index_type ent);
+	inline void insert(Entity entity, CompType const& comp);
+	inline void remove(Entity entity);
+	inline bool contains(Entity entity) const;
+	inline CompType& get(Entity entity);
+	inline CompType& operator[](Entity ent);
 	inline size_t size() const;
 	class iterator {
 	public:
@@ -53,139 +51,12 @@ public:
 		pointer operator->();
 		bool operator==(const self_type& rhs);
 		bool operator!=(const self_type& rhs);
-		entity_index_type id();
+		Entity id();
 	};
 	inline iterator begin();
 	inline iterator end();
 };
 
-/*
-	pros:
-		-low memory usage
-	cons: 
-		-fast access time
-		-unordered, accessing OTHER components in a loop is not that cache friendly
-		-no interloop comp registration
-		-no interloop comp deregistration
-		violating these limitations will mass up the iterators
-	memory alignment:
-		random
-		packed (1.3)
-	memory usage:
-		n = count(entities)
-		nMax = (current maximum of the entitiy List)
-		m(n, nMax) = nMax + n * sizeof(CompType) * 8 * 1.3;
-*/
-template<typename CompType>
-class ComponentStorage<CompType, hashing> {
-public:
-	using Component = CompType;
-	using storage_t = robin_hood::unordered_map<uint32_t, CompType>;
-
-	inline size_t memoryConsumtion() {
-		return storage.size();
-	}
-
-	inline void updateMaxEntNum(size_t newEntNum) {
-		if (containsVec.size() < newEntNum) {
-			containsVec.resize(newEntNum, false);
-		}
-	}
-
-	inline void insert(entity_index_type entity, CompType const& comp) {
-		assert(!contains(entity));
-		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
-		containsVec[entity] = true;
-
-		storage[entity] = comp;
-	}
-	inline void remove(entity_index_type entity) {
-		if (contains(entity)) {
-			containsVec[entity] = false;
-			auto res = storage.find(entity);
-			if (res != storage.end()) {
-				storage.erase(res);
-			}
-		}
-	}
-	inline bool contains(entity_index_type entity) const {
-#ifdef DEBUG_COMPONENT_STORAGE
-		return containsVec.at(entity);
-#else
-		return containsVec[entity];
-#endif
-	}
-	inline CompType& get(entity_index_type entity) {
-		assert(contains(entity));
-		return storage[entity];
-	}
-	inline CompType& operator[](entity_index_type entity) {
-		assert(contains(entity));
-		return storage[entity];
-	}
-	inline size_t size() const { return storage.size(); }
-	class iterator {
-	public:
-		typedef iterator self_type;
-		typedef CompType value_type;
-		typedef CompType& reference;
-		typedef CompType* pointer;
-		typedef std::forward_iterator_tag iterator_category;
-		iterator(typename storage_t::iterator storIter, storage_t& stor_) : iter{ storIter }, storage{ stor_ } {}
-		self_type operator++(int junk) {
-			assert(iter != storage.end());
-			++iter;
-			return *this;
-		}
-		self_type operator++() {
-			self_type me = *this;
-			operator++(0);
-			return me;
-		}
-		reference operator*() {
-			assert(iter != storage.end());
-			return iter->second;
-		}
-		pointer operator->() {
-			assert(iter != storage.end());
-			return &(iter->second);
-		}
-		bool operator==(const self_type& rhs) {
-			return iter == rhs.iter;
-		}
-		bool operator!=(const self_type& rhs) {
-			return iter != rhs.iter;
-		}
-		entity_index_type handle() { return iter->first; }
-	private:
-		typename storage_t::iterator iter;
-		storage_t& storage;
-	};
-	inline iterator begin() { return iterator(storage.begin(), storage); }
-	inline iterator end() { return iterator(storage.end(), storage); }
-private:
-	storage_t storage;
-	std::vector<bool> containsVec;
-};
-
-/*
-	pros:
-		instant access
-		instant deregistration
-		instant registration
-		linear iteration, super cache friendly
-		iterators NEVER get invalidated
-	cons:
-		very high memory usage
-	memory alignment:
-		linear
-		sparse (n / nMax)
-	memory usage:
-		n = count(entities)
-		nMax = (current maximum of the entitiy List)
-		m(n, nMax) = nMax + nMax * sizeof(CompType) * 8;
-
-*/
 template<typename CompType>
 class ComponentStorage<CompType, direct_indexing>{
 public:
@@ -202,7 +73,7 @@ public:
 		}
 	}
 
-	inline void insert(entity_index_type entity, CompType const& comp) {
+	inline void insert(Entity entity, CompType const& comp) {
 		assert(!contains(entity));
 		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
 		containsVec[entity] = true;
@@ -217,23 +88,19 @@ public:
 			storage[entity] = comp;
 		}
 	}
-	inline void remove(entity_index_type entity) {
+	inline void remove(Entity entity) {
 		if (contains(entity)) {
 			containsVec[entity] = false;
 		}
 	}
-	inline bool contains(entity_index_type entity) const {
-#ifdef DEBUG_COMPONENT_STORAGE
-		return containsVec.at(entity);
-#else
-return containsVec[entity];
-#endif
+	inline bool contains(Entity entity) const {
+		return containsVec[entity];
 	}
-	inline CompType& get(entity_index_type entity) {
+	inline CompType& get(Entity entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
-	inline CompType& operator[](entity_index_type entity) {
+	inline CompType& operator[](Entity entity) {
 		assert(contains(entity));
 		return storage[entity];
 	}
@@ -243,15 +110,19 @@ return containsVec[entity];
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef entity_index_type value_type;
-		typedef entity_index_type& reference;
-		typedef entity_index_type* pointer;
+		typedef Entity value_type;
+		typedef Entity& reference;
+		typedef Entity* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_index_type entity_, ComponentStorage<CompType, direct_indexing>& compStore) : entity{ entity_ }, compStore{ compStore } {}
+		iterator(Entity entity_, ComponentStorage<CompType, direct_indexing>& compStore) 
+			: entity{ entity_ }, compStore{ compStore }, end{ (Entity)compStore.size() } {}
 		self_type operator++(int dummy) {
-			assert(entity < compStore.storage.size());
-			++entity;
-			while (entity < compStore.storage.size() && !compStore.containsVec.at(entity)) ++entity; //skip non valid entries
+			assert(entity < end);
+			do {
+				++entity;
+			} while (entity < end && !compStore.containsVec[entity]);
+			 //skip non valid entries
+			assert(entity <= end);
 			return *this;
 		}
 		self_type operator++() {
@@ -260,12 +131,12 @@ return containsVec[entity];
 			return me;
 		}
 		reference operator*() {
-			assert(entity < compStore.storage.size() && compStore.containsVec.at(entity));
-			return compStore.storage[entity];
+			assert(entity < end&& compStore.containsVec[entity]);
+			return entity;
 		}
 		pointer operator->() {
-			assert(entity < compStore.storage.size());
-			return &compStore.storage[entity];
+			assert(entity < end);
+			return &entity;
 		}
 		bool operator==(self_type const& rhs) {
 			return entity == rhs.entity;
@@ -273,17 +144,18 @@ return containsVec[entity];
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		entity_index_type data() {
-			assert(entity < storage.size());
+		Entity data() {
+			assert(entity < end);
 			return compStore.storage[entity];
 		}
 	private:
-		entity_index_type entity; 
+		Entity entity; 
 		ComponentStorage<CompType, direct_indexing>& compStore;
+		const Entity end;
 	};
 	inline iterator<CompType> begin() {
-		entity_index_type entity = 0;
-		while (!contains(entity)) ++entity;
+		Entity entity = 0;
+		while (entity < storage.size() && !contains(entity)) ++entity;
 		return iterator<CompType>(entity, *this);
 	}
 	inline iterator<CompType> end() { return iterator<CompType>(storage.size(), *this); }
@@ -292,102 +164,119 @@ private:
 	std::vector<bool> containsVec;
 };
 
-/*
-	pros:
-		instant access
-		instant deregistration
-		very fast registration
-		iterators NEVER get invalidated
-		memory usage on large objects that appear often is very good
-	cons:
-		random iteration BUT data is tightly packed
-		index table memory overhead ( 4 bytes * MaxEntID )
-	memory alignment:
-		random (can be optimised by call to linear)
-		packed (1)
-	memory usage:
-		n = count(entities)
-		nMax = (current maximum of the entitiy List)
-		m(n, nMax) = nMax * 32 + n * sizeof(CompType) * 8
+static const int PAGE_BITS{ 10 };
+static const int PAGE_SIZE{ 1 << PAGE_BITS };
+static const int OFFSET_MASK{ ~(-1 << PAGE_BITS) };
 
-*/
+static inline int page(Entity entity) {
+	return entity >> PAGE_BITS;
+}
+
+static inline int offset(Entity entity) {
+	return entity & OFFSET_MASK;
+}
+
 template<typename CompType>
-class ComponentStorage<CompType, lookup_table> {
+class ComponentStorage<CompType, sparse_indexing> {
+
+	struct Page {
+		CompType data[PAGE_SIZE];
+		int usedCount{ 0 };
+	};
 public:
 	using Component = CompType;
 	using storage_t = std::vector<CompType>;
 
-	inline size_t memoryConsumtion() {
-		return indexTable.capacity() * sizeof(uint32_t) + storage.capacity() * sizeof(CompType);
+	~ComponentStorage() {
+		for (auto& page : pages) {
+			if (page != nullptr)
+				delete page;
+		}
 	}
 
+	inline size_t memoryConsumtion() {
+		return pages.size() * sizeof(Page*) + usedPages * PAGE_SIZE * sizeof(CompType);
+	}
+
+	inline size_t capacity() {
+		return usedPages * PAGE_SIZE;
+	}
 
 	inline void updateMaxEntNum(size_t newEntNum) {
-		if (indexTable.size() < newEntNum) {
-			indexTable.resize(newEntNum, 0xFFFFFFFF);
-		}
+		if (newEntNum > containsVec.size())
+			containsVec.resize(newEntNum, false);
+		if (page(newEntNum-1)+1 > pages.size())
+			pages.resize(page(newEntNum-1)+1, nullptr);
 	}
 
-	inline void optimiseMemoryLayout() {
+	inline void insert(Entity entity, CompType const& comp) {
+		if (pages[page(entity)] == nullptr)
+			pages[page(entity)] = new Page;
+
+		containsVec[entity] = true;
+
+		pages[page(entity)]->data[offset(entity)] = comp;
+		pages[page(entity)]->usedCount += 1;
 	}
 
-	inline void insert(entity_index_type entity, CompType const& comp) {
-		assert(!contains(entity));
-		if (entity >= indexTable.size()) {
-			indexTable.resize(entity + 1, 0xFFFFFFFF);
-		}
-
-		if (freeStorageSlots.empty()) {
-			storage.emplace_back(comp);
-			indexTable[entity] = storage.size() - 1;
-		}
-		else {
-			entity_index_type freeSlotIndex = freeStorageSlots.front();
-			freeStorageSlots.pop();
-			indexTable[entity] = freeSlotIndex;
-			storage[indexTable[entity]] = comp;
-		}
-	}
-
-	inline void remove(entity_index_type entity) {
-		assert(contains(entity));
+	inline void remove(Entity entity) {
 		if (contains(entity)) {
-			freeStorageSlots.push(indexTable[entity]);
-			indexTable[entity] = 0xFFFFFFFF;
+			containsVec[entity] = false;
+
+			pages[page(entity)]->usedCount -= 1;
+			if (pages[page(entity)]->usedCount == 0) {
+				delete pages[page(entity)];
+				pages[page(entity)] = nullptr;
+			}
+				
 		}
 	}
-
-	inline bool contains(entity_index_type entity) const {
-#ifdef DEBUG_COMPONENT_STORAGE
-		assert(entity != 0);
-		return indexTable.at(entity) != 0xFFFFFFFF;
-#else
-		return indexTable[entity] != 0xFFFFFFFF;
-#endif
+	inline bool contains(Entity entity) const {
+		return containsVec[entity];
 	}
-
-	inline CompType& get(entity_index_type entity) {
-		assert(contains(entity));
-		return storage[indexTable[entity]];
+	inline CompType& get(Entity entity) {
+		if (!contains(entity)) throw new std::exception();
+		return pages[page(entity)]->data[offset(entity)];
 	}
-	inline CompType& operator[](entity_index_type entity) {
+	inline CompType& operator[](Entity entity) {
 		return get(entity);
 	}
-	inline size_t size() const { 
-		return storage.size() - freeStorageSlots.size();
+	inline size_t size() const {
+		size_t size = 0;
+		for (const auto& page : pages) {
+			if (page != nullptr)
+				size += page->usedCount;
+		}
+		return size;
 	}
+
+	template<typename CompType>
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef CompType value_type;
-		typedef CompType& reference;
-		typedef CompType* pointer;
+		typedef Entity value_type;
+		typedef Entity& reference;
+		typedef Entity* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_index_type entity_, storage_t& storage_, std::vector<entity_index_type>& indexTable) : entity{ entity_ }, storage{ storage_ }, indexTable{ indexTable } {}
+		iterator(Entity entity_, ComponentStorage<CompType, sparse_indexing>& compStore) 
+			: entity{ entity_ }, compStore{ compStore }, end{ (Entity)compStore.containsVec.size() } {}
 		self_type operator++(int dummy) {
-			assert(entity < indexTable.size());
 			++entity;
-			while (entity < indexTable.size() && indexTable[entity] == 0xFFFFFFFF) ++entity; //skip non valid entries
+			while (entity < end) {
+				if (compStore.pages[page(entity)] == nullptr) // skip empty pages
+				{
+					entity = (page(entity) + 1) << PAGE_BITS;
+				}
+				else if (!compStore.contains(entity))
+				{
+					++entity;
+				}
+				else {
+					break;
+				}
+			}
+			if (entity > end)
+				entity = end;
 			return *this;
 		}
 		self_type operator++() {
@@ -396,32 +285,49 @@ public:
 			return me;
 		}
 		reference operator*() {
-			assert(entity < indexTable.size());
-			return storage[indexTable[entity]];
+			return entity;
 		}
 		pointer operator->() {
-			assert(entity < indexTable.size());
-			return &storage[indexTable[entity]];
+			return &entity;
 		}
 		bool operator==(self_type const& rhs) {
-			return entity == entity;
+			return entity == rhs.entity;
 		}
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		entity_index_type handle() {
-			assert(entity < indexTable.size());
-			return entity;
+		Entity data() {
+			return compStore.pages[page(entity)]->data[offset(entity)];
 		}
 	private:
-		entity_index_type entity;
-		storage_t& storage;
-		std::vector<entity_index_type>& indexTable;
+		Entity entity;
+		ComponentStorage<CompType, sparse_indexing>& compStore;
+		const Entity end;
 	};
+	inline iterator<CompType> begin() {
+		Entity entity = 0;
+		while (entity < containsVec.size()) {
+			if (pages[page(entity)] == nullptr) // skip empty pages
+			{
+				entity = (page(entity) + 1) << PAGE_BITS;
+			}
+			else if (!contains(entity))
+			{
+				++entity;
+			}
+			else {
+				break;
+			}
+		}
+		if (entity > containsVec.size())
+			entity = containsVec.size();
+		return iterator<CompType>(entity, *this);
+	}
+	inline iterator<CompType> end() { return iterator<CompType>(containsVec.size(), *this); }
 private:
-	std::vector<entity_index_type> indexTable;
-	storage_t storage;
-	std::queue<entity_index_type> freeStorageSlots;
+	size_t usedPages{ 0 };
+	std::vector<Page*> pages;
+	std::vector<bool> containsVec;
 };
 
 
@@ -430,7 +336,7 @@ class ComponentStorage<CompType, sparse_set> {
 public:
 
 	inline size_t memoryConsumtion() {
-		return sparseTable.capacity() * sizeof(entity_index_type) + denseTable.capacity() * sizeof(entity_index_type); + storage.capacity() * sizeof(CompType);
+		return sparseTable.capacity() * sizeof(Entity) + denseTable.capacity() * sizeof(Entity); + storage.capacity() * sizeof(CompType);
 	}
 
 	inline void updateMaxEntNum(size_t newEntNum) {
@@ -439,7 +345,7 @@ public:
 		}
 	}
 
-	inline void insert(entity_index_type entity, CompType const& comp) {
+	inline void insert(Entity entity, CompType const& comp) {
 		assert(!contains(entity));
 		assert(entity < sparseTable.size());
 		
@@ -450,7 +356,7 @@ public:
 		assert(storage.size() == denseTable.size());
 	}
 
-	inline void remove(entity_index_type entity) {
+	inline void remove(Entity entity) {
 		if (contains(entity)) {
 			if (entity == denseTable.at(denseTable.size() - 1)) {
 				sparseTable.at(entity) = 0xFFFFFFFF;
@@ -472,14 +378,14 @@ public:
 		}
 	}
 
-	inline bool contains(entity_index_type entity) const {
-		return sparseTable.at(entity) != 0xFFFFFFFF;
+	inline bool contains(Entity entity) const {
+		return sparseTable[entity] != 0xFFFFFFFF;
 	}
 
-	inline CompType& get(entity_index_type entity) {
+	inline CompType& get(Entity entity) {
 		return storage[sparseTable[entity]];
 	}
-	inline CompType& operator[](entity_index_type entity) {
+	inline CompType& operator[](Entity entity) {
 		return get(entity);
 	}
 	inline size_t size() const {
@@ -489,45 +395,47 @@ public:
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef entity_index_type value_type;
-		typedef entity_index_type& reference;
-		typedef entity_index_type* pointer;
+		typedef Entity value_type;
+		typedef Entity& reference;
+		typedef Entity* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_index_type denseTableIndex, ComponentStorage<CompType, sparse_set>& compStore) : denseTableIndex{ denseTableIndex }, compStore{ compStore } {}
-		self_type operator++(int dummy) {
-			assert(denseTableIndex < compStore.denseTable.size());
+		iterator(Entity denseTableIndex, ComponentStorage<CompType, sparse_set>& compStore) 
+			: denseTableIndex{ denseTableIndex }, compStore{ compStore }, end{ (Entity)compStore.denseTable.size() } {}
+		inline self_type operator++(int dummy) {
+			assert(denseTableIndex < end);
 			++denseTableIndex;
 			return *this;
 		}
-		self_type operator++() {
+		inline self_type operator++() {
 			self_type me = *this;
 			operator++(0);
 			return me;
 		}
-		reference operator*() {
-			return compStore.denseTable.at(denseTableIndex);
+		inline reference operator*() {
+			return compStore.denseTable[denseTableIndex];
 		}
-		pointer operator->() {
-			return &compStore.denseTable.at(denseTableIndex);
+		inline pointer operator->() {
+			return &compStore.denseTable[denseTableIndex];
 		}
-		bool operator==(self_type const& rhs) {
+		inline bool operator==(self_type const& rhs) {
 			return denseTableIndex == denseTableIndex;
 		}
-		bool operator!=(self_type const& rhs) {
+		inline bool operator!=(self_type const& rhs) {
 			return denseTableIndex != rhs.denseTableIndex;
 		}
-		CompType data() {
-			return compStore.storage.at(denseTableIndex);
+		inline CompType data() {
+			return compStore.storage[denseTableIndex];
 		}
 	private:
-		entity_index_type denseTableIndex; 
+		Entity denseTableIndex; 
 		ComponentStorage<CompType, sparse_set>& compStore;
+		const Entity end;
 	};
-	iterator<CompType> begin() { return iterator<CompType>(0, *this); }
-	iterator<CompType> end() { return iterator<CompType>(denseTable.size(), *this); }
+	inline iterator<CompType> begin() { return iterator<CompType>(0, *this); }
+	inline iterator<CompType> end()   { return iterator<CompType>(denseTable.size(), *this); }
 private:
-	std::vector<entity_index_type> sparseTable;
-	std::vector<entity_index_type> denseTable;
+	std::vector<Entity> sparseTable;
+	std::vector<Entity> denseTable;
 	std::vector<CompType> storage;
 };
 
@@ -547,9 +455,9 @@ public:
 		}
 	}
 
-	inline void insert(entity_index_type entity, CompType const& comp) {
+	inline void insert(Entity entity, CompType const& comp) {
 		// find next bugger entity index
-		entity_index_type nextBiggerEntityIndex = entity + 1;
+		Entity nextBiggerEntityIndex = entity + 1;
 		while (nextBiggerEntityIndex < indexTable.size() && !contains(nextBiggerEntityIndex)) nextBiggerEntityIndex++;
 
 		if (nextBiggerEntityIndex == indexTable.size()) {
@@ -577,7 +485,7 @@ public:
 		}
 	}
 
-	inline void remove(entity_index_type entity) {
+	inline void remove(Entity entity) {
 		if (contains(entity)) {
 			// erase entity place
 			int index = indexTable[entity];
@@ -594,7 +502,7 @@ public:
 		}
 	}
 
-	inline bool contains(entity_index_type entity) const {
+	inline bool contains(Entity entity) const {
 #ifdef DEBUG_COMPONENT_STORAGE
 		return indexTable.at(entity) != 0xFFFFFFFF;
 #else
@@ -602,125 +510,77 @@ public:
 #endif
 	}
 
-	inline CompType& get(entity_index_type entity) {
+	inline CompType& get(Entity entity) {
 		assert(contains(entity));
 		return storage[indexTable[entity]];
 	}
-	inline CompType& operator[](entity_index_type entity) {
+	inline CompType& operator[](Entity entity) {
 		return get(entity);
 	}
 	inline size_t size() const {
 		return storage.size();
 	}
+	template<typename CompType>
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef CompType value_type;
-		typedef CompType& reference;
-		typedef CompType* pointer;
+		typedef Entity value_type;
+		typedef Entity& reference;
+		typedef Entity* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(entity_index_type entity_, storage_t& storage_, std::vector<entity_index_type>& indexTable) : entity{ entity_ }, storage{ storage_ }, indexTable{ indexTable } {}
-		self_type operator++(int dummy) {
-			assert(entity < indexTable.size());
+		iterator(Entity entity, ComponentStorage<CompType, sorted_lookup_table>& compStore) 
+			: entity{ entity }, compStore{ compStore }, end{ (Entity)compStore.indexTable.size() } {}
+		inline self_type operator++(int dummy) {
+			assert(entity < end);
 			++entity;
-			while (entity < indexTable.size() && indexTable[entity] == 0xFFFFFFFF) ++entity; //skip non valid entries
+			while (entity < end && !compStore.contains(entity)) ++entity;
 			return *this;
 		}
-		self_type operator++() {
+		inline self_type operator++() {
 			self_type me = *this;
 			operator++(0);
 			return me;
 		}
-		reference operator*() {
-			assert(entity < indexTable.size());
-			return storage[indexTable[entity]];
-		}
-		pointer operator->() {
-			assert(entity < indexTable.size());
-			return &storage[indexTable[entity]];
-		}
-		bool operator==(self_type const& rhs) {
-			return entity == entity;
-		}
-		bool operator!=(self_type const& rhs) {
-			return entity != rhs.entity;
-		}
-		entity_index_type handle() {
-			assert(entity < indexTable.size());
+		inline reference operator*() {
 			return entity;
 		}
+		inline pointer operator->() {
+			return &entity;
+		}
+		inline bool operator==(self_type const& rhs) {
+			return entity == rhs.entity;
+		}
+		inline bool operator!=(self_type const& rhs) {
+			return entity != rhs.entity;
+		}
+		inline CompType data() {
+			return compStore.storage[compStore.indexTable[entity]];
+		}
 	private:
-		entity_index_type entity;
-		storage_t& storage;
-		std::vector<entity_index_type>& indexTable;
+		Entity entity;
+		ComponentStorage<CompType, sorted_lookup_table>& compStore;
+		const Entity end;
 	};
+	inline iterator<CompType> begin() {
+		Entity ent = 0;
+		while (ent < indexTable.size() && !contains(ent)) ++ent;
+		return iterator<CompType>(ent, *this); 
+	}
+	inline iterator<CompType> end() { return iterator<CompType>(indexTable.size(), *this); }
 private:
-	std::vector<entity_index_type> indexTable;
+	std::vector<Entity> indexTable;
 	storage_t storage;
 };
 
 
-
-template<typename CompType>
-class ComponentStorage<CompType, shit> {
-public:
-
-	inline size_t memoryConsumtion() {
-		return 0;
-	}
-
-	inline void updateMaxEntNum(size_t newEntNum) {
-		if (components.size() < newEntNum) {
-			components.resize(newEntNum, nullptr);
-		}
-	}
-
-	inline void insert(entity_index_type entity, CompType const& comp) {
-		if (!contains(entity)) {
-			components[entity] = new CompType(comp);
-		}
-	}
-
-	inline void remove(entity_index_type entity) {
-		if (contains(entity)) {
-			delete components[entity];
-			components[entity] = nullptr;
-		}
-	}
-
-	inline bool contains(entity_index_type entity) const {
-#ifdef DEBUG_COMPONENT_STORAGE
-		return components.at(entity) != nullptr;
-#else
-		return components[entity] != nullptr;
-#endif
-	}
-
-	inline CompType& get(entity_index_type entity) {
-		return operator[](entity);
-	}
-	inline CompType& operator[](entity_index_type entity) {
-		return *(components[entity]);
-	}
-	inline size_t size() const {
-		return components.size();
-	}
-private:
-	std::vector<CompType*> components;
-};
-
-
-
 template< size_t I, typename T, typename Tuple_t>
 constexpr size_t index_in_storagetuple_fn() {
-	static_assert(I < std::tuple_size<Tuple_t>::value, "The element is not in the tuple");
+	static_assert(I < std::tuple_size<Tuple_t>::value, "the given component type is unknown");
 
 	typedef typename std::tuple_element<I, Tuple_t>::type el;
-	if constexpr (std::is_same<ComponentStorage<T, hashing>, el>::value
-		|| std::is_same<ComponentStorage<T, direct_indexing>, el>::value
-		|| std::is_same<ComponentStorage<T, lookup_table>, el>::value
+	if constexpr (std::is_same<ComponentStorage<T, direct_indexing>, el>::value
+		|| std::is_same<ComponentStorage<T, sparse_indexing>, el>::value
 		|| std::is_same<ComponentStorage<T, sorted_lookup_table>, el>::value
-		|| std::is_same<ComponentStorage<T, shit>, el>::value
 		|| std::is_same<ComponentStorage<T, sparse_set>, el>::value) {
 		return I;
 	}

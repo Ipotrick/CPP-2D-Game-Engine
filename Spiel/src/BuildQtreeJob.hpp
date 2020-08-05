@@ -6,18 +6,26 @@
 
 class BuildQtreeJob : public JobFunctor {
 	EntityComponentManager& manager;
-	std::vector<entity_id_type>& entities;
+	std::vector<Entity>& entities;
 	Quadtree2& qtree;
+	bool insertParticles;
+	std::vector<Vec2>& aabbCache;
 public:
-	BuildQtreeJob(EntityComponentManager& manager, std::vector<entity_id_type>& entities, Quadtree2& qtree)
-		: manager{ manager }, entities{ entities }, qtree{ qtree }
+	BuildQtreeJob(EntityComponentManager& manager, std::vector<entity_id_t>& entities, Quadtree2& qtree, std::vector<Vec2>& aabbCache, bool insertParticles)
+		: manager{ manager }, entities{ entities }, qtree{ qtree }, insertParticles{ insertParticles }, aabbCache{ aabbCache }
 	{}
-	int operator()(int workerId) override {
-		for (auto& ent : entities) {
-			if (!manager.getComp<Collider>(ent).particle) {	// never check for collisions against particles
-				qtree.insert(ent);
+	void execute(int workerId) override {
+		for (const auto ent : entities) {
+			if (insertParticles) {
+				if (manager.getComp<Collider>(ent).particle) {
+					qtree.insert(ent, aabbCache.at(ent));
+				}
+			}
+			else {
+				if (!manager.getComp<Collider>(ent).particle) {	// never check for collisions against particles
+					qtree.insert(ent, aabbCache.at(ent));
+				}
 			}
 		}
-		return 0;
 	}
 };

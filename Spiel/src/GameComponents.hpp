@@ -6,11 +6,11 @@
 #include "EntityComponentStorage.hpp"
 
 struct SpawnerComp : public CompData {
-	entity_id sucker;
+	EntityId sucker;
 };
 
 struct SuckerComp : public CompData {
-	entity_id spawner;
+	EntityId spawner;
 };
 
 struct ParticleScriptComp : public CompData {
@@ -25,10 +25,10 @@ struct ParticleScriptComp : public CompData {
 // player component
 
 struct Player : public CompData {
-	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.001f }, dummyExis{ entity_id() } {}
+	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.005f }, dummyExis{ EntityId() } {}
 	LapTimer<> bulletShotLapTimer;
 	LapTimer<> flameSpawnTimer;
-	entity_id dummyExis;
+	EntityId dummyExis;
 	float power{ 1.0f };
 };
 
@@ -89,13 +89,13 @@ struct CompDataLight : public CompData {
 // enemy component
 
 struct Enemy : public CompData {
-	Enemy(entity_index_type tar_ = 0) : target{ tar_} {}
-	entity_index_type target;
+	Enemy(Entity tar_ = 0) : target{ tar_} {}
+	Entity target;
 };
 
 // dummy component
 
 struct Dummy : public CompData {
-	Dummy(entity_id player_id_ = entity_id()) : player_id{ player_id_} {}
-	entity_id player_id;
+	Dummy(EntityId player_id_ = EntityId()) : player_id{ player_id_} {}
+	EntityId player_id;
 };

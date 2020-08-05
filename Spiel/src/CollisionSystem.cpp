@@ -10,7 +10,7 @@ CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogge
 	perfLog{ perfLog },
 	qtreeCapacity{ qtreeCapacity }
 {
-	poolWorkerData = std::make_shared<CollisionPoolData>(world, qtreeCapacity, jobManager.workerCount());
+	poolWorkerData = std::make_shared<CollisionPoolData>(world, qtreeCapacity, jobManager.neededBufferNum());
 }
 
 void CollisionSystem::execute(World& world, float deltaTime)
@@ -20,21 +20,21 @@ void CollisionSystem::execute(World& world, float deltaTime)
 	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
-std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> CollisionSystem::getCollisions(entity_index_type entity)
+std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> CollisionSystem::getCollisions(Entity entity)
 {
-	auto begin = indexCollisionInfoBegins.find(entity);
-	auto end = indexCollisionInfoEnds.find(entity);
-	if (begin != indexCollisionInfoBegins.end() && end != indexCollisionInfoEnds.end()) {	// is there even collisionInfo for the id?
+	auto begin = collisionInfoBegins.find(entity);
+	auto end = collisionInfoEnds.find(entity);
+	if (begin != collisionInfoBegins.end() && end != collisionInfoEnds.end()) {	// is there even collisionInfo for the id?
 		return std::make_tuple(begin->second, end->second);
 	}
 	else {
-		return std::make_tuple(indexCollisionInfos.end(), indexCollisionInfos.end());
+		return std::make_tuple(collisionInfos.end(), collisionInfos.end());
 	}
 }
 
 std::vector<IndexCollisionInfo>& CollisionSystem::getAllCollisions()
 {
-	return this->indexCollisionInfos;
+	return this->collisionInfos;
 }
 
 GridPhysics<bool> CollisionSystem::getStaticGrid()
@@ -48,7 +48,7 @@ void CollisionSystem::end()
 
 void CollisionSystem::prepare(World& world)
 {
-	Timer t1(perfLog.getInputRef("physicsprepare"));
+	Timer t1(perfLog.getInputRef("collisionprepare"));
 	poolWorkerData->world = world;
 	poolWorkerData->qtreeDynamic.world = world;
 	poolWorkerData->qtreeStatic.world = world;
@@ -63,7 +63,7 @@ void CollisionSystem::prepare(World& world)
 	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
 	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
 	Vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
-	for (auto colliderID : world.index_view<Collider>()) {
+	for (auto colliderID : world.entity_view<Collider>()) {
 		auto& collider = world.getComp<Collider>(colliderID);
 		auto& baseCollider = world.getComp<Base>(colliderID);
 
@@ -85,7 +85,8 @@ void CollisionSystem::prepare(World& world)
 			sensorMinPos = min(sensorMinPos, baseCollider.position);
 		}
 	}
-
+	t1.stop();
+	Timer t2(perfLog.getInputRef("collisionbroad"));
 	// clean quadtrees
 	if (poolWorkerData->rebuildDynQuadTrees) {
 		poolWorkerData->qtreeDynamic.resetPerMinMax(dynMinPos, dynMaxPos);
@@ -95,20 +96,9 @@ void CollisionSystem::prepare(World& world)
 		poolWorkerData->qtreeStatic.resetPerMinMax(statMinPos, statMaxPos);
 		poolWorkerData->qtreeStatic.removeEmptyLeafes();
 	}
+	poolWorkerData->qtreeParticle.resetPerMinMax(statMinPos, statMaxPos);
 
-	// start jobs to prepare buffers
-	int jobTagStaticRebuild = -1;
-	BuildQtreeJob staticQtreeBuildJob = BuildQtreeJob(world, poolWorkerData->statCollidables, poolWorkerData->qtreeStatic);
-	if (poolWorkerData->rebuildStatQuadTrees) {
-		jobTagStaticRebuild = jobManager.addJob(&staticQtreeBuildJob);
-	}
 
-	int jobTagQtreeDyn = -1;
-	BuildQtreeJob dynqTreeJob = BuildQtreeJob(world, poolWorkerData->dynCollidables, poolWorkerData->qtreeDynamic);
-	if (poolWorkerData->rebuildDynQuadTrees) {
-		jobTagQtreeDyn = jobManager.addJob(&dynqTreeJob);
-	}
-	 
 	CacheAABBJob aabbJob1 = CacheAABBJob(poolWorkerData->dynCollidables, world, poolWorkerData->aabbCache);
 	auto jobTagAABBDyn = jobManager.addJob(&aabbJob1);
 
@@ -118,19 +108,56 @@ void CollisionSystem::prepare(World& world)
 	CacheAABBJob aabbJob3 = CacheAABBJob(poolWorkerData->sensorCollidables, world, poolWorkerData->aabbCache);
 	auto jobTagAABBSensor = jobManager.addJob(&aabbJob3);
 
+	jobManager.waitFor(jobTagAABBDyn);
+	jobManager.waitFor(jobTagAABBStat);
+	jobManager.waitFor(jobTagAABBSensor);
+
+	// start jobs to prepare buffers
+	int jobTagStaticRebuild = -1;
+	BuildQtreeJob staticQtreeBuildJob = BuildQtreeJob(world, poolWorkerData->statCollidables, poolWorkerData->qtreeStatic, poolWorkerData->aabbCache, false);
+	if (poolWorkerData->rebuildStatQuadTrees) {
+		jobTagStaticRebuild = jobManager.addJob(&staticQtreeBuildJob);
+	}
+
+	int jobTagQtreeDyn = -1;
+	BuildQtreeJob dynqTreeJob = BuildQtreeJob(world, poolWorkerData->dynCollidables, poolWorkerData->qtreeDynamic, poolWorkerData->aabbCache, false);
+	if (poolWorkerData->rebuildDynQuadTrees) {
+		jobTagQtreeDyn = jobManager.addJob(&dynqTreeJob);
+	}
+
+	BuildQtreeJob particleTreeJob = BuildQtreeJob(world, poolWorkerData->dynCollidables, poolWorkerData->qtreeParticle, poolWorkerData->aabbCache, true);
+	int jobTagQtreeParticle = jobManager.addJob(&particleTreeJob);
+
 	if (poolWorkerData->rebuildDynQuadTrees) {	// we must wait for this job to finish before insertein sensors into dyn treee
 		jobManager.waitFor(jobTagQtreeDyn);
 		int jobTagQtreeDynSensor = -1;
-		BuildQtreeJob dynSensorqTreeJob = BuildQtreeJob(world, poolWorkerData->sensorCollidables, poolWorkerData->qtreeDynamic);
+		BuildQtreeJob dynSensorqTreeJob = BuildQtreeJob(world, poolWorkerData->sensorCollidables, poolWorkerData->qtreeDynamic, poolWorkerData->aabbCache, false);
 		jobTagQtreeDynSensor = jobManager.addJob(&dynSensorqTreeJob);
 		jobManager.waitFor(jobTagQtreeDynSensor);
 	}
 
 	if (poolWorkerData->rebuildStatQuadTrees)
 		jobManager.waitFor(jobTagStaticRebuild);
-	jobManager.waitFor(jobTagAABBDyn);
-	jobManager.waitFor(jobTagAABBStat);
-	jobManager.waitFor(jobTagAABBSensor);
+	jobManager.waitFor(jobTagQtreeParticle);
+
+	for (auto player : world.entity_view<Player>()) {
+		std::vector<Entity> near;
+		PosSize p(world.getComp<Base>(player).position, poolWorkerData->aabbCache.at(player));
+		poolWorkerData->qtreeDynamic.querry(near, p);
+		std::cout << "collchecks player: " << near.size() << std::endl;
+		//poolWorkerData->qtreeDynamic.querryDebug(p, debugDrawables);
+	
+		//for (auto const ent : near) {
+		//	if (world.hasComps<Collider, Movement, Base, Draw>(ent)) {
+		//		auto pos = world.getComp<Base>(ent).position;
+		//		auto draw = world.getComp<Draw>(ent);
+		//
+		//		auto d = Drawable(0, pos, 1, draw.scale, Vec4(1, 0, 0, 1), Form::Circle, 0);
+		//		debugDrawables.push_back(d);
+		//	}
+		//}
+	
+	}
 }
 
 void CollisionSystem::cleanBuffers(World& world)
@@ -152,9 +179,9 @@ void CollisionSystem::cleanBuffers(World& world)
 	cleanAndShrink(poolWorkerData->aabbCache);
 	if (poolWorkerData->aabbCache.size() < world.maxEntityIndex()) poolWorkerData->aabbCache.resize(world.maxEntityIndex());
 	for (auto& split : poolWorkerData->collisionInfoBuffers) cleanAndShrink(split);
-	cleanAndShrink(indexCollisionInfos);
-	indexCollisionInfoBegins.clear();
-	indexCollisionInfoEnds.clear();
+	cleanAndShrink(collisionInfos);
+	collisionInfoBegins.clear();
+	collisionInfoEnds.clear();
 	cleanAndShrink(collisionInfos);
 	collisionInfoBegins.clear();
 	collisionInfoEnds.clear();
@@ -167,7 +194,7 @@ void CollisionSystem::cleanBuffers(World& world)
 
 void CollisionSystem::collisionDetection(World& world)
 {
-	Timer t2(perfLog.getInputRef("physicscollide"));
+	Timer t3(perfLog.getInputRef("collisionnarrow"));
 
 	int entityCount = 0;
 	for (int i = 0; i < poolWorkerData->dynCollidables.size(); i++) {
@@ -198,48 +225,34 @@ void CollisionSystem::collisionDetection(World& world)
 		sensorTags.push_back(jobManager.addJob(&job));
 	}
 
-	for (auto& tag : dynTags) {
-		jobManager.waitFor(tag);
-	}
+	jobManager.waitAndHelp(&dynTags);
+	jobManager.waitAndHelp(&sensorTags);
 
-	for (auto& tag : sensorTags) {
-		jobManager.waitFor(tag);
-	}
+	t3.stop();
+	Timer t4(perfLog.getInputRef("collisionpost"));
 
 	// reset quadtree rebuild flags
 	poolWorkerData->rebuildDynQuadTrees = false;
 	poolWorkerData->rebuildStatQuadTrees = false;
 
 	// store all collisioninfos in one vectorcapacity
-	for (auto collisionInfosplit : poolWorkerData->collisionInfoBuffers) {
-		indexCollisionInfos.insert(indexCollisionInfos.end(), collisionInfosplit.begin(), collisionInfosplit.end());
+	for (auto const& collisionInfosplit : poolWorkerData->collisionInfoBuffers) {
+		collisionInfos.insert(collisionInfos.end(), collisionInfosplit.begin(), collisionInfosplit.end());
 	}
 
 	// build hashtables for first and last iterator element of collisioninfo
 	uint32_t lastIDA{};
-	for (auto iter = indexCollisionInfos.begin(); iter != indexCollisionInfos.end(); ++iter) {
-		if (iter == indexCollisionInfos.begin()) {	//initialize values from first element
+	for (auto iter = collisionInfos.begin(); iter != collisionInfos.end(); ++iter) {
+		if (iter == collisionInfos.begin()) {	//initialize values from first element
 			lastIDA = iter->indexA;
-			indexCollisionInfoBegins.insert({ iter->indexA, iter });
+			collisionInfoBegins.insert({ iter->indexA, iter });
 		}
 		if (lastIDA != iter->indexA) {	//new idA found
-			indexCollisionInfoEnds.insert({ lastIDA, iter });
-			indexCollisionInfoBegins.insert({ iter->indexA, iter });
+			collisionInfoEnds.insert({ lastIDA, iter });
+			collisionInfoBegins.insert({ iter->indexA, iter });
 			lastIDA = iter->indexA;	//set lastId to new id
 		}
 	}
-	indexCollisionInfoEnds.insert({ lastIDA, indexCollisionInfos.end() });
+	collisionInfoEnds.insert({ lastIDA, collisionInfos.end() });
 
-	// build collisionInfo tables and vector from index Collisioninfos
-	for (auto collInfo : indexCollisionInfos) {
-		collisionInfos.emplace_back(world.identify(collInfo.indexB), collInfo.clippingDist, collInfo.collisionNormal, collInfo.collisionPos);
-	}
-	for (auto [key, value] : indexCollisionInfoBegins) {
-		collisionInfoBegins[world.identify(key).id] = collisionInfos.begin() + std::distance(indexCollisionInfos.begin(), indexCollisionInfoBegins[key]);
-	}
-	for (auto [key, value] : indexCollisionInfoEnds) {
-		collisionInfoEnds[world.identify(key).id] = collisionInfos.begin() + std::distance(indexCollisionInfos.begin(), indexCollisionInfoEnds[key]);
-	}
-
-	t2.stop();
 }

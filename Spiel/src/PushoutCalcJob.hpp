@@ -23,21 +23,19 @@ public:
 		:collisionInfos{ collisionInfos }, velocities{ velocities }, overlaps{ overlaps }, collisionResponses{ collisionResponses }, manager{ manager }
 	{}
 
-	int operator() (int workerId) override {
+	void execute(int workerId) override {
 		for (auto& collInfo : collisionInfos) {
 			pushoutCalc(collInfo);
 		}
-		return 0;
 	}
 };
 
 void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
 	auto& collID = collInfo.indexA;
 	if (manager.hasComps<PhysicsBody, Movement>(collID) && manager.hasComp<PhysicsBody>(collInfo.indexB)) {
-		auto& otherID = collInfo.indexB;
+		const auto otherID = collInfo.indexB;
 
-		bool otherDynamic = false;
-		if (manager.hasComps<Movement>(otherID)) otherDynamic = true;
+		bool otherDynamic = manager.hasComps<Movement>(otherID);
 
 		const float surfaceAreaColl = manager.getComp<Collider>(collID).size.x * manager.getComp<Collider>(collID).size.y;
 		const float surfaceAreaOther = manager.getComp<Collider>(otherID).size.x * manager.getComp<Collider>(otherID).size.y;
@@ -52,7 +50,7 @@ void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
 		Vec2 newPosChange = calcPosChange(
 			surfaceAreaColl, velocities[collID],
 			surfaceAreaOther, velocities[otherID],
-			collInfo.clippingDist, collInfo.collisionNormal, otherDynamic, pushoutPriority);
+			collInfo.clippingDist, collInfo.collisionNormal, otherDynamic, 1);
 
 		Vec2 oldPosChange = collisionResponses.at(collID).posChange;
 

@@ -43,12 +43,15 @@ public:
 	DummyScript		dummyScript;
 	SuckerScript	suckerScript;
 
-	entity_id cursorID;
+	EntityId cursorID;
 
 	CursorManipData cursorManipData;
 	void cursorManipFunc();
 
 	static bool testEventReaction(std::string_view, uint32_t);
+
+	// TEMP TODO REMOVE
+	LapTimer<> spawnerLapTimer{0.001f};
 };
 
 inline bool Game::testEventReaction(std::string_view name, uint32_t id) {

@@ -1,6 +1,6 @@
 #include "SuckerScript.hpp"
 
-void SuckerScript::script(entity_id me, SuckerComp& data, float deltaTime) {
+void SuckerScript::script(Entity me, SuckerComp& data, float deltaTime) {
 	World& world = engine.world;
 	if (world.isIdValid(data.spawner)) {
 		for (auto collInfo : engine.collisions_view(me)) {

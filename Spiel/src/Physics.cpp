@@ -22,7 +22,7 @@ Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float
 		}
 	}
 	else {
-		return dist * primCollNormal + primCollNormal * Physics::pushout;
+		return dist * primCollNormal + primCollNormal * 0.95f * Physics::pushout;
 	}
 }
 

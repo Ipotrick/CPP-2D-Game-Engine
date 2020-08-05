@@ -34,7 +34,6 @@ void Renderer::flushSubmissions() {
 	wasFushCalled = true;
 	if (!wasEndCalled) {
 		workerSharedData->renderBuffer->drawables.clear();
-		workerSharedData->renderBuffer->newTextureRefs.clear();
 		std::swap(frontBuffer, workerSharedData->renderBuffer);
 	}
 }

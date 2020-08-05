@@ -29,13 +29,12 @@ public:
 		std::pair<int, int> batch)
 		:world{ world }, deltaTime{ deltaTime }, collisionBatches{ collisionBatches }, batch{ batch }
 	{}
-	int operator()(int workerId) override {
+	void execute(int workerId) override {
 		for (int i = batch.first; i < batch.second; i++) {
 			for (auto& coll : collisionBatches[i]) {
 				collisionResolution(coll);
 			}
 		}
-		return 0;
 	}
 };
 
@@ -69,11 +68,11 @@ inline void ImpulseResolutionJob::collisionResolution(IndexCollisionInfo& collIn
 		if (world.hasComp<PhysicsBody>(entA) & world.hasComp<PhysicsBody>(entB)) { // recheck if the owners are solid
 			auto& solidA = world.getComp<PhysicsBody>(entA);
 			auto& baseA = world.getComp<Base>(entA);
-			auto& moveA = world.getComp<Movement>(entA);
 			auto& solidB = world.getComp<PhysicsBody>(entB);
 			auto& baseB = world.getComp<Base>(entB);
 			Movement dummy = Movement();
 			Movement& moveB = (world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : dummy);
+			auto& moveA = world.hasComp<Movement>(entA) ? world.getComp<Movement>(entA) : dummy;
 
 			auto& collidB = world.getComp<Collider>(entB);
 

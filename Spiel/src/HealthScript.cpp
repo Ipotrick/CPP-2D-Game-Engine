@@ -1,6 +1,6 @@
 #include "HealthScript.hpp"
 
-void HealthScript::script(entity_id id, Health& data, float deltaTime) {
+void HealthScript::script(Entity id, Health& data, float deltaTime) {
 	World& world = engine.world;
 	auto [begin, end] = engine.getCollisions(id);
 	bool gotHitByBullet{ false };

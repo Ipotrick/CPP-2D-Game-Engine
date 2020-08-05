@@ -40,25 +40,25 @@ struct CollisionTestResult {
 };
 
 struct IndexCollisionInfo {
-	entity_index_type indexA;
-	entity_index_type indexB;
+	Entity indexA;
+	Entity indexB;
 	float clippingDist;
 	Vec2 collisionNormal;
 	Vec2 collisionPos;
 
-	IndexCollisionInfo(entity_index_type idA_, entity_index_type idB_, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :indexA{ idA_ }, indexB{ idB_ }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
+	IndexCollisionInfo(Entity idA_, Entity idB_, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :indexA{ idA_ }, indexB{ idB_ }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
 };
 
 struct CollisionInfo {
-	entity_id otherId;
+	EntityId otherId;
 	float clippingDist;
 	Vec2 collisionNormal;
 	Vec2 collisionPos;
 
-	CollisionInfo(entity_id otherId, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :otherId{ otherId }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
+	CollisionInfo(EntityId otherId, float clippingDist_, Vec2 collisionNormal_, Vec2 collisionPos_) :otherId{ otherId }, clippingDist{ clippingDist_ }, collisionNormal{ collisionNormal_ }, collisionPos{ collisionPos_ } {}
 };
 
-struct CollisionResponse {
+struct CollisionResponse { 
 	Vec2 posChange = Vec2(0,0);
 };
 

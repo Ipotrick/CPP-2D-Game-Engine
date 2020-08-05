@@ -243,6 +243,12 @@
     <ClInclude Include="src\MovementSystem.hpp">
       <Filter>_Engine</Filter>
     </ClInclude>
+    <ClInclude Include="src\SweepAndPrune.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PosSize.hpp">
+      <Filter>_Engine\_Collision</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

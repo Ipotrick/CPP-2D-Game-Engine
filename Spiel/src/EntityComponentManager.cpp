@@ -1,8 +1,8 @@
 #include "EntityComponentManager.hpp"
 
-entity_index_type EntityComponentManager::index_create() {
+Entity EntityComponentManager::index_create() {
 	if (!freeIndexQueue.empty()) {
-		entity_index_type index = freeIndexQueue.front();
+		Entity index = freeIndexQueue.front();
 		freeIndexQueue.pop_front();
 		entityStorageInfo[index].setValid(true);
 		entityStorageInfo[index].setDestroyMark(false);
@@ -11,38 +11,38 @@ entity_index_type EntityComponentManager::index_create() {
 	}
 	else {
 		entityStorageInfo.emplace_back( true );
-		latestIndex = static_cast<entity_index_type>(entityStorageInfo.size() - 1);
+		latestIndex = static_cast<Entity>(entityStorageInfo.size() - 1);
 
 		for_each(componentStorageTuple, [&](auto& componentStorage) {
 			componentStorage.updateMaxEntNum(entityStorageInfo.size());
 			});
 	}
-	identify(latestIndex);	// TODO replace with optimised version
+	getId(latestIndex);	// TODO replace with optimised version
 	return latestIndex;
 }
 
-entity_id EntityComponentManager::create()
+EntityId EntityComponentManager::id_create()
 {
 	auto index = index_create();
-	return identify(index);
+	return getId(index);
 }
 
-void EntityComponentManager::link(entity_index_type slave, entity_index_type master, Vec2 relativePos, float relativeRota)
+void EntityComponentManager::link(Entity slave, Entity master, Vec2 relativePos, float relativeRota)
 {
 	if (hasntComp<Parent>(master)) addComp<Parent>(master);
 	auto& parent = getComp<Parent>(master);
 
-	parent.children.push_back(identify(slave));
+	parent.children.push_back(getId(slave));
 
 	if (hasntComp<BaseChild>(slave)) addComp<BaseChild>(slave);
 	auto& baseChild = getComp<BaseChild>(slave);
 
 	baseChild.relativePos = relativePos;
 	baseChild.relativeRota = relativeRota;
-	baseChild.parent = identify(master);
+	baseChild.parent = getId(master);
 }
 
-void EntityComponentManager::destroy(entity_index_type index) {
+void EntityComponentManager::destroy(Entity index) {
 	if (index < entityStorageInfo.size() && !entityStorageInfo[index].isDestroyMarked()) {
 		assert(entityStorageInfo[index].isValid());
 		entityStorageInfo[index].setDestroyMark(true);
@@ -50,27 +50,27 @@ void EntityComponentManager::destroy(entity_index_type index) {
 	}
 }
 
-void EntityComponentManager::destroy(entity_id id)
+void EntityComponentManager::destroy(EntityId id)
 {
 	destroy(idToIndex[id.id]);
 }
 
-void EntityComponentManager::spawnLater(entity_index_type entity)
+void EntityComponentManager::spawnLater(Entity entity)
 {
 	spawnLaterList.emplace_back(entity);
 }
 
-void EntityComponentManager::spawnLater(entity_id id)
+void EntityComponentManager::spawnLater(EntityId id)
 {
 	spawnLater(idToIndex[id.id]);
 }
 
-entity_id EntityComponentManager::identify(entity_index_type entity)
+EntityId EntityComponentManager::getId(Entity entity)
 {
 	assert(exists(entity));
 	if (indexToId.size() != entityStorageInfo.size()) indexToId.resize(entityStorageInfo.size(), 0 );
 	if (indexToId[entity] != 0) /* does the handle allready have an id? */ {
-		return entity_id(indexToId[entity], idVersion[indexToId[entity]]);
+		return EntityId(indexToId[entity], idVersion[indexToId[entity]]);
 	}
 	else {
 		// generate id for entity
@@ -81,21 +81,21 @@ entity_id EntityComponentManager::identify(entity_index_type entity)
 			idToIndex[id] = entity;
 			idVersion[id] += 1;	// for every reuse the version gets an increase
 			indexToId[entity] = id;
-			return entity_id(id, idVersion[id]);
+			return EntityId(id, idVersion[id]);
 		}
 		else {
 			// expand id vector
 			idToIndex.push_back(entity);
 			idVersion.emplace_back(0);
-			entity_id_type id = idToIndex.size() - 1;
+			entity_id_t id = idToIndex.size() - 1;
 			indexToId[entity] = id;
-			return entity_id(id, 0);
+			return EntityId(id, 0);
 		}
 	}
 }
 
 void EntityComponentManager::executeDestroys() {
-	for (entity_index_type index : despawnList) {
+	for (Entity index : despawnList) {
 		if (hasComp<Collider>(index) && !hasComp<Movement>(index)) { staticEntitiesChanged = true; }
 		// reset id references:
 		if (hasID(index)) {
@@ -125,7 +125,7 @@ void EntityComponentManager::flushLaterActions()
 	std::sort(freeIndexQueue.begin(), freeIndexQueue.end());
 }
 
-void EntityComponentManager::moveEntity(entity_index_type start, entity_index_type goal)
+void EntityComponentManager::moveEntity(Entity start, Entity goal)
 {
 	assert(entityStorageInfo.size() > goal && entityStorageInfo[goal].isValid() == false);
 	assert(entityStorageInfo.size() > start && entityStorageInfo[start].isValid() == true); 
@@ -149,7 +149,7 @@ void EntityComponentManager::moveEntity(entity_index_type start, entity_index_ty
 	entityStorageInfo[start].setSpawned(false);
 }
 
-entity_index_type EntityComponentManager::findBiggestValidHandle()
+Entity EntityComponentManager::findBiggestValidHandle()
 {
 	for (int i = entityStorageInfo.size() - 1; i > 0; i--) {
 		if (entityStorageInfo[i].isValid()) return i;
@@ -161,7 +161,7 @@ void EntityComponentManager::shrink() {
 	// !! handles must be sorted !!
 	auto lastEl = findBiggestValidHandle();
 	entityStorageInfo.resize(lastEl + 1LL, EntityStatus(false));
-	std::vector<entity_index_type> handleVec;
+	std::vector<Entity> handleVec;
 
 	for (int i = freeIndexQueue.size() - 1; i >= 0; i--) {
 		if (freeIndexQueue.at(i) < entityStorageInfo.size()) break;
@@ -238,7 +238,7 @@ void EntityComponentManager::parentChildDestroy() {
 }
 
 void EntityComponentManager::deregisterDestroyedEntities() {
-	for (entity_index_type entity : despawnList) {
+	for (Entity entity : despawnList) {
 		for_each(componentStorageTuple, [&](auto& componentStorage) {
 			componentStorage.remove(entity);
 			});

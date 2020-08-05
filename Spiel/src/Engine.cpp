@@ -5,11 +5,11 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 100 }, // 10000 microseconds = 10 milliseond => 100 loops per second
 	maxDeltaTime{0.01f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
-	jobManager(std::thread::hardware_concurrency() - 1),
+	jobManager(std::thread::hardware_concurrency()),
 	collisionSystem{ world, jobManager, perfLog },
 	physicsSystem{ jobManager, perfLog },
 	renderer{ window }
@@ -29,7 +29,6 @@ Engine::~Engine() {
 	renderer.end();
 	collisionSystem.end();
 	physicsSystem.end();
-	jobManager.end();
 }
 
 std::string Engine::getPerfInfo(int detail) {
@@ -47,9 +46,13 @@ std::string Engine::getPerfInfo(int detail) {
 			<< "        physics(s): " << perfLog.getTime("physicstime") << '\n';
 	}
 	if (detail >= 3) {
-		ss << "            physicsPrepare(s): " << perfLog.getTime("physicsprepare") << '(' << floorf(perfLog.getTime("physicsprepare") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            physicsCollisionTime(s): " << perfLog.getTime("physicscollide") << '(' << floorf(perfLog.getTime("physicscollide") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            physicsExecuteTime(s): " << perfLog.getTime("physicsexecute") << '(' << floorf(perfLog.getTime("physicsexecute") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)" << '\n';
+		ss << "            collision prepare:      " << perfLog.getTime("collisionprepare") << '(' << floorf(perfLog.getTime("collisionprepare") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
+			<< "            collision borad phase:  " << perfLog.getTime("collisionbroad") << '(' << floorf(perfLog.getTime("collisionbroad") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
+			<< "            collision narrow phase: " << perfLog.getTime("collisionnarrow") << '(' << floorf(perfLog.getTime("collisionnarrow") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
+			<< "            collision postamble:    " << perfLog.getTime("collisionpost") << '(' << floorf(perfLog.getTime("collisionpost") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
+			<< "            physics prepare:        " << perfLog.getTime("physicsprepare") << '(' << floorf(perfLog.getTime("physicsprepare") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
+			<< "            physics impulse:        " << perfLog.getTime("physicsimpulse") << '(' << floorf(perfLog.getTime("physicsimpulse") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
+			<< "            physics other:        " << perfLog.getTime("physicsrest") << '(' << floorf(perfLog.getTime("physicsrest") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n";
 	}
 	if (detail >= 1) ss << "    renderTime(s): " << perfLog.getTime("rendertime") << '\n';
 
@@ -109,7 +112,14 @@ Vec2 Engine::getPosWorldSpace(Vec2 windowSpacePos_) {
 	return { transformedPos.x, transformedPos.y };
 }
 
-std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(entity_index_type entity) {
+Vec2 Engine::getPosWindowSpace(Vec2 worldSpacePos)
+{
+	Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
+	return viewProjectionMatrix * worldSpacePos;
+}
+
+
+std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(Entity entity) {
 	return collisionSystem.getCollisions(entity);
 }
 
@@ -158,17 +168,20 @@ void Engine::run() {
 	destroy();
 }
 
-Drawable buildWorldSpaceDrawable(World& world, entity_index_type entity) {
-	return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec));
+Drawable buildWorldSpaceDrawable(World& world, Entity entity) {
+	if (!world.hasComp<TexRef>(entity)) {
+		return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec));
+	}
+	else {
+		return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec, DrawMode::WorldSpace, world.getComp<TexRef>(entity)));
+	}
+	
 }
 
 void Engine::rendererUpdate(World& world)
 {
-	for (auto ent : world.index_view<Base,Draw>()) {
+	for (auto ent : world.entity_view<Base,Draw>()) {
 		renderer.submit(buildWorldSpaceDrawable(world, ent));
-	}
-	for (auto ent : world.index_view<TextureRef>()) {
-		renderer.attachTex(ent, world.getComp<TextureRef>(ent));
 	}
 	renderer.setCamera(camera);
 

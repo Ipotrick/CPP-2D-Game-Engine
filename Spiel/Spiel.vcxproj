@@ -66,6 +66,7 @@
     <ClInclude Include="src\PhysicsTypes.hpp" />
     <ClInclude Include="src\CollisionWorker.hpp" />
     <ClInclude Include="src\PlayerScript.hpp" />
+    <ClInclude Include="src\PosSize.hpp" />
     <ClInclude Include="src\PushoutCalcJob.hpp" />
     <ClInclude Include="src\QuadTree.hpp" />
     <ClInclude Include="src\random.hpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="src\GameSystem.hpp" />
     <ClInclude Include="src\std_extra.hpp" />
     <ClInclude Include="src\SuckerScript.hpp" />
+    <ClInclude Include="src\SweepAndPrune.hpp" />
     <ClInclude Include="src\TextureHandler.hpp" />
     <ClInclude Include="src\Timing.hpp" />
     <ClInclude Include="src\Vec.hpp" />

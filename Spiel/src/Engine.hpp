@@ -92,18 +92,18 @@ public:
 	float getWindowAspectRatio();
 	/* transformes world space coordinates into relative window space coordinates */
 	Vec2 getPosWorldSpace(Vec2 windowSpacePos);
+	Vec2 getPosWindowSpace(Vec2 worldSpacePos);
 
 					/* graphics utility */
 	/*  submit a Drawable to be rendered the next frame, O(1)  */
+	void drawString(std::string str, std::string_view fontAtlas, Vec2 pos, Vec2 fontSize);
 	void submitDrawable(Drawable && d);
 	void submitDrawable(Drawable const& d);
-	/* attach a texture to a submited Drawable */
-	void attachTexture(uint32_t drawableID, std::string_view name, Vec2 min = { 0,0 }, Vec2 max = { 1,1 });
 
 					/* physics utility */
 	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(entity_index_type index);
-	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(entity_id id);
+	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(Entity index);
+	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(EntityId id);
 
 	friend class CollisionsView;
 	template<typename entityReference>
@@ -167,6 +167,26 @@ private:
 	Renderer renderer;
 };
 
+inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2 pos, Vec2 fontSize)
+{
+	pos += fontSize * 0.5f;
+	int lineStride = 0;
+	int lineBreakCount = 0;
+	for (int i = 0; i < str.length(); i++) {
+		if (str[i] == '\n') {
+			lineBreakCount++;
+			lineStride = 0;
+			continue;
+		}
+		auto drawID = ++freeDrawableID;
+		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, 0, DrawMode::PixelSpace, AsciiRef("ConsolasAtlas.png", str[i]));
+		auto background = Drawable(++freeDrawableID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, 0, DrawMode::PixelSpace);
+		submitDrawable(background);
+		submitDrawable(d);
+		lineStride++;
+	}
+}
+
 __forceinline void Engine::submitDrawable(Drawable && d) {
 	renderer.submit(d);
 }
@@ -175,12 +195,7 @@ __forceinline void Engine::submitDrawable(Drawable const& d) {
 	renderer.submit(d);
 }
 
-__forceinline void Engine::attachTexture(uint32_t drawableID, std::string_view name, Vec2 min, Vec2 max)
-{
-	renderer.attachTex(drawableID, name, min, max);
-}
-
-__forceinline std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(entity_id id)
+__forceinline std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(EntityId id)
 {
 	return getCollisions(world.getIndex(id));
 }

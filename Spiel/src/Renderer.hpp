@@ -28,9 +28,6 @@ public:
 	// submit drawables for the next frame
 	void submit(Drawable const& d);
 	void submit(Drawable && d);
-	// attaches Texture to a drawable
-	void attachTex(uint32_t drawableID, std::string_view texName, Vec2 min = { 0,0 }, Vec2 max = { 1,1 });
-	void attachTex(uint32_t drawableID, TextureRef const& texRef);
 	// allways call waitTillFinished once after rendering before calling this function
 	void setCamera(Camera const& cam);
 	// allways call waitTillFinished once after rendering before calling this function
@@ -69,16 +66,6 @@ inline void Renderer::submit(Drawable && d) {
 #else
 	frontBuffer->drawables.push_back(d);
 #endif
-}
-
-inline void Renderer::attachTex(uint32_t drawableID, std::string_view texName, Vec2 min, Vec2 max)
-{
-	frontBuffer->newTextureRefs.push_back({ drawableID, TextureRef(texName, min, max) });
-}
-
-inline void Renderer::attachTex(uint32_t drawableID, TextureRef const& texRef)
-{
-	frontBuffer->newTextureRefs.push_back({ drawableID, texRef });
 }
 
 inline void Renderer::setCamera(Camera const& cam) {

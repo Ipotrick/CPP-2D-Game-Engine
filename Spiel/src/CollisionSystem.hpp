@@ -16,9 +16,9 @@
 class CollisionSystem {
 	friend class PhysicsSystem;
 public:
-	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, float staticGridResolution = 0.5f, uint32_t qtreeCapacity = 6);
+	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, float staticGridResolution = 0.5f, uint32_t qtreeCapacity = 30);
 	void execute(World& world, float deltaTime);
-	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(entity_index_type id_);
+	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(Entity id_);
 	std::vector<IndexCollisionInfo>& getAllCollisions();
 	GridPhysics<bool> getStaticGrid();
 	void end();
@@ -31,7 +31,7 @@ private:
 	void collisionDetection(World& world);
 private:
 	// constants:
-	const int jobMaxEntityCount = 50;
+	const int jobMaxEntityCount = 200;
 	uint32_t qtreeCapacity;
 
 	PerfLogger& perfLog;
@@ -39,16 +39,13 @@ private:
 
 	// buffers
 	std::shared_ptr<CollisionPoolData> poolWorkerData;
-	std::vector<IndexCollisionInfo> indexCollisionInfos{};
-	robin_hood::unordered_map<entity_index_type, std::vector<IndexCollisionInfo>::iterator> indexCollisionInfoBegins;
-	robin_hood::unordered_map<entity_index_type, std::vector<IndexCollisionInfo>::iterator> indexCollisionInfoEnds;
-	std::vector<CollisionInfo> collisionInfos{};
-	robin_hood::unordered_map<entity_id_type, std::vector<CollisionInfo>::iterator> collisionInfoBegins;
-	robin_hood::unordered_map<entity_id_type, std::vector<CollisionInfo>::iterator> collisionInfoEnds;
+	std::vector<IndexCollisionInfo> collisionInfos{};
+	robin_hood::unordered_map<Entity, std::vector<IndexCollisionInfo>::iterator> collisionInfoBegins;
+	robin_hood::unordered_map<Entity, std::vector<IndexCollisionInfo>::iterator> collisionInfoEnds;
 
 	// buffers for jobs:
 	std::vector<DynCollisionCheckJob> dynCheckJobs;
-	std::vector<uint32_t> dynTags;
+	std::vector<Tag> dynTags;
 	std::vector<SensorCollisionCheckJob> sensorCheckJobs;
-	std::vector<uint32_t> sensorTags;
+	std::vector<Tag> sensorTags;
 };

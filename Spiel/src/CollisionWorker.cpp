@@ -89,7 +89,7 @@ void CollisionWorker::operator()()
 }
 
 
-void CollisionWorker::cacheAABBs(std::vector<entity_index_type>& colliders) {
+void CollisionWorker::cacheAABBs(std::vector<Entity>& colliders) {
 	for (auto ent : colliders) {
 		auto& base = poolData->world.getComp<Base>(ent);
 		auto& collider = poolData->world.getComp<Collider>(ent);
@@ -118,7 +118,7 @@ void CollisionWorker::waitForOtherWorkers()
 	}
 }
 
-void CollisionWorker::collisionFunction(entity_index_type collID, Quadtree2 const& quadtree, bool otherDynamic) {
+void CollisionWorker::collisionFunction(Entity collID, Quadtree2 const& quadtree, bool otherDynamic) {
 	auto& world = poolData->world;
 	auto& collisionResponses = poolData->collisionResponses;
 
@@ -139,7 +139,8 @@ void CollisionWorker::collisionFunction(entity_index_type collID, Quadtree2 cons
 		/// dyn vs dyn
 		nearCollidablesBuffer.clear();
 		// querry dynamic entities
-		quadtree.querry(nearCollidablesBuffer, posSize);
+		// TODO THIS IS BROKEN
+		//quadtree.querry(nearCollidablesBuffer, posSize);	
 
 		//check for collisions and save the changes in velocity and position these cause
 

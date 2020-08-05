@@ -5,7 +5,7 @@ void World::loadMap(std::string mapname_) {
 	std::ifstream mapData(mapname_);
 	if (mapData.good()) {
 	}
-	else
+	else if (mapname_ == "ballstest")
 	{
 		auto makeWall = [&](int x, int y) {
 			auto wall = index_create();
@@ -18,7 +18,7 @@ void World::loadMap(std::string mapname_) {
 		};
 
 		this->physics.friction = 0.01f;
-		this->physics.linearEffectAccel = 3.1;
+		//this->physics.linearEffectAccel = 2;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 		int const height = 80;
@@ -116,103 +116,74 @@ void World::loadMap(std::string mapname_) {
 		}
 
 		Vec2 scalePlayer(1, 1);
-		auto player = create();
+		auto player = id_create();
 		auto cmps = viewComps(player);
 		cmps.add<Base>(Base(Vec2(5,5),0));
 		auto colliderPlayer = Collider(scalePlayer, Form::Rectangle);
-		cmps.add<Collider>(colliderPlayer);
-		cmps.add<PhysicsBody>(PhysicsBody(0.5, 5.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
+		colliderPlayer.collisionMaskSelf |= CollisionGroup<1>::mask;
+		cmps.add(colliderPlayer);
+		cmps.add(PhysicsBody(0.5, 50.0f, /*calcMomentOfIntertia(1.0f, scalePlayer)*/ 1000000000000000000000000.0f, 1.0f));
 		cmps.add<Movement>();
-		cmps.add<Draw>(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::Rectangle));
+		cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.5, Form::Rectangle));
 		cmps.add<Player>();
 		spawn(player);
 
-		int num = 10000;// 250'000;
+		int num = 20000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = index_create();
 			auto c = viewComps(ent);
 			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
 			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.3f, Form::Rectangle));
+			c.add(TexRef("test.png"));
 			spawn(ent);
 		}
 
 		Vec2 scale = Vec2(0.2f, 0.2f);
 		Collider trashCollider = Collider(scale, Form::Circle);
-		PhysicsBody trashSolidBody(0.9f, 1.2f, calcMomentOfIntertia(1.2, scale), 50.0f);
-		for (int i = 0; i < 10000; i ++) {
-			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+		PhysicsBody trashSolidBody(0.7f, 1.2f, calcMomentOfIntertia(1.2, scale), 0.0f);
+		for (int i = 0; i < 5000; i ++) {
+			Vec4 color = Vec4(64/255.f, 222/256.f, 228/256.f,1);//Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
 			auto trash = index_create();
-			addComp<Base>(trash, Base(position, RotaVec2(0)));
-			addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
-			addComp<Collider>(trash, trashCollider);
-			addComp<Draw>(trash, Draw(color, scale, 0.5f, Form::Circle, true));
-			addComp<PhysicsBody>(trash, trashSolidBody);
-			addComp<Health>(trash, Health(100));
-			//addComp(trash, TexRef("Dir.png"));
+			addComp(trash, Base(position, RotaVec2(0)));
+			addComp(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
+			addComp(trash, trashCollider); 
+			addComp(trash, Draw(color, scale, 0.5f, Form::Circle, true));
+			addComp(trash, trashSolidBody);
+			addComp(trash, Health(100));
 			spawn(trash);
 
-			//auto trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);
-			//auto trashAss = index_create();
-			//auto cmps = viewComps(trashAss);
-			//cmps.add<Base>(Base(position));
-			//cmps.add<Movement>();
-			//auto coll = trashCollider;
-			//coll.form = Form::Circle;
-			//cmps.add<Coll>(coll);
-			//cmps.add<PhysicsBody>();
-			//auto draw = trashDraw;
-			//draw.form = Form::Circle;
-			//cmps.add<Draw>(draw);
-			//link(trashAss, trash, Vec2(0, 0.05f), 0);
-			//spawn(trashAss);
-			//
-			//trashAss = index_create();
-			//auto cmps2 = viewComps(trashAss);
-			//cmps2.add<Base>(Base(position));
-			//cmps2.add<Movement>();
-			//coll = trashCollider;
-			//coll.form = Form::Circle;
-			//cmps2.add<Coll>(coll);
-			//cmps2.add<PhysicsBody>();
-			//draw = trashDraw;
-			//draw.form = Form::Circle;
-			//cmps2.add<Draw>(draw);
-			//link(trashAss, trash, Vec2(0, -0.05f), 0);
-			//spawn(trashAss);
+			//auto trash2 = index_create();
+			//addComp(trash2, Base(position, RotaVec2(0)));
+			//addComp(trash2, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
+			//addComp(trash2, Collider(scale, Form::Rectangle));
+			//addComp(trash2, Draw(color, scale, 0.5f, Form::Rectangle, true));
+			//addComp(trash2, trashSolidBody);
+			//addComp(trash2, Health(100));
+			//link(trash2, trash, Vec2(0, 0.1), 0);
+			//spawn(trash2);
 		}
-		/*
-		int num2 = 0;
-		Vec2 scale2 = Vec2(0.04f, 0.04f);
-		Collider trashCollider2 = Collider(scale2, Form::RECTANGLE);
-		Draw trashDraw2 = Draw(Vec4(1.0f, 1.0f, 1.0f, 1), scale2, 0.5f, Form::RECTANGLE, true);
-		PhysicsBody trashSolidBody2(0.9f, 1'000'000'000'000'000.0f, calcMomentOfIntertia(1, scale), 10.0f);
-		for (int i = 0; i < num2; i++) {
 
-			Vec2 position2 = { static_cast<float>(rand() % 1000 / 10.0f - 50.0f) * 4.6f, static_cast<float>(rand() % 1000 / 10.0f - 50.0f) * 4.6f };
-			auto trash2 = create();
-			addComp<Base>(trash2, Base(position2, RotaVec2(0)));
-			addComp<Collider>(trash2, trashCollider2);
-			addComp<PhysicsBody>(trash2, trashSolidBody2);
-			spawn(trash2);
-		}*/
-
-		auto spawner = create();
+		auto spawner = id_create();
 		auto cmps2 = viewComps(spawner);
 		cmps2.add<Base>(Base(Vec2(20, 40), 0));
-		cmps2.add<Collider>(Collider(Vec2(1.3, 1.3), Form::Circle));
-		cmps2.add<PhysicsBody>(PhysicsBody(5.f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
+		cmps2.add<Collider>(Collider(Vec2(3.3, 3.3), Form::Circle));
+		cmps2.add<PhysicsBody>(PhysicsBody(0.9f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
 		cmps2.add<SpawnerComp>();
 		spawn(spawner);
-
-		auto sucker = create();
+		
+		auto sucker = id_create();
 		auto cmps3 = viewComps(sucker);
 		cmps3.add<Base>(Base(Vec2(20, 2), 0));
-		cmps3.add<Collider>(Collider(Vec2(6,6), Form::Circle));
+		auto coll = Collider(Vec2(6, 6), Form::Circle);
+		cmps3.add<Collider>(coll);
 		cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
 		auto suckerCmd = SuckerComp();
 		suckerCmd.spawner = spawner;
 		cmps3.add<SuckerComp>(suckerCmd);
 		spawn(sucker);
+	}
+	else if ("uitest") {
+		this->physics.linearEffectDir = Vec2(0, -1);
 	}
 }

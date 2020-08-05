@@ -1,5 +1,6 @@
 #include "Game.hpp"
 #include "htmlCompiler.hpp"
+#include <iomanip>
 
 using namespace std_extra;
 using std::cout;
@@ -18,7 +19,7 @@ Game::Game() :
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 
-	cursorID = world.create();
+	cursorID = world.id_create();
 	Vec2 cursorScale = { 0.1f,0.1f };
 	world.addComp<Base>(cursorID);
 	Collider cursorCollider(cursorScale, Form::Rectangle, true);
@@ -30,7 +31,7 @@ Game::Game() :
 
 void Game::create() {
 	camera.zoom = 1 / 3.5f;
-	world.loadMap("shit");
+	world.loadMap("ballstest");
 
 	for (auto i : range<-22,12>()) {
 		cout << i << endl;
@@ -44,21 +45,21 @@ void Game::create() {
 		std::cout << "angle: " << angle << " translated angle: " << getRotation(baseVec) << std::endl;
 	}
 	{
-		for (auto ent : world.index_view<Player>()) {
+		for (auto ent : world.entity_view<Player>()) {
 			std::cout << "ding" << std::endl;
-			auto id = world.identify(ent);
+			auto id = world.getId(ent);
 			bool hasID = world.hasID(ent);
 			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << std::endl;
 		}
 		auto newent = world.index_create();
-		auto id = world.identify(newent);
+		auto id = world.getId(newent);
 		bool hasIDafter = world.hasID(newent);
 		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
 		world.destroy(newent);
 
 		auto newent2 = world.index_create();
 		bool hasIDbefore = world.hasID(newent2);
-		auto id2 = world.identify(newent2);
+		auto id2 = world.getId(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
 	}
 
@@ -78,11 +79,12 @@ void Game::create() {
 void Game::update(World& world, float deltaTime) {
 	gameplayUpdate(world, deltaTime);
 	world.flushLaterActions();
-	world.defragment(World::DefragMode::FAST);
+	//world.defragment(World::DefragMode::FAST);
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
 		movementSystem.execute(world, deltaTime);
 		collisionSystem.execute(world, deltaTime);
+		for (auto& d : collisionSystem.debugDrawables) submitDrawable(d);
 		physicsSystem.execute(world, deltaTime, collisionSystem);
 		for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
 	}
@@ -94,9 +96,23 @@ void Game::update(World& world, float deltaTime) {
 
 void Game::gameplayUpdate(World& world, float deltaTime)
 {
+	
+	Vec2 size(10, 13);
+	Vec2 startpos(0, getWindowSize().y-size.y);
+	drawString(getPerfInfo(5), "ColnsolasAtlas.png", startpos, size);
+
+	//auto d = Drawable(++freeDrawableID, Vec2(800 /2, 450/2), 0.5, Vec2(800, 450), Vec4(1, 1, 1, 1), Form::Rectangle, 0, DrawMode::PixelSpace);
+	//submitDrawable(d);
+
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
 		quit();
+	}
+	if (keyPressed(KEY::G)) {
+		world.physics.linearEffectAccel += 8 * deltaTime;
+	}
+	if (keyPressed(KEY::H)) {
+		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
 	if (keyPressed(KEY::UP)) {
 		camera.position -= rotate(Vec2(0.0f, -5.0f), camera.rotation) * deltaTime;
@@ -132,36 +148,43 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 
 	//execute scripts
 	playerScript.execute(deltaTime);
-	healthScript.execute(deltaTime);
-	ageScript.execute(deltaTime);
-	bulletScript.execute(deltaTime);
-	particleScript.execute(deltaTime);
-	dummyScript.execute(deltaTime);
-	suckerScript.execute(deltaTime);
-
-	for (auto ent : world.index_view<SpawnerComp>()) {
+	{
+		healthScript.execute(deltaTime);
+		ageScript.execute(deltaTime);
+		bulletScript.execute(deltaTime);
+		particleScript.execute(deltaTime);
+		dummyScript.execute(deltaTime);
+		suckerScript.execute(deltaTime);
+	}
+	auto begin = world.entity_view<SpawnerComp>().begin();
+	auto end = world.entity_view<SpawnerComp>().end();
+	for (auto iter = begin; iter != end; ++iter) {
+		auto ent = *iter;
+		printf("ding: %i\n", ent);
 		auto base = world.getComp<Base>(ent);
-		for (int i = 1; i < 100; i++) {
+		for (int i = 1; i < spawnerLapTimer.getLaps(deltaTime); i++) {
 			float rotation = (float)(rand() % 360);
 			auto particle = world.index_create();
 			Vec2 movement = rotate(Vec2(5,0), rotation);
 			world.addComp<Base>(particle, Base(base.position));
-			auto size = Vec2(0.26, 0.26) * ((rand() % 1000) / 1000.0f);
-			world.addComp<Draw>(particle, Draw(Vec4(0.4, 0.9, 0.2 + (rand()%1000/1000.0f), 0.3), size, rand() % 1000 / 1000.0f, Form::Rectangle));
-			world.addComp<Movement>(particle, Movement(movement, rand()%1000/100.0f -5.0f));
-			//world.addComp<Collider>(particle, Collider(size, Form::Rectangle, true));
-			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 10, 10, 100));
-			world.addComp<Age>(particle, Age(rand()%1000/4000.0f));
+			auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
+			float gray = (rand() % 1000 / 1000.0f);
+			world.addComp<Draw>(particle, Draw(Vec4(gray, gray, gray, 0.3), size, rand() % 1000 / 1000.0f, Form::Circle));
+			world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
+			//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
+			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
+			world.addComp<Age>(particle, Age(rand()%1000/1000.0f));
 			world.spawn(particle);
 		}
 	}
 
 
 	/* display performance statistics */
-	std::cout << getPerfInfo(5) << '\n';
-	std::cout << "fragmentation: " << world.fragmentation() << std::endl;
-	std::cout << "ent count: " << world.entityCount() << std::endl;
-	std::cout << "ent memsize: " << world.maxEntityIndex() << std::endl << std::endl;
+	//std::cout << getPerfInfo(5) << '\n';
+	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
+	//std::cout << "ent count: " << world.entityCount() << std::endl;
+	//std::cout << "ent memsize: " << world.maxEntityIndex() << std::endl;
+	std::cout << "gravity: " << world.physics.linearEffectAccel << std::endl << std::endl;
 }
 
 void Game::cursorManipFunc()
@@ -174,7 +197,7 @@ void Game::cursorManipFunc()
 	baseCursor.rotation = camera.rotation;
 	colliderCursor.size = Vec2(1, 1) / camera.zoom / 100.0f;
 
-	for (auto ent : world.index_view<Player>()) {
+	for (auto ent : world.entity_view<Player>()) {
 		camera.position = world.getComp<Base>(ent).position;
 	}
 
