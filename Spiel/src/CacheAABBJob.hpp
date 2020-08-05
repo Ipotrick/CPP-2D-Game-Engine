@@ -15,8 +15,8 @@ public:
 	{}
 	void execute(int workerId) override {
 		for (auto ent : entities_to_cache) {
-			auto& base = manager.getComp<Base>(ent);
-			auto& collider = manager.getComp<Collider>(ent);
+			auto base = manager.getComp<Base>(ent);
+			auto collider = manager.getComp<Collider>(ent);
 			if (collider.form == Form::Circle) {
 				aabbs.at(ent) = collider.size;
 			}

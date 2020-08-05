@@ -28,7 +28,7 @@ struct QuadtreeNode {
 
 class Quadtree2 {
 	friend class QuadtreeNode;
-	const int stability = 1;	// 1 = high stability lower speed 2 = lower stability higher speed
+	const int stability = 2;	// 1 = high stability lower speed 2 = lower stability higher speed
 public:
 	Quadtree2(Vec2 minPos_, Vec2 maxPos_, size_t capacity_, World& wrld) :
 		m_pos{ (maxPos_ - minPos_) / 2 + minPos_ },
@@ -41,9 +41,9 @@ public:
 		trees.push_back(QuadtreeNode());
 	}
 
-	void insert(Entity ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, int depth = 0);
-	__forceinline void insert(Entity ent, Vec2 aabb) {
-		insert(ent, aabb, 0, m_pos, m_size);
+	void insert(Entity ent, std::vector<Vec2>& aabbs, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, int depth = 0);
+	__forceinline void insert(Entity ent, std::vector<Vec2>& aabbs) {
+		insert(ent, aabbs, 0, m_pos, m_size);
 	}
 	void querry(std::vector<Entity>& rVec, PosSize const& posSize, uint32_t thisID, Vec2 thisPos, Vec2 thisSize) const;
 	__forceinline void querry(std::vector<Entity>& rVec, PosSize const& posSize) const {

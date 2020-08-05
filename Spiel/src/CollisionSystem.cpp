@@ -139,25 +139,6 @@ void CollisionSystem::prepare(World& world)
 	if (poolWorkerData->rebuildStatQuadTrees)
 		jobManager.waitFor(jobTagStaticRebuild);
 	jobManager.waitFor(jobTagQtreeParticle);
-
-	for (auto player : world.entity_view<Player>()) {
-		std::vector<Entity> near;
-		PosSize p(world.getComp<Base>(player).position, poolWorkerData->aabbCache.at(player));
-		poolWorkerData->qtreeDynamic.querry(near, p);
-		std::cout << "collchecks player: " << near.size() << std::endl;
-		poolWorkerData->qtreeDynamic.querryDebug(p, debugDrawables);
-
-		for (auto const ent : near) {
-			if (world.hasComps<Collider, Movement, Base, Draw>(ent)) {
-				auto pos = world.getComp<Base>(ent).position;
-				auto draw = world.getComp<Draw>(ent);
-		
-				auto d = Drawable(0, pos, 1, draw.scale*0.5, Vec4(1, 0, 0, 1), Form::Circle, 0);
-				debugDrawables.push_back(d);
-			}
-		}
-	
-	}
 }
 
 void CollisionSystem::cleanBuffers(World& world)
@@ -255,13 +236,22 @@ void CollisionSystem::collisionDetection(World& world)
 	}
 	collisionInfoEnds.insert({ lastIDA, collisionInfos.end() });
 
-	float max = 0;
-	for (auto player : world.entity_view<Player>()) {
-		auto b = collisionInfoBegins[player];
-		auto e = collisionInfoEnds[player];
-		for (auto iter = b; iter != e; ++iter) {
-			max = std::max(max, iter->clippingDist);
+#ifdef DEBUG_QTREE_FINDPLAYER
+	Entity player;
+	for (auto p : world.entity_view<Player>())
+		player = p;
+
+	std::vector<Entity> near;
+	for (auto ent : world.entity_view<Collider, Movement>()) {
+		near.clear();
+		poolWorkerData->qtreeDynamic.querry(near, PosSize(world.getComp<Base>(ent).position, poolWorkerData->aabbCache.at(ent)));
+		for (auto oent : near) {
+			if (oent == player) {
+				auto pos = world.getComp<Base>(ent).position;
+				auto d = Drawable(0, pos, 0.99, Vec2(0.1,0.1), Vec4(0, 0, 1, 1), Form::Circle, 0);
+				debugDrawables.push_back(d);
+			}
 		}
 	}
-	std::cout << "playerMaxClip: " << max << std::endl;
+#endif
 }

@@ -164,7 +164,7 @@ private:
 	std::vector<bool> containsVec;
 };
 
-static const int PAGE_BITS{ 10 };
+static const int PAGE_BITS{ 8 };
 static const int PAGE_SIZE{ 1 << PAGE_BITS };
 static const int OFFSET_MASK{ ~(-1 << PAGE_BITS) };
 

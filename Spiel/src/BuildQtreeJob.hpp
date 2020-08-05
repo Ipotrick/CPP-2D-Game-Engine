@@ -18,12 +18,12 @@ public:
 		for (const auto ent : entities) {
 			if (insertParticles) {
 				if (manager.getComp<Collider>(ent).particle) {
-					qtree.insert(ent, aabbCache.at(ent));
+					qtree.insert(ent, aabbCache);
 				}
 			}
 			else {
 				if (!manager.getComp<Collider>(ent).particle) {	// never check for collisions against particles
-					qtree.insert(ent, aabbCache.at(ent));
+					qtree.insert(ent, aabbCache);
 				}
 			}
 		}

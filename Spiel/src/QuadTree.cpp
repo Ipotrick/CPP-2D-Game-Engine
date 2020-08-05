@@ -1,7 +1,8 @@
 #include "QuadTree.hpp"
 
-void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, int depth)
+void Quadtree2::insert(uint32_t ent, std::vector<Vec2>& aabbs, uint32_t thisID, Vec2 thisPos, Vec2 thisSize, int depth)
 {
+
 	if (!trees[thisID].hasSubTrees()) {
 		if (trees[thisID].collidables.size() < m_capacity) {
 			// if the node has no subtrees and is unter capacity, take the element into own storage:
@@ -34,7 +35,7 @@ void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos
 			for (auto& pcoll : collidablesOld)
 			{
 				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(pcoll).position,
-					entAABB);
+					aabbs.at(pcoll) );
 				int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 				if (isInCount > stability) {
 					trees[thisID].collidables.push_back(pcoll);
@@ -42,19 +43,19 @@ void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos
 				else {
 					if (isInUl)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+						insert(pcoll, aabbs, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 					if (isInUr)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+						insert(pcoll, aabbs, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 					if (isInDl)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+						insert(pcoll, aabbs, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 					if (isInDr)
 					{
-						insert(pcoll, entAABB, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+						insert(pcoll, aabbs, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}
 				}
 			}
@@ -63,7 +64,7 @@ void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos
 	else {
 		// this node has subtrees and tries to distribute them into the subtrees
 		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(ent).position,
-			entAABB);
+			aabbs.at(ent));
 		int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 		if (isInCount > stability) {
 			trees[thisID].collidables.push_back(ent);
@@ -71,19 +72,19 @@ void Quadtree2::insert(uint32_t ent, Vec2 entAABB, uint32_t thisID, Vec2 thisPos
 		else {
 			if (isInUl)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+				insert(ent, aabbs, trees[thisID].firstSubTree + 0, thisPos + Vec2(-thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 			if (isInUr)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+				insert(ent, aabbs, trees[thisID].firstSubTree + 1, thisPos + Vec2(thisSize.x, -thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 			if (isInDl)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+				insert(ent, aabbs, trees[thisID].firstSubTree + 2, thisPos + Vec2(-thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 			if (isInDr)
 			{
-				insert(ent, entAABB, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
+				insert(ent, aabbs, trees[thisID].firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 		}
 	}

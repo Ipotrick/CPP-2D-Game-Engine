@@ -17,8 +17,8 @@ void World::loadMap(std::string mapname_) {
 			spawn(wall);
 		};
 
-		this->physics.friction = 0.01f;
-		//this->physics.linearEffectAccel = 2;
+		this->physics.friction = 0.25f;
+		//this->physics.linearEffectAccel = 4;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 		int const height = 80;
@@ -128,21 +128,20 @@ void World::loadMap(std::string mapname_) {
 		cmps.add<Player>();
 		spawn(player);
 
-		int num = 20000;// 250'000;
+		int num = 1'000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = index_create();
 			auto c = viewComps(ent);
 			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
 			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.1f, Form::Rectangle));
-			c.add(TexRef("test.png"));
 			spawn(ent);
 		}
 
 		Vec2 scale = Vec2(0.2f, 0.2f);
 		Collider trashCollider = Collider(scale, Form::Circle);
-		PhysicsBody trashSolidBody(0.7f, 1.2f, calcMomentOfIntertia(1.2, scale), 0.0f);
-		for (int i = 0; i < 5000; i ++) {
-			Vec4 color = Vec4(64/255.f, 222/256.f, 228/256.f,1);//Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+		PhysicsBody trashSolidBody(0.7f, 1.2f, calcMomentOfIntertia(1.2, scale), 2.0f);
+		for (int i = 0; i < 20000; i ++) {
+			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f , static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
 			auto trash = index_create();
 			addComp(trash, Base(position, RotaVec2(0)));
