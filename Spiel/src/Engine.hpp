@@ -33,13 +33,13 @@
 // Core Systems
 #include "MovementSystem.hpp"
 #include "CollisionSystem.hpp"
-#include "PhysicsSystem.hpp"
+//#include "PhysicsSystem.hpp"
+#include "PhysicsSystem2.hpp"
 #include "BaseSystem.hpp"
 #include "Renderer.hpp"
 
 
-class Engine
-{
+class Engine {
 public:
 	Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
 	~Engine();
@@ -100,37 +100,8 @@ public:
 	void submitDrawable(Drawable && d);
 	void submitDrawable(Drawable const& d);
 
-					/* physics utility */
-	/* returns a range (iterator to begin and end) of the collision list for the ent with the id, O(1) */
-	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(Entity index);
-	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(EntityId id);
-
-	friend class CollisionsView;
-	template<typename entityReference>
-	class CollisionsView {
-		using iterator = std::vector<IndexCollisionInfo>::iterator;
-		Engine& engine; iterator beginIter; iterator endIter;
-	public:
-		CollisionsView(Engine& engine, entityReference ent) : engine{ engine } {
-			auto [begin, end] = engine.getCollisions(ent); this->beginIter = begin; this->endIter = end;
-		}
-		inline iterator begin() { return beginIter; }
-		inline iterator end() { return endIter; }
-		inline size_t size() { return std::distance(beginIter, endIter); }
-	};
-
-	/*
-		returns a view to the collisions of an entity id or entity index this is only slightly slower then getCollisions(entRef entity)
-	*/
-	template<typename entityReference>
-	CollisionsView<entityReference> collisions_view(entityReference entity) {
-		return CollisionsView<entityReference>(*this, entity);
-	}
-
-	/* returns a Grid that with bools, if a cell is "true" there is a solid object, if it is "false" there is no solid object
-		the position of the cells can be calculated using the minPos and the cellSize member variables, O(1) */
-	GridPhysics<bool> const& getStaticGrid();
-
+private:
+	void rendererUpdate(World& world);
 public:
 	World& world;
 	EventHandler events;
@@ -144,12 +115,11 @@ public:
 	BaseSystem baseSystem;
 	MovementSystem movementSystem;
 	CollisionSystem collisionSystem;
-	PhysicsSystem physicsSystem;
+	//PhysicsSystem physicsSystem;
+	PhysicsSystem2 physicsSystem2;
 
 	PerfLogger perfLog;
 
-private:
-	void rendererUpdate(World& world);
 private:
 	// meta
 	std::chrono::microseconds minimunLoopTime;
@@ -179,8 +149,8 @@ inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2
 			continue;
 		}
 		auto drawID = ++freeDrawableID;
-		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, 0, DrawMode::PixelSpace, AsciiRef("ConsolasAtlas.png", str[i]));
-		auto background = Drawable(++freeDrawableID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, 0, DrawMode::PixelSpace);
+		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace, AsciiRef("ConsolasAtlas.png", str[i]));
+		auto background = Drawable(++freeDrawableID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace);
 		submitDrawable(background);
 		submitDrawable(d);
 		lineStride++;
@@ -193,9 +163,4 @@ __forceinline void Engine::submitDrawable(Drawable && d) {
 
 __forceinline void Engine::submitDrawable(Drawable const& d) {
 	renderer.submit(d);
-}
-
-__forceinline std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(EntityId id)
-{
-	return getCollisions(world.getIndex(id));
 }

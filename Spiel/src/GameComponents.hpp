@@ -25,7 +25,7 @@ struct ParticleScriptComp : public CompData {
 // player component
 
 struct Player : public CompData {
-	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.005f }, dummyExis{ EntityId() } {}
+	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.001f }, dummyExis{ EntityId() } {}
 	LapTimer<> bulletShotLapTimer;
 	LapTimer<> flameSpawnTimer;
 	EntityId dummyExis;
@@ -98,4 +98,8 @@ struct Enemy : public CompData {
 struct Dummy : public CompData {
 	Dummy(EntityId player_id_ = EntityId()) : player_id{ player_id_} {}
 	EntityId player_id;
+};
+
+struct Tester {
+	float changeDirTime = 0.0f;
 };

@@ -6,20 +6,20 @@ Vec2 calcPosChange(float surfAreaA, Vec2 velA, float surfAreaB, Vec2 velB, float
 		float bPart = surfAreaB / bothAreas;
 		float collDirV1 = dot(velA, primCollNormal);
 		float collDirV2 = dot(velB, primCollNormal);
-		if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f && Physics::directionalPositionCorrection) {
-			//they move into each other
-			if (collDirV2 < 0) {
-				//coll moved into other
-				return dist * primCollNormal *  (2.0f - priority) * Physics::directionalCorrectionFactor + primCollNormal * Physics::pushout;
-			}
-			else {
-				//other moved into coll
-				return dist * primCollNormal * (2.0f- priority) * (1.0f - Physics::directionalCorrectionFactor) + primCollNormal * Physics::pushout;
-			}
-		}
-		else {
-			return dist * primCollNormal * bPart * (2.0f - priority) + primCollNormal * Physics::pushout;
-		}
+		//if (collDirV1 - collDirV2 > 0.0f && bPart < 0.75f && bPart > 0.25f && Physics::directionalPositionCorrection) {
+		//	//they move into each other
+		//	if (collDirV2 < 0) {
+		//		//coll moved into other
+		//		return dist * primCollNormal *  priority * Physics::directionalCorrectionFactor + primCollNormal * Physics::pushout;
+		//	}
+		//	else {
+		//		//other moved into coll
+		//		return dist * primCollNormal * priority * (1.0f - Physics::directionalCorrectionFactor) + primCollNormal * Physics::pushout;
+		//	}
+		//}
+		//else {
+			return dist * primCollNormal * bPart * priority + primCollNormal * Physics::pushout;
+		//}
 	}
 	else {
 		return dist * primCollNormal + primCollNormal * 0.95f * Physics::pushout;
@@ -58,7 +58,7 @@ std::pair<std::pair<Vec2, float>, std::pair< Vec2, float>> impulseResolution(Vec
 	return {
 		{ cNV * impulse / massA + tNV * frictionImpulse / massA,
 		cross(rAP, cNV) * impulse / inertiaA * RAD + cross(rAP, tNV) * frictionImpulse / inertiaA * RAD },
-		{ cNV * -impulse / massB + tNV * -frictionImpulse / massA,
+		{ cNV * -impulse / massB + tNV * -frictionImpulse / massB,
 		cross(rBP, cNV) * -impulse / inertiaB * RAD + cross(rBP, tNV) * -frictionImpulse / inertiaB * RAD }
 	};
 }

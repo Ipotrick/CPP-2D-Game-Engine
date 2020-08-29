@@ -14,7 +14,8 @@ Game::Game() :
 	bulletScript{ *this },
 	particleScript{ *this },
 	dummyScript{ *this },
-	suckerScript{ *this }
+	suckerScript{ *this },
+	testerScript{ *this }
 {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
@@ -23,6 +24,7 @@ Game::Game() :
 	Vec2 cursorScale = { 0.1f,0.1f };
 	world.addComp<Base>(cursorID);
 	Collider cursorCollider(cursorScale, Form::Rectangle, true);
+	cursorCollider.ignoreGroupMask = CollisionGroup<1>::mask;
 	world.addComp<Collider>(cursorID, cursorCollider);
 	Draw cursorDraw(Vec4(1, 0, 0, 1), cursorScale, 0.6f, Form::Circle);
 	world.addComp<Draw>(cursorID, cursorDraw);
@@ -36,6 +38,9 @@ void Game::create() {
 	for (auto i : range<-22,12>()) {
 		cout << i << endl;
 	}
+
+	std::cout << "sizeof QNode: " << sizeof(QuadtreeNode) << '\n'
+		<< "sizeof QNode page: " << (sizeof(QuadtreeNode) * (1 << 11)) << std::endl;
 
 	{
 		float angle = 33.19f;
@@ -85,8 +90,8 @@ void Game::update(World& world, float deltaTime) {
 		movementSystem.execute(world, deltaTime);
 		collisionSystem.execute(world, deltaTime);
 		for (auto& d : collisionSystem.debugDrawables) submitDrawable(d);
-		physicsSystem.execute(world, deltaTime, collisionSystem);
-		for (auto& d : physicsSystem.debugDrawables) submitDrawable(d);
+		physicsSystem2.execute(world, deltaTime, collisionSystem);
+		for (auto& d : physicsSystem2.debugDrawables) submitDrawable(d);
 	}
 	{
 		Timer t(perfLog.getInputRef("calcRotaVecTime"));
@@ -96,13 +101,16 @@ void Game::update(World& world, float deltaTime) {
 
 void Game::gameplayUpdate(World& world, float deltaTime)
 {
-	
+	auto background = Drawable(0, Vec2(0, 0), 0, Vec2(2, 2), Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0), DrawMode::WindowSpace);
+	submitDrawable(background);
+
+	for (auto ent : world.entity_view<Base, Movement>()) {
+		if (world.getComp<Base>(ent).position.length() > 1000)
+			world.destroy(ent);
+	}
 	Vec2 size(10, 13);
 	Vec2 startpos(0, getWindowSize().y-size.y);
 	drawString(getPerfInfo(5), "ColnsolasAtlas.png", startpos, size);
-
-	//auto d = Drawable(++freeDrawableID, Vec2(800 /2, 450/2), 0.5, Vec2(800, 450), Vec4(1, 1, 1, 1), Form::Rectangle, 0, DrawMode::PixelSpace);
-	//submitDrawable(d);
 
 	//take input
 	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
@@ -155,12 +163,9 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 		particleScript.execute(deltaTime);
 		dummyScript.execute(deltaTime);
 		suckerScript.execute(deltaTime);
+		testerScript.execute(deltaTime);
 	}
-	auto begin = world.entity_view<SpawnerComp>().begin();
-	auto end = world.entity_view<SpawnerComp>().end();
-	for (auto iter = begin; iter != end; ++iter) {
-		auto ent = *iter;
-		printf("ding: %i\n", ent);
+	for (auto ent : world.entity_view<SpawnerComp>()) {
 		auto base = world.getComp<Base>(ent);
 		for (int i = 1; i < spawnerLapTimer.getLaps(deltaTime); i++) {
 			float rotation = (float)(rand() % 360);
@@ -173,9 +178,15 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 			world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
 			//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
 			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
-			world.addComp<Age>(particle, Age(rand()%1000/1000.0f));
+			world.addComp<Age>(particle, Age(rand()%1000/2000.0f));
 			world.spawn(particle);
 		}
+	}
+
+	for (auto ent : world.entity_view<Base, Movement>()) {
+		auto pos = world.getComp<Base>(ent).position;
+		if (pos.length() > 1000)
+			world.destroy(ent);
 	}
 
 
@@ -184,12 +195,11 @@ void Game::gameplayUpdate(World& world, float deltaTime)
 	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
 	//std::cout << "ent count: " << world.entityCount() << std::endl;
 	//std::cout << "ent memsize: " << world.maxEntityIndex() << std::endl;
-	std::cout << "gravity: " << world.physics.linearEffectAccel << std::endl << std::endl;
 }
 
 void Game::cursorManipFunc()
 {
-	auto cursor = world.getIndex(cursorID);
+	Entity cursor = world.getIndex(cursorID);
 	auto& baseCursor = world.getComp<Base>(cursor);
 	auto& colliderCursor = world.getComp<Collider>(cursor);
 	baseCursor.position = getPosWorldSpace(getCursorPos());
@@ -241,16 +251,20 @@ void Game::cursorManipFunc()
 			}
 		}
 		else {
-			auto [begin, end] = getCollisions(cursor);
-			auto iterWIthHighestDrawPrio = begin;
-			for (auto iter = begin; iter != end; ++iter) {
-				if (world.getComp<Draw>(iter->indexB).drawingPrio > world.getComp<Draw>(iterWIthHighestDrawPrio->indexB).drawingPrio) {	//higher drawprio found
-					iterWIthHighestDrawPrio = iter;
+			std::optional<CollisionInfo> highestPrioColl;
+			bool first = true;
+			for (auto collision : collisionSystem.collisions_view(cursor)) {
+				if (first) {
+					highestPrioColl = collision;
+				}
+				first = false;
+				if (world.getComp<Draw>(collision.indexB).drawingPrio > world.getComp<Draw>(highestPrioColl.value().indexB).drawingPrio) {	//higher drawprio found
+					highestPrioColl = collision;
 				}
 			}
-			if (begin != end) {
-				cursorManipData.lockedID = iterWIthHighestDrawPrio->indexB;
-				cursorManipData.lockedIDDist = world.getComp<Base>(iterWIthHighestDrawPrio->indexB).position - baseCursor.position;
+			if (highestPrioColl.has_value()) {
+				cursorManipData.lockedID = highestPrioColl.value().indexB;
+				cursorManipData.lockedIDDist = world.getComp<Base>(highestPrioColl.value().indexB).position - baseCursor.position;
 				cursorManipData.locked = true;
 			}
 		}
@@ -268,55 +282,28 @@ void Game::cursorManipFunc()
 		if (keyPressed(KEY::U)) {
 			Vec2 scale = Vec2(0.3f, 0.3f);
 			Collider trashCollider = Collider(scale, Form::Circle);
-			PhysicsBody trashSolidBody(0.9f, 1.0f, calcMomentOfIntertia(1, scale), 10.0f);
+			PhysicsBody trashSolidBody(0.0f, 1.0f, calcMomentOfIntertia(1, scale), 1.0f);
 
+			Vec2 position = baseCursor.position;
+			// AFTER THIS LINE ALL REFERENCES TO COMPONENTS ARE GETTING INVALIDATED
 			for (int i = 0; i < cursorManipData.ballSpawnLap.getLaps(getDeltaTime()); i++) {
 				Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 				Draw trashDraw = Draw(color, scale, 0.5f, Form::Circle, true);
-				Vec2 position = baseCursor.position;
 				auto trash = world.index_create();
 				world.addComp<Base>(trash, Base(position, RotaVec2(0)));
-				world.addComp<Movement>(trash, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
+				world.addComp<Movement>(trash, Movement());
 				world.addComp<Collider>(trash, trashCollider);
 				world.addComp<Draw>(trash, trashDraw);
 				world.addComp<PhysicsBody>(trash, trashSolidBody);
 				world.addComp<Health>(trash, Health(100));
 				world.spawn(trash);
-
-				//auto trashAss = world.index_create();
-				//auto cmps = world.viewComps(trashAss);
-				//cmps.add<Base>();
-				//cmps.add<Movement>();
-				//auto coll = trashCollider;
-				//coll.form = Form::Circle;
-				//cmps.add<Coll>(coll);
-				//cmps.add<PhysicsBody>();
-				//auto draw = trashDraw;
-				//draw.form = Form::Circle;
-				//cmps.add<Draw>(draw);
-				//world.link(trashAss, trash, Vec2(0, 0.15f), 0);
-				//world.spawn(trashAss);
-				//
-				//trashAss = world.index_create();
-				//auto cmps2 = world.viewComps(trashAss);
-				//cmps2.add<Base>();
-				//cmps2.add<Movement>();
-				//coll = trashCollider;
-				//coll.form = Form::Circle;
-				//cmps2.add<Coll>(coll);
-				//cmps2.add<PhysicsBody>();
-				//draw = trashDraw;
-				//draw.form = Form::Circle;
-				//cmps2.add<Draw>(draw);
-				//world.link(trashAss, trash, Vec2(0, -0.15f), 0);
-				//world.spawn(trashAss);
 			}
 		}
 
 		if (keyPressed(KEY::I)) {
 			Vec2 scale = Vec2(0.5f, 0.5f);
 			Collider trashCollider(scale, Form::Rectangle);
-			PhysicsBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale), 100.0f);
+			PhysicsBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale), 1.0f);
 			Draw trashDraw = Draw(Vec4(1, 1, 1, 1), scale, 0.5f, Form::Rectangle);
 
 			for (int i = 0; i < cursorManipData.wallSpawnLap.getLaps(getDeltaTime()); i++) {

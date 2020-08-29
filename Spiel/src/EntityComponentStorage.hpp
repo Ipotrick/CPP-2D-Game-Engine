@@ -12,7 +12,7 @@
 #include "robin_hood.h"
 
 #include "EntityTypes.hpp"
-#define DEBUG_COMPONENT_STORAGE
+//#define DEBUG_COMPONENT_STORAGE
 
 
 struct CompData {
@@ -97,12 +97,16 @@ public:
 		return containsVec[entity];
 	}
 	inline CompType& get(Entity entity) {
+#ifdef DEBUG_COMPONENT_STORAGE
 		assert(contains(entity));
+		return storage.at(entity);
+#else
 		return storage[entity];
+#endif
 	}
 	inline CompType& operator[](Entity entity) {
 		assert(contains(entity));
-		return storage[entity];
+		return get(entity);
 	}
 	inline size_t size() const { return storage.size(); }
 
@@ -164,7 +168,7 @@ private:
 	std::vector<bool> containsVec;
 };
 
-static const int PAGE_BITS{ 8 };
+static const int PAGE_BITS{ 7 };
 static const int PAGE_SIZE{ 1 << PAGE_BITS };
 static const int OFFSET_MASK{ ~(-1 << PAGE_BITS) };
 
@@ -178,9 +182,9 @@ static inline int offset(Entity entity) {
 
 template<typename CompType>
 class ComponentStorage<CompType, sparse_indexing> {
-
+	static const bool DELETE_EMPTY_PAGES{ false };
 	struct Page {
-		CompType data[PAGE_SIZE];
+		std::array<CompType, PAGE_SIZE> data;
 		int usedCount{ 0 };
 	};
 public:
@@ -224,19 +228,23 @@ public:
 			containsVec[entity] = false;
 
 			pages[page(entity)]->usedCount -= 1;
-			if (pages[page(entity)]->usedCount == 0) {
-				delete pages[page(entity)];
-				pages[page(entity)] = nullptr;
+			if constexpr (DELETE_EMPTY_PAGES) {
+				if (pages[page(entity)]->usedCount == 0) {
+					delete pages[page(entity)];
+					pages[page(entity)] = nullptr;
+				}
 			}
-				
 		}
 	}
 	inline bool contains(Entity entity) const {
 		return containsVec[entity];
 	}
 	inline CompType& get(Entity entity) {
-		if (!contains(entity)) throw new std::exception();
+#ifdef DEBUG_COMPONENT_STORAGE
+		return pages.at(page(entity))->data.at(offset(entity));
+#else
 		return pages[page(entity)]->data[offset(entity)];
+#endif
 	}
 	inline CompType& operator[](Entity entity) {
 		return get(entity);
@@ -383,7 +391,11 @@ public:
 	}
 
 	inline CompType& get(Entity entity) {
+#ifdef DEBUG_COMPONENT_STORAGE
+		return storage.at(sparseTable.at(entity));
+#else
 		return storage[sparseTable[entity]];
+#endif
 	}
 	inline CompType& operator[](Entity entity) {
 		return get(entity);
@@ -400,9 +412,9 @@ public:
 		typedef Entity* pointer;
 		typedef std::forward_iterator_tag iterator_category;
 		iterator(Entity denseTableIndex, ComponentStorage<CompType, sparse_set>& compStore) 
-			: denseTableIndex{ denseTableIndex }, compStore{ compStore }, end{ (Entity)compStore.denseTable.size() } {}
+			: denseTableIndex{ denseTableIndex }, compStore{ compStore } {}
 		inline self_type operator++(int dummy) {
-			assert(denseTableIndex < end);
+			assert(denseTableIndex < compStore.denseTable.size());
 			++denseTableIndex;
 			return *this;
 		}
@@ -429,7 +441,6 @@ public:
 	private:
 		Entity denseTableIndex; 
 		ComponentStorage<CompType, sparse_set>& compStore;
-		const Entity end;
 	};
 	inline iterator<CompType> begin() { return iterator<CompType>(0, *this); }
 	inline iterator<CompType> end()   { return iterator<CompType>(denseTable.size(), *this); }

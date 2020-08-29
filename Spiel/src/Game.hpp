@@ -9,6 +9,7 @@
 #include "ParticleScript.hpp"
 #include "DummyScript.hpp"
 #include "SuckerScript.hpp"
+#include "TesterScript.hpp"
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
@@ -42,6 +43,7 @@ public:
 	ParticleScript	particleScript;
 	DummyScript		dummyScript;
 	SuckerScript	suckerScript;
+	TesterScript	testerScript;
 
 	EntityId cursorID;
 
@@ -51,7 +53,7 @@ public:
 	static bool testEventReaction(std::string_view, uint32_t);
 
 	// TEMP TODO REMOVE
-	LapTimer<> spawnerLapTimer{0.001f};
+	LapTimer<> spawnerLapTimer{0.0001f};
 };
 
 inline bool Game::testEventReaction(std::string_view name, uint32_t id) {

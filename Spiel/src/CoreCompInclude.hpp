@@ -3,6 +3,7 @@
 ComponentStorage<Base, direct_indexing>, \
 ComponentStorage<Draw, direct_indexing>, \
 ComponentStorage<Collider, sparse_indexing>, \
+ComponentStorage<CollisionsToken, sparse_indexing>, \
 ComponentStorage<Movement, sparse_indexing>, \
 ComponentStorage<PhysicsBody, sparse_indexing>, \
 ComponentStorage<TextureRef, sparse_set>, \

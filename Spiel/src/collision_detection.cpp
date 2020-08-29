@@ -53,7 +53,7 @@ CollisionTestResult checkCircleRectangleCollision(CollidableAdapter const& circl
 	if (dist < 0.0f) {
 		Vec2 backRotatedCollNormal = rotate(collisionDir, rect.rotationVec);
 
-		result.collided = true;
+		result.collisionCount = true;
 		result.clippingDist = -dist;
 		result.collisionPos = rotate(clampedCirclePos, rect.rotationVec);
 		CollidableAdapter const* coll; CollidableAdapter const* other; Vec2 primCollNormal;
@@ -65,8 +65,6 @@ CollisionTestResult checkCircleRectangleCollision(CollidableAdapter const& circl
 		}
 		result.collisionNormal = primCollNormal;
 
-		//result.posChange = calcPosChange(*coll, *other, -dist, primCollNormal);
-
 	}
 	return result;
 }
@@ -76,37 +74,74 @@ CollisionTestResult rectangleRectangleCollisionCheck2(CollidableAdapter const& c
 {
 	CollisionTestResult result = CollisionTestResult();
 	auto result1 = partialSATTest(coll, other);
-	if (!result1.didNotCollide) {
+	if (result1.collisionPointCount) {
 		auto result2 = partialSATTest(other, coll);
-		if (!result2.didNotCollide) {
-			result.collided = true;
+		if (result2.collisionPointCount) {
+			result.collisionCount = true;
 			if (result1.minClippingDist < result2.minClippingDist) {
 				result.clippingDist = fabs(result1.minClippingDist);
-				result.collisionPos = result1.cornerPosOfMinClippingDist;
 				result.collisionNormal = result1.collisionNormalOfMinClippingDist;
+				//result.collisionPos = result1.cornerPosOfMinClippingDist;
+				//result.collisionPos2 = result1.cornerPosOfMinClippingDist;
+				result.collisionCount = 2;
+				result.collisionPos = result1.pos1;
+				result.collisionPos2 = result1.pos2;
+
 			}
 			else {
 				result.clippingDist = fabs(result2.minClippingDist);
-				result.collisionPos = result2.cornerPosOfMinClippingDist;
 				result.collisionNormal = -result2.collisionNormalOfMinClippingDist;	// flip normal vector as cnv allways has to point to coll
+				//result.collisionPos = result2.cornerPosOfMinClippingDist;
+				//result.collisionPos2 = result2.cornerPosOfMinClippingDist;
+				result.collisionCount = 2;
+				result.collisionPos = result2.pos2;
+				result.collisionPos2 = result2.pos1;
 			}
 		}
 	}
 	return result;
 }
 
+CollisionTestResult rectangleRectangleCollisionCheck3(CollidableAdapter const& coll, CollidableAdapter const& other)
+{
+	return CollisionTestResult();
+}
 
+int fastMod(int i)
+{
+	switch (i) {
+	case -1: return 3;
+	case 0: return 0;
+	case 1: return 1;
+	case 2: return 2;
+	case 3: return 3;
+	case 4: return 0;
+	}
+}
+
+Vec2 lineLineIntersection(Vec2 o1, Vec2 d1, Vec2 o2, Vec2 d2)
+{
+	float a1 = d1.y / std::max(0.000001f, d1.x);
+	float b1 = o1.y - o1.x * a1;
+	float a2 = d2.y / std::max(0.000001f, d2.x);
+	float b2 = o2.y - o2.x * a2;
+	float x = (b2 - b1) / std::max(0.00001f,(a1 - a2));
+	x = clamp(x, o1.x, o1.x + d1.x);
+	x = clamp(x, o2.x, o2.x + d2.x);
+	float y = a1 * x + b1;
+	y = clamp(y, o1.y, o1.y + d1.y);
+	y = clamp(y, o2.y, o2.y + d2.y);
+	return Vec2(x, y);
+}
 
 SATTestResult partialSATTest(CollidableAdapter const& coll, CollidableAdapter const& other) {
 	SATTestResult testResult;
 
-	
-
 	std::array<Vec2, 4> cornersOther{
-		other.position + rotate(Vec2(-other.size.x * 0.5f, -other.size.y * 0.5f), other.rotationVec), // ul
-		other.position + rotate(Vec2( other.size.x * 0.5f, -other.size.y * 0.5f), other.rotationVec), // ur
-		other.position + rotate(Vec2(-other.size.x * 0.5f,  other.size.y * 0.5f), other.rotationVec), // dl
-		other.position + rotate(Vec2( other.size.x * 0.5f,  other.size.y * 0.5f), other.rotationVec)  // dr
+		other.position + rotate(Vec2(other.size.x * 0.5f,  other.size.y * 0.5f), other.rotationVec), // ur
+		other.position + rotate(Vec2(other.size.x * 0.5f, -other.size.y * 0.5f), other.rotationVec), // dr
+		other.position + rotate(Vec2(-other.size.x * 0.5f, -other.size.y * 0.5f), other.rotationVec),// dl
+		other.position + rotate(Vec2(-other.size.x * 0.5f,  other.size.y * 0.5f), other.rotationVec) // ul
 	};
 
 	for (int i = 0; i < 2; i++) {
@@ -125,10 +160,10 @@ SATTestResult partialSATTest(CollidableAdapter const& coll, CollidableAdapter co
 		}
 
 		std::array<float, 4> projectedCornersOther{
-			dot(relativePlaneColl, cornersOther[0]), // ul
-			dot(relativePlaneColl, cornersOther[1]), // ur
+			dot(relativePlaneColl, cornersOther[0]), // ur
+			dot(relativePlaneColl, cornersOther[1]), // dr
 			dot(relativePlaneColl, cornersOther[2]), // dl
-			dot(relativePlaneColl, cornersOther[3])  // dr
+			dot(relativePlaneColl, cornersOther[3])  // ul
 		};
 
 		int minOtherIndex = 0;
@@ -143,18 +178,42 @@ SATTestResult partialSATTest(CollidableAdapter const& coll, CollidableAdapter co
 			if (newClippingDist < testResult.minClippingDist) {
 				testResult.minClippingDist = newClippingDist;
 				// find corner of other, that is nearest to coll's center
+				int index;
+				float factor;
 				if (isIntervalCenterSmaller(minColl, maxColl, projectedCornersOther[minOtherIndex], projectedCornersOther[maxOtherIndex])) {
-					testResult.cornerPosOfMinClippingDist = cornersOther[minOtherIndex]; // coll is left from other, so the min x pos corner of other is the collision corner
-					testResult.collisionNormalOfMinClippingDist = -relativePlaneColl; // coll is left from other, so the normal vector goes to the left
+					index = minOtherIndex;	// coll is left from other, so the min x pos corner of other is the collision corner
+					factor = -1.0f;			// coll is left from other, so the normal vector goes to the left
 				}
 				else {
-					testResult.cornerPosOfMinClippingDist = cornersOther[maxOtherIndex]; // coll is right from other, so the max x pos corner of other is the collision corner
-					testResult.collisionNormalOfMinClippingDist = relativePlaneColl; // coll is right from other, so the normal vector goes to the right
+					index = maxOtherIndex;	// coll is right from other, so the max x pos corner of other is the collision corner
+					factor = 1.0f;			// coll is right from other, so the normal vector goes to the right
 				}
+				testResult.cornerPosOfMinClippingDist = cornersOther[index];
+				testResult.collisionNormalOfMinClippingDist = factor * relativePlaneColl;
+				// vectors that point from collisionpoint up to the corners connected to the collision point:
+				Vec2 dToLeft  = cornersOther[fastMod(index - 1)] - cornersOther[index];
+				Vec2 dToRight = cornersOther[fastMod(index + 1)] - cornersOther[index];
+
+				float stepSizeLeft  = clamp(-testResult.minClippingDist / dot(dToLeft,  testResult.collisionNormalOfMinClippingDist), 0.0f, 1.0f);
+				float stepSizeRight = clamp(-testResult.minClippingDist / dot(dToRight, testResult.collisionNormalOfMinClippingDist), 0.0f, 1.0f);
+				Vec2 p1 = cornersOther[index] + dToLeft * stepSizeLeft;
+				Vec2 p2 = cornersOther[index] + dToRight * stepSizeRight;
+				// get corners of normal plane:
+				Vec2 normalPlaneLeftCorner  = coll.position - factor * rotate(((i == 0) ? Vec2(coll.size.x * 0.5f, coll.size.y * 0.5f) : Vec2(coll.size.x * 0.5f, coll.size.y * 0.5f)), coll.rotationVec);
+				Vec2 normalPlaneRightCorner = coll.position - factor * rotate(((i == 0) ? Vec2(coll.size.x * 0.5f, -coll.size.y * 0.5f) : Vec2(-coll.size.x * 0.5f, coll.size.y * 0.5f)), coll.rotationVec);
+				// clamp found points to the normal planes aabb (basicly the same as clipping it to the normal plane):
+				Vec2 minAABB = min(normalPlaneLeftCorner, normalPlaneRightCorner);
+				Vec2 maxAABB = max(normalPlaneLeftCorner, normalPlaneRightCorner);
+				p1.x = clamp(p1.x, minAABB.x, maxAABB.x);
+				p1.y = clamp(p1.y, minAABB.y, maxAABB.y);
+				p2.x = clamp(p2.x, minAABB.x, maxAABB.x);
+				p2.y = clamp(p2.y, minAABB.y, maxAABB.y);
+				testResult.pos1 = p1;
+				testResult.pos2 = p2;
 			}
 		}
 		else {
-			testResult.didNotCollide = true;
+			testResult.collisionPointCount = 0;
 			return testResult;
 		}
 	}
@@ -166,7 +225,7 @@ CollisionTestResult circleCircleCollisionCheck(CollidableAdapter const& coll, Co
 
 	if (dist < 0.0f) {
 		CollisionTestResult result;
-		result.collided = true;
+		result.collisionCount = true;
 		result.clippingDist = -dist;
 		result.collisionPos = normalize(coll.position - other.position) * other.size.x / 2.0f + other.position;
 

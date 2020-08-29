@@ -3,142 +3,115 @@
 
 #include "PhysicsSystem.hpp"
 #include "CacheAABBJob.hpp"
-#include "BuildQtreeJob.hpp"
 
-CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, float statCollGridRes, uint32_t qtreeCapacity) :
+CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, uint32_t qtreeCapacity) :
+	world{ world },
 	jobManager{ jobManager },
 	perfLog{ perfLog },
-	qtreeCapacity{ qtreeCapacity }
+	qtreeCapacity{ qtreeCapacity },
+	workerBuffers(jobManager.neededBufferNum()),
+	qtreeDynamic({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::DYNAMIC),
+	qtreeStatic({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::STATIC),
+	qtreeParticle({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::PARTICLE),
+	qtreeSensor({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::SENSOR)
 {
-	poolWorkerData = std::make_shared<CollisionPoolData>(world, qtreeCapacity, jobManager.neededBufferNum());
+	jobEntityBuffers.push_back(std::make_unique<std::vector<Entity>>());
 }
 
 void CollisionSystem::execute(World& world, float deltaTime)
 {
 	prepare(world);
 	collisionDetection(world);
-	debugDrawables.insert(debugDrawables.end(), poolWorkerData->debugDrawables.begin(), poolWorkerData->debugDrawables.end());
 }
 
-std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> CollisionSystem::getCollisions(Entity entity)
-{
-	auto begin = collisionInfoBegins.find(entity);
-	auto end = collisionInfoEnds.find(entity);
-	if (begin != collisionInfoBegins.end() && end != collisionInfoEnds.end()) {	// is there even collisionInfo for the id?
-		return std::make_tuple(begin->second, end->second);
-	}
-	else {
-		return std::make_tuple(collisionInfos.end(), collisionInfos.end());
-	}
-}
-
-std::vector<IndexCollisionInfo>& CollisionSystem::getAllCollisions()
+std::vector<CollisionInfo>& CollisionSystem::getCollisions()
 {
 	return this->collisionInfos;
 }
 
-GridPhysics<bool> CollisionSystem::getStaticGrid()
+const CollisionSystem::CollisionsView CollisionSystem::collisions_view(Entity entity)
 {
-	return poolWorkerData->staticCollisionGrid;
-}
-
-void CollisionSystem::end()
-{
+	if (world.hasComp<CollisionsToken>(entity)) {
+		return CollisionsView((size_t)world.getComp<CollisionsToken>(entity).begin, (size_t)world.getComp<CollisionsToken>(entity).end, collisionInfos);
+	}
+	else {
+		return CollisionsView(collisionInfos.size(), collisionInfos.size(), collisionInfos);
+	}
 }
 
 void CollisionSystem::prepare(World& world)
 {
 	Timer t1(perfLog.getInputRef("collisionprepare"));
-	poolWorkerData->world = world;
-	poolWorkerData->qtreeDynamic.world = world;
-	poolWorkerData->qtreeStatic.world = world;
 
-	poolWorkerData->rebuildDynQuadTrees = true; // allways rebuild dynamic quadtree
-	poolWorkerData->rebuildStatQuadTrees = world.didStaticsChange(); // only rebuild static quadtree if static Entities changed
+	rebuildStatic = world.didStaticsChange(); // only rebuild static quadtree if static Entities changed
 
 	// allocate memory for collider groups and or clean them
 	cleanBuffers(world);
 
+	// TODO REDO SPLIT OF COLLIDER
 	// split collidables
-	Vec2 sensorMaxPos{ 0,0 }, sensorMinPos{ 0,0 };
-	Vec2 dynMaxPos{ 0,0 }, dynMinPos{ 0,0 };
-	Vec2 statMaxPos{ 0,0 }, statMinPos{ 0,0 };
+	Vec2 minPos{ 0,0 }, maxPos{ 0,0 };
 	for (auto colliderID : world.entity_view<Collider>()) {
 		auto& collider = world.getComp<Collider>(colliderID);
 		auto& baseCollider = world.getComp<Base>(colliderID);
-
+		minPos = min(minPos, baseCollider.position);
+		maxPos = max(maxPos, baseCollider.position);
+	
 		if (world.hasComp<PhysicsBody>(colliderID)) { // if a collider has a solidBody, it is a physics object
 			if (world.hasComp<Movement>(colliderID)) {	// is it dynamic or static?
-				poolWorkerData->dynCollidables.push_back(colliderID);
-				dynMaxPos = max(dynMaxPos, baseCollider.position);
-				dynMinPos = min(dynMinPos, baseCollider.position);
+				if (collider.particle) {
+					particleEntities.push_back(colliderID);
+				}
+				else {
+					dynamicSolidEntities.push_back(colliderID);
+				}
 			}
 			else {	// entity must be static
-				poolWorkerData->statCollidables.push_back(colliderID);
-				statMaxPos = max(statMaxPos, baseCollider.position);
-				statMinPos = min(statMinPos, baseCollider.position);
+				staticSolidEntities.push_back(colliderID);
 			}
 		}
 		else { // if a collider has NO PhysicsBody, it is a sensor
-			poolWorkerData->sensorCollidables.push_back(colliderID);
-			sensorMaxPos = max(sensorMaxPos, baseCollider.position);
-			sensorMinPos = min(sensorMinPos, baseCollider.position);
+			sensorEntities.push_back(colliderID);
 		}
 	}
-	t1.stop();
-	Timer t2(perfLog.getInputRef("collisionbroad"));
-	// clean quadtrees
-	if (poolWorkerData->rebuildDynQuadTrees) {
-		poolWorkerData->qtreeDynamic.resetPerMinMax(dynMinPos, dynMaxPos);
-		poolWorkerData->qtreeDynamic.removeEmptyLeafes();
-	}
-	if (poolWorkerData->rebuildStatQuadTrees) {
-		poolWorkerData->qtreeStatic.resetPerMinMax(statMinPos, statMaxPos);
-		poolWorkerData->qtreeStatic.removeEmptyLeafes();
-	}
-	poolWorkerData->qtreeParticle.resetPerMinMax(statMinPos, statMaxPos);
 
+	CacheAABBJob aabbJob0 = CacheAABBJob(particleEntities, world, aabbCache);
+	auto jobTagAABBparticle = jobManager.addJob(&aabbJob0);
 
-	CacheAABBJob aabbJob1 = CacheAABBJob(poolWorkerData->dynCollidables, world, poolWorkerData->aabbCache);
+	CacheAABBJob aabbJob1 = CacheAABBJob(dynamicSolidEntities, world, aabbCache);
 	auto jobTagAABBDyn = jobManager.addJob(&aabbJob1);
 
-	CacheAABBJob aabbJob2 = CacheAABBJob(poolWorkerData->statCollidables, world, poolWorkerData->aabbCache);
+	CacheAABBJob aabbJob2 = CacheAABBJob(staticSolidEntities, world, aabbCache);
 	auto jobTagAABBStat = jobManager.addJob(&aabbJob2);
 
-	CacheAABBJob aabbJob3 = CacheAABBJob(poolWorkerData->sensorCollidables, world, poolWorkerData->aabbCache);
+	CacheAABBJob aabbJob3 = CacheAABBJob(sensorEntities, world, aabbCache);
 	auto jobTagAABBSensor = jobManager.addJob(&aabbJob3);
 
+	jobManager.waitFor(jobTagAABBparticle);
 	jobManager.waitFor(jobTagAABBDyn);
 	jobManager.waitFor(jobTagAABBStat);
 	jobManager.waitFor(jobTagAABBSensor);
 
-	// start jobs to prepare buffers
-	int jobTagStaticRebuild = -1;
-	BuildQtreeJob staticQtreeBuildJob = BuildQtreeJob(world, poolWorkerData->statCollidables, poolWorkerData->qtreeStatic, poolWorkerData->aabbCache, false);
-	if (poolWorkerData->rebuildStatQuadTrees) {
-		jobTagStaticRebuild = jobManager.addJob(&staticQtreeBuildJob);
+	t1.stop();
+	Timer t2(perfLog.getInputRef("collisionbroad"));
+	// clean quadtrees
+	qtreeParticle.resetPerMinMax(minPos, maxPos);
+	qtreeParticle.removeEmptyLeafes();
+	qtreeDynamic.resetPerMinMax(minPos, maxPos);
+	qtreeDynamic.removeEmptyLeafes();
+	if (rebuildStatic) {
+		qtreeStatic.resetPerMinMax(minPos, maxPos);
+		qtreeStatic.removeEmptyLeafes();
 	}
+	qtreeSensor.resetPerMinMax(minPos, maxPos);
+	qtreeSensor.removeEmptyLeafes();
 
-	int jobTagQtreeDyn = -1;
-	BuildQtreeJob dynqTreeJob = BuildQtreeJob(world, poolWorkerData->dynCollidables, poolWorkerData->qtreeDynamic, poolWorkerData->aabbCache, false);
-	if (poolWorkerData->rebuildDynQuadTrees) {
-		jobTagQtreeDyn = jobManager.addJob(&dynqTreeJob);
+	qtreeParticle.broadInsert(particleEntities, aabbCache);
+	qtreeDynamic.broadInsert(dynamicSolidEntities, aabbCache);
+	if (rebuildStatic) {
+		qtreeStatic.broadInsert(staticSolidEntities, aabbCache);
 	}
-
-	BuildQtreeJob particleTreeJob = BuildQtreeJob(world, poolWorkerData->dynCollidables, poolWorkerData->qtreeParticle, poolWorkerData->aabbCache, true);
-	int jobTagQtreeParticle = jobManager.addJob(&particleTreeJob);
-
-	if (poolWorkerData->rebuildDynQuadTrees) {	// we must wait for this job to finish before insertein sensors into dyn treee
-		jobManager.waitFor(jobTagQtreeDyn);
-		int jobTagQtreeDynSensor = -1;
-		BuildQtreeJob dynSensorqTreeJob = BuildQtreeJob(world, poolWorkerData->sensorCollidables, poolWorkerData->qtreeDynamic, poolWorkerData->aabbCache, false);
-		jobTagQtreeDynSensor = jobManager.addJob(&dynSensorqTreeJob);
-		jobManager.waitFor(jobTagQtreeDynSensor);
-	}
-
-	if (poolWorkerData->rebuildStatQuadTrees)
-		jobManager.waitFor(jobTagStaticRebuild);
-	jobManager.waitFor(jobTagQtreeParticle);
+	qtreeSensor.broadInsert(sensorEntities, aabbCache);
 }
 
 void CollisionSystem::cleanBuffers(World& world)
@@ -149,109 +122,150 @@ void CollisionSystem::cleanBuffers(World& world)
 		}
 		vector.clear();
 	};
-
+	workerBuffers.clear();
 	cleanAndShrink(debugDrawables);
-	cleanAndShrink(poolWorkerData->debugDrawables);
-	cleanAndShrink(poolWorkerData->sensorCollidables);
-	cleanAndShrink(poolWorkerData->dynCollidables);
-	cleanAndShrink(poolWorkerData->statCollidables);
-	cleanAndShrink(poolWorkerData->collisionResponses);
-	if (poolWorkerData->collisionResponses.size() < world.maxEntityIndex()) poolWorkerData->collisionResponses.resize(world.maxEntityIndex());
-	cleanAndShrink(poolWorkerData->aabbCache);
-	if (poolWorkerData->aabbCache.size() < world.maxEntityIndex()) poolWorkerData->aabbCache.resize(world.maxEntityIndex());
-	for (auto& split : poolWorkerData->collisionInfoBuffers) cleanAndShrink(split);
+	cleanAndShrink(particleEntities);
+	cleanAndShrink(sensorEntities);
+	cleanAndShrink(dynamicSolidEntities);
+	cleanAndShrink(staticSolidEntities);
+	cleanAndShrink(aabbCache);
+	if (aabbCache.size() < world.maxEntityIndex()) aabbCache.resize(world.maxEntityIndex());
 	cleanAndShrink(collisionInfos);
-	collisionInfoBegins.clear();
-	collisionInfoEnds.clear();
-	cleanAndShrink(collisionInfos);
-	collisionInfoBegins.clear();
-	collisionInfoEnds.clear();
+	for (auto ent : world.entity_view<Collider>()) {
+		if (!world.hasComp<CollisionsToken>(ent))
+			world.addComp<CollisionsToken>(ent);
+		else {
+			world.getComp<CollisionsToken>(ent).begin = 0;
+			world.getComp<CollisionsToken>(ent).end = 0;
+		}
+	}
 
-	cleanAndShrink(dynCheckJobs);
-	cleanAndShrink(dynTags);
-	cleanAndShrink(sensorCheckJobs);
-	cleanAndShrink(sensorTags);
+	cleanAndShrink(collisionInfos);
+
+	cleanAndShrink(collisionCheckJobs);
+	cleanAndShrink(collisionCheckJobTags);
+
+	for (auto& jobBuffer : jobEntityBuffers) {
+		jobBuffer->clear();
+	}
 }
 
 void CollisionSystem::collisionDetection(World& world)
 {
 	Timer t3(perfLog.getInputRef("collisionnarrow"));
 
-	int entityCount = 0;
-	for (int i = 0; i < poolWorkerData->dynCollidables.size(); i++) {
-		if (entityCount == jobMaxEntityCount) {
-			dynCheckJobs.push_back(DynCollisionCheckJob(poolWorkerData, poolWorkerData->dynCollidables, i - jobMaxEntityCount,i));
-			entityCount = 0;
+	// the maximum job count is the size of the 4 entity vectors divided by the max job size (+1 for the rest of the division)
+	// multiplied by the number of qtrees the entitiylist checks with
+	// we MUST reserve the jobBUffer size here, as a reallocation would mean, that a running job would have a dangling ppointer to the old
+	// memory of the job, after a reallocation of the job vector.
+	const int maximumJobCount =
+		(particleEntities.size() / MAX_ENTITIES_PER_JOB + 1) * 2 +
+		(dynamicSolidEntities.size() / MAX_ENTITIES_PER_JOB + 1) * 2 +
+		(staticSolidEntities.size() / MAX_ENTITIES_PER_JOB + 1) * 1 +
+		(sensorEntities.size() / MAX_ENTITIES_PER_JOB + 1) * 4;
+	collisionCheckJobs.reserve(maximumJobCount);
+
+	size_t cap = collisionCheckJobs.capacity();
+
+	int currentBuffer = 0;
+	auto makeJobs = [&](const std::vector<Entity>& entities, const uint8_t qtreeMask) {
+		auto pushJob = [&]() {
+			if (collisionCheckJobs.size() == maximumJobCount - 1)
+				throw new std::exception("ERROR: DO NOT REALLOCATE JOB VECTOR WHEN EXECUTING JOBS!");
+			collisionCheckJobs.push_back(CollisionCheckJob(world, workerBuffers, *jobEntityBuffers[currentBuffer], qtreeDynamic, qtreeParticle, qtreeStatic, qtreeSensor, qtreeMask, aabbCache));
+			collisionCheckJobTags.push_back(jobManager.addJob(&collisionCheckJobs.back()));
+			++currentBuffer;
+			if (currentBuffer >= jobEntityBuffers.size()) {
+				jobEntityBuffers.push_back(std::make_unique<std::vector<Entity>>());
+				jobEntityBuffers.back()->reserve(MAX_ENTITIES_PER_JOB);
+			}
+		};
+		for (const auto ent : entities) {
+			jobEntityBuffers[currentBuffer]->push_back(ent);
+			if (jobEntityBuffers[currentBuffer]->size() == MAX_ENTITIES_PER_JOB) {
+				pushJob();
+			}
 		}
-		entityCount++;
-	}
-	dynCheckJobs.push_back(DynCollisionCheckJob(poolWorkerData, poolWorkerData->dynCollidables, poolWorkerData->dynCollidables.size()-entityCount, poolWorkerData->dynCollidables.size()));
-
-	for (auto& job : dynCheckJobs) {
-		int tag = jobManager.addJob(&job);
-		dynTags.push_back(tag);
-	}
-
-	entityCount = 0;
-	for (int i = 0; i < poolWorkerData->sensorCollidables.size(); i++) {
-		if (entityCount == jobMaxEntityCount) {
-			sensorCheckJobs.push_back(SensorCollisionCheckJob(poolWorkerData, poolWorkerData->sensorCollidables, i - jobMaxEntityCount, i));
-			entityCount = 0;
+		if (jobEntityBuffers[currentBuffer]->size() != 0) {
+			pushJob();
 		}
-		entityCount++;
-	}
-	sensorCheckJobs.push_back(SensorCollisionCheckJob(poolWorkerData, poolWorkerData->sensorCollidables, poolWorkerData->sensorCollidables.size() - entityCount, poolWorkerData->sensorCollidables.size()));
+	};
 
-	for (auto& job : sensorCheckJobs) {
-		sensorTags.push_back(jobManager.addJob(&job));
-	}
+	makeJobs(particleEntities, Collider::DYNAMIC | Collider::STATIC);
+	
+	makeJobs(dynamicSolidEntities, Collider::DYNAMIC | Collider::STATIC);
 
-	jobManager.waitAndHelp(&dynTags);
-	jobManager.waitAndHelp(&sensorTags);
+	makeJobs(staticSolidEntities, Collider::DYNAMIC);
+
+	makeJobs(sensorEntities, Collider::PARTICLE | Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC);
+
+	if (collisionCheckJobs.capacity() != cap)
+		throw new std::exception();
+
+	jobManager.waitAndHelp(&collisionCheckJobTags);
 
 	t3.stop();
 	Timer t4(perfLog.getInputRef("collisionpost"));
 
 	// reset quadtree rebuild flags
-	poolWorkerData->rebuildDynQuadTrees = false;
-	poolWorkerData->rebuildStatQuadTrees = false;
+	rebuildStatic = false;
 
-	// store all collisioninfos in one vectorcapacity
-	for (auto const& collisionInfosplit : poolWorkerData->collisionInfoBuffers) {
-		collisionInfos.insert(collisionInfos.end(), collisionInfosplit.begin(), collisionInfosplit.end());
+	// store all collisioninfos in one vector
+	for (auto const& collisionInfosplit : workerBuffers.collisionInfos) {
+		collisionInfos.insert(collisionInfos.end(), collisionInfosplit.cbegin(), collisionInfosplit.cend());
 	}
 
-	// build hashtables for first and last iterator element of collisioninfo
-	uint32_t lastIDA{};
-	for (auto iter = collisionInfos.begin(); iter != collisionInfos.end(); ++iter) {
-		if (iter == collisionInfos.begin()) {	//initialize values from first element
-			lastIDA = iter->indexA;
-			collisionInfoBegins.insert({ iter->indexA, iter });
+	if (collisionInfos.size() > 0) {
+		Entity currentEntity = collisionInfos[0].indexA;
+		world.getComp<CollisionsToken>(currentEntity).begin = 0;
+		for (int i = 1; i < collisionInfos.size(); i++) {
+			if (currentEntity != collisionInfos[i].indexA) {	//new idA found
+				auto nextEntity = collisionInfos[i].indexA;
+				world.getComp<CollisionsToken>(nextEntity).begin = i;
+				world.getComp<CollisionsToken>(currentEntity).end = i;
+				currentEntity = nextEntity;	//set lastId to new id
+			}
 		}
-		if (lastIDA != iter->indexA) {	//new idA found
-			collisionInfoEnds.insert({ lastIDA, iter });
-			collisionInfoBegins.insert({ iter->indexA, iter });
-			lastIDA = iter->indexA;	//set lastId to new id
+		world.getComp<CollisionsToken>(currentEntity).end = collisionInfos.size();
+	}
+//#define DEBUG_HITBOX
+#ifdef DEBUG_HITBOX
+	for (auto ent : world.entity_view<Collider>()) {
+		auto& base = world.getComp<Base>(ent);
+		auto& coll = world.getComp<Collider>(ent);
+
+		debugDrawables.push_back(Drawable(0, base.position, 0.41, coll.size, Vec4(0, 1, 0, 1), coll.form, base.rotaVec));
+		for (auto& c : coll.extraColliders) {
+			debugDrawables.push_back(Drawable(0, base.position + rotate(c.relativePos, base.rotaVec), 0.41, c.size, Vec4(0, 1, 0, 1), c.form, base.rotaVec * c.relativeRota));
 		}
 	}
-	collisionInfoEnds.insert({ lastIDA, collisionInfos.end() });
+#endif
+#ifdef DEBUG_AABB
+	for (auto ent : world.entity_view<Collider>()) {
+		auto& base = world.getComp<Base>(ent);
+		auto& coll = world.getComp<Collider>(ent);
 
+		debugDrawables.push_back(Drawable(0, base.position, 0.4, aabbCache.at(ent), Vec4(1, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f)));
+	}
+#endif
 #ifdef DEBUG_QTREE_FINDPLAYER
 	Entity player;
 	for (auto p : world.entity_view<Player>())
 		player = p;
 
 	std::vector<Entity> near;
+	size_t max = 0;
 	for (auto ent : world.entity_view<Collider, Movement>()) {
 		near.clear();
-		poolWorkerData->qtreeDynamic.querry(near, PosSize(world.getComp<Base>(ent).position, poolWorkerData->aabbCache.at(ent)));
+		qtreeDynamic.querry(near, world.getComp<Base>(ent).position, aabbCache.at(ent));
 		for (auto oent : near) {
 			if (oent == player) {
 				auto pos = world.getComp<Base>(ent).position;
-				auto d = Drawable(0, pos, 0.99, Vec2(0.1,0.1), Vec4(0, 0, 1, 1), Form::Circle, 0);
+				auto d = Drawable(0, pos, 0.99, Vec2(0.3,0.3), Vec4(0, 0, 1, 1), Form::Circle, 0);
 				debugDrawables.push_back(d);
 			}
 		}
+		max = std::max(max, near.size());
 	}
 #endif
 }

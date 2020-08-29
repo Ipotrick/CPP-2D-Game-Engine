@@ -5,13 +5,14 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 100 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
 	maxDeltaTime{0.01f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	jobManager(std::thread::hardware_concurrency()),
 	collisionSystem{ world, jobManager, perfLog },
-	physicsSystem{ jobManager, perfLog },
+	//physicsSystem{ jobManager, perfLog }, 
+	physicsSystem2{ jobManager, perfLog },
 	renderer{ window }
 {
 	perfLog.submitTime("maintime");
@@ -27,8 +28,6 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 
 Engine::~Engine() {
 	renderer.end();
-	collisionSystem.end();
-	physicsSystem.end();
 }
 
 std::string Engine::getPerfInfo(int detail) {
@@ -36,8 +35,8 @@ std::string Engine::getPerfInfo(int detail) {
 	if (detail >= 4) ss << "Entity Max: " << world.maxEntityIndex() << "\n";
 	if (detail >= 1) ss << "Entity Count: " << world.entityCount() << "\n";
 	if (detail >= 1) {
-		ss << "    deltaTime(s): " << perfLog.getTime("maintime") << "\n"
-			<< "    Ticks/s: " << 1 / perfLog.getTime("maintime") << "\n"
+		ss << "    deltaTime(s): " << getDeltaTime() << "\n"
+			<< "    Ticks/s: " << 1 / getDeltaTime() << "\n"
 			<< "    simspeed: " << getDeltaTimeSafe() / getDeltaTime() << '\n';
 	}
 	if (detail >= 2) {
@@ -119,15 +118,6 @@ Vec2 Engine::getPosWindowSpace(Vec2 worldSpacePos)
 }
 
 
-std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> Engine::getCollisions(Entity entity) {
-	return collisionSystem.getCollisions(entity);
-}
-
-GridPhysics<bool> const& Engine::getStaticGrid()
-{
-	return collisionSystem.getStaticGrid();
-}
-
 void Engine::run() {
 	create();
 
@@ -175,7 +165,6 @@ Drawable buildWorldSpaceDrawable(World& world, Entity entity) {
 	else {
 		return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec, DrawMode::WorldSpace, world.getComp<TexRef>(entity)));
 	}
-	
 }
 
 void Engine::rendererUpdate(World& world)

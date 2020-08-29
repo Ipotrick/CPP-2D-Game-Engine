@@ -7,4 +7,5 @@ ComponentStorage<Enemy, sparse_set>, \
 ComponentStorage<ParticleScriptComp, sparse_set>, \
 ComponentStorage<Dummy, sparse_set>, \
 ComponentStorage<SpawnerComp, sparse_set>, \
-ComponentStorage<SuckerComp, sparse_set>
+ComponentStorage<SuckerComp, sparse_set>, \
+ComponentStorage<Tester, sparse_set>

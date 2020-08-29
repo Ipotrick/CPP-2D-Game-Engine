@@ -7,6 +7,9 @@
 #include <functional>
 #include <deque>
 #include <vector>
+#include <iostream>
+
+#include <cassert>
 
 #include "robin_hood.h"
 
@@ -75,7 +78,9 @@ inline void jobWorkerFunction(JobWorkerPoolData* poolData, int workerId) {
             if (poolData->killWorkers) break;                                    // when killSwitch got set while sleeping we get that and kill ourselfs
         }
 
-        auto [currentJobTag, job] = poolData->openJobs.front();
+        auto&& el = poolData->openJobs.front();
+        Tag currentJobTag = el.first;
+        JobFunctor* job = el.second;
         poolData->openJobs.pop_front(); // take new job
         lock.unlock();          // unlock here as we do not need access to the syncronisation and meta data while executing a job
         job->execute(workerId);
@@ -98,7 +103,8 @@ inline void jobWorkerFunction(JobWorkerPoolData* poolData, int workerId) {
     }
 }
 
-inline void helpFunction(std::unique_lock<std::mutex>& lock, JobWorkerPoolData* poolData, int workerId, std::vector<Tag>* myRequest) {
+inline void helpFunction(JobWorkerPoolData* poolData, int workerId, std::vector<Tag>* myRequest) {
+    std::unique_lock<std::mutex> lock(poolData->mut);
     while (true) {
         // are there jobs of our request left:
         if (poolData->openJobs.empty()) return;
@@ -112,7 +118,9 @@ inline void helpFunction(std::unique_lock<std::mutex>& lock, JobWorkerPoolData* 
         if (!jobLeft) return;
         
         // execute job:
-        auto [currentJobTag, job] = poolData->openJobs.front(); 
+        auto&& el = poolData->openJobs.front();
+        Tag currentJobTag = el.first;
+        JobFunctor* job = el.second;
         poolData->openJobs.pop_front(); 
         lock.unlock();                                  // unlock here as we do not need access to the syncronisation and meta data while executing a job
         job->execute(workerId);
@@ -122,7 +130,6 @@ inline void helpFunction(std::unique_lock<std::mutex>& lock, JobWorkerPoolData* 
         // we only need to check if we completed our own multi request, as we are ONLY processing our own jobs here:
         if (poolData->areJobsFinished(myRequest)) {
             poolData->multiFinishRequests[myRequest] = true;
-            lock.unlock();
             poolData->clientCV.notify_all();
             return;
         }
@@ -208,12 +215,16 @@ public:
        so that it can help complete it's own job request.
    */
     void waitAndHelp(std::vector<Tag>* const job_tags) {
+        if (job_tags->empty()) return;
+
         assert(job_tags);
         std::unique_lock lock(jobMetaData->mut);
 
         if (!jobMetaData->areJobsFinished(job_tags)) {
             jobMetaData->multiFinishRequests[job_tags] = false;
-            helpFunction(lock, &*jobMetaData, workerNum, job_tags);
+            lock.unlock();
+            helpFunction(&*jobMetaData, workerNum, job_tags);
+            lock.lock();
             // we wait for the last worker to finish our job
             jobMetaData->clientCV.wait(lock, [&]() {
                 return jobMetaData->multiFinishRequests[job_tags] == true;

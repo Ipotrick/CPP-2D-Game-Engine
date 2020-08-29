@@ -6,16 +6,16 @@
 #include "collision_detection.hpp"
 
 class PushoutCalcJob : public JobFunctor {
-	std::vector<IndexCollisionInfo>& collisionInfos;
+	std::vector<CollisionInfo>& collisionInfos;
 	std::vector<Vec2>& velocities;
 	std::vector<float>& overlaps;
 	std::vector<CollisionResponse>& collisionResponses;
 	EntityComponentManager& manager;
 
-	void pushoutCalc(IndexCollisionInfo collInfo);
+	void pushoutCalc(CollisionInfo collInfo);
 public:
 	PushoutCalcJob(
-		std::vector<IndexCollisionInfo>& collisionInfos,
+		std::vector<CollisionInfo>& collisionInfos,
 		std::vector<Vec2>& velocities,
 		std::vector<float>& overlaps,
 		std::vector<CollisionResponse>& collisionResponses,
@@ -24,13 +24,23 @@ public:
 	{}
 
 	void execute(int workerId) override {
-		for (auto& collInfo : collisionInfos) {
-			pushoutCalc(collInfo);
+		for (int i = 0; i < 1; i++) {
+			for (auto& collInfo : collisionInfos) {
+				pushoutCalc(collInfo);
+			}
+			for (auto& collInfo : collisionInfos) {
+				auto bMoveRelativeToA = collisionResponses[collInfo.indexB].posChange - collisionResponses[collInfo.indexA].posChange;
+				collInfo.clippingDist += dot((collInfo.normal[0] + collInfo.normal[1])*0.5f, bMoveRelativeToA);
+			}
+			for (const auto ent : manager.entity_view<Collider,PhysicsBody,Movement>()) {
+				auto& base = manager.getComp<Base>(ent);
+				base.position += collisionResponses[ent].posChange * 1;
+			}
 		}
 	}
 };
 
-void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
+inline void PushoutCalcJob::pushoutCalc(CollisionInfo collInfo) {
 	auto& collID = collInfo.indexA;
 	if (manager.hasComps<PhysicsBody, Movement>(collID) && manager.hasComp<PhysicsBody>(collInfo.indexB)) {
 		const auto otherID = collInfo.indexB;
@@ -39,18 +49,16 @@ void PushoutCalcJob::pushoutCalc(IndexCollisionInfo collInfo) {
 
 		const float surfaceAreaColl = manager.getComp<Collider>(collID).size.x * manager.getComp<Collider>(collID).size.y;
 		const float surfaceAreaOther = manager.getComp<Collider>(otherID).size.x * manager.getComp<Collider>(otherID).size.y;
-		float dimColl = (manager.getComp<Collider>(collID).size.x + manager.getComp<Collider>(collID).size.y) / 2;
-		float dimother = (manager.getComp<Collider>(otherID).size.x + manager.getComp<Collider>(otherID).size.y) / 2;
 		float pushoutPriority = 1.0f;
 		if (Physics::pressurebasedPositionCorrection) {
-			if (overlaps[collID] > 0) {
-				pushoutPriority = 2 * (overlaps[collID]/ dimColl) / ((overlaps[collID]/ dimColl) + (overlaps[otherID]/ dimother));
+			if (Physics::pressurebasedPositionCorrection) {
+				pushoutPriority = overlaps[collInfo.indexA] > overlaps[collInfo.indexB] ? 0.2f : 0.8f;
 			}
 		}
 		Vec2 newPosChange = calcPosChange(
 			surfaceAreaColl, velocities[collID],
 			surfaceAreaOther, velocities[otherID],
-			collInfo.clippingDist, collInfo.collisionNormal, otherDynamic, 1);
+			collInfo.clippingDist, (collInfo.normal[0] + collInfo.normal[1]) * 0.5f, otherDynamic, pushoutPriority);
 
 		Vec2 oldPosChange = collisionResponses.at(collID).posChange;
 

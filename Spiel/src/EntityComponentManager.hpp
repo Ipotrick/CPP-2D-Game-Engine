@@ -25,12 +25,16 @@
 
 template<typename First, typename Second, typename ... CompTypes>
 class MultiView;
+template<typename Comp>
+class SingleView;
 class ComponentView;
 
 class EntityComponentManager {
 	friend class Game;
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiView;
+	template<typename Comp>
+	friend class SingleView;
 public:
 	class EntityStatus {
 	public:
@@ -96,7 +100,9 @@ public:
 	void link(Entity slave, Entity master, Vec2 relativePos, float relativeRota);
 	/* returns if an entitiy is related to another index via a slave/owner relationship */
 	bool areRelated(Entity collID, Entity otherID);
-
+	/* returns if entity is currently in the world/spawned */
+	bool isSpawned(Entity ent);
+	bool isSpawned(EntityId ent);
 
 	/* utility */
 	/* returns count of entities, O(1) */
@@ -139,10 +145,12 @@ public:
 	template<typename CompType> void remComp(Entity index);
 	template<typename CompType> void remComp(EntityId id);
 	/* returnes a View, and iterable object that only iterates over the entities with the given Components, ignored despawned entities */
-	template<typename First, typename Second, typename ... CompTypes> MultiView<First, Second, CompTypes...> entity_view();
-	template<typename CompType> auto& entity_view();
-	ComponentView viewComps(Entity index);
-	ComponentView viewComps(EntityId id);
+	template<typename First, typename Second, typename ... CompTypes> 
+	[[nodiscard]] auto entity_view();
+	template<typename CompType> 
+	[[nodiscard]] auto entity_view();
+	[[nodiscard]] ComponentView viewComps(Entity index);
+	[[nodiscard]] ComponentView viewComps(EntityId id);
 
 	// Meta utility:
 	void flushLaterActions();
@@ -340,14 +348,75 @@ inline bool EntityComponentManager::hasntComps(EntityId id)
 }
 
 // ------------ view implementation ----------------------------------------
-// ----------------- multi view --------------------------------------------
 
-template<typename First, typename Second, typename ... CompTypes>
+template<typename CompStore>
+class SingleView {
+public:
+	SingleView(EntityComponentManager& manager, CompStore& compStore)
+		: manager{ manager }, compStore{ compStore }, iterEnd{ compStore.end() }
+	{ }
+	template<typename MainIterT>
+	class iterator {
+	public:
+		typedef iterator<MainIterT> self_type;
+		typedef Entity value_type;
+		typedef Entity& reference;
+		typedef Entity* pointer;
+		typedef std::forward_iterator_tag iterator_category;
+
+		iterator(const MainIterT iter, SingleView& vw) 
+			: iter{ iter }, view{ vw } 
+		{ }
+		inline self_type operator++(int junk)
+		{
+			do {
+				++iter;
+			} while (iter != view.iterEnd && !view.manager.isSpawned(*iter));
+			return *this;
+		}
+		inline self_type operator++()
+		{
+			auto oldme = *this;
+			operator++(0);
+			return oldme;
+		}
+		inline value_type operator*()
+		{
+			return *iter;
+		}
+		inline bool operator==(const self_type& rhs)
+		{
+			return iter == rhs.iter;
+		}
+		inline bool operator!=(const self_type& rhs)
+		{
+			return iter != rhs.iter;
+		}
+	private:
+		MainIterT iter;
+		SingleView& view;
+	};
+	inline auto begin()
+	{
+		auto iter = compStore.begin();
+		return iterator<decltype(compStore.end())>(iter, *this);
+	}
+	inline auto end()
+	{
+		return iterator<decltype(compStore.end())>(iterEnd, *this);
+	}
+private:
+	EntityComponentManager& manager;
+	CompStore& compStore; 
+	const decltype(compStore.end()) iterEnd;
+};
+
+template<typename CompStore, typename Second, typename ... CompTypes>
 class MultiView {
 public:
-	MultiView(EntityComponentManager& manager) : manager{ manager }, endID{ static_cast<Entity>(manager.maxEntityIndex()) } {
-
-	}
+	MultiView(EntityComponentManager& manager, CompStore& compStore) 
+		: manager{ manager }, compStore{ compStore }, iterEnd{ compStore.end() }
+	{ }
 	template<typename MainIterT, typename Second, typename ... CompTypes>
 	class iterator {
 	public:
@@ -357,12 +426,13 @@ public:
 		typedef Entity* pointer;
 		typedef std::forward_iterator_tag iterator_category;
 
-		iterator(const MainIterT iter, const MainIterT iterEnd, MultiView& vw) : iter{ iter }, end{ iterEnd }, view{ vw } {
-		}
+		iterator(const MainIterT iter, MultiView& vw) 
+			: iter{ iter }, view{ vw } 
+		{ }
 		inline self_type operator++(int junk) {
 			do {
 				++iter;
-			} while (iter != end && !view.manager.hasComps<Second, CompTypes...>(*iter));
+			} while (iter != view.iterEnd && (!view.manager.hasComps<Second, CompTypes...>(*iter) || !view.manager.isSpawned(*iter)));
 			return *this;
 		}
 		inline self_type operator++() {
@@ -381,35 +451,36 @@ public:
 		}
 	private:
 		MainIterT iter;
-		const MainIterT end;
 		MultiView& view;
 	};
 	inline auto begin() {
-		auto iterEnd = manager.entity_view<First>().end();
-		auto iter = manager.entity_view<First>().begin();
-		while (iter != iterEnd && !manager.hasComps<Second, CompTypes...>(*iter)) {
+		auto iter = compStore.begin();
+		while (iter != iterEnd && (!manager.hasComps<Second, CompTypes...>(*iter) || !manager.isSpawned(*iter))) {
 			++iter;
 		}
-		return iterator<decltype(iter), Second, CompTypes...>(iter, iterEnd, *this);
+		return iterator<decltype(compStore.begin()), Second, CompTypes...>(iter, *this);
 	}
 	inline auto end() {
-		auto iter = manager.entity_view<First>().end();
-		return iterator<decltype(iter), Second, CompTypes...>(iter, iter, *this);
+		return iterator<decltype(compStore.begin()), Second, CompTypes...>(iterEnd, *this);
 	}
 private:
 	EntityComponentManager& manager;
-	Entity endID;
+	CompStore& compStore;
+	const decltype(compStore.end()) iterEnd;
 };
 
 template<typename First, typename Second, typename ... CompTypes>
-inline MultiView<First, Second, CompTypes...> EntityComponentManager::entity_view() {
-	return MultiView<First, Second, CompTypes...>(*this);
+[[nodiscard]]
+inline auto EntityComponentManager::entity_view() {
+	static constexpr auto tuple_index = index_in_storagetuple<First, decltype(componentStorageTuple)>::value;
+	return MultiView<decltype(std::get<tuple_index>(componentStorageTuple)), Second, CompTypes...>(*this, std::get<tuple_index>(componentStorageTuple));
 }
 
 template<typename CompType>
-inline auto& EntityComponentManager::entity_view() {
+[[nodiscard]]
+inline auto EntityComponentManager::entity_view() {
 	static constexpr auto tuple_index = index_in_storagetuple<CompType, decltype(componentStorageTuple)>::value;
-	return std::get<tuple_index>(componentStorageTuple);
+	return SingleView(*this, std::get<tuple_index>(componentStorageTuple));
 }
 
 // -------- ComponentView implementation -----------------------------------
@@ -472,6 +543,16 @@ __forceinline bool EntityComponentManager::areRelated(Entity collID, Entity othe
 		}
 	}
 	return false;
+}
+
+inline bool EntityComponentManager::isSpawned(Entity ent)
+{
+	return entityStorageInfo[ent].isSpawned();
+}
+
+inline bool EntityComponentManager::isSpawned(EntityId ent)
+{
+	return entityStorageInfo[idToIndex[ent.id]].isSpawned();
 }
 
 inline void EntityComponentManager::despawn(Entity index)

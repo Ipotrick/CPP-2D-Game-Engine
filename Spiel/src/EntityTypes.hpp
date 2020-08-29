@@ -8,6 +8,10 @@ struct EntityId {
 		this->id = rhs.id;
 		this->version = rhs.version;
 	}
+	bool operator==(EntityId const other)
+	{
+		return this->id == other.id && this->version == other.version;
+	}
 	entity_id_t& operator*() { return id; }
 	entity_id_t id;
 	uint32_t version;

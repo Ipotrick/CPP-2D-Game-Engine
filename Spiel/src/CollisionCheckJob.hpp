@@ -4,126 +4,88 @@
 #include "QuadTree.hpp"
 #include "collision_detection.hpp"
 #include "Physics.hpp"
-#include "CollisionWorkerData.hpp"
 #include "robin_hood.h"
 
+class CollisionCheckJobBuffers {
+public:
+	CollisionCheckJobBuffers(size_t workerNum)
+		: workerNum{ workerNum }
+	{
+		for (int i = 0; i < workerNum; i++) {
+			nearEntities.push_back(std::vector<Entity>());
+			collisionInfos.push_back(std::vector<CollisionInfo>());
+		}
+	}
+	void clear()
+	{
+		for (int i = 0; i < workerNum; i++) {
+			nearEntities.at(i).clear();
+			collisionInfos.at(i).clear();
+		}
+	}
+	std::vector<std::vector<Entity>> nearEntities;
+	std::vector<std::vector<CollisionInfo>> collisionInfos;
+	const size_t workerNum;
+};
+
 class CollisionCheckJob : public JobFunctor {
+public:
+	explicit CollisionCheckJob(
+		EntityComponentManager& manager,
+		CollisionCheckJobBuffers& poolData,
+		const std::vector<Entity>& entities,
+		const Quadtree& qtree1,
+		const Quadtree& qtree2,
+		const Quadtree& qtree3,
+		const Quadtree& qtree4,
+		const uint8_t qtreeMask,
+		const std::vector<Vec2>& aabbCache)
+		:manager{ manager }, poolData{ poolData }, entities{ entities },
+		qtree1{ qtree1 },
+		qtree2{ qtree2 },
+		qtree3{ qtree3 },
+		qtree4{ qtree4 },
+		QTREE_MASK{ qtreeMask },
+		aabbCache{ aabbCache }
+	{ }
+
+	void execute(int workerId) override
+	{
+		for (Entity i = 0; i < entities.size(); i++) {
+			if (qtree1.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree1.IGNORE_TAG))
+				collisionFunction(entities.at(i), qtree1, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+			if (qtree2.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree2.IGNORE_TAG))
+				collisionFunction(entities.at(i), qtree2, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+			if (qtree3.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree3.IGNORE_TAG))
+				collisionFunction(entities.at(i), qtree3, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+			if (qtree4.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree4.IGNORE_TAG))
+				collisionFunction(entities.at(i), qtree4, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+		}
+	}
 protected:
-	std::shared_ptr<CollisionPoolData> poolData;
-	std::vector<Entity>& entities;
-	uint32_t begin = 0;
-	uint32_t end = 0;
+	EntityComponentManager& manager;
+	CollisionCheckJobBuffers& poolData;
+	const std::vector<Entity>& entities;
+	const Quadtree& qtree1;
+	const Quadtree& qtree2;
+	const Quadtree& qtree3;
+	const Quadtree& qtree4;
+	const uint8_t QTREE_MASK;
+	const std::vector<Vec2>& aabbCache;
+	std::vector<Entity> near;
+	struct CollPoint {
+		CollPoint(Vec2 p, Vec2 n, float c)
+			:pos{ p }, norm{ n }, clip{ c }
+		{}
+		Vec2 pos;
+		Vec2 norm;
+		float clip;
+	};
+	std::vector<CollPoint> collisionVertices;
 
 	void collisionFunction(
 		const Entity collID,
-		const bool otherDynamic,
-		const Quadtree2& qtree,
+		const Quadtree& qtree,
 		std::vector<Entity>& nearCollidablesBuffer,
-		std::vector<IndexCollisionInfo>& collisionInfos);
-public:
-	CollisionCheckJob(
-		std::shared_ptr<CollisionPoolData> poolData,
-		std::vector<Entity>& entities,
-		uint32_t begin,
-		uint32_t end)
-		:poolData{ poolData }, entities{ entities }, begin{ begin }, end{ end }
-	{
-	}
-
-	void execute(int workerId) override = 0;
+		std::vector<CollisionInfo>& collisionInfos);
 };
-
-class DynCollisionCheckJob : public CollisionCheckJob {
-public:
-	DynCollisionCheckJob(
-		std::shared_ptr<CollisionPoolData> poolData,
-		std::vector<Entity>& entities,
-		uint32_t begin,
-		uint32_t end)
-		:CollisionCheckJob(poolData, entities, begin, end)
-	{}
-
-	void execute(int workerId) override {
-		for (uint32_t i = begin; i < end; i++) {
-			auto& collID = entities.at(i);
-			collisionFunction(collID, true, poolData->qtreeDynamic, poolData->nearCollidablesBuffers.at(workerId), poolData->collisionInfoBuffers.at(workerId));
-			collisionFunction(collID, false, poolData->qtreeStatic, poolData->nearCollidablesBuffers.at(workerId), poolData->collisionInfoBuffers.at(workerId));
-		}
-	}
-};
-
-class SensorCollisionCheckJob : public CollisionCheckJob {
-public:
-	SensorCollisionCheckJob(
-		std::shared_ptr<CollisionPoolData> poolData,
-		std::vector<Entity>& entities,
-		uint32_t begin,
-		uint32_t end)
-		:CollisionCheckJob(poolData, entities, begin, end)
-	{}
-
-	void execute(int workerId) override {
-		for (uint32_t i = begin; i < end; i++) {
-			auto& collID = entities.at(i);
-			collisionFunction(collID, true, poolData->qtreeDynamic, poolData->nearCollidablesBuffers.at(workerId), poolData->collisionInfoBuffers.at(workerId));
-			collisionFunction(collID, true, poolData->qtreeParticle, poolData->nearCollidablesBuffers.at(workerId), poolData->collisionInfoBuffers.at(workerId));
-			if (poolData->world.hasntComps<LinearEffector, FrictionEffector>(collID)) {
-				collisionFunction(collID, false, poolData->qtreeStatic, poolData->nearCollidablesBuffers.at(workerId), poolData->collisionInfoBuffers.at(workerId));
-			}
-		}
-	}
-};
-
-inline void CollisionCheckJob::collisionFunction(
-	const Entity collID, 
-	const bool otherDynamic,
-	const Quadtree2& qtree,
-	std::vector<Entity>& nearCollidablesBuffer,
-	std::vector<IndexCollisionInfo>& collisionInfos)
-{
-	auto& manager = poolData->world;
-	auto& aabbCache = poolData->aabbCache;
-	auto& collisionResponses = poolData->collisionResponses;
-
-	auto& colliderColl = manager.getComp<Collider>(collID);
-	auto& baseColl = manager.getComp<Base>(collID);
-
-	if (!colliderColl.sleeping) {
-		const CollidableAdapter collAdapter = CollidableAdapter(
-			baseColl.position,
-			baseColl.rotation,
-			colliderColl.size,
-			colliderColl.form,
-			true,
-			baseColl.rotaVec);
-
-		const PosSize posSize(baseColl.position, poolData->aabbCache.at(collID));
-
-		nearCollidablesBuffer.clear();
-		qtree.querry(nearCollidablesBuffer, posSize);
-
-		for (auto& otherID : nearCollidablesBuffer) {
-			if (collID != otherID) { //do not check against self
-				const auto baseOther = manager.getComp<Base>(otherID);
-				const auto colliderOther = manager.getComp<Collider>(otherID);
-				if (!(colliderColl.collisionMaskAgainst & colliderOther.collisionMaskSelf)) {
-
-					CollidableAdapter otherAdapter(
-						baseOther.position,
-						baseOther.rotation,
-						colliderOther.size,
-						colliderOther.form,
-						otherDynamic,
-						baseOther.rotaVec);
-
-					const auto newTestResult = collisionTestCachedAABB(collAdapter, otherAdapter, aabbCache.at(collID), aabbCache.at(otherID));
-					if (newTestResult.collided) {
-						if (!manager.areRelated(collID, otherID)) {
-							collisionInfos.push_back(IndexCollisionInfo(collID, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionPos));
-						}
-					}
-				}
-			}
-		}
-	}
-}

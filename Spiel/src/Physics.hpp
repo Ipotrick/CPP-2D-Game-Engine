@@ -3,9 +3,51 @@
 #include <vector>
 #include <array>
 
+#include "robin_hood.h"
+
 #include "BaseTypes.hpp"
 #include "Vec2.hpp"
 #include "PhysicsTypes.hpp"
+#include "collision_detection.hpp"
+#include "EntityComponentManager.hpp"
+
+
+inline uint64_t entPairToKey(EntityId a, EntityId b)
+{
+	return (uint64_t)a.id << 32 | (uint64_t)b.id;
+}
+struct PhysicsCollisionData {
+	uint32_t entAVersion;
+	uint32_t entBVersion;
+	float accImpulse{ 0 };
+	float accTangentialImpulse{ 0 };
+	bool alive{ true };
+};
+
+struct CollisionPoint {
+	Vec2 position{ 0, 0 };
+	Vec2 normal{ 1,0 };
+	float massNormal = 0;
+	float massTangent = 0;
+	// accumulated data:
+	float accPn = 0;	// accumulated impulse to normal
+	float accPt = 0;	// accumulated impulse to tangent
+};
+
+struct CollisionConstraint {
+	// meta:
+	EntityId idA{ 0 };
+	EntityId idB{ 0 };
+	bool updated{ true };
+	// collision info:
+	CollisionPoint collisionPoints[2] = { CollisionPoint(), CollisionPoint() };
+	int collisionPointNum = 1;
+	float clippingDist = 0;
+	// precomputed data:
+	float friction = 0;
+	// i dont fucking know: TODO
+	float bias = 0;
+};
 
 /*
 	the higher the priority, the lower the pushout

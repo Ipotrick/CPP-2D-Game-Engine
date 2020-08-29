@@ -8,7 +8,6 @@ class Vec2 {
 public:
 	Vec2() : x{0}, y{0} {}
 	Vec2(float x, float y) : x{ x }, y{ y } {}
-	Vec2(float scalar) : x{ scalar }, y{ scalar } {}
 
 	// openGL access func
 	inline float const * data() const { return &x; }
@@ -61,6 +60,11 @@ public:
 		x += vec.x;
 		y += vec.y;
 		return *this;
+	}
+
+	float length()
+	{
+		return sqrtf(x * y);
 	}
 public:
 	float x;
@@ -141,6 +145,16 @@ inline float const cross(Vec2 const& vecA, Vec2 const& vecB) {
 	return vecA.x * vecB.y - vecA.y * vecB.x;
 }
 
+inline Vec2 cross(const Vec2& a, float s)
+{
+	return Vec2(s * a.y, -s * a.x);
+}
+
+inline Vec2 cross(float s, const Vec2& a)
+{
+	return Vec2(-s * a.y, s * a.x);
+}
+
 // reflect vector vec at normal n
 inline Vec2 const reflect(Vec2 const& vec, Vec2 const& n) {
 	return vec - (2.0f * dot(n, vec)) * n;
@@ -204,15 +218,36 @@ inline float getRotation(Vec2 vec) {
 			return 180.0f + atan(-vec.y / -vec.x) * 180.f / 3.14159f;
 }
 
+inline Vec2 abs(Vec2 v)
+{
+	v.x = fabs(v.x);
+	v.y = fabs(v.y);
+	return v;
+}
+
 class RotaVec2 {
 public:
-	RotaVec2() : sin{ 0 }, cos{ 1 } {}
 	RotaVec2(float sin, float cos) : sin{ sin }, cos{ cos } {}
-	RotaVec2(float angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
+	explicit RotaVec2(float angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
+
+	inline RotaVec2 operator -()
+	{
+		return RotaVec2(-sin, cos);
+	}
+
+	inline bool operator==(RotaVec2 v)
+	{
+		return this->cos == v.cos && this->sin == v.sin;
+	}
 public:
-	float sin;
-	float cos;
+	float sin = 0;
+	float cos = 1;
 };
+
+inline RotaVec2 operator*(RotaVec2 a, RotaVec2 b)
+{
+	return RotaVec2(a.sin*b.cos + a.cos*b.sin, a.cos * b.cos - a.sin * b.sin);
+}
 
 inline Vec2 rotate(Vec2 vec, RotaVec2 rotationVec) {
 	return {

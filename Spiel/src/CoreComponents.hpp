@@ -7,23 +7,23 @@
 
 struct Base : public CompData {
 	Vec2 position;
-	float rotation;
 	RotaVec2 rotaVec;
-	Base(Vec2 pos_ = Vec2{0,0}) :
-		position{ pos_ },
+	float rotation;
+	Base(Vec2 pos = Vec2{0,0}) :
+		position{ pos },
 		rotation{0},
 		rotaVec{1,0}
 	{}
-	Base(Vec2 pos_, float rota_) :
-		position{ pos_ },
-		rotation{ rota_ },
+	Base(Vec2 pos, float rota) :
+		position{ pos },
+		rotation{ rota },
 	rotaVec{ sinf(rotation / RAD),
 		cosf(rotation / RAD) }
 	{}
-	Base(Vec2 pos_, RotaVec2 rota_) :
-		position{ pos_ },
+	Base(Vec2 pos, RotaVec2 rota) :
+		position{ pos },
 		rotation{ 0 },
-		rotaVec{ rota_ }
+		rotaVec{ rota }
 	{}
 };
 
@@ -32,33 +32,90 @@ struct Base : public CompData {
 struct Movement : public CompData {
 	Vec2 velocity;
 	float angleVelocity;
-	Movement(Vec2 vel_ = { 0,0 }, float anglVel_ = 0.0f) :
-		velocity{ vel_ },
-		angleVelocity{ anglVel_ } {}
+	Movement(Vec2 vel = { 0,0 }, float anglVel = 0.0f) :
+		velocity{ vel },
+		angleVelocity{ anglVel } {}
 };
 
 
-#define COLLISION_GROUP_TYPE uint8_t
+using CollisionMask = uint16_t;
 
 // collider component
 template<int Group>
 struct CollisionGroup {
-	static const COLLISION_GROUP_TYPE mask = 1 << Group;
+	static_assert(Group >= 0 && Group < 16);
+	static const CollisionMask mask = 1 << Group;
+};
+
+struct CompountCollider {
+	CompountCollider(Vec2 size,
+	Vec2 relativePos,
+	RotaVec2 relativeRota,
+	Form form)
+		:size{size}, relativePos{ relativePos }, relativeRota{ relativeRota }, form{ form }
+	{}
+	Vec2 size;
+	Vec2 relativePos;
+	RotaVec2 relativeRota;
+	Form form;
 };
 
 struct Collider : public CompData {
+	Collider(Vec2 size = { 1,1 }, Form form = Form::Circle, bool particle = false) :
+		size{ size },
+		form{ form },
+		particle{ particle },
+		sleeping{ false }
+	{}
+	inline void setIgnore(uint8_t mask)
+	{
+		collisionSettings |= mask;
+	}
+	inline void unsetIgnore(uint8_t mask)
+	{
+		collisionSettings &= ~mask;
+	}
+	inline void setIgnoredBy(uint8_t mask)
+	{
+		collisionSettings |= mask << 4;
+	}
+	inline void unsetIgnoredBy(uint8_t mask)
+	{
+		collisionSettings &= ~(mask << 4);
+	}
+	inline bool isIgnoring(uint8_t mask)
+	{
+		return (collisionSettings & mask) != false;
+	}
+	inline bool isIgnoredBy(uint8_t mask)
+	{
+		return (collisionSettings & (mask << 4)) != false;
+	}
+
+	static const uint8_t DYNAMIC = 1 << 0;
+	static const uint8_t STATIC = 1 << 1;
+	static const uint8_t PARTICLE = 1 << 2;
+	static const uint8_t SENSOR = 1 << 3;
+
 	Vec2 size;
-	COLLISION_GROUP_TYPE collisionMaskAgainst	= 0;
-	COLLISION_GROUP_TYPE collisionMaskSelf		= CollisionGroup<0>::mask;
+	CollisionMask ignoreGroupMask = 0;
+	CollisionMask groupMask = CollisionGroup<0>::mask;
+	std::vector<CompountCollider> extraColliders;
 	bool particle;
 	bool sleeping;
 	Form form;
-	Collider(Vec2 size_ = { 1,1 }, Form form_ = Form::Circle, bool particle_ = false) :
-		size{ size_ }, 
-		form{ form_ },
-		particle{ particle_ },
-		sleeping{ false }
-	{}
+
+private:
+	// lower 4 bits: who am i ignoring?
+	// upper 4 bits: who am i ignored by/hiding from
+	uint8_t collisionSettings = 0;
+};
+
+struct CollisionsToken {
+	friend class CollisionSystem;
+private:
+	uint32_t begin{ 0 };
+	uint32_t end{ 0 };
 };
 
 // solidBody component
@@ -69,10 +126,11 @@ struct PhysicsBody : public CompData {
 	float momentOfInertia;
 	float friction;
 	float overlapAccum = 0;
-	PhysicsBody(float elasticity_, float mass_, float mOI_, float friction) : 
-		elasticity{ elasticity_ },
-		mass{ mass_ }, 
-		momentOfInertia{ mOI_ },
+	Vec2 pushOutVel{ 0,0 };
+	PhysicsBody(float elasticity, float mass, float mOI, float friction) : 
+		elasticity{ elasticity },
+		mass{ mass }, 
+		momentOfInertia{ mOI },
 		friction{ friction }
 	{}
 	PhysicsBody() : 
@@ -92,12 +150,12 @@ struct Draw : public CompData {
 	Form form;
 	bool throwsShadow;
 
-	Draw(Vec4 color_ = Vec4(1, 1, 1, 1), Vec2 scale_ = Vec2(1, 1), float drawingPrio_ = 0.5f, Form form_ = Form::Rectangle, bool throwsShadow_ = false) :
-		color{ color_ },
-		scale{ scale_ },
-		drawingPrio{ drawingPrio_ },
-		form{ form_ },
-		throwsShadow{ throwsShadow_ }
+	Draw(Vec4 color = Vec4(1, 1, 1, 1), Vec2 scale = Vec2(1, 1), float drawingPrio = 0.5f, Form form = Form::Rectangle, bool throwsShadow = false) :
+		color{ color },
+		scale{ scale },
+		drawingPrio{ drawingPrio },
+		form{ form },
+		throwsShadow{ throwsShadow }
 	{
 	}
 };

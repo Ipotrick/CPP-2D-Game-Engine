@@ -134,7 +134,7 @@ public:
 	LapTimer(float lap_time_) : lap_time{ floatToMicsec(lap_time_) }, time_since_last_lap{ 0 } {}
 	uint64_t getLaps(float deltaTime) {
 		time_since_last_lap = time_since_last_lap + floatToMicsec(deltaTime);
-		uint64_t laps = time_since_last_lap / lap_time;
+		uint64_t laps = (uint64_t)floorf((float)time_since_last_lap.count() / (float)std::max(1ll, lap_time.count()));
 		if (laps > 0) {
 			time_since_last_lap = time_since_last_lap % lap_time;
 		}

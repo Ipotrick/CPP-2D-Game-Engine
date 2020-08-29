@@ -1,16 +1,15 @@
 #include "HealthScript.hpp"
 
-void HealthScript::script(Entity id, Health& data, float deltaTime) {
+void HealthScript::script(Entity me, Health& data, float deltaTime) {
 	World& world = engine.world;
-	auto [begin, end] = engine.getCollisions(id);
 	bool gotHitByBullet{ false };
-	for (auto iter = begin; iter != end; ++iter) {
-		if (world.hasComp<Bullet>(iter->indexB)) {
+	for (auto collision : engine.collisionSystem.collisions_view(me)) {
+		if (world.hasComp<Bullet>(collision.indexB)) {
 			gotHitByBullet = true;
 		}
 	}
 
 	if (data.curHealth <= 0) {
-		world.destroy(id);
+		world.destroy(me);
 	}
 }

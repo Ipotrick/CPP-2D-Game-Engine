@@ -8,44 +8,106 @@
 #include "collision_detection.hpp"
 #include "Physics.hpp"
 #include "CoreSystem.hpp"
-#include "CollisionWorkerData.hpp"
 #include "Perf.hpp"
 #include "JobManager.hpp"
 #include "CollisionCheckJob.hpp"
+#include "CollGrid.hpp"
 
 class CollisionSystem {
+	friend class Engine;
+	friend class Game;
 	friend class PhysicsSystem;
+	friend class PhysicsSystem2;
+	class CollisionsView {
+	public:
+		explicit CollisionsView(const size_t begin, const size_t end, std::vector<CollisionInfo>& collInfos)
+			:beginIndex{ begin }, endIndex{ end }, collInfos{ collInfos }
+		{}
+		auto begin() const
+		{
+			return collInfos.begin() + beginIndex;
+		}
+		auto end() const
+		{
+			return collInfos.begin() + endIndex;
+		}
+		CollisionInfo& operator[](size_t index)
+		{
+			return collInfos[beginIndex + index];
+		}
+		const CollisionInfo& operator[](size_t index) const
+		{
+			return collInfos[beginIndex + index];
+		}
+		CollisionInfo& at(size_t index)
+		{
+			if (index >= beginIndex && index < endIndex) {
+				return collInfos.at(beginIndex + index);
+			}
+			else {
+				throw new std::exception("error: index out of bounds");
+			}
+		}
+		const CollisionInfo& at(size_t index) const 
+		{
+			if (index >= beginIndex && index < endIndex) {
+				return collInfos.at(beginIndex + index);
+			}
+			else {
+				throw new std::exception("error: index out of bounds");
+			}
+		}
+		size_t size() const
+		{
+			return endIndex - beginIndex;
+		}
+	private:
+		const size_t beginIndex;
+		const size_t endIndex;
+		std::vector<CollisionInfo>& collInfos;
+	};
 public:
-	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, float staticGridResolution = 0.5f, uint32_t qtreeCapacity = 30);
+	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, uint32_t qtreeCapacity = 6);
 	void execute(World& world, float deltaTime);
-	std::tuple<std::vector<IndexCollisionInfo>::iterator, std::vector<IndexCollisionInfo>::iterator> getCollisions(Entity id_);
-	std::vector<IndexCollisionInfo>& getAllCollisions();
-	GridPhysics<bool> getStaticGrid();
-	void end();
-public:
-	std::vector<Drawable> debugDrawables;
-	JobManager& jobManager;
+	std::vector<CollisionInfo>& getCollisions();
+	const CollisionsView collisions_view(Entity entity);
+
 private:
 	void prepare(World& world);
 	void cleanBuffers(World& world);
 	void collisionDetection(World& world);
-private:
-	// constants:
-	const int jobMaxEntityCount = 200;
-	uint32_t qtreeCapacity;
 
+	std::vector<Drawable> debugDrawables;
+
+	World& world;
+	JobManager& jobManager;
+	// constants:
+	static const int MAX_ENTITIES_PER_JOB = 200;
+	uint32_t qtreeCapacity;
 	PerfLogger& perfLog;
 	bool rebuildStaticData;
-
+	// flags:
+	bool rebuildStatic = true;
 	// buffers
-	std::shared_ptr<CollisionPoolData> poolWorkerData;
-	std::vector<IndexCollisionInfo> collisionInfos{};
-	robin_hood::unordered_map<Entity, std::vector<IndexCollisionInfo>::iterator> collisionInfoBegins;
-	robin_hood::unordered_map<Entity, std::vector<IndexCollisionInfo>::iterator> collisionInfoEnds;
+	Quadtree qtreeDynamic;
+	Quadtree qtreeStatic;
+	Quadtree qtreeParticle;
+	Quadtree qtreeSensor;
 
+	std::vector<Vec2> aabbCache;
+
+	std::vector<Entity> sensorEntities;
+	std::vector<Entity> particleEntities;
+	std::vector<Entity> dynamicSolidEntities;
+	std::vector<Entity> staticSolidEntities;
+	CollisionCheckJobBuffers workerBuffers;
+
+	std::vector<std::unique_ptr<std::vector<Entity>>> jobEntityBuffers;
+
+	std::vector<CollisionInfo> collisionInfos{};
+	//robin_hood::unordered_map<Entity, size_t> collisionInfoBegins;
+	//robin_hood::unordered_map<Entity, size_t> collisionInfoEnds;
 	// buffers for jobs:
-	std::vector<DynCollisionCheckJob> dynCheckJobs;
-	std::vector<Tag> dynTags;
-	std::vector<SensorCollisionCheckJob> sensorCheckJobs;
-	std::vector<Tag> sensorTags;
+	std::vector<CollisionCheckJob> collisionCheckJobs;
+	std::vector<Tag> collisionCheckJobTags;
 };
