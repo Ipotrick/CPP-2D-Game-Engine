@@ -11,9 +11,8 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	jobManager(std::thread::hardware_concurrency()),
 	collisionSystem{ world, jobManager, perfLog },
-	//physicsSystem{ jobManager, perfLog }, 
 	physicsSystem2{ jobManager, perfLog },
-	renderer{ window }
+	renderer{ window, world.texture }
 {
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
@@ -132,7 +131,7 @@ void Engine::run() {
 			Timer mainTimer(perfLog.getInputRef("maintime"));
 			{
 				Timer t(perfLog.getInputRef("updatetime"));
-				update(world, getDeltaTimeSafe());
+				update(getDeltaTimeSafe());
 			}
 			{
 				rendererUpdate(world);
@@ -140,21 +139,16 @@ void Engine::run() {
 		}
 		if (glfwWindowShouldClose(window->glfwWindow)) { // if window closes the program ends
 			running = false;
-			renderer.end();
 		}
-		// window access begin
-		{
-			std::lock_guard l(window->mut);
+		else {
+			//std::lock_guard l(window->mut);
 			glfwPollEvents();
+			renderer.startRendering();
+			world.setStaticsChanged(false);
+			iteration++;
 		}
-		// window access end
-		renderer.startRendering();
-		// reset flags
-		world.setStaticsChanged(false);
-		iteration++;
 	}
 	renderer.end();
-
 	destroy();
 }
 

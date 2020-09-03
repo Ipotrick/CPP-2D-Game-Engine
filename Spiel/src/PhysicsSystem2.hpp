@@ -16,9 +16,9 @@ class PhysicsSystem2 {
 public:
 	PhysicsSystem2(JobManager& jobs, PerfLogger& perf);
 	void execute(World& world, float deltaTime, CollisionSystem& collSys);
-
-	std::vector<Drawable> debugDrawables;
+	const std::vector<Drawable>& getDebugDrawables() const;
 private:
+	std::vector<Drawable> debugDrawables;
 	void updateCollisionConstraints(World& world, CollisionSystem& collSys);
 	void eraseDeadConstraints();
 	void prepareConstraints(World& world, float deltaTime);

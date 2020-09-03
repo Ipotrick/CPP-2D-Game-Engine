@@ -33,7 +33,6 @@
 // Core Systems
 #include "MovementSystem.hpp"
 #include "CollisionSystem.hpp"
-//#include "PhysicsSystem.hpp"
 #include "PhysicsSystem2.hpp"
 #include "BaseSystem.hpp"
 #include "Renderer.hpp"
@@ -53,7 +52,7 @@ public:
 	/* specify what happenes once for initialisation */
 	virtual void create() = 0;
 	/* specify what happenes every update tick */
-	virtual void update(World& world, float deltaTime) = 0;
+	virtual void update(float deltaTime) = 0;
 	/* specify what happenes once for destruction */
 	virtual void destroy() = 0;
 
@@ -132,9 +131,11 @@ private:
 
 	// window
 	std::shared_ptr<Window> window;
+public:
 
 	// render
 	Renderer renderer;
+
 };
 
 inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2 pos, Vec2 fontSize)
@@ -149,7 +150,7 @@ inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2
 			continue;
 		}
 		auto drawID = ++freeDrawableID;
-		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace, AsciiRef("ConsolasAtlas.png", str[i]));
+		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace, makeAsciiRef(world.texture.getId("ConsolasAtlas.png"), str[i]));
 		auto background = Drawable(++freeDrawableID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace);
 		submitDrawable(background);
 		submitDrawable(d);

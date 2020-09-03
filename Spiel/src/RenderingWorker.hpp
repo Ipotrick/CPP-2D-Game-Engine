@@ -97,9 +97,10 @@ private:
 	// returns the index after the last element that was drawn in the batch
 	size_t drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix, size_t startIndex);
 	void bindTexture(GLuint texID, int slot = 0);
-	void bindTexture(std::string_view name, int slot = 0);
 private:
-	TextureCache texCache{ "ressources/" };
+	TextureCache texCache{ &data->renderBuffer->textureNames, "ressources/" };
+	static constexpr int TEXTURE_WHITE = 0;
+	static constexpr int TEXTURE_DEFAULT = 1;
 
 	int maxTextureSlots{};
 

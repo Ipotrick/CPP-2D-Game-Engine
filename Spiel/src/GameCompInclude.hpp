@@ -1,11 +1,11 @@
 #define GAME_COMPONENT_SEGMENT \
-ComponentStorage<Health, sparse_set>, \
-ComponentStorage<Age, sparse_set>, \
-ComponentStorage<Player, sparse_set>, \
-ComponentStorage<Bullet, sparse_set>, \
-ComponentStorage<Enemy, sparse_set>, \
-ComponentStorage<ParticleScriptComp, sparse_set>, \
-ComponentStorage<Dummy, sparse_set>, \
-ComponentStorage<SpawnerComp, sparse_set>, \
-ComponentStorage<SuckerComp, sparse_set>, \
-ComponentStorage<Tester, sparse_set>
+ComponentStorage<Health, paged_set>, \
+ComponentStorage<Age, paged_set>, \
+ComponentStorage<Player, paged_set>, \
+ComponentStorage<Bullet, paged_set>, \
+ComponentStorage<Enemy, paged_set>, \
+ComponentStorage<ParticleScriptComp, paged_set>, \
+ComponentStorage<Dummy, paged_set>, \
+ComponentStorage<SpawnerComp, paged_set>, \
+ComponentStorage<SuckerComp, paged_set>, \
+ComponentStorage<Tester, paged_set>

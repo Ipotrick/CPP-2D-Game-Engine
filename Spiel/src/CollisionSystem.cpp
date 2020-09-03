@@ -39,6 +39,31 @@ const CollisionSystem::CollisionsView CollisionSystem::collisions_view(Entity en
 	}
 }
 
+const std::vector<Drawable>& CollisionSystem::getDebugDrawables() const
+{
+	return debugDrawables;
+}
+
+void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Base const& b, Collider const& c) const
+{
+	Vec2 aabb = aabbBounds(c.size, b.rotaVec);
+	std::vector<Entity> near;
+	if (colliderType & Collider::DYNAMIC) {
+		qtreeDynamic.querry(&near, b.position, aabb);
+	}
+	if (colliderType & Collider::STATIC) {
+		qtreeStatic.querry(&near, b.position, aabb);
+	}
+	if (colliderType & Collider::PARTICLE) {
+		qtreeParticle.querry(&near, b.position, aabb);
+	}
+	if (colliderType & Collider::SENSOR) {
+		qtreeSensor.querry(&near, b.position, aabb);
+	}
+	std::vector<CollPoint> verteciesBuffer;
+	generateCollisionInfos(world, collisions, aabbCache, near, 0xFFFFFFFF, b, c, aabb, verteciesBuffer);
+}
+
 void CollisionSystem::prepare(World& world)
 {
 	Timer t1(perfLog.getInputRef("collisionprepare"));
@@ -99,18 +124,18 @@ void CollisionSystem::prepare(World& world)
 	qtreeParticle.removeEmptyLeafes();
 	qtreeDynamic.resetPerMinMax(minPos, maxPos);
 	qtreeDynamic.removeEmptyLeafes();
-	if (rebuildStatic) {
+	//if (rebuildStatic) {
 		qtreeStatic.resetPerMinMax(minPos, maxPos);
 		qtreeStatic.removeEmptyLeafes();
-	}
+	//}
 	qtreeSensor.resetPerMinMax(minPos, maxPos);
 	qtreeSensor.removeEmptyLeafes();
 
 	qtreeParticle.broadInsert(particleEntities, aabbCache);
 	qtreeDynamic.broadInsert(dynamicSolidEntities, aabbCache);
-	if (rebuildStatic) {
+	//if (rebuildStatic) {
 		qtreeStatic.broadInsert(staticSolidEntities, aabbCache);
-	}
+	//}
 	qtreeSensor.broadInsert(sensorEntities, aabbCache);
 }
 
@@ -228,7 +253,6 @@ void CollisionSystem::collisionDetection(World& world)
 		}
 		world.getComp<CollisionsToken>(currentEntity).end = collisionInfos.size();
 	}
-//#define DEBUG_HITBOX
 #ifdef DEBUG_HITBOX
 	for (auto ent : world.entity_view<Collider>()) {
 		auto& base = world.getComp<Base>(ent);

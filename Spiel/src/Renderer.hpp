@@ -13,11 +13,12 @@
 #include "RenderTypes.hpp"
 #include "PhysicsTypes.hpp"
 #include "RenderingWorker.hpp"
+#include "TextureUniforms.hpp"
 
 class Renderer
 {
 public:
-	Renderer(std::shared_ptr<Window> wndw);
+	Renderer(std::shared_ptr<Window> wndw, TextureUniforms& tex);
 
 	// waits till the worker thread is finished
 	void waitTillFinished();
@@ -42,6 +43,8 @@ public:
 	inline std::chrono::microseconds getRenderingTime() { return renderingTime ; }
 	// returns the time spend waiting for the worker to finish
 	inline std::chrono::microseconds getWaitedTime() { return syncTime; }
+
+	// Texture utility:
 private:
 	bool wasWaitCalled{ false };
 	bool wasFushCalled{ false };
@@ -53,6 +56,8 @@ private:
 	std::thread workerThread;
 	std::chrono::microseconds renderingTime;
 	std::chrono::microseconds syncTime;
+
+	TextureUniforms& tex;
 };
 
 inline void Renderer::submit(Drawable const& d) {
@@ -60,12 +65,7 @@ inline void Renderer::submit(Drawable const& d) {
 }
 
 inline void Renderer::submit(Drawable && d) {
-#ifdef _DEBUG
-	Drawable d_ = d;
-	frontBuffer->drawables.push_back(d_);
-#else
 	frontBuffer->drawables.push_back(d);
-#endif
 }
 
 inline void Renderer::setCamera(Camera const& cam) {

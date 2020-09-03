@@ -14,8 +14,6 @@
 #include "CollGrid.hpp"
 
 class CollisionSystem {
-	friend class Engine;
-	friend class Game;
 	friend class PhysicsSystem;
 	friend class PhysicsSystem2;
 	class CollisionsView {
@@ -71,7 +69,8 @@ public:
 	void execute(World& world, float deltaTime);
 	std::vector<CollisionInfo>& getCollisions();
 	const CollisionsView collisions_view(Entity entity);
-
+	const std::vector<Drawable>& getDebugDrawables() const;
+	void checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Base const& b, Collider const& c) const;
 private:
 	void prepare(World& world);
 	void cleanBuffers(World& world);

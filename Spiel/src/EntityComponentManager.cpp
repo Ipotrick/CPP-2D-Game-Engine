@@ -17,29 +17,14 @@ Entity EntityComponentManager::index_create() {
 			componentStorage.updateMaxEntNum(entityStorageInfo.size());
 			});
 	}
-	getId(latestIndex);	// TODO replace with optimised version
+	makeId(latestIndex);	// TODO replace with optimised version
 	return latestIndex;
 }
 
 EntityId EntityComponentManager::id_create()
 {
 	auto index = index_create();
-	return getId(index);
-}
-
-void EntityComponentManager::link(Entity slave, Entity master, Vec2 relativePos, float relativeRota)
-{
-	if (hasntComp<Parent>(master)) addComp<Parent>(master);
-	auto& parent = getComp<Parent>(master);
-
-	parent.children.push_back(getId(slave));
-
-	if (hasntComp<BaseChild>(slave)) addComp<BaseChild>(slave);
-	auto& baseChild = getComp<BaseChild>(slave);
-
-	baseChild.relativePos = relativePos;
-	baseChild.relativeRota = relativeRota;
-	baseChild.parent = getId(master);
+	return makeId(index);
 }
 
 void EntityComponentManager::destroy(Entity index) {
@@ -65,7 +50,7 @@ void EntityComponentManager::spawnLater(EntityId id)
 	spawnLater(idToIndex[id.id]);
 }
 
-EntityId EntityComponentManager::getId(Entity entity)
+EntityId EntityComponentManager::makeId(Entity entity)
 {
 	assert(exists(entity));
 	if (indexToId.size() != entityStorageInfo.size()) indexToId.resize(entityStorageInfo.size(), 0 );
@@ -115,8 +100,6 @@ void EntityComponentManager::executeDestroys() {
 
 void EntityComponentManager::flushLaterActions()
 {
-	childParentDestroy();
-	parentChildDestroy();
 	despawnList.reserve(entityStorageInfo.size());	// make sure the iterators stay valid
 	executeDelayedSpawns();
 	deregisterDestroyedEntities();
@@ -213,26 +196,6 @@ void EntityComponentManager::defragment(DefragMode const mode)
 			moveEntity(biggesthandle, freeIndexQueue.front());
 			freeIndexQueue.pop_front();
 			shrink();
-		}
-	}
-}
-
-void EntityComponentManager::childParentDestroy()
-{
-	for (auto& entity : despawnList) {
-		if (hasComp<BaseChild>(entity)) {
-			despawnList.push_back(getIndex(getComp<BaseChild>(entity).parent));
-		}
-	}
-}
-
-void EntityComponentManager::parentChildDestroy() {
-	for (auto& entity : despawnList) {
-		if (hasComp<Parent>(entity)) {
-			auto& parent = getComp<Parent>(entity);
-			for (auto& child : parent.children) {
-				despawnList.push_back(getIndex(child));
-			}
 		}
 	}
 }

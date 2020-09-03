@@ -10,6 +10,10 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 		}
 	}
 
+	for (auto ent : world.entity_view<Player>()) {
+		engine.camera.position = world.getComp<Base>(ent).position;
+	}
+
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
 		for (int i = 0; i < num; i++) {
 			auto particle = world.id_create();
@@ -32,42 +36,36 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 			}
 			else {
 				world.addComp<Age>(particle, Age(1.0f));
-				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.8f, 0.8f), Vec2(4, 4),
+				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.15f, 0.15f), Vec2(4, 4),
 					Vec4(20 / 256.f, 40 / 256.f, 202 / 256.f, 0.95f),
 					Vec4(1, 1, 1, 0)
 				));
 			}
-			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.02f, 0.0001, 0));
+			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.002f, 0.0001, 0));
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
-			world.addComp<TextureRef>(particle, TextureRef("Cloud.png"));
+			world.addComp<TextureRef>(particle, TextureRef(world.texture.getId("Cloud.png")));
 			world.spawnLater(particle);
 			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass / world.getComp<PhysicsBody>(me).mass*10;
 		}
 	};
 
+	float powerAdjust = 1.0f;
+	float minPower = 0.05f;
+	float maxPower = 10.0f;
+
+	if (engine.keyPressed(KEY::LEFT_SHIFT)) {
+		data.power = std::min(data.power + deltaTime * powerAdjust, maxPower);
+		printf("new player power: %f\n", data.power);
+	}
+	if (engine.keyPressed(KEY::LEFT_CONTROL)) {
+		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
+		printf("new player power: %f\n", data.power);
+	}
+
 	auto cursorPos = engine.getPosWorldSpace(engine.getCursorPos());
 
-	//auto player_to_cursor = normalize(cursorPos - cmps.get<Base>().position);
-	//auto newRotation = getRotation(player_to_cursor) - 90;
-	//cmps.get<Movement>().angleVelocity = (newRotation - cmps.get<Base>().rotation);
-	//cmps.get<Base>().rotation = newRotation;
-
-	float maxVel = 10.0f;
-	float const maxAccel = 20.0f;	// (1 unit/second^2)
-
-	if (engine.keyPressed(KEY::SPACE)) maxVel *= 2.5;
-	
-	// calculate accelerationDir:
-	Vec2 accellDir(0, 0);
-	bool accell{ false };
-	if (accell) {
-		Vec2 newVel = cmps.get<Movement>().velocity + accellDir * maxAccel * deltaTime;
-		Vec2 newVelDir = normalize(newVel);
-		float newVelAbs = std::min(maxVel, length(newVel));
-		cmps.get<Movement>().velocity = newVelDir * newVelAbs;
-	}
 	if (engine.keyPressed(KEY::Q)) {
 		world.getComp<Movement>(me).angleVelocity += 100 * deltaTime;
 	}
@@ -77,8 +75,8 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
 	if (engine.keyPressed(KEY::W)) {
-		auto num = data.flameSpawnTimer.getLaps(deltaTime);
-		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90), 15, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90) * 0.6f);
+		auto num = data.flameSpawnTimer.getLaps(deltaTime) * data.power;
+		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90) * (rand()%1000/10000.0f) );
 
 	}
 
@@ -107,31 +105,31 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 	}
 
 	
-	if (engine.keyPressed(KEY::K) && !world.isIdValid(data.dummyExis)) {
-		std::cout << "stored ID " << data.dummyExis.id << std::endl;
-		auto baseEnt = cmps.get<Base>();
-		auto movEnt = cmps.get<Move>();
-		auto collEnt = cmps.get<Coll>();
-
-		Vec2 scale(0.8, 0.8);
-		float dummyVel = 0.0f;
-
-		float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-		Collider DummyCollider = Collider(scale, Form::Circle, false);
-		Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::Circle);
-		
-		auto dummy = world.id_create();
-		world.addComp<Base>(dummy, Base(baseEnt));
-		world.addComp<Movement>(dummy);
-		world.addComp<PhysicsBody>(dummy, PhysicsBody(0.9f, 0.01f, 1, 0));
-		world.addComp<Draw>(dummy, dummyDraw);
-		world.addComp<Collider>(dummy, DummyCollider);
-		world.addComp<Dummy>(dummy, Dummy(world.getId(me)));
-		world.addComp<Health>(dummy, 100);
-		world.spawn(dummy);
-		if (!world.isIdValid(data.dummyExis))
-		{
-			std::cout << " error, id is not valid " << std::endl;
-		}
-	}
+	//if (engine.keyPressed(KEY::K) && !world.isIdValid(data.dummyExis)) {
+	//	std::cout << "stored ID " << data.dummyExis.id << std::endl;
+	//	auto baseEnt = cmps.get<Base>();
+	//	auto movEnt = cmps.get<Move>();
+	//	auto collEnt = cmps.get<Coll>();
+	//
+	//	Vec2 scale(0.8, 0.8);
+	//	float dummyVel = 0.0f;
+	//
+	//	float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
+	//	Collider DummyCollider = Collider(scale, Form::Circle, false);
+	//	Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::Circle);
+	//	
+	//	auto dummy = world.id_create();
+	//	world.addComp<Base>(dummy, Base(baseEnt));
+	//	world.addComp<Movement>(dummy);
+	//	world.addComp<PhysicsBody>(dummy, PhysicsBody(0.9f, 0.01f, 1, 0));
+	//	world.addComp<Draw>(dummy, dummyDraw);
+	//	world.addComp<Collider>(dummy, DummyCollider);
+	//	world.addComp<Dummy>(dummy, Dummy(world.getId(me)));
+	//	world.addComp<Health>(dummy, 100);
+	//	world.spawn(dummy);
+	//	if (!world.isIdValid(data.dummyExis))
+	//	{
+	//		std::cout << " error, id is not valid " << std::endl;
+	//	}
+	//}
 }

@@ -265,28 +265,22 @@ CollisionTestResult collisionTest(CollidableAdapter const& coll, CollidableAdapt
 	}
 }
 
-CollisionTestResult collisionTestCachedAABB(CollidableAdapter const& coll_, CollidableAdapter const& other_, Vec2 const aabbColl, Vec2 const aabbOther) {
-	//pretest with AABB
-
-	if (isOverlappingAABB(coll_.position, aabbColl, other_.position, aabbOther)) {
-		if (coll_.form == Form::Circle) {
-			if (other_.form == Form::Circle) {
-				return circleCircleCollisionCheck(coll_, other_);
-			}
-			else {
-				return checkCircleRectangleCollision(coll_, other_, true);
-			}
+CollisionTestResult collisionTestCachedAABB(CollidableAdapter const& coll_, CollidableAdapter const& other_) 
+{
+	if (coll_.form == Form::Circle) {
+		if (other_.form == Form::Circle) {
+			return circleCircleCollisionCheck(coll_, other_);
 		}
 		else {
-			if (other_.form == Form::Circle) {
-				return checkCircleRectangleCollision(other_, coll_, false);
-			}
-			else {
-				return rectangleRectangleCollisionCheck2(coll_, other_);
-			}
+			return checkCircleRectangleCollision(coll_, other_, true);
 		}
 	}
 	else {
-		return CollisionTestResult();
+		if (other_.form == Form::Circle) {
+			return checkCircleRectangleCollision(other_, coll_, false);
+		}
+		else {
+			return rectangleRectangleCollisionCheck2(coll_, other_);
+		}
 	}
 }

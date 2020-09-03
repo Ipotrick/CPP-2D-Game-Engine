@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 #include "basic_math.hpp"
 
@@ -67,6 +69,14 @@ public:
 		return sqrtf(x * y);
 	}
 public:
+
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& x;
+		ar& y;
+	}
 	float x;
 	float y;
 };
@@ -240,6 +250,13 @@ public:
 		return this->cos == v.cos && this->sin == v.sin;
 	}
 public:
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& sin;
+		ar& cos;
+	}
 	float sin = 0;
 	float cos = 1;
 };

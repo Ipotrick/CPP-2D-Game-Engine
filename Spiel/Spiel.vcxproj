@@ -81,6 +81,7 @@
     <ClInclude Include="src\SweepAndPrune.hpp" />
     <ClInclude Include="src\TesterScript.hpp" />
     <ClInclude Include="src\TextureHandler.hpp" />
+    <ClInclude Include="src\TextureUniforms.hpp" />
     <ClInclude Include="src\Timing.hpp" />
     <ClInclude Include="src\Vec.hpp" />
     <ClInclude Include="src\Vec3.hpp" />
@@ -223,7 +224,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
@@ -233,11 +234,12 @@
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Libraries\glew-2.1.0\lib\Debug\x64;$(SolutionDir)\Libraries\glfw-3.3.2\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\glew-2.1.0\lib\Debug\x64;$(SolutionDir)\Libraries\glfw-3.3.2\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32sd.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -274,7 +276,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -295,7 +297,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Libraries\glfw-3.3.2\src\Release;$(SolutionDir)\Libraries\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\glfw-3.3.2\src\Release;$(SolutionDir)\Libraries\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
     </Link>

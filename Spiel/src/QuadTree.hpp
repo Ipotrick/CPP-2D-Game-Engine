@@ -27,10 +27,6 @@ struct QuadtreeNode {
 
 class NodeStorage {
 public:
-	struct Page {
-		std::array<QuadtreeNode, PAGE_SIZE> nodes;
-		uint32_t nodeCount{ 0 };
-	};
 
 	inline QuadtreeNode& get(uint32_t index)  
 	{
@@ -127,6 +123,10 @@ private:
 	static int page(uint32_t index) {
 		return index >> PAGE_BITS;
 	}
+	struct Page {
+		std::array<QuadtreeNode, PAGE_SIZE> nodes;
+		uint32_t nodeCount{ 0 };
+	};
 	std::array<Page*, PAGE_COUNT> pages{ nullptr };
 	std::mutex mut{};
 	uint32_t nextIndex{ 0 };

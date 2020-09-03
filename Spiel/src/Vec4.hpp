@@ -1,11 +1,22 @@
 #pragma once
 
 #include <iostream>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 #include "basic_math.hpp"
 
 class Vec4
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive& ar, const unsigned int file_version)
+    {
+        ar& x;
+        ar& y;
+        ar& z;
+        ar& w;
+    }
 public:
 
     /// this union allows us to access vector elements by either x,y,z or r,g,b,

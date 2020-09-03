@@ -2,6 +2,10 @@
 #include <functional>
 #include "Engine.hpp"
 
+/*
+	name is the name of the class that holds the script
+	Component is the Component datatype that the script is attached to
+*/
 #define GAME_SCRIPT(name, Component) \
 struct name : public GameScript<Component> { \
 using GameScript<Component>::GameScript; \

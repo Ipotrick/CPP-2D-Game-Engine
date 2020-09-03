@@ -17,6 +17,7 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 		if (world.hasComps<Collider, PhysicsBody>(collision.indexB)) {
 			data.startSize *= 0.5f;
 			data.endSize *= 0.9f;
+			data.endColor.a *= 0.5f;
 		}
 	}
 

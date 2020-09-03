@@ -3,6 +3,10 @@
 #include <vector>
 #include <string>
 #include <optional>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
+#include "robin_hood.h"
 
 #include "GL/glew.h"
 
@@ -34,12 +38,7 @@ struct IntColor {
 };
 
 struct Texture {
-	Texture() :
-		openglTexID{ 0 },
-		width{ -1 },
-		height{ -1 },
-		channelPerPixel{ -1 }
-	{}
+	Texture() = default;
 	Texture(GLuint id, int width_, int height_, int bitsPerPixel_) :
 		openglTexID{ id },
 		width{ width_ },
@@ -47,55 +46,60 @@ struct Texture {
 		channelPerPixel{ bitsPerPixel_ } 
 	{}
 
-	GLuint openglTexID;
-	int width;
-	int height;
-	int channelPerPixel;
+	GLuint openglTexID{ 0 };
+	int width{ -1 };
+	int height{ -1 };
+	int channelPerPixel{ -1 };
+	bool good{ true };
 };
 
 
 
 struct TextureRef {
-	std::string_view textureName;
+	TextureRef(int textureId = -1, Vec2 minPos_ = { 0,0 }, Vec2 maxPos_ = { 1,1 }) :
+		minPos{ minPos_ },
+		maxPos{ maxPos_ },
+		textureId{ textureId }
+	{
+	}
+
 	Vec2 minPos;
 	Vec2 maxPos;
-	TextureRef(std::string_view name = "invalid", Vec2 minPos_ = { 0,0 }, Vec2 maxPos_ = { 1,1 }) :
-		textureName{ name },
-		minPos{ minPos_ },
-		maxPos{ maxPos_ }
-	{}
+	int textureId;
+private:
+	friend class boost::serialization::access;
+
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar & textureId;
+		ar & minPos;
+		ar & maxPos;
+	}
 };
 
-struct AtlasRef {
+inline TextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
+{
 	TextureRef texRef;
-	AtlasRef(const std::string_view atlasName, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{0,0}) {
-		texRef.textureName = atlasName;
-		texRef.minPos = startAtlasCell / atlasGridSize;
-		if (endAtlasCell == Vec2{ 0,0 }) {
-			texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
-		}
-		else {
-			texRef.maxPos = (endAtlasCell + Vec2(1, 1)) / atlasGridSize;
-		}
+	texRef.textureId = atlasId;
+	texRef.minPos = startAtlasCell / atlasGridSize;
+	if (endAtlasCell == Vec2{ 0,0 }) {
+		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
 	}
-
-	operator TextureRef() const {
-		return texRef;
+	else {
+		texRef.maxPos = (endAtlasCell + Vec2(1, 1)) / atlasGridSize;
 	}
-};
+	return texRef;
+}
 
-struct AsciiRef {
+inline TextureRef makeAsciiRef(int atlasTextureId, char c)
+{
 	TextureRef texRef;
-	AsciiRef(std::string_view asciiAtlasName, char c) {
-		c -= 0x20;
-		Vec2 atlasCoord(c % 8, 15 - c / 8);
-		texRef = AtlasRef(asciiAtlasName, Vec2(8, 16), atlasCoord);
-	}
-
-	operator TextureRef() const {
-		return texRef;
-	}
-};
+	c -= 0x20;
+	Vec2 atlasCoord(c % 8, 15 - c / 8);
+	texRef = makeAtlasRef(atlasTextureId, Vec2(8, 16), atlasCoord);
+	return texRef;
+}
 
 class Drawable {
 public:
@@ -119,7 +123,7 @@ public:
 		drawMode{ drawMode },
 		form{ form_ }
 	{
-		if (texRef.textureName == "invalid") {
+		if (texRef.textureId < 0) {
 			this->texRef = {};
 		}
 		else {
@@ -142,6 +146,7 @@ struct Light {
 
 struct RenderBuffer {
 	std::vector<Drawable> drawables{};
+	std::vector<std::string*> textureNames;
 	Camera camera{};
 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 #include "stb_image.h"
 #include "robin_hood.h"
@@ -9,58 +9,25 @@
 
 class TextureCache {
 public:
-	TextureCache(std::string_view texturePath_ = "") :
+	TextureCache(std::vector<std::string*>* textureNames, std::string texturePath_ = "") :
+		textureNames{ textureNames },
 		texturesPath{ texturePath_ }
 	{
 	}
-	~TextureCache() {
-		for (auto el : textureMap) {
-			glDeleteTextures(1, &el.second.openglTexID);
+	~TextureCache() 
+	{
+		for (const auto& el : textures) {
+			glDeleteTextures(1, &el.openglTexID);
 		}
 	}
-	// returns id texture could be loaded
-	// textureMap functions
 	void initialize();
-	bool loadTexture(std::string_view name);
-	bool isTextureLoaded(std::string_view name);
-	Texture& getTexture(std::string_view name);
-
-	// textureRefMap functions
+	bool loadTexture(int texId);
+	bool isTextureLoaded(int texId);
+	Texture& getTexture(int texId);
 	void cacheTextures(std::vector<Drawable>& drawables);
+	std::vector<std::string*>* textureNames;
 private:
-	std::string_view texturesPath;
-	robin_hood::unordered_map<std::string_view, Texture> textureMap;
+	std::string texturesPath;
+	std::vector<Texture> textures;
+	std::vector<bool> loaded;
 };
-
-__forceinline bool TextureCache::isTextureLoaded(std::string_view name)
-{
-	return textureMap.contains(name);
-}
-
-__forceinline Texture& TextureCache::getTexture(std::string_view name) 
-{
-	if (!isTextureLoaded(name)) {
-#ifdef _DEBUG
-		std::cerr << "warning: called getTexture with \"" << name << "\". This texture was not loaded before use!\n", 
-#endif
-		loadTexture(name);
-	}
-	return textureMap[name];
-}
-
-inline void TextureCache::cacheTextures(std::vector<Drawable>& drawables)
-{
-	for (auto const& d : drawables) {
-		if (d.texRef.has_value() && !isTextureLoaded(d.texRef.value().textureName)) {
-			loadTexture(d.texRef.value().textureName);
-		}
-	}
-}
-
-__forceinline void checkGLError()
-{
-	GLenum err;
-	while ((err = glGetError()) != GL_NO_ERROR) {
-		std::cout << err;
-	}
-}

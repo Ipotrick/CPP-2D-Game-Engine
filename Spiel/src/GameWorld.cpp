@@ -2,10 +2,9 @@
 #include "Physics.hpp"
 
 void World::loadMap(std::string mapname_) {
-	std::ifstream mapData(mapname_);
-	if (mapData.good()) {
-	}
-	else if (mapname_ == "ballstest")
+	setStaticsChanged(true);
+	*this = GameWorld();
+	if (mapname_ == "standart")
 	{
 		auto makeWall = [&](int x, int y) {
 			auto wall = index_create();
@@ -19,8 +18,8 @@ void World::loadMap(std::string mapname_) {
 			spawn(wall);
 		};
 
-		//this->physics.friction = 0.25f;
-		//this->physics.linearEffectAccel = 9.3;
+		this->physics.friction = 0.25f;
+		this->physics.linearEffectAccel = 9.3;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 
@@ -130,7 +129,7 @@ void World::loadMap(std::string mapname_) {
 		cmps.add(PhysicsBody(0.0, 25.0f, calcMomentOfIntertia(25.0f, scalePlayer), 0.9f));
 		cmps.add<Movement>();
 		cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.4, Form::Rectangle));
-		cmps.add(TexRef("bitch.png"));
+		cmps.add(TexRef(texture.getId("bitch.png")));
 		cmps.add<Player>();
 		spawn(player);
 
@@ -159,8 +158,8 @@ void World::loadMap(std::string mapname_) {
 		Vec2 scale = Vec2(0.15f, 0.15f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form);
-		PhysicsBody trashSolidBody = PhysicsBody(0.5f, 10.05f, calcMomentOfIntertia(10.05, scale),0.9f);
-		for (int i = 0; i < 10000; i ++) {
+		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
+		for (int i = 0; i < 5000; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
@@ -168,10 +167,10 @@ void World::loadMap(std::string mapname_) {
 			addComp(trash, Base(position, RotaVec2(0)));
 			addComp(trash, Movement());
 			addComp(trash, trashCollider); 
-			addComp(trash, Draw(color, scale, 0.5f, form, true));
+			addComp(trash, Draw(color, scale, 0.5f, form));
 			addComp(trash, trashSolidBody);
 			addComp(trash, Health(100));
-			addComp(trash, TextureRef("Dir.png"));
+			addComp(trash, TextureRef(texture.getId("Dir.png")));
 			spawn(trash);
 
 			//auto trash2 = index_create();
@@ -200,26 +199,42 @@ void World::loadMap(std::string mapname_) {
 		//	}
 		//}
 
-		auto spawner = id_create();
-		auto cmps2 = viewComps(spawner);
-		cmps2.add<Base>(Base(Vec2(20, 40), 0));
-		cmps2.add<Collider>(Collider(Vec2(3.3, 3.3), Form::Circle));
-		cmps2.add<PhysicsBody>(PhysicsBody(0.9f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
-		cmps2.add<SpawnerComp>();
-		spawn(spawner);
-		
-		auto sucker = index_create();
-		auto cmps3 = viewComps(sucker);
-		cmps3.add<Base>(Base(Vec2(20, 2), 0));
-		auto coll = Collider(Vec2(7, 7), Form::Circle);
-		cmps3.add<Collider>(coll);
-		cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
-		auto suckerCmd = SuckerComp();
-		suckerCmd.spawner = spawner;
-		cmps3.add<SuckerComp>(suckerCmd);
-		spawn(sucker);
+		//auto spawner = id_create();
+		//auto cmps2 = viewComps(spawner);
+		//cmps2.add<Base>(Base(Vec2(20, 40), 0));
+		//cmps2.add<Collider>(Collider(Vec2(3.3, 3.3), Form::Circle));
+		//cmps2.add<PhysicsBody>(PhysicsBody(0.9f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
+		//cmps2.add<SpawnerComp>();
+		//spawn(spawner);
+		//
+		//auto sucker = index_create();
+		//auto cmps3 = viewComps(sucker);
+		//cmps3.add<Base>(Base(Vec2(20, 2), 0));
+		//auto coll = Collider(Vec2(7, 7), Form::Circle);
+		//cmps3.add<Collider>(coll);
+		//cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
+		//auto suckerCmd = SuckerComp();
+		//suckerCmd.spawner = spawner;
+		//cmps3.add<SuckerComp>(suckerCmd);
+		//spawn(sucker);
 	}
-	else if ("uitest") {
+	else if (mapname_ == "uitest") {
 		this->physics.linearEffectDir = Vec2(0, -1);
+	}
+	else {
+		std::ifstream ifs(mapname_);
+		if (ifs.good()) {
+			boost::archive::text_iarchive oa(ifs);
+			oa >> *this;
+		}
+	}
+}
+
+void World::saveMap(std::string filename)
+{
+	std::ofstream ofs(filename);
+	if (ofs.good()) {
+		boost::archive::text_oarchive oa(ofs);
+		oa << *this;
 	}
 }

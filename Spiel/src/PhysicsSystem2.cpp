@@ -1,4 +1,5 @@
 #include "PhysicsSystem2.hpp"
+#include "debug.hpp"
 
 PhysicsSystem2::PhysicsSystem2(JobManager& jobs, PerfLogger& perf)
 	:jobManager{ jobs }, perfLog{ perf }
@@ -18,7 +19,12 @@ void PhysicsSystem2::execute(World& world, float deltaTime, CollisionSystem& col
 	prepareConstraints(world, deltaTime);
 	applyImpulses(world);
 	applyForcefields(world, deltaTime);
-	drawAllCollisionConstraints();
+	//drawAllCollisionConstraints();
+}
+
+const std::vector<Drawable>& PhysicsSystem2::getDebugDrawables() const
+{
+	return debugDrawables;
 }
 
 void PhysicsSystem2::updateCollisionConstraints(World& world, CollisionSystem& collSys)
@@ -40,6 +46,9 @@ void PhysicsSystem2::updateCollisionConstraints(World& world, CollisionSystem& c
 					const auto temp2 = collinfo.position[0];
 					collinfo.position[0] = collinfo.position[1];
 					collinfo.position[1] = temp2;
+					const auto temp3 = collinfo.normal[0];
+					collinfo.normal[0] = collinfo.normal[1];
+					collinfo.normal[1] = temp3;
 				}
 			}
 
@@ -355,5 +364,11 @@ void PhysicsSystem2::drawAllCollisionConstraints()
 	for (auto& c : collConstraints) {
 		debugDrawables.push_back(Drawable(0, c.collisionPoints[0].position, 0.95, Vec2(0.05, 0.05), Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0.0f)));
 		debugDrawables.push_back(Drawable(0, c.collisionPoints[1].position, 1, Vec2(0.04, 0.04), Vec4(1, 1, 0, 1), Form::Circle, RotaVec2(0.0f)));
+		auto arrow0 = makeArrow(c.collisionPoints[0].normal * 0.05, c.collisionPoints[0].position);
+		for (auto el : arrow0)
+			debugDrawables.push_back(el);
+		auto arrow1 = makeArrow(c.collisionPoints[1].normal * 0.05, c.collisionPoints[1].position);
+		for (auto el : arrow1)
+			debugDrawables.push_back(el);
 	}
 }

@@ -255,6 +255,9 @@
     <ClInclude Include="src\CollisionConstraintSet.hpp">
       <Filter>_Engine\_Physics</Filter>
     </ClInclude>
+    <ClInclude Include="src\TextureUniforms.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

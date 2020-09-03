@@ -1,16 +1,14 @@
 #include "Renderer.hpp"
 
-#include "windows.h"
-
-Renderer::Renderer(std::shared_ptr<Window> wndw) :
+Renderer::Renderer(std::shared_ptr<Window> wndw, TextureUniforms& tex) :
 	window{ wndw },
+	tex{ tex },
 	workerSharedData{ std::make_shared<RenderingSharedData>() },
 	workerThread{ RenderingWorker(window, workerSharedData) },
 	renderingTime{ 0 },
 	syncTime{ 0 },
 	frontBuffer{ std::make_shared<RenderBuffer>()}
 {
-	SetThreadPriority(workerThread.native_handle(), 0);	// windows sceduling function
 	workerThread.detach();
 }
 
@@ -34,7 +32,10 @@ void Renderer::flushSubmissions() {
 	wasFushCalled = true;
 	if (!wasEndCalled) {
 		workerSharedData->renderBuffer->drawables.clear();
+		for (const auto& el : tex.textureNames)
+			frontBuffer->textureNames.push_back(&*el);
 		std::swap(frontBuffer, workerSharedData->renderBuffer);
+		frontBuffer->textureNames.clear();
 	}
 }
 

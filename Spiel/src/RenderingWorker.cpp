@@ -114,6 +114,8 @@ void RenderingWorker::operator()()
 		auto& camera = data->renderBuffer->camera; 
 		{	
 			Timer<> t(data->new_renderTime);
+			texCache.textureNames = &data->renderBuffer->textureNames;
+			for (auto el : data->renderBuffer->textureNames)
 			// refresh texture Refs
 			texCache.cacheTextures(data->renderBuffer->drawables);
 
@@ -187,7 +189,7 @@ std::string RenderingWorker::readShader(std::string path_)
 std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat, Mat3 const& pixelProjectionMatrix) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
-	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value().textureName)) {
+	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value().textureId)) {
 		minTex = d.texRef.value().minPos;
 		maxTex = d.texRef.value().maxPos;
 	}
@@ -247,10 +249,10 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 	int texSamplers[32] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
 	glUniform1iv(50, 32, texSamplers);
 
-	bindTexture("default", 0);
+	bindTexture(TEXTURE_DEFAULT, 0);
 
 	uint32_t nextTextureSamplerSlot{ 1 }; // when there are no texture slots left, the batch is full and will be rendered.
-	robin_hood::unordered_map<std::string_view, uint32_t> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
+	robin_hood::unordered_map<int, uint32_t> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
 	// fill batch with vertices
 	size_t index{ startIndex };
 	int drawableCount{ 0 };
@@ -261,11 +263,12 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 
 		// check if drawable has texture
 		if (d.texRef.has_value()) {
-			if (texCache.isTextureLoaded(d.texRef.value().textureName)) {
+			auto& texRef = d.texRef.value();
+			if (texCache.isTextureLoaded(texRef.textureId) && texCache.getTexture(texRef.textureId).good) {
 				// is texture allready in the usedSamplerMap?
-				if (usedTexturesSamplerSlots.contains(d.texRef.value().textureName)) {
+				if (usedTexturesSamplerSlots.contains(texRef.textureId)) {
 					// then just use the allready sloted texture sampler:
-					drawableSamplerSlot = usedTexturesSamplerSlots[d.texRef.value().textureName];
+					drawableSamplerSlot = usedTexturesSamplerSlots[texRef.textureId];
 				}
 				else { 
 					// if all texture sampler slots are used flush the batch
@@ -273,9 +276,9 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 
 					// there is a free texture sampler slot
 					// add texture to usedSamplerSlotMap:
-					usedTexturesSamplerSlots.insert({ d.texRef.value().textureName , nextTextureSamplerSlot });
+					usedTexturesSamplerSlots.insert({ texRef.textureId , nextTextureSamplerSlot });
 					// bind texture to sampler slot
-					bindTexture(d.texRef.value().textureName, nextTextureSamplerSlot);
+					bindTexture(texCache.getTexture(texRef.textureId).openglTexID, nextTextureSamplerSlot);
 					drawableSamplerSlot = nextTextureSamplerSlot;
 					nextTextureSamplerSlot++;
 				}
@@ -321,18 +324,6 @@ void RenderingWorker::bindTexture(GLuint texID, int slot)
 	glBindTexture(GL_TEXTURE_2D, texID);
 }
 
-void RenderingWorker::bindTexture(std::string_view name, int slot)
-{
-#ifdef _DEBUG
-	int maxTexCount;
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexCount);
-	assert(slot < maxTexCount);
-#endif
-	assert(texCache.isTextureLoaded(name)); 
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, texCache.getTexture(name).openglTexID);
-}
-
 void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix)
 {
 	int texSlot{ 0 };
@@ -348,11 +339,11 @@ void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjection
 
 
 	if (d.texRef.has_value()) {
-		if (texCache.isTextureLoaded(d.texRef.value().textureName)) {
-			bindTexture(d.texRef.value().textureName, texSlot);
+		if (texCache.isTextureLoaded(d.texRef.value().textureId)) {
+			bindTexture(d.texRef.value().textureId, texSlot);
 		}
 		else {
-			bindTexture("default", texSlot);
+			bindTexture(TEXTURE_DEFAULT, texSlot);
 		}
 	}
 	else {

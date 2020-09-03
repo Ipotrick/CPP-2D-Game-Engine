@@ -73,14 +73,6 @@ protected:
 	const uint8_t QTREE_MASK;
 	const std::vector<Vec2>& aabbCache;
 	std::vector<Entity> near;
-	struct CollPoint {
-		CollPoint(Vec2 p, Vec2 n, float c)
-			:pos{ p }, norm{ n }, clip{ c }
-		{}
-		Vec2 pos;
-		Vec2 norm;
-		float clip;
-	};
 	std::vector<CollPoint> collisionVertices;
 
 	void collisionFunction(

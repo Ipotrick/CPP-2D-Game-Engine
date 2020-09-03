@@ -23,7 +23,8 @@ void TextureCache::initialize()
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePoint);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		textureMap.insert({ "white", tex });
+		textures.push_back(tex);
+		loaded.push_back(true);
 		free(whitePoint);
 	}
 	{
@@ -57,21 +58,23 @@ void TextureCache::initialize()
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, defaultTex);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		textureMap.insert({ "default", tex });
+		textures.push_back(tex);
+		loaded.push_back(true);
 		free(defaultTex);
 	}
 }
 
-bool TextureCache::loadTexture(std::string_view name)
+bool TextureCache::loadTexture(int texId)
 {
 	bool success{ false };
-	if (!isTextureLoaded(name)) {
+	if (!isTextureLoaded(texId)) {
+		std::cout << "load texture with id: " << texId << " and name: \"" << *textureNames->at(texId) << "\"" << std::endl;
 
 		Texture tex;
 
 		std::string path;
 		path.append(texturesPath);
-		path.append(name);
+		path.append(*textureNames->at(texId));
 
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* localBuffer = stbi_load(path.c_str(), &tex.width, &tex.height, &tex.channelPerPixel, 4/*rgba*/);	// generate cpu texture data
@@ -89,17 +92,58 @@ bool TextureCache::loadTexture(std::string_view name)
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			//stbi_image_free(localBuffer);	// free cpu texture data
-			textureMap.insert({ name, tex });
 			success = true;
 		}
 		else {
-#ifdef _DEBUG
 			std::cerr << "error: texture with path: \"" << path << "\" could not be loaded!" << std::endl;
-#endif
+			tex.good = false;
+			success = false;
 		}
+		textures[texId] = tex;
+		loaded[texId] = true;
 	}
 	else {
 		success = true;
 	}
 	return success;
+}
+
+
+
+bool TextureCache::isTextureLoaded(int texId)
+{
+	return ((texId >= 0) && (texId < loaded.size())) && loaded[texId];
+}
+
+Texture& TextureCache::getTexture(int texId)
+{
+	if (!isTextureLoaded(texId)) {
+		std::cerr << "warning: called getTexture with \"" << *textureNames->at(texId) << "\". This texture was not loaded before use!\n",
+		loadTexture(texId);
+	}
+	return textures[texId];
+}
+
+void TextureCache::cacheTextures(std::vector<Drawable>& drawables)
+{
+	for (auto const& d : drawables) {
+		if (d.texRef.has_value()) {
+			auto& ref = d.texRef.value();
+			if (!isTextureLoaded(ref.textureId)) {
+				if (ref.textureId >= loaded.size()) {
+					loaded.resize(ref.textureId + 1, false);
+					textures.resize(ref.textureId + 1, Texture(0, 1, 1, 4));
+				}
+				loadTexture(ref.textureId);
+			}
+		}
+	}
+}
+
+void checkGLError()
+{
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		std::cout << err;
+	}
 }

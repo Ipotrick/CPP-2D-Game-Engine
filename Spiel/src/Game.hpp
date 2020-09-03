@@ -15,9 +15,9 @@ struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
 
 	bool locked;
-	Vec2 oldCursorPos;
-	uint32_t lockedID;
-	Vec2 lockedIDDist;
+	Vec2 oldPos{0,0};
+	EntityId lockedID;
+	Vec2 relativePos;
 	LapTimer<> ballSpawnLap;
 	LapTimer<> wallSpawnLap;
 };
@@ -28,13 +28,15 @@ public:
 
 	void create() override;
 
-	void update(World& world, float dTime) override;
+	void update(float dTime) override;
 
-	void gameplayUpdate(World& world, float deltaTime);
+	void gameplayUpdate(float deltaTime);
 
-	void destroy() override {}
+	void destroy() override;
 
 public:
+	CursorManipData cursorData;
+
 	GameWorld world;
 	PlayerScript	playerScript;
 	HealthScript	healthScript;
@@ -45,9 +47,6 @@ public:
 	SuckerScript	suckerScript;
 	TesterScript	testerScript;
 
-	EntityId cursorID;
-
-	CursorManipData cursorManipData;
 	void cursorManipFunc();
 
 	static bool testEventReaction(std::string_view, uint32_t);

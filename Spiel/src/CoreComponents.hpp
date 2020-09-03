@@ -1,3 +1,6 @@
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 #include "BaseTypes.hpp"
 #include "Vec.hpp"
 #include "EntityComponentStorage.hpp"
@@ -6,6 +9,14 @@
 // basis component
 
 struct Base : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& position;
+		ar& rotaVec;
+		ar& rotation;
+	}
 	Vec2 position;
 	RotaVec2 rotaVec;
 	float rotation;
@@ -30,6 +41,13 @@ struct Base : public CompData {
 // movement component
 
 struct Movement : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& velocity;
+		ar& angleVelocity;
+	}
 	Vec2 velocity;
 	float angleVelocity;
 	Movement(Vec2 vel = { 0,0 }, float anglVel = 0.0f) :
@@ -48,19 +66,42 @@ struct CollisionGroup {
 };
 
 struct CompountCollider {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& size;
+		ar& relativePos;
+		ar& relativeRota;
+		ar& form;
+	}
+	CompountCollider() = default;
 	CompountCollider(Vec2 size,
 	Vec2 relativePos,
 	RotaVec2 relativeRota,
 	Form form)
 		:size{size}, relativePos{ relativePos }, relativeRota{ relativeRota }, form{ form }
 	{}
-	Vec2 size;
-	Vec2 relativePos;
-	RotaVec2 relativeRota;
-	Form form;
+	Vec2 size{0,0};
+	Vec2 relativePos{0,0};
+	RotaVec2 relativeRota{0,0};
+	Form form{Form::Rectangle};
 };
 
 struct Collider : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& size;
+		ar& ignoreGroupMask;
+		ar& groupMask;
+		ar& extraColliders;
+		ar& particle;
+		ar& sleeping;
+		ar& form;
+		ar& collisionSettings;
+	}
 	Collider(Vec2 size = { 1,1 }, Form form = Form::Circle, bool particle = false) :
 		size{ size },
 		form{ form },
@@ -112,8 +153,13 @@ private:
 };
 
 struct CollisionsToken {
-	friend class CollisionSystem;
 private:
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+	}
+	friend class CollisionSystem;
 	uint32_t begin{ 0 };
 	uint32_t end{ 0 };
 };
@@ -121,12 +167,19 @@ private:
 // solidBody component
 
 struct PhysicsBody : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& elasticity;
+		ar& mass;
+		ar& momentOfInertia;
+		ar& friction;
+	}
 	float elasticity;
 	float mass;
 	float momentOfInertia;
 	float friction;
-	float overlapAccum = 0;
-	Vec2 pushOutVel{ 0,0 };
 	PhysicsBody(float elasticity, float mass, float mOI, float friction) : 
 		elasticity{ elasticity },
 		mass{ mass }, 
@@ -144,18 +197,25 @@ struct PhysicsBody : public CompData {
 // draw component
 
 struct Draw : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& color;
+		ar& scale;
+		ar& drawingPrio;
+		ar& form;
+	}
 	Vec4 color;
 	Vec2 scale;
 	float drawingPrio;
 	Form form;
-	bool throwsShadow;
 
-	Draw(Vec4 color = Vec4(1, 1, 1, 1), Vec2 scale = Vec2(1, 1), float drawingPrio = 0.5f, Form form = Form::Rectangle, bool throwsShadow = false) :
+	Draw(Vec4 color = Vec4(1, 1, 1, 1), Vec2 scale = Vec2(1, 1), float drawingPrio = 0.5f, Form form = Form::Rectangle) :
 		color{ color },
 		scale{ scale },
 		drawingPrio{ drawingPrio },
-		form{ form },
-		throwsShadow{ throwsShadow }
+		form{ form }
 	{
 	}
 };
@@ -163,6 +223,12 @@ struct Draw : public CompData {
 // Parent component
 
 struct Parent {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& children;
+	}
 	Parent() {}
 	std::vector<EntityId> children;
 };
@@ -170,6 +236,14 @@ struct Parent {
 // BaseSlave component
 
 struct BaseChild {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& parent;
+		ar& relativePos;
+		ar& relativeRota;
+	}
 	BaseChild() : parent{ EntityId(0) }, relativePos{ 0, 0 }, relativeRota{ 0 } {}
 	BaseChild(EntityId parent, Vec2 relativePos, float relativeRota) : parent{ parent }, relativePos{ relativePos }, relativeRota { relativeRota } {}
 	EntityId parent;
@@ -180,6 +254,14 @@ struct BaseChild {
 // effector components
 
 struct LinearEffector : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& movdir;
+		ar& force;
+		ar& acceleration;
+	}
 	Vec2 movdir;
 	float force;
 	float acceleration;
@@ -190,6 +272,13 @@ struct LinearEffector : public CompData {
 	{ }
 };
 struct FrictionEffector : public CompData {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& friction;
+		ar& rotationalFriction;
+	}
 	float friction;
 	float rotationalFriction;
 	FrictionEffector(float frctn = 0, float rotaFrctn = 0) :

@@ -8,6 +8,14 @@
 #include <bitset>
 #include <tuple>
 #include <type_traits>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/deque.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/serialization/bitset.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/split_member.hpp >
 
 #include "robin_hood.h"
 #include "json.h"
@@ -30,14 +38,73 @@ class SingleView;
 class ComponentView;
 
 class EntityComponentManager {
+protected:
 	friend class Game;
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiView;
 	template<typename Comp>
 	friend class SingleView;
+
+	friend class boost::serialization::access;
+	template<class Archive>
+	void save(Archive& ar, const unsigned int version) const
+	{
+		//TODO IMPLEMENT MAXIMUM DEFRAGMENTATION BEFORE SAVE
+		ar << entityStorageInfo;
+		ar << freeIdQueue;
+		ar << latestIndex;
+		ar << idToIndex;
+		ar << idVersion;
+		ar << indexToId;
+		ar << freeIdQueue;
+		ar << despawnList;
+		ar << spawnLaterList;
+		ar << staticEntitiesChanged;
+
+		for_each(componentStorageTuple, [&](auto& componentStorage) {
+			ar << componentStorage.dump();
+			});
+	}
+
+	template<class Archive>
+	void load(Archive& ar, const unsigned int version)
+	{
+		ar >> entityStorageInfo;
+		ar >> freeIdQueue;
+		ar >> latestIndex;
+		ar >> idToIndex;
+		ar >> idVersion;
+		ar >> indexToId;
+		ar >> freeIdQueue;
+		ar >> despawnList;
+		ar >> spawnLaterList;
+		ar >> staticEntitiesChanged;
+
+		for_each(componentStorageTuple, [&](auto& componentStorage) {
+			componentStorage.updateMaxEntNum(entityStorageInfo.size());
+			decltype(componentStorage.dump()) dump;
+			ar >> dump;
+			for (auto [ent, comp] : dump) {
+				componentStorage.insert(ent, comp);
+			}
+			});
+	}
+
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		boost::serialization::split_member(ar, *this, file_version);
+	}
 public:
 	class EntityStatus {
+		friend class boost::serialization::access;
+		template<class Archive>
+		void serialize(Archive& ar, const unsigned int file_version)
+		{
+			ar& flags;
+		}
 	public:
+		EntityStatus() = default;
 		EntityStatus(bool valid) : flags{} {
 			flags[0] = valid;
 			flags[1] = false;
@@ -88,18 +155,15 @@ public:
 
 	/* identification */
 	/* generates new id for index or returns existing id */
-	EntityId getId(Entity index);
+	EntityId makeId(Entity index);
 	/* returns handle of the index, call isIdValid before! */
 	Entity getIndex(EntityId entityId);
 	/* returns true when index has an id, prefer identify to this */
 	bool hasID(Entity index);
 	/* if index has an id it will be returned, call hasID before! Prefer identify to this  */
 	EntityId getID(Entity index);
+	/* if the version of the given Id deviates from the one that is in the regestry, the given id is invalid */
 	bool isIdValid(EntityId entityId);
-	/* enslaves the first ent to the second, ~O(1) */
-	void link(Entity slave, Entity master, Vec2 relativePos, float relativeRota);
-	/* returns if an entitiy is related to another index via a slave/owner relationship */
-	bool areRelated(Entity collID, Entity otherID);
 	/* returns if entity is currently in the world/spawned */
 	bool isSpawned(Entity ent);
 	bool isSpawned(EntityId ent);
@@ -171,8 +235,6 @@ private:
 	void moveEntity(Entity start, Entity goal);
 	Entity findBiggestValidHandle();
 	void shrink(); // shorten index array and delete freeHandles at the end of the index array
-	void childParentDestroy(); // destroy on parent calls destroy on child
-	void parentChildDestroy(); // destroy on child calls destroy on parent
 	void deregisterDestroyedEntities();
 	void executeDelayedSpawns();
 	void executeDestroys();
@@ -524,25 +586,6 @@ inline bool EntityComponentManager::exists(Entity index) {
 inline bool EntityComponentManager::exists(EntityId id)
 {
 	return exists(idToIndex[id.id]);
-}
-
-__forceinline bool EntityComponentManager::areRelated(Entity collID, Entity otherID) {
-	if (hasComp<BaseChild>(collID) && hasComp<BaseChild>(otherID)) {	//same owner no collision check
-		if (getIndex(getComp<BaseChild>(collID).parent) == getIndex(getComp<BaseChild>(otherID).parent)) {
-			return true;
-		}
-	}
-	else if (hasComp<BaseChild>(collID)) {
-		if (getIndex(getComp<BaseChild>(collID).parent) == otherID) {
-			return true;
-		}
-	}
-	else if (hasComp<BaseChild>(otherID)) {
-		if (getIndex(getComp<BaseChild>(otherID).parent) == collID) {
-			return true;
-		}
-	}
-	return false;
 }
 
 inline bool EntityComponentManager::isSpawned(Entity ent)
