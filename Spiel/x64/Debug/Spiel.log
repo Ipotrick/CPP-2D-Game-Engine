@@ -7,8 +7,6 @@ ChocolateyLastPathUpdate = 132319681596169636
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
-COMPLUS_InstallRoot = 
-COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -47,7 +45,7 @@ ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
 PYTHONPATH = C:\Users\Patrick\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.8_qbz5n2kfra8p0\LocalCache\local-packages\Python38\site-packages
-ServiceHubLogSessionKey = 46D3FA82
+ServiceHubLogSessionKey = CF4058C1
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -86,53 +84,52 @@ cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
   collision_detection.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(243,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(120): warning C4715: "fastMod": Nicht alle Codepfade geben einen Wert zurück.
-  DummyScript.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionConstraintSet.cpp(18,75): warning C4554: "&": Überprüfen Sie die Operatorrangfolge auf mögliche Fehler. Verwenden Sie Klammern, um die Rangfolge zu verdeutlichen.
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\BulletScript.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\AgeScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionConstraintSet.cpp(18,75): warning C4554: "&": Überprüfen Sie die Operatorrangfolge auf mögliche Fehler. Verwenden Sie Klammern, um die Rangfolge zu verdeutlichen.
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+  DummyScript.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(120): warning C4715: "fastMod": Nicht alle Codepfade geben einen Wert zurück.
   Engine.cpp
   EventHandler.cpp
   Game.cpp
-  GameWorld.cpp
+  World.cpp
   HealthScript.cpp
   htmlCompiler.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\DummyScript.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\htmlCompiler.cpp(115,14): warning C4806: "==": unsichere Operation: kein Wert vom Typ "bool" erweitert auf Typ "char" kann mit der angegebenen Konstante übereinstimmen
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Engine.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Game.cpp)
   main.cpp
-  Mat3.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Game.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\HealthScript.cpp)
+  Mat3.cpp
   Mat4.cpp
   MovementSystem.cpp
   ParticleScript.cpp
   Physics.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\main.cpp)
   PhysicsSystem.cpp
   PhysicsSystem2.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\main.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\MovementSystem.cpp)
   PlayerScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\ParticleScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(29,40): warning C4305: "=": Verkürzung von "unsigned int" in "CollisionMask"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(29,30): warning C4309: "=": Verkürzung eines konstanten Wertes
-  Qtree2.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(30,40): warning C4305: "=": Verkürzung von "unsigned int" in "CollisionMask"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(30,30): warning C4309: "=": Verkürzung eines konstanten Wertes
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+  Qtree2.cpp
   QuadTree.cpp
   Renderer.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PlayerScript.cpp)
   RenderingWorker.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PlayerScript.cpp)
   SuckerScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Qtree2.cpp)
-  TesterScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\QuadTree.cpp)
-  TextureHandler.cpp
+  TesterScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(275,33): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
-  Vec2.hpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.hpp(55): warning C4715: "Vertex::operator[]": Nicht alle Codepfade geben einen Wert zurück.
+  TextureHandler.cpp
+  Vec2.hpp
   EntityComponentManager.cpp
-  World.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\SuckerScript.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\TesterScript.cpp)
      Bibliothek "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.lib" und Objekt "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exp" werden erstellt.

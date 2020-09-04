@@ -12,19 +12,21 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 	mov.angleVelocity += (rand() % 1000 / 400.0f * 90.0f - 45.0f) * deltaTime;
 	mov.velocity.x += (rand() % 1000 / 400.0f - 1.25f) * deltaTime;
 	mov.velocity.y += (rand() % 1000 / 400.0f - 1.25f) * deltaTime;
+	mov.velocity *= 1 - deltaTime*10;
  
 	for (const auto collision : engine.collisionSystem.collisions_view(me)) {
 		if (world.hasComps<Collider, PhysicsBody>(collision.indexB)) {
-			data.startSize *= 0.5f;
-			data.endSize *= 0.9f;
+			data.startSize *= 0.7f;
+			data.endSize *= 0.8f;
 			data.endColor.a *= 0.5f;
+			age.curAge += 0.01f;
+			mov.velocity *= 0.8f;
 		}
 	}
 
-	if (age.curAge / age.maxAge > 0.05f) {
+	if (age.curAge / age.maxAge > 0.1f) {
 		collider.ignoreGroupMask = 0;
 	}
-
 
 	if (age.curAge / age.maxAge > 0.7f) {
 		collider.ignoreGroupMask = 0xFFFFFFFF;
@@ -40,7 +42,7 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 		auto qAge = relativeAge * relativeAge;
 		return start * (1 - qAge) + end * qAge;
 	};
-	int str = 2;
+	int str = 3;
 	auto logInterpolation = [relativeAge, str](auto start, auto end) {
 		auto logAge = log(1.71 * relativeAge + 1); 
 		for (int i = 1; i < str; i++)
@@ -52,5 +54,5 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 	collider.size = logInterpolation(data.startSize, data.endSize);
 	draw.color = logInterpolation(data.startColor, data.endColor);
 
-	age.curAge += rand() % 1000 / 1000 * deltaTime;
+	age.curAge += rand() % 1000 / 2000 * deltaTime;
 }

@@ -1,8 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/access.hpp>
 
 #include "basic_math.hpp"
 

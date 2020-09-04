@@ -1,6 +1,5 @@
 #pragma once
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/access.hpp>
 
 using entity_id_t = uint32_t;
 using Entity = uint32_t;

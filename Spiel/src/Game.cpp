@@ -23,7 +23,6 @@ void Game::create() {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
-	//world.loadMap("standart");
 	world.loadMap("world.wrld");
 
 	for (auto i : range<-22,12>()) {
@@ -43,19 +42,19 @@ void Game::create() {
 	{
 		for (auto ent : world.entity_view<Player>()) {
 			std::cout << "ding" << std::endl;
-			auto id = world.makeId(ent);
+			auto id = world.makeDynamicId(ent);
 			bool hasID = world.hasID(ent);
 			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << std::endl;
 		}
 		auto newent = world.index_create();
-		auto id = world.makeId(newent);
+		auto id = world.makeDynamicId(newent);
 		bool hasIDafter = world.hasID(newent);
 		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
 		world.destroy(newent);
 
 		auto newent2 = world.index_create();
 		bool hasIDbefore = world.hasID(newent2);
-		auto id2 = world.makeId(newent2);
+		auto id2 = world.makeDynamicId(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
 	}
 
@@ -73,8 +72,6 @@ void Game::create() {
 }
 
 void Game::update(float deltaTime) {
-	gameplayUpdate(deltaTime);
-	world.flushLaterActions();
 	//world.defragment(World::DefragMode::FAST);
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
@@ -88,6 +85,8 @@ void Game::update(float deltaTime) {
 		Timer t(perfLog.getInputRef("calcRotaVecTime"));
 		baseSystem.execute(world);
 	}
+	gameplayUpdate(deltaTime);
+	world.flushLaterActions();
 }
 
 void Game::gameplayUpdate(float deltaTime)
@@ -108,10 +107,6 @@ void Game::gameplayUpdate(float deltaTime)
 
 	if (keyPressed(KEY::J)) {
 		world.loadMap("standart");
-	}
-
-	if (keyPressed(KEY::K)) {
-		world.saveMap(filename);
 	}
 
 	if (keyPressed(KEY::K)) {

@@ -61,9 +61,11 @@ protected:
 		ar << spawnLaterList;
 		ar << staticEntitiesChanged;
 
-		for_each(componentStorageTuple, [&](auto& componentStorage) {
-			ar << componentStorage.dump();
-			});
+		for_each(componentStorageTuple, 
+			[&](auto& componentStorage) {
+				ar << componentStorage.dump();
+			}
+		);
 	}
 
 	template<class Archive>
@@ -80,14 +82,16 @@ protected:
 		ar >> spawnLaterList;
 		ar >> staticEntitiesChanged;
 
-		for_each(componentStorageTuple, [&](auto& componentStorage) {
-			componentStorage.updateMaxEntNum(entityStorageInfo.size());
-			decltype(componentStorage.dump()) dump;
-			ar >> dump;
-			for (auto [ent, comp] : dump) {
-				componentStorage.insert(ent, comp);
+		for_each(componentStorageTuple, 
+			[&](auto& componentStorage) {
+				componentStorage.updateMaxEntNum(entityStorageInfo.size());
+				decltype(componentStorage.dump()) dump;
+				ar >> dump;
+				for (auto [ent, comp] : dump) {
+					componentStorage.insert(ent, comp);
+				}
 			}
-			});
+		);
 	}
 
 	template<class Archive>
@@ -154,8 +158,6 @@ public:
 
 
 	/* identification */
-	/* generates new id for index or returns existing id */
-	EntityId makeId(Entity index);
 	/* returns handle of the index, call isIdValid before! */
 	Entity getIndex(EntityId entityId);
 	/* returns true when index has an id, prefer identify to this */
@@ -231,6 +233,10 @@ public:
 private:
 	std::tuple<CORE_COMPONENT_SEGMENT, GAME_COMPONENT_SEGMENT> componentStorageTuple;
 private:
+	/* generates new DYNAMIC id for index or returns existing id */
+	EntityId makeDynamicId(Entity index);
+	/* generates new STATIC id for index or returns existing id */
+	EntityId makeStaticId(Entity index);
 	/* INNER ENGINE FUNCTIONS: */
 	void moveEntity(Entity start, Entity goal);
 	Entity findBiggestValidHandle();
@@ -246,7 +252,7 @@ private:
 
 	std::vector<Entity> idToIndex;
 	std::vector<entity_id_t> idVersion;
-	std::vector<entity_id_t> indexToId;
+	std::vector<Entity> indexToId;
 	std::deque<entity_id_t> freeIdQueue;
 
 	std::vector<Entity> despawnList;
