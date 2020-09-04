@@ -39,7 +39,6 @@ class ComponentView;
 
 class EntityComponentManager {
 protected:
-	friend class Game;
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiView;
 	template<typename Comp>
@@ -50,13 +49,13 @@ protected:
 	void save(Archive& ar, const unsigned int version) const
 	{
 		//TODO IMPLEMENT MAXIMUM DEFRAGMENTATION BEFORE SAVE
+
 		ar << entityStorageInfo;
-		ar << freeIdQueue;
 		ar << latestIndex;
 		ar << idToIndex;
-		ar << idVersion;
+		ar << idToVersion;
 		ar << indexToId;
-		ar << freeIdQueue;
+		ar << freeDynamicIdQueue;
 		ar << despawnList;
 		ar << spawnLaterList;
 		ar << staticEntitiesChanged;
@@ -72,12 +71,11 @@ protected:
 	void load(Archive& ar, const unsigned int version)
 	{
 		ar >> entityStorageInfo;
-		ar >> freeIdQueue;
 		ar >> latestIndex;
 		ar >> idToIndex;
-		ar >> idVersion;
+		ar >> idToVersion;
 		ar >> indexToId;
-		ar >> freeIdQueue;
+		ar >> freeDynamicIdQueue;
 		ar >> despawnList;
 		ar >> spawnLaterList;
 		ar >> staticEntitiesChanged;
@@ -133,7 +131,7 @@ public:
 		entityStorageInfo.push_back({ false });
 		indexToId.push_back(0);
 		idToIndex.push_back(0);
-		idVersion.push_back(0);
+		idToVersion.push_back(0);
 	}
 	
 	/* returnes if entitiy exists or not, O(1) */
@@ -142,7 +140,7 @@ public:
 	/* index create/destruct utility */
 	/* creates blank index and returns its index, O(1) */
 	Entity index_create();
-	EntityId id_create();
+	EntityId idCreate();
 	/* marks index for deletion, entities are deleted after each update, O(1) */
 	void destroy(Entity index);
 	void destroy(EntityId id);
@@ -161,9 +159,9 @@ public:
 	/* returns handle of the index, call isIdValid before! */
 	Entity getIndex(EntityId entityId);
 	/* returns true when index has an id, prefer identify to this */
-	bool hasID(Entity index);
+	bool hasId(Entity index);
 	/* if index has an id it will be returned, call hasID before! Prefer identify to this  */
-	EntityId getID(Entity index);
+	EntityId getId(Entity index);
 	/* if the version of the given Id deviates from the one that is in the regestry, the given id is invalid */
 	bool isIdValid(EntityId entityId);
 	/* returns if entity is currently in the world/spawned */
@@ -250,10 +248,17 @@ private:
 	std::deque<Entity> freeIndexQueue;
 	Entity latestIndex;
 
-	std::vector<Entity> idToIndex;
-	std::vector<entity_id_t> idVersion;
-	std::vector<Entity> indexToId;
-	std::deque<entity_id_t> freeIdQueue;
+	/*
+		Notable infos about id's:
+		 id == 0  => invalid id
+		  id & 1  => static id
+		!(id & 1) => dynamic id
+	*/
+	std::vector<entity_id_t>	idToIndex;
+	std::vector<entity_id_t>	idToVersion;
+	std::vector<Entity>			indexToId;
+	std::deque<entity_id_t>		freeDynamicIdQueue;
+	std::deque<entity_id_t>		freeStaticIdQueue;
 
 	std::vector<Entity> despawnList;
 	std::vector<Entity> spawnLaterList;
@@ -628,19 +633,19 @@ inline void EntityComponentManager::spawn(EntityId id)
 	spawn(idToIndex[id.id]);
 }
 
-inline bool EntityComponentManager::hasID(Entity index)
+inline bool EntityComponentManager::hasId(Entity index)
 {
 	return index < indexToId.size() && indexToId[index] > 0;
 }
 
-inline EntityId EntityComponentManager::getID(Entity index) {
-	assert(hasID(index));
-	return EntityId(indexToId[index], idVersion[indexToId[index]]);
+inline EntityId EntityComponentManager::getId(Entity index) {
+	assert(hasId(index));
+	return EntityId(indexToId[index], idToVersion[indexToId[index]]);
 }
 
 inline bool EntityComponentManager::isIdValid(EntityId entityId)
 {
-	return entityId.id < idToIndex.size() && idToIndex[entityId.id] > 0 && idVersion[entityId.id] == entityId.version;
+	return entityId.id < idToIndex.size() && idToIndex[entityId.id] > 0 && idToVersion[entityId.id] == entityId.version;
 }
 
 inline Entity EntityComponentManager::getIndex(EntityId entityId)

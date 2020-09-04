@@ -31,8 +31,8 @@ void PhysicsSystem2::updateCollisionConstraints(World& world, CollisionSystem& c
 {
 	for (CollisionInfo collinfo : collSys.collisionInfos) {
 		if (world.hasComp<PhysicsBody>(collinfo.indexA) && world.hasComp<PhysicsBody>(collinfo.indexB)) {
-			EntityId a = world.getID(collinfo.indexA);
-			EntityId b = world.getID(collinfo.indexB);
+			EntityId a = world.getId(collinfo.indexA);
+			EntityId b = world.getId(collinfo.indexB);
 				// order a and b
 			collinfo.normal[0] *= -1;			// in physics the normal goes from a to b
 			collinfo.normal[1] *= -1;			// in physics the normal goes from a to b

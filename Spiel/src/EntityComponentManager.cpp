@@ -21,10 +21,10 @@ Entity EntityComponentManager::index_create() {
 	return latestIndex;
 }
 
-EntityId EntityComponentManager::id_create()
+EntityId EntityComponentManager::idCreate()
 {
 	auto index = index_create();
-	return makeDynamicId(index);
+	return getId(index);
 }
 
 void EntityComponentManager::destroy(Entity index) {
@@ -55,45 +55,97 @@ EntityId EntityComponentManager::makeDynamicId(Entity entity)
 	assert(exists(entity));
 	if (indexToId.size() != entityStorageInfo.size()) indexToId.resize(entityStorageInfo.size(), 0 );
 	if (indexToId[entity] != 0) /* does the handle allready have an id? */ {
-		return EntityId(indexToId[entity], idVersion[indexToId[entity]]);
+		throw new std::exception();
 	}
 	else {
 		// generate id for entity
-		if (!freeIdQueue.empty()) {
+		if (!freeDynamicIdQueue.empty()) {
 			// reuse existing index of id vector
-			auto id = freeIdQueue.front();
-			freeIdQueue.pop_front();
+			auto id = freeDynamicIdQueue.front();
+			freeDynamicIdQueue.pop_front();
+
+			// emplace new dynamic id:
 			idToIndex[id] = entity;
-			idVersion[id] += 1;	// for every reuse the version gets an increase
+			idToVersion[id] += 1;	// for every reuse the version gets an increase
 			indexToId[entity] = id;
-			return EntityId(id, idVersion[id]);
+
+			return EntityId(id, idToVersion[id]);
 		}
 		else {
-			// expand id vector
+			// expand id vectors
+
+			// push back memory space for static id:
+			idToIndex.push_back(0);
+			idToVersion.emplace_back(0);
+			freeStaticIdQueue.push_back(idToIndex.size() - 1);
+
+			// emplate new dynamic id:
 			idToIndex.push_back(entity);
-			idVersion.emplace_back(0);
+			idToVersion.emplace_back(0);
 			entity_id_t id = idToIndex.size() - 1;
 			indexToId[entity] = id;
+
 			return EntityId(id, 0);
 		}
 	}
 }
 
-EntityId EntityComponentManager::makeStaticId(Entity index)
+EntityId EntityComponentManager::makeStaticId(Entity entity)
 {
-	return EntityId();
+	assert(exists(entity));
+	if (indexToId.size() != entityStorageInfo.size()) indexToId.resize(entityStorageInfo.size(), 0);
+	if (indexToId[entity] != 0) /* does the handle allready have an id? */ {
+		throw new std::exception();
+	}
+	else {
+		// generate id for entity
+		if (!freeStaticIdQueue.empty()) {
+			// reuse existing index of id vector
+			auto id = freeStaticIdQueue.front();
+			freeStaticIdQueue.pop_front();
+
+			// emplace new static id:
+			idToIndex[id] = entity;
+			idToVersion[id] += 1;	// for every reuse the version gets an increase
+			indexToId[entity] = id;
+
+			return EntityId(id, idToVersion[id]);
+		}
+		else {
+			// expand id vector
+
+			// emplace new static id:
+			idToIndex.push_back(entity);
+			idToVersion.emplace_back(0);
+			entity_id_t id = idToIndex.size() - 1;
+			indexToId[entity] = id;
+
+			// push back memory space for dynamic id:
+			idToIndex.push_back(0);
+			idToVersion.emplace_back(0);
+			freeDynamicIdQueue.push_back(idToIndex.size() - 1);
+
+			return EntityId(id, 0);
+		}
+	}
 }
 
 void EntityComponentManager::executeDestroys() {
 	for (Entity index : despawnList) {
 		if (hasComp<Collider>(index) && !hasComp<Movement>(index)) { staticEntitiesChanged = true; }
 		// reset id references:
-		if (hasID(index)) {
-			auto id = indexToId[index];
-			freeIdQueue.push_back(id);
-			indexToId[index] = 0;
-			idToIndex[id] = 0;
+		if (!hasId(index)) {
+			throw new std::exception();
 		}
+		auto id = indexToId[index];
+		if (id & 1) {
+			freeStaticIdQueue.push_back(id);
+		}
+		else {
+			freeDynamicIdQueue.push_back(id);
+		}
+		indexToId[index] = 0;
+		idToIndex[id] = 0;
 		// reset status of handle:
 		entityStorageInfo[index].setValid(false);
 		entityStorageInfo[index].setDestroyMark(false);
@@ -109,7 +161,7 @@ void EntityComponentManager::flushLaterActions()
 	executeDelayedSpawns();
 	deregisterDestroyedEntities();
 	executeDestroys();
-	std::sort(freeIdQueue.begin(), freeIdQueue.end());
+	std::sort(freeDynamicIdQueue.begin(), freeDynamicIdQueue.end());
 	std::sort(freeIndexQueue.begin(), freeIndexQueue.end());
 }
 
@@ -117,7 +169,7 @@ void EntityComponentManager::moveEntity(Entity start, Entity goal)
 {
 	assert(entityStorageInfo.size() > goal && entityStorageInfo[goal].isValid() == false);
 	assert(entityStorageInfo.size() > start && entityStorageInfo[start].isValid() == true); 
-	if (hasID(start)) {
+	if (hasId(start)) {
 		idToIndex[indexToId[start]] = goal;
 		indexToId[goal] = indexToId[start];
 		indexToId[start] = 0;

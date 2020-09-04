@@ -42,19 +42,19 @@ void Game::create() {
 	{
 		for (auto ent : world.entity_view<Player>()) {
 			std::cout << "ding" << std::endl;
-			auto id = world.makeDynamicId(ent);
-			bool hasID = world.hasID(ent);
+			auto id = world.getId(ent);
+			bool hasID = world.hasId(ent);
 			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << std::endl;
 		}
 		auto newent = world.index_create();
-		auto id = world.makeDynamicId(newent);
-		bool hasIDafter = world.hasID(newent);
+		auto id = world.getId(newent);
+		bool hasIDafter = world.hasId(newent);
 		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
 		world.destroy(newent);
 
 		auto newent2 = world.index_create();
-		bool hasIDbefore = world.hasID(newent2);
-		auto id2 = world.makeDynamicId(newent2);
+		bool hasIDbefore = world.hasId(newent2);
+		auto id2 = world.getId(newent2);
 		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
 	}
 
@@ -218,7 +218,7 @@ void Game::cursorManipFunc()
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
 			Entity topEntity = collisions.front().indexB;
-			EntityId id = world.getID(topEntity);
+			EntityId id = world.getId(topEntity);
 			cursorData.relativePos = world.getComp<Base>(topEntity).position - worldCoord;
 			cursorData.lockedID = id;
 			cursorData.locked = true;

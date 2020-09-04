@@ -118,7 +118,7 @@ void World::loadMap(std::string mapname_) {
 		}
 
 		Vec2 scalePlayer(1, 1);
-		auto player = id_create();
+		auto player = idCreate();
 		auto cmps = viewComps(player);
 		cmps.add<Base>(Base(Vec2(2,12),0));
 		auto colliderPlayer = Collider(Vec2(0.4,0.7), Form::Rectangle);
@@ -134,7 +134,7 @@ void World::loadMap(std::string mapname_) {
 		spawn(player);
 
 		Vec2 scaleBox(1, 1);
-		auto box = id_create();
+		auto box = idCreate();
 		auto cmpsBox = viewComps(box);
 		cmpsBox.add<Base>(Base(Vec2(2, 2), 0));
 		auto colliderBox = Collider(scalePlayer, Form::Rectangle);
@@ -235,6 +235,7 @@ void World::loadMap(std::string mapname_) {
 
 void World::saveMap(std::string filename)
 {
+	defragment(DefragMode::COMPLETE);
 	std::ofstream ofs(filename, std::ios::binary);
 	if (ofs.good()) {
 		{
