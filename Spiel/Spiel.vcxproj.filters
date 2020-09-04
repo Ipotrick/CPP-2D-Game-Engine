@@ -314,12 +314,6 @@
     <ClCompile Include="src\EntityComponentManager.cpp">
       <Filter>_Engine\_Component</Filter>
     </ClCompile>
-    <ClCompile Include="src\World.cpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClCompile>
-    <ClCompile Include="src\GameWorld.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\DummyScript.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
@@ -361,6 +355,9 @@
     </ClCompile>
     <ClCompile Include="src\CollisionConstraintSet.cpp">
       <Filter>_Engine\_Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\World.cpp">
+      <Filter>_Engine\_Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

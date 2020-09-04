@@ -104,7 +104,7 @@
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\GameWorld.cpp" />
+    <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />
     <ClCompile Include="src\htmlCompiler.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -125,7 +125,6 @@
     <ClCompile Include="src\TextureHandler.cpp" />
     <ClCompile Include="src\Vec2.hpp" />
     <ClCompile Include="src\EntityComponentManager.cpp" />
-    <ClCompile Include="src\World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\Basic.frag" />

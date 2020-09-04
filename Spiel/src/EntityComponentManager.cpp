@@ -17,14 +17,14 @@ Entity EntityComponentManager::index_create() {
 			componentStorage.updateMaxEntNum(entityStorageInfo.size());
 			});
 	}
-	makeId(latestIndex);	// TODO replace with optimised version
+	makeDynamicId(latestIndex);	// TODO replace with optimised version
 	return latestIndex;
 }
 
 EntityId EntityComponentManager::id_create()
 {
 	auto index = index_create();
-	return makeId(index);
+	return makeDynamicId(index);
 }
 
 void EntityComponentManager::destroy(Entity index) {
@@ -50,7 +50,7 @@ void EntityComponentManager::spawnLater(EntityId id)
 	spawnLater(idToIndex[id.id]);
 }
 
-EntityId EntityComponentManager::makeId(Entity entity)
+EntityId EntityComponentManager::makeDynamicId(Entity entity)
 {
 	assert(exists(entity));
 	if (indexToId.size() != entityStorageInfo.size()) indexToId.resize(entityStorageInfo.size(), 0 );
@@ -77,6 +77,11 @@ EntityId EntityComponentManager::makeId(Entity entity)
 			return EntityId(id, 0);
 		}
 	}
+}
+
+EntityId EntityComponentManager::makeStaticId(Entity index)
+{
+	return EntityId();
 }
 
 void EntityComponentManager::executeDestroys() {

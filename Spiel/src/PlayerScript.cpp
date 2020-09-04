@@ -28,15 +28,15 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 			world.addComp<Movement>(particle, mov);
 			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), rand() % 1000 * 0.0052f, Form::Circle));
 			if (rand() % 4 == 0) {
-				world.addComp<Age>(particle, Age(1.5f));
+				world.addComp<Age>(particle, Age(3.5f));
 				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.01f, 0.01f), Vec2(10, 10),
 					Vec4(20 / 256.f, 20 / 256.f, 202 / 256.f, 0.95),
 					Vec4(1, 1, 1, 0)
 				));
 			}
 			else {
-				world.addComp<Age>(particle, Age(1.0f));
-				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.15f, 0.15f), Vec2(4, 4),
+				world.addComp<Age>(particle, Age(3.0f));
+				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.03f, 0.03f), Vec2(12, 12),
 					Vec4(20 / 256.f, 40 / 256.f, 202 / 256.f, 0.95f),
 					Vec4(1, 1, 1, 0)
 				));
@@ -63,7 +63,7 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
 		printf("new player power: %f\n", data.power);
 	}
-
+	data.flameSpawnTimer.setLapTime(0.001 * (1 / data.power));
 	auto cursorPos = engine.getPosWorldSpace(engine.getCursorPos());
 
 	if (engine.keyPressed(KEY::Q)) {
@@ -75,8 +75,8 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
 	if (engine.keyPressed(KEY::W)) {
-		auto num = data.flameSpawnTimer.getLaps(deltaTime) * data.power;
-		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90) * (rand()%1000/10000.0f) );
+		auto num = data.flameSpawnTimer.getLaps(deltaTime);
+		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90) * (0.4f + rand()%1000/10000.0f) );
 
 	}
 

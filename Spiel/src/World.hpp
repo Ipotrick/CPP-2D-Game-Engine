@@ -1,5 +1,8 @@
 #pragma once
 
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+
 #include "EntityComponentManager.hpp"
 
 #include "CoreSystemUniforms.hpp"
@@ -18,26 +21,11 @@ public:
 protected:
 	friend class boost::serialization::access;
 	template<class Archive>
-	void save(Archive& ar, const unsigned int version) const
-	{
-		ar << boost::serialization::base_object<EntityComponentManager>(*this);
-		ar << physics;
-		ar << texture;
-	}
-
-	template<class Archive>
-	void load(Archive& ar, const unsigned int version)
-	{
-		*this = World();
-		ar >> boost::serialization::base_object<EntityComponentManager>(*this);
-		ar >> physics;
-		ar >> texture;
-	}
-
-	template<class Archive>
 	void serialize(Archive& ar, const unsigned int file_version)
 	{
-		boost::serialization::split_member(ar, *this, file_version);
+		ar & boost::serialization::base_object<EntityComponentManager>(*this);
+		ar & physics;
+		ar & texture;
 	}
 private:
 };
