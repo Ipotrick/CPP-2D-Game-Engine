@@ -36,7 +36,7 @@ void PhysicsSystem2::updateCollisionConstraints(World& world, CollisionSystem& c
 				// order a and b
 			collinfo.normal[0] *= -1;			// in physics the normal goes from a to b
 			collinfo.normal[1] *= -1;			// in physics the normal goes from a to b
-			if (a.id > b.id) {
+			if (a.identifier > b.identifier) {
 				const auto temp = a;
 				a = b;
 				b = temp;

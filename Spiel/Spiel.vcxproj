@@ -32,6 +32,7 @@
     <ClInclude Include="src\CollGrid.hpp" />
     <ClInclude Include="src\CollisionCheckJob.hpp" />
     <ClInclude Include="src\CollisionConstraintSet.hpp" />
+    <ClInclude Include="src\EntityManager.hpp" />
     <ClInclude Include="src\ImpulseResolutionJob.hpp" />
     <ClInclude Include="src\CollisionSystem.hpp" />
     <ClInclude Include="src\collision_detection.hpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="src\collision_detection.cpp" />
     <ClCompile Include="src\DummyScript.cpp" />
     <ClCompile Include="src\Engine.cpp" />
+    <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\World.cpp" />

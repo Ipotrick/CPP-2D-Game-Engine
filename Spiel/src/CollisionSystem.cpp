@@ -68,7 +68,7 @@ void CollisionSystem::prepare(World& world)
 {
 	Timer t1(perfLog.getInputRef("collisionprepare"));
 
-	rebuildStatic = world.didStaticsChange(); // only rebuild static quadtree if static Entities changed
+	rebuildStatic = true;
 
 	// allocate memory for collider groups and or clean them
 	cleanBuffers(world);

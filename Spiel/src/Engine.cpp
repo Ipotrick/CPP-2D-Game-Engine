@@ -6,7 +6,7 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	running{ true },
 	iteration{ 0 },
 	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
-	maxDeltaTime{0.01f},
+	maxDeltaTime{0.02f},
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
 	jobManager(std::thread::hardware_concurrency()),
@@ -32,7 +32,7 @@ Engine::~Engine() {
 std::string Engine::getPerfInfo(int detail) {
 	std::stringstream ss;
 	if (detail >= 4) ss << "Entity Max: " << world.maxEntityIndex() << "\n";
-	if (detail >= 1) ss << "Entity Count: " << world.entityCount() << "\n";
+	if (detail >= 1) ss << "Entity Count: " << world.size() << "\n";
 	if (detail >= 1) {
 		ss << "    deltaTime(s): " << getDeltaTime() << "\n"
 			<< "    Ticks/s: " << 1 / getDeltaTime() << "\n"
@@ -144,7 +144,6 @@ void Engine::run() {
 			//std::lock_guard l(window->mut);
 			glfwPollEvents();
 			renderer.startRendering();
-			world.setStaticsChanged(false);
 			iteration++;
 		}
 	}

@@ -258,6 +258,9 @@
     <ClInclude Include="src\TextureUniforms.hpp">
       <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="src\EntityManager.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -357,6 +360,9 @@
       <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\World.cpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EntityManager.cpp">
       <Filter>_Engine\_Component</Filter>
     </ClCompile>
   </ItemGroup>

@@ -41,13 +41,13 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 					Vec4(1, 1, 1, 0)
 				));
 			}
-			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.002f, 0.0001, 0));
+			world.addComp<PhysicsBody>(particle, PhysicsBody(0.9f, 0.00000002f, 0.0001, 0));
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
 			world.addComp<TextureRef>(particle, TextureRef(world.texture.getId("Cloud.png")));
 			world.spawnLater(particle);
-			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass / world.getComp<PhysicsBody>(me).mass*10;
+			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass*100000 / world.getComp<PhysicsBody>(me).mass*10;
 		}
 	};
 

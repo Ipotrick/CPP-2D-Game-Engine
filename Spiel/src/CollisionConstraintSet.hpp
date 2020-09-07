@@ -19,8 +19,8 @@
 
 inline uint64_t makeConstraintKey(EntityId a, EntityId b)
 {
-	constraintset_assert(a.id < b.id, "error: id's must be in order!");
-	return (uint64_t)a.id << 32 | (uint64_t)b.id;
+	constraintset_assert(a.identifier < b.identifier, "error: id's must be in order!");
+	return (uint64_t)a.identifier << 32 | (uint64_t)b.identifier;
 }
 
 inline std::pair<entity_id_t, entity_id_t> decompConstraintKey(uint64_t key)

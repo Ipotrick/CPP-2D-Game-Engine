@@ -8,22 +8,15 @@
 #include <bitset>
 #include <tuple>
 #include <type_traits>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/bitset.hpp>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/split_member.hpp >
+#include <boost/serialization/split_member.hpp>
 
 #include "robin_hood.h"
-#include "json.h"
 
 #include "BaseTypes.hpp"
 #include "RenderTypes.hpp"
 #include "algo.hpp"
 
+#include "EntityManager.hpp"
 #include "EntityComponentStorage.hpp"
 #include "CoreComponents.hpp"
 #include "CoreCompInclude.hpp"
@@ -37,148 +30,17 @@ template<typename Comp>
 class SingleView;
 class ComponentView;
 
-class EntityComponentManager {
-protected:
+class EntityComponentManager : public EntityManager {
 	template<typename First, typename Second, typename ... CompTypes>
 	friend class MultiView;
 	template<typename Comp>
 	friend class SingleView;
-
 	friend class boost::serialization::access;
-	template<class Archive>
-	void save(Archive& ar, const unsigned int version) const
-	{
-		//TODO IMPLEMENT MAXIMUM DEFRAGMENTATION BEFORE SAVE
-
-		ar << entityStorageInfo;
-		ar << latestIndex;
-		ar << idToIndex;
-		ar << idToVersion;
-		ar << indexToId;
-		ar << freeDynamicIdQueue;
-		ar << despawnList;
-		ar << spawnLaterList;
-		ar << staticEntitiesChanged;
-
-		for_each(componentStorageTuple, 
-			[&](auto& componentStorage) {
-				ar << componentStorage.dump();
-			}
-		);
-	}
-
-	template<class Archive>
-	void load(Archive& ar, const unsigned int version)
-	{
-		ar >> entityStorageInfo;
-		ar >> latestIndex;
-		ar >> idToIndex;
-		ar >> idToVersion;
-		ar >> indexToId;
-		ar >> freeDynamicIdQueue;
-		ar >> despawnList;
-		ar >> spawnLaterList;
-		ar >> staticEntitiesChanged;
-
-		for_each(componentStorageTuple, 
-			[&](auto& componentStorage) {
-				componentStorage.updateMaxEntNum(entityStorageInfo.size());
-				decltype(componentStorage.dump()) dump;
-				ar >> dump;
-				for (auto [ent, comp] : dump) {
-					componentStorage.insert(ent, comp);
-				}
-			}
-		);
-	}
-
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		boost::serialization::split_member(ar, *this, file_version);
-	}
 public:
-	class EntityStatus {
-		friend class boost::serialization::access;
-		template<class Archive>
-		void serialize(Archive& ar, const unsigned int file_version)
-		{
-			ar& flags;
-		}
-	public:
-		EntityStatus() = default;
-		EntityStatus(bool valid) : flags{} {
-			flags[0] = valid;
-			flags[1] = false;
-			flags[2] = false;
-		}
-		__forceinline void setValid(bool valid) { flags[0] = valid; }
-		__forceinline bool isValid() { return flags[0]; }
-		__forceinline void setDestroyMark(bool mark) { flags[1] = mark; }
-		__forceinline bool isDestroyMarked() { return flags[1]; }
-		__forceinline void setSpawned(bool spawned) { flags[2] = spawned; }
-		__forceinline bool isSpawned() { return flags[2]; }
-
-	private:
-		// flag 0: valid
-		// flag 1: destroyMark
-		// flag 2: spawned
-		std::bitset<3> flags;
-	};
-public:
-	EntityComponentManager() : latestIndex{ 0 }, despawnList{}
-	{
-		entityStorageInfo.push_back({ false });
-		indexToId.push_back(0);
-		idToIndex.push_back(0);
-		idToVersion.push_back(0);
-	}
-	
-	/* returnes if entitiy exists or not, O(1) */
-	bool exists(Entity index);
-	bool exists(EntityId id);
-	/* index create/destruct utility */
-	/* creates blank index and returns its index, O(1) */
-	Entity index_create();
+	/* creates blank entity and returns it */
+	Entity create();
+	/* creates blank entity and returns it's id */
 	EntityId idCreate();
-	/* marks index for deletion, entities are deleted after each update, O(1) */
-	void destroy(Entity index);
-	void destroy(EntityId id);
-	/* immediately makes index invisible for systems and scripts but the index stays in memory so it can be respawned */
-	void despawn(Entity index);
-	void despawn(EntityId id);
-	/* immediate spawn of entitiy */
-	void spawn(Entity index);
-	void spawn(EntityId id);
-	/* delayed(after update call) spawn of an index */
-	void spawnLater(Entity index);
-	void spawnLater(EntityId id);
-
-
-	/* identification */
-	/* returns handle of the index, call isIdValid before! */
-	Entity getIndex(EntityId entityId);
-	/* returns true when index has an id, prefer identify to this */
-	bool hasId(Entity index);
-	/* if index has an id it will be returned, call hasID before! Prefer identify to this  */
-	EntityId getId(Entity index);
-	/* if the version of the given Id deviates from the one that is in the regestry, the given id is invalid */
-	bool isIdValid(EntityId entityId);
-	/* returns if entity is currently in the world/spawned */
-	bool isSpawned(Entity ent);
-	bool isSpawned(EntityId ent);
-
-	/* utility */
-	/* returns count of entities, O(1) */
-	size_t const entityCount();
-	/* returns the size of the vector that holds the entities, O(1) */
-	size_t const maxEntityIndex();
-	/* sets static entities changed flag */
-	void setStaticsChanged(bool boolean = true);
-	/* returns wheter or not static entities changed */
-	bool didStaticsChange();
-	/* returnes how fragmented the entities are */
-	float fragmentation();
 
 	/* Component access */
 	/* returnes reference to a safe virtual container of the given components one can iterate over.
@@ -228,41 +90,45 @@ public:
 		FAST
 	};
 	void defragment(DefragMode mode);
+protected:
+	template<class Archive>
+	void save(Archive& ar, const unsigned int version) const
+	{
+		ar << boost::serialization::base_object<EntityManager>(*this);
+		for_each(componentStorageTuple,
+			[&](auto& componentStorage) {
+				ar << componentStorage.dump();
+			}
+		);
+	}
+
+	template<class Archive>
+	void load(Archive& ar, const unsigned int version)
+	{
+		ar >> boost::serialization::base_object<EntityManager>(*this);
+		for_each(componentStorageTuple,
+			[&](auto& componentStorage) {
+				componentStorage.updateMaxEntNum(entityStorageInfo.size());
+				decltype(componentStorage.dump()) dump;
+				ar >> dump;
+				for (auto [ent, comp] : dump) {
+					componentStorage.insert(ent, comp);
+				}
+			}
+		);
+	}
+
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		boost::serialization::split_member(ar, *this, file_version);
+	}
 private:
-	std::tuple<CORE_COMPONENT_SEGMENT, GAME_COMPONENT_SEGMENT> componentStorageTuple;
-private:
-	/* generates new DYNAMIC id for index or returns existing id */
-	EntityId makeDynamicId(Entity index);
-	/* generates new STATIC id for index or returns existing id */
-	EntityId makeStaticId(Entity index);
-	/* INNER ENGINE FUNCTIONS: */
+	void updateMaxEntityToComponentSotrages(Entity entity);
 	void moveEntity(Entity start, Entity goal);
-	Entity findBiggestValidHandle();
-	void shrink(); // shorten index array and delete freeHandles at the end of the index array
 	void deregisterDestroyedEntities();
-	void executeDelayedSpawns();
-	void executeDestroys();
 
-private:
-	std::vector<EntityStatus> entityStorageInfo;
-	std::deque<Entity> freeIndexQueue;
-	Entity latestIndex;
-
-	/*
-		Notable infos about id's:
-		 id == 0  => invalid id
-		  id & 1  => static id
-		!(id & 1) => dynamic id
-	*/
-	std::vector<entity_id_t>	idToIndex;
-	std::vector<entity_id_t>	idToVersion;
-	std::vector<Entity>			indexToId;
-	std::deque<entity_id_t>		freeDynamicIdQueue;
-	std::deque<entity_id_t>		freeStaticIdQueue;
-
-	std::vector<Entity> despawnList;
-	std::vector<Entity> spawnLaterList;
-	bool staticEntitiesChanged{ true };
+	std::tuple<CORE_COMPONENT_SEGMENT, GAME_COMPONENT_SEGMENT> componentStorageTuple;
 };
 
 // ---- Component Accessors implementations --------------------------------
@@ -279,7 +145,7 @@ template<typename CompType> __forceinline CompType& EntityComponentManager::getC
 template<typename CompType>
 inline CompType& EntityComponentManager::getComp(EntityId id)
 {
-	return getComp<CompType>(idToIndex[id.id]);
+	return getComp<CompType>(idToIndexTable[id.identifier]);
 }
 
 template<typename ... CompTypes> auto EntityComponentManager::getCompPtrs(Entity index) -> const std::tuple<CompTypes...> {
@@ -305,7 +171,7 @@ template<typename CompType> __forceinline bool EntityComponentManager::hasComp(E
 template<typename CompType>
 inline bool EntityComponentManager::hasComp(EntityId id)
 {
-	return hasComp<CompType>(idToIndex[id.id]);
+	return hasComp<CompType>(idToIndexTable[id.identifier]);
 }
 
 template<typename CompType> __forceinline bool EntityComponentManager::hasntComp(Entity index) {
@@ -315,7 +181,7 @@ template<typename CompType> __forceinline bool EntityComponentManager::hasntComp
 template<typename CompType>
 inline bool EntityComponentManager::hasntComp(EntityId id)
 {
-	return hasntComp<CompType>(idToIndex[id.id]);
+	return hasntComp<CompType>(idToIndexTable[id.identifier]);
 }
 
 template<typename CompType> __forceinline CompType& EntityComponentManager::addComp(Entity index, CompType data) {
@@ -326,7 +192,7 @@ template<typename CompType> __forceinline CompType& EntityComponentManager::addC
 template<typename CompType>
 inline CompType& EntityComponentManager::addComp(EntityId id, CompType data)
 {
-	return addComp<CompType>(idToIndex[id.id], data);
+	return addComp<CompType>(idToIndexTable[id.identifier], data);
 }
 
 template<typename CompType> __forceinline CompType& EntityComponentManager::addComp(Entity index) {
@@ -337,7 +203,7 @@ template<typename CompType> __forceinline CompType& EntityComponentManager::addC
 template<typename CompType>
 inline CompType& EntityComponentManager::addComp(EntityId id)
 {
-	return addComp<CompType>(idToIndex[id.id]);
+	return addComp<CompType>(idToIndexTable[id.identifier]);
 }
 
 
@@ -349,7 +215,7 @@ template<typename CompType> __forceinline void EntityComponentManager::remComp(E
 template<typename CompType>
 inline void EntityComponentManager::remComp(EntityId id)
 {
-	remComp<CompType>(idToIndex[id.id]);
+	remComp<CompType>(idToIndexTable[id.identifier]);
 }
 
 // ---------- hasComps implementation --------------------------------------
@@ -380,7 +246,7 @@ inline bool EntityComponentManager::hasComps(Entity index) {
 template<typename ...CompTypes>
 inline bool EntityComponentManager::hasComps(EntityId id)
 {
-	return hasComps<CompTypes...>(idToIndex[id.id]);
+	return hasComps<CompTypes...>(idToIndexTable[id.identifier]);
 }
 
 // --------- hasntComps implementation -------------------------------------
@@ -417,7 +283,7 @@ inline bool EntityComponentManager::hasntComps(Entity index) {
 template<typename ...CompTypes>
 inline bool EntityComponentManager::hasntComps(EntityId id)
 {
-	return hasntComps<CompTypes...>(idToIndex[id.id]);
+	return hasntComps<CompTypes...>(idToIndexTable[id.identifier]);
 }
 
 // ------------ view implementation ----------------------------------------
@@ -585,71 +451,107 @@ __forceinline ComponentView EntityComponentManager::viewComps(Entity index)
 
 inline ComponentView EntityComponentManager::viewComps(EntityId id)
 {
-	return ComponentView(*this, idToIndex[id.id]);
+	return ComponentView(*this, idToIndexTable[id.identifier]);
 }
 
 // ------------------------------------------------------------------------
 
-inline bool EntityComponentManager::exists(Entity index) {
-	return (index < entityStorageInfo.size() ? entityStorageInfo[index].isValid() : false);
-}
-
-inline bool EntityComponentManager::exists(EntityId id)
+inline void EntityComponentManager::updateMaxEntityToComponentSotrages(Entity entity)
 {
-	return exists(idToIndex[id.id]);
+	for_each(componentStorageTuple, [&](auto& componentStorage) {
+		componentStorage.updateMaxEntNum(entityStorageInfo.size());
+		});
 }
 
-inline bool EntityComponentManager::isSpawned(Entity ent)
+inline Entity EntityComponentManager::create()
 {
-	return entityStorageInfo[ent].isSpawned();
+	Entity ent = EntityManager::create();
+	updateMaxEntityToComponentSotrages(ent);
+	return ent;
 }
 
-inline bool EntityComponentManager::isSpawned(EntityId ent)
+inline EntityId EntityComponentManager::idCreate()
 {
-	return entityStorageInfo[idToIndex[ent.id]].isSpawned();
+	auto index = create();
+	return getId(index);
 }
 
-inline void EntityComponentManager::despawn(Entity index)
+inline void EntityComponentManager::deregisterDestroyedEntities()
 {
-	assert(entityStorageInfo[index].isValid() && entityStorageInfo[index].isSpawned());
-	if (hasComp<Collider>(index) && hasntComp<Movement>(index)) staticEntitiesChanged = true;	// set static changed flag
-	entityStorageInfo[index].setSpawned(false);
+	for (Entity entity : destroyQueue) {
+		for_each(componentStorageTuple, [&](auto& componentStorage) {
+			componentStorage.remove(entity);
+			});
+	}
 }
 
-inline void EntityComponentManager::despawn(EntityId id)
+inline void EntityComponentManager::moveEntity(Entity start, Entity goal)
 {
-	despawn(idToIndex[id.id]);
+	assert(entityStorageInfo.size() > goal && entityStorageInfo[goal].isValid() == false);
+	assert(entityStorageInfo.size() > start && entityStorageInfo[start].isValid() == true);
+	if (hasId(start)) {
+		idToIndexTable[indexToIdTable[start]] = goal;
+		indexToIdTable[goal] = indexToIdTable[start];
+		indexToIdTable[start] = INVALID_ID;
+	}
+	for_each(componentStorageTuple, [&](auto& componentStorage) {
+		if (componentStorage.contains(start)) {
+			componentStorage.insert(goal, componentStorage.get(start));
+			componentStorage.remove(start);
+			assert(componentStorage.contains(goal));
+			assert(!componentStorage.contains(start));
+		}
+		});
+	entityStorageInfo[goal].setValid(true);
+	entityStorageInfo[goal].setSpawned(entityStorageInfo[start].isSpawned());
+	entityStorageInfo[start].setValid(false);
+	entityStorageInfo[start].setSpawned(false);
 }
 
-inline void EntityComponentManager::spawn(Entity index)
+inline void EntityComponentManager::defragment(DefragMode const mode)
 {
-	assert(entityStorageInfo[index].isValid() && !entityStorageInfo[index].isSpawned());
-	if (hasComp<Collider>(index) && hasntComp<Movement>(index)) staticEntitiesChanged = true;	// set static changed flag
-	entityStorageInfo[index].setSpawned(true);
-}
+	int maxDefragEntCount;
+	float minFragmentation(1.0f);
+	switch (mode) {
+	case DefragMode::FAST:
+		maxDefragEntCount = 10;
+		minFragmentation = 0.001;
+		break;
+	case DefragMode::NONE:
+		maxDefragEntCount = 0;
+		minFragmentation = 1.01f;
+		break;
+	case DefragMode::LAZY:
+		maxDefragEntCount = 200;
+		minFragmentation = 0.5f;
+		break;
+	case DefragMode::MODERATE:
+		maxDefragEntCount = 200;
+		minFragmentation = 0.33333f;
+		break;
+	case DefragMode::EAGER:
+		maxDefragEntCount = 100;
+		minFragmentation = 0.1f;
+		break;
+	case DefragMode::AGRESSIVE:
+		maxDefragEntCount = 50;
+		minFragmentation = 0.01f;
+		break;
+	case DefragMode::COMPLETE:
+		maxDefragEntCount = maxEntityIndex();
+		minFragmentation = 0.00001f;
+		break;
+	}
 
-inline void EntityComponentManager::spawn(EntityId id)
-{
-	spawn(idToIndex[id.id]);
-}
+	if (fragmentation() > minFragmentation) {
+		shrink();
 
-inline bool EntityComponentManager::hasId(Entity index)
-{
-	return index < indexToId.size() && indexToId[index] > 0;
-}
-
-inline EntityId EntityComponentManager::getId(Entity index) {
-	assert(hasId(index));
-	return EntityId(indexToId[index], idToVersion[indexToId[index]]);
-}
-
-inline bool EntityComponentManager::isIdValid(EntityId entityId)
-{
-	return entityId.id < idToIndex.size() && idToIndex[entityId.id] > 0 && idToVersion[entityId.id] == entityId.version;
-}
-
-inline Entity EntityComponentManager::getIndex(EntityId entityId)
-{
-	assert(isIdValid(entityId));
-	return idToIndex[entityId.id];
+		for (int defragCount = 0; defragCount < maxDefragEntCount; defragCount++) {
+			if (freeIndexQueue.empty()) break;
+			auto biggesthandle = findBiggestValidEntityIndex();
+			moveEntity(biggesthandle, freeIndexQueue.front());
+			freeIndexQueue.pop_front();
+			shrink();
+		}
+	}
 }

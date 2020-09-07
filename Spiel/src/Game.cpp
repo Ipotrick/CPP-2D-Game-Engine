@@ -39,24 +39,6 @@ void Game::create() {
 		baseVec = rotate(rotate(baseVec, rotaVec), -42.7);
 		std::cout << "angle: " << angle << " translated angle: " << getRotation(baseVec) << std::endl;
 	}
-	{
-		for (auto ent : world.entity_view<Player>()) {
-			std::cout << "ding" << std::endl;
-			auto id = world.getId(ent);
-			bool hasID = world.hasId(ent);
-			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << std::endl;
-		}
-		auto newent = world.index_create();
-		auto id = world.getId(newent);
-		bool hasIDafter = world.hasId(newent);
-		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
-		world.destroy(newent);
-
-		auto newent2 = world.index_create();
-		bool hasIDbefore = world.hasId(newent2);
-		auto id2 = world.getId(newent2);
-		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
-	}
 
 	{
 		// Test html compiler
@@ -91,8 +73,8 @@ void Game::update(float deltaTime) {
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	auto background = Drawable(0, Vec2(0, 0), 0, Vec2(2, 2), Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0), DrawMode::WindowSpace);
-	submitDrawable(background);
+	//auto background = Drawable(0, Vec2(0, 0), 0, Vec2(2, 2), Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0), DrawMode::WindowSpace);
+	//submitDrawable(background);
 
 	for (auto ent : world.entity_view<Base, Movement>()) {
 		if (world.getComp<Base>(ent).position.length() > 1000)
@@ -171,9 +153,11 @@ void Game::gameplayUpdate(float deltaTime)
 	}
 	for (auto ent : world.entity_view<SpawnerComp>()) {
 		auto base = world.getComp<Base>(ent);
-		for (int i = 1; i < spawnerLapTimer.getLaps(deltaTime); i++) {
+		int laps = spawnerLapTimer.getLaps(deltaTime);
+		printf("laps: %i\n", laps);
+		for (int i = 1; i < laps; i++) {
 			float rotation = (float)(rand() % 360);
-			auto particle = world.index_create();
+			auto particle = world.create();
 			Vec2 movement = rotate(Vec2(5,0), rotation);
 			world.addComp<Base>(particle, Base(base.position));
 			auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
@@ -182,7 +166,7 @@ void Game::gameplayUpdate(float deltaTime)
 			world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
 			//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
 			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
-			world.addComp<Age>(particle, Age(rand()%1000/2000.0f));
+			world.addComp<Age>(particle, Age(rand()%1000/2000.0f*3));
 			world.spawn(particle);
 		}
 	}

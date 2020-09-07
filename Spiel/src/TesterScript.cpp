@@ -3,17 +3,14 @@
 void TesterScript::script(Entity me, Tester& data, float deltaTime)
 {
 	if (world.hasComps<Base, Draw>(me)) {
-		auto collView = engine.collisionSystem.collisions_view(me);
-		bool foundPlayer = false;
-		for (auto c : collView) {
-			if (world.hasComp<Player>(c.indexB)) {
-				foundPlayer = true;
-				break;
-			}
-		}
+		Base& b = engine.world.getComp<Base>(me);
+		Draw& d = engine.world.getComp<Draw>(me);
+		data.changeDirTime += deltaTime;
+		if (data.changeDirTime > 1.0f)
+			data.changeDirTime = -1.0f;
 
-		if (world.hasComp<Draw>(me)) {
-			world.getComp<Draw>(me).color = foundPlayer ? Vec4(1,1,1,0.5f) : Vec4(0,0,0,0);
-		}
+		b.rotation = 360 * data.changeDirTime;
+		b.position += Vec2(0, 1) * data.changeDirTime;
+		d.color += Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f);
 	}
 }
