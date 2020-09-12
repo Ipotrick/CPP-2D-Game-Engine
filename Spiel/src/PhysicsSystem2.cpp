@@ -31,12 +31,12 @@ void PhysicsSystem2::updateCollisionConstraints(World& world, CollisionSystem& c
 {
 	for (CollisionInfo collinfo : collSys.collisionInfos) {
 		if (world.hasComp<PhysicsBody>(collinfo.indexA) && world.hasComp<PhysicsBody>(collinfo.indexB)) {
-			EntityId a = world.getID(collinfo.indexA);
-			EntityId b = world.getID(collinfo.indexB);
+			EntityId a = world.getId(collinfo.indexA);
+			EntityId b = world.getId(collinfo.indexB);
 				// order a and b
 			collinfo.normal[0] *= -1;			// in physics the normal goes from a to b
 			collinfo.normal[1] *= -1;			// in physics the normal goes from a to b
-			if (a.id > b.id) {
+			if (a.identifier > b.identifier) {
 				const auto temp = a;
 				a = b;
 				b = temp;
@@ -353,9 +353,11 @@ void PhysicsSystem2::applyImpulsesMultiThreadded(World& world)
 
 void PhysicsSystem2::applyForcefields(World& world, float deltaTime)
 {
-	for (auto ent : world.entity_view<PhysicsBody, Movement, Base>()) {
-		world.getComp<Movement>(ent).velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
-		world.getComp<Movement>(ent).velocity += world.physics.linearEffectDir * world.physics.linearEffectForce * (1.0f / world.getComp<PhysicsBody>(ent).mass) * deltaTime;
+	for (auto [ent, p, mov, base] : world.entityComponentView<PhysicsBody, Movement, Base>()) {
+		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
+		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce * (1.0f / world.getComp<PhysicsBody>(ent).mass) * deltaTime;
+		mov.velocity *= (1.0f - world.physics.friction * deltaTime);
+		mov.angleVelocity *= (1.0f - world.physics.friction * deltaTime);
 	}
 }
 

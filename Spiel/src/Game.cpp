@@ -24,58 +24,15 @@ void Game::create() {
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
 	world.loadMap("world.wrld");
-
-	for (auto i : range<-22,12>()) {
-		cout << i << endl;
-	}
-
-	std::cout << "sizeof QNode: " << sizeof(QuadtreeNode) << '\n'
-		<< "sizeof QNode page: " << (sizeof(QuadtreeNode) * (1 << 11)) << std::endl;
-
-	{
-		float angle = 33.19f;
-		RotaVec2 rotaVec(angle);
-		Vec2 baseVec = rotate({ 1, 0 }, 42.7);
-		baseVec = rotate(rotate(baseVec, rotaVec), -42.7);
-		std::cout << "angle: " << angle << " translated angle: " << getRotation(baseVec) << std::endl;
-	}
-	{
-		for (auto ent : world.entity_view<Player>()) {
-			std::cout << "ding" << std::endl;
-			auto id = world.makeDynamicId(ent);
-			bool hasID = world.hasID(ent);
-			std::cout << "ent: " << ent << " id: " << id.id << " hasID: " << hasID << std::endl;
-		}
-		auto newent = world.index_create();
-		auto id = world.makeDynamicId(newent);
-		bool hasIDafter = world.hasID(newent);
-		std::cout << "newent id: " << id.id << " hasIDafter: " << hasIDafter << std::endl;
-		world.destroy(newent);
-
-		auto newent2 = world.index_create();
-		bool hasIDbefore = world.hasID(newent2);
-		auto id2 = world.makeDynamicId(newent2);
-		std::cout << "newent2 id: " << id.id << " hasIDbefore: " << hasIDbefore << std::endl;
-	}
-
-	{
-		// Test html compiler
-		std::string html =
-			"<div>"
-			"	<text> La La </text>"
-			"</div>";
-		UIElement uiElement;
-		uiElement.set(html);
-		bool success = uiElement.compile();
-		std::cout << "Test html Compiler: " << (success ? "passed" : "error") << std::endl;
-	}
 }
 
 void Game::update(float deltaTime) {
-	//world.defragment(World::DefragMode::FAST);
+	world.defragment(World::DefragMode::LAZY);
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
-		movementSystem.execute(world, deltaTime);
+		{
+			movementSystem.execute(world, deltaTime);
+		}
 		collisionSystem.execute(world, deltaTime);
 		for (auto& d : collisionSystem.getDebugDrawables()) submitDrawable(d);
 		physicsSystem2.execute(world, deltaTime, collisionSystem);
@@ -83,18 +40,28 @@ void Game::update(float deltaTime) {
 	}
 	{
 		Timer t(perfLog.getInputRef("calcRotaVecTime"));
-		baseSystem.execute(world);
+		{
+			baseSystem.execute(world);
+		}
 	}
 	gameplayUpdate(deltaTime);
 	world.flushLaterActions();
+
 }
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	auto background = Drawable(0, Vec2(0, 0), 0, Vec2(2, 2), Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0), DrawMode::WindowSpace);
-	submitDrawable(background);
 
-	for (auto ent : world.entity_view<Base, Movement>()) {
+
+	for (auto ent : world.entityView<Base>()) {
+		Base& b = world.getComp<Base>(ent);
+		if (b.position.length() > 1000.0f) {
+			std::cout << "WARNING: ENTITY WAY OUT LIMITS WITH DIST TO CENTER OF: " << b.position.length() << std::endl;
+		}
+	}
+
+
+	for (auto ent : world.entityView<Base, Movement>()) {
 		if (world.getComp<Base>(ent).position.length() > 1000)
 			world.destroy(ent);
 	}
@@ -167,13 +134,16 @@ void Game::gameplayUpdate(float deltaTime)
 		particleScript.execute(deltaTime);
 		dummyScript.execute(deltaTime);
 		suckerScript.execute(deltaTime);
-		testerScript.execute(deltaTime);
+		{
+			testerScript.execute<500>(deltaTime, jobManager);
+		}
 	}
-	for (auto ent : world.entity_view<SpawnerComp>()) {
+	for (auto ent : world.entityView<SpawnerComp>()) {
 		auto base = world.getComp<Base>(ent);
-		for (int i = 1; i < spawnerLapTimer.getLaps(deltaTime); i++) {
+		int laps = spawnerLapTimer.getLaps(deltaTime);
+		for (int i = 1; i < laps; i++) {
 			float rotation = (float)(rand() % 360);
-			auto particle = world.index_create();
+			auto particle = world.create();
 			Vec2 movement = rotate(Vec2(5,0), rotation);
 			world.addComp<Base>(particle, Base(base.position));
 			auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
@@ -182,12 +152,12 @@ void Game::gameplayUpdate(float deltaTime)
 			world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
 			//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
 			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
-			world.addComp<Age>(particle, Age(rand()%1000/2000.0f));
+			world.addComp<Age>(particle, Age(rand()%1000/2000.0f*3));
 			world.spawn(particle);
 		}
 	}
 
-	for (auto ent : world.entity_view<Base, Movement>()) {
+	for (auto ent : world.entityView<Base, Movement>()) {
 		auto pos = world.getComp<Base>(ent).position;
 		if (pos.length() > 1000)
 			world.destroy(ent);
@@ -218,7 +188,7 @@ void Game::cursorManipFunc()
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
 			Entity topEntity = collisions.front().indexB;
-			EntityId id = world.getID(topEntity);
+			EntityId id = world.getId(topEntity);
 			cursorData.relativePos = world.getComp<Base>(topEntity).position - worldCoord;
 			cursorData.lockedID = id;
 			cursorData.locked = true;

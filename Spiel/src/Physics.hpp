@@ -14,7 +14,7 @@
 
 inline uint64_t entPairToKey(EntityId a, EntityId b)
 {
-	return (uint64_t)a.id << 32 | (uint64_t)b.id;
+	return (uint64_t)a.identifier << 32 | (uint64_t)b.identifier;
 }
 struct PhysicsCollisionData {
 	uint32_t entAVersion;

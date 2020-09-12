@@ -78,9 +78,7 @@ inline void jobWorkerFunction(JobWorkerPoolData* poolData, int workerId) {
             if (poolData->killWorkers) break;                                    // when killSwitch got set while sleeping we get that and kill ourselfs
         }
 
-        auto&& el = poolData->openJobs.front();
-        Tag currentJobTag = el.first;
-        JobFunctor* job = el.second;
+        auto[currentJobTag, job] = poolData->openJobs.front();
         poolData->openJobs.pop_front(); // take new job
         lock.unlock();          // unlock here as we do not need access to the syncronisation and meta data while executing a job
         job->execute(workerId);
@@ -118,9 +116,7 @@ inline void helpFunction(JobWorkerPoolData* poolData, int workerId, std::vector<
         if (!jobLeft) return;
         
         // execute job:
-        auto&& el = poolData->openJobs.front();
-        Tag currentJobTag = el.first;
-        JobFunctor* job = el.second;
+        auto [currentJobTag, job] = poolData->openJobs.front();
         poolData->openJobs.pop_front(); 
         lock.unlock();                                  // unlock here as we do not need access to the syncronisation and meta data while executing a job
         job->execute(workerId);

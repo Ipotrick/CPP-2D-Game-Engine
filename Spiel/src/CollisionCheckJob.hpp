@@ -52,14 +52,17 @@ public:
 	void execute(int workerId) override
 	{
 		for (Entity i = 0; i < entities.size(); i++) {
-			if (qtree1.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree1.IGNORE_TAG))
-				collisionFunction(entities.at(i), qtree1, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
-			if (qtree2.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree2.IGNORE_TAG))
-				collisionFunction(entities.at(i), qtree2, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
-			if (qtree3.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree3.IGNORE_TAG))
-				collisionFunction(entities.at(i), qtree3, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
-			if (qtree4.IGNORE_TAG & QTREE_MASK && !manager.getComp<Collider>(entities.at(i)).isIgnoring(qtree4.IGNORE_TAG))
-				collisionFunction(entities.at(i), qtree4, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+			Collider& coll = manager.getComp<Collider>(entities.at(i));
+			if (!coll.sleeping) {
+				if (qtree1.IGNORE_TAG & QTREE_MASK && !coll.isIgnoring(qtree1.IGNORE_TAG))
+					collisionFunction(entities.at(i), qtree1, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+				if (qtree2.IGNORE_TAG & QTREE_MASK && !coll.isIgnoring(qtree2.IGNORE_TAG))
+					collisionFunction(entities.at(i), qtree2, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+				if (qtree3.IGNORE_TAG & QTREE_MASK && !coll.isIgnoring(qtree3.IGNORE_TAG))
+					collisionFunction(entities.at(i), qtree3, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+				if (qtree4.IGNORE_TAG & QTREE_MASK && !coll.isIgnoring(qtree4.IGNORE_TAG))
+					collisionFunction(entities.at(i), qtree4, poolData.nearEntities.at(workerId), poolData.collisionInfos.at(workerId));
+			}
 		}
 	}
 protected:

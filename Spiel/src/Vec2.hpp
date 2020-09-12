@@ -65,7 +65,7 @@ public:
 
 	float length()
 	{
-		return sqrtf(x * y);
+		return sqrtf(x * x + y * y);
 	}
 public:
 
@@ -290,4 +290,10 @@ inline Vec2 aabbBounds(Vec2 size, RotaVec2 rotaVec) {
 	minPos = min(min(point1, point2), min(point3, point4));
 
 	return maxPos - minPos;
+}
+
+template<>
+inline Vec2 clamp<Vec2>(const Vec2 v, const Vec2 min, const Vec2 max)
+{
+	return ::max(min, ::min(max, v));
 }

@@ -13,10 +13,7 @@ Quadtree3::Quadtree3(const Vec2 minPos_, const Vec2 maxPos_, const size_t capaci
 	tags.reserve(MAX_JOBS);
 }
 
-Quadtree3::~Quadtree3() 
-{
-	nodes.reset();	// deallocates all heap memory
-}
+
 
 void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, int depth) 
 {
@@ -227,12 +224,12 @@ void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vect
 	jobs.clear();
 }
 
-void Quadtree3::querry(std::vector<Entity>* rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const  Vec2 thisSize) const 
+void Quadtree3::querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const  Vec2 thisSize) const 
 {
 	const auto& node = nodes.get(thisID);
 	for (const auto ent : node.collidables) {
 		volatile auto dummy = rVec;
-		rVec->push_back(ent);
+		rVec.push_back(ent);
 	}
 	if (node.hasSubTrees()) {
 		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, qryPos, qrySize);
@@ -251,10 +248,10 @@ void Quadtree3::querry(std::vector<Entity>* rVec, const Vec2 qryPos, const Vec2 
 	}
 }
 
-void Quadtree3::querry(std::vector<Entity>* rVec, const Vec2 qryPos, const Vec2 qrySize) const 
+void Quadtree3::querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize) const 
 {
 	for (const auto ent : root.collidables)
-		rVec->push_back(ent);
+		rVec.push_back(ent);
 	auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(m_pos, m_size, qryPos, qrySize);
 	if (isInUl) {
 		querry(rVec, qryPos, qrySize, root.firstSubTree + 0, m_pos + Vec2(-m_size.x, -m_size.y) * 0.25f, m_size * 0.5000001f);

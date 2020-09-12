@@ -2,15 +2,14 @@
 #include "Physics.hpp"
 
 void World::loadMap(std::string mapname_) {
-	setStaticsChanged(true);
 	*this = World();
 	if (mapname_ == "standart")
 	{
 		auto makeWall = [&](int x, int y) {
-			auto wall = index_create();
-			auto comp = viewComps(wall);
+			auto wall = create();
+			auto comp = componentView(wall);
 			comp.add<Base>(Base(Vec2(x, y), 0));
-			comp.add<Draw>(Draw(Vec4(0, 0, 0, 1), Vec2(1.2, 1.2), 0.45f, Form::Rectangle));
+			comp.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(1.2, 1.2), 0.45f, Form::Rectangle));
 			auto coll = Collider(Vec2(1.2, 1.2), Form::Rectangle);
 			coll.setIgnore(Collider::DYNAMIC);
 			comp.add<Collider>(coll);
@@ -19,7 +18,7 @@ void World::loadMap(std::string mapname_) {
 		};
 
 		this->physics.friction = 0.25f;
-		this->physics.linearEffectAccel = 9.3;
+		this->physics.linearEffectAccel = 2.3;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 
@@ -118,8 +117,8 @@ void World::loadMap(std::string mapname_) {
 		}
 
 		Vec2 scalePlayer(1, 1);
-		auto player = id_create();
-		auto cmps = viewComps(player);
+		auto player = idCreate();
+		auto cmps = componentView(player);
 		cmps.add<Base>(Base(Vec2(2,12),0));
 		auto colliderPlayer = Collider(Vec2(0.4,0.7), Form::Rectangle);
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(1, 1)*0.4, Vec2(0,0.35), RotaVec2(0), Form::Circle));
@@ -134,8 +133,8 @@ void World::loadMap(std::string mapname_) {
 		spawn(player);
 
 		Vec2 scaleBox(1, 1);
-		auto box = id_create();
-		auto cmpsBox = viewComps(box);
+		auto box = idCreate();
+		auto cmpsBox = componentView(box);
 		cmpsBox.add<Base>(Base(Vec2(2, 2), 0));
 		auto colliderBox = Collider(scalePlayer, Form::Rectangle);
 		colliderBox.groupMask |= CollisionGroup<1>::mask;
@@ -143,27 +142,27 @@ void World::loadMap(std::string mapname_) {
 		cmpsBox.add(PhysicsBody(0.0, 5.0f, calcMomentOfIntertia(5.0f, scaleBox), 0.9f));
 		cmpsBox.add<Movement>();
 		cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
-		//spawn(box);
+		spawn(box);
 
-		//int num = 1'000;// 250'000;
-		//for (int i = 0; i < num; i++) {
-		//	auto ent = index_create();
-		//	auto c = viewComps(ent);
-		//	c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
-		//	c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.1f, Form::Rectangle));
-		//	c.add<Tester>();
-		//	spawn(ent);
-		//}
+		int num = 5'000;// 250'000;
+		for (int i = 0; i < num; i++) {
+			auto ent = create();
+			auto c = componentView(ent);
+			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
+			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.1f, Form::Rectangle));
+			c.add<Tester>();
+			spawn(ent);
+		}
 
-		Vec2 scale = Vec2(0.15f, 0.15f);
+		Vec2 scale = Vec2(0.2f, 0.2f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form);
 		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
-		for (int i = 0; i < 5000; i ++) {
+		for (int i = 0; i < 6000; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
-			auto trash = index_create();
+			auto trash = create();
 			addComp(trash, Base(position, RotaVec2(0)));
 			addComp(trash, Movement());
 			addComp(trash, trashCollider); 
@@ -172,51 +171,26 @@ void World::loadMap(std::string mapname_) {
 			addComp(trash, Health(100));
 			addComp(trash, TextureRef(texture.getId("Dir.png")));
 			spawn(trash);
-
-			//auto trash2 = index_create();
-			//addComp(trash2, Base(position, RotaVec2(0)));
-			//addComp(trash2, Movement(rand() % 1000 / 10000.0f - 0.05f, rand() % 1000 / 10000.0f - 0.05f));
-			//addComp(trash2, Collider(scale, Form::Rectangle));
-			//addComp(trash2, Draw(color, scale, 0.5f, Form::Rectangle, true));
-			//addComp(trash2, trashSolidBody);
-			//addComp(trash2, Health(100));
-			//link(trash2, trash, Vec2(0, 0.1), 0);
-			//spawn(trash2);
 		}
 
-		//Vec2 dotSize(0.05, 0.05);
-		//Collider dotCollider = Collider(dotSize, Form::Rectangle);
-		//dotCollider.groupMask = CollisionGroup<1>::mask;
-		//Draw dotDrawable = Draw(Vec4(1, 1, 1, 0.5), dotSize, 0.6f, Form::Rectangle);
-		//for (float x = 1.0f; x < 10.0f; x += dotSize.x) {
-		//	for (float y = 1.0f; y < 10.0f; y += dotSize.y) {
-		//		auto dot = index_create();
-		//		addComp(dot, Base(Vec2(x, y)));
-		//		addComp(dot, dotCollider);
-		//		addComp(dot, dotDrawable);
-		//		addComp(dot, Tester());
-		//		spawn(dot);
-		//	}
-		//}
-
-		//auto spawner = id_create();
-		//auto cmps2 = viewComps(spawner);
-		//cmps2.add<Base>(Base(Vec2(20, 40), 0));
-		//cmps2.add<Collider>(Collider(Vec2(3.3, 3.3), Form::Circle));
-		//cmps2.add<PhysicsBody>(PhysicsBody(0.9f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
-		//cmps2.add<SpawnerComp>();
-		//spawn(spawner);
-		//
-		//auto sucker = index_create();
-		//auto cmps3 = viewComps(sucker);
-		//cmps3.add<Base>(Base(Vec2(20, 2), 0));
-		//auto coll = Collider(Vec2(7, 7), Form::Circle);
-		//cmps3.add<Collider>(coll);
-		//cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
-		//auto suckerCmd = SuckerComp();
-		//suckerCmd.spawner = spawner;
-		//cmps3.add<SuckerComp>(suckerCmd);
-		//spawn(sucker);
+		auto spawner = idCreate();
+		auto cmps2 = componentView(spawner);
+		cmps2.add<Base>(Base(Vec2(20, 40), 0));
+		cmps2.add<Collider>(Collider(Vec2(0.3, 0.3), Form::Circle));
+		cmps2.add<PhysicsBody>(PhysicsBody(0.0f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
+		cmps2.add<SpawnerComp>();
+		spawn(spawner);
+		
+		auto sucker = create();
+		auto cmps3 = componentView(sucker);
+		cmps3.add<Base>(Base(Vec2(20, 2), 0));
+		auto coll = Collider(Vec2(7, 7), Form::Circle);
+		cmps3.add<Collider>(coll);
+		cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
+		auto suckerCmd = SuckerComp();
+		suckerCmd.spawner = spawner;
+		cmps3.add<SuckerComp>(suckerCmd);
+		spawn(sucker);
 	}
 	else if (mapname_ == "uitest") {
 		this->physics.linearEffectDir = Vec2(0, -1);
@@ -235,6 +209,7 @@ void World::loadMap(std::string mapname_) {
 
 void World::saveMap(std::string filename)
 {
+	defragment(DefragMode::COMPLETE);
 	std::ofstream ofs(filename, std::ios::binary);
 	if (ofs.good()) {
 		{

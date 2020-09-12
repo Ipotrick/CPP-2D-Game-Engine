@@ -30,7 +30,7 @@ NUMBER_OF_PROCESSORS = 6
 OneDrive = C:\Users\Patrick\OneDrive
 OneDriveConsumer = C:\Users\Patrick\OneDrive
 OS = Windows_NT
-Path = C:\Program Files\Microsoft MPI\Bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Program Files\nodejs\;C:\Program Files\JDK11\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\MinGW\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Maven\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;;C:\Users\Patrick\AppData\Roaming\npm;C:\Program Files\Python34\Scripts;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;;C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin;
+Path = C:\Program Files\Microsoft MPI\Bin\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\LLVM\bin;C:\Program Files\dotnet\;C:\Android;C:\Windows\System32;C:\Program Files\Git\cmd;C:\Program Files\CMake\bin;C:\Program Files\nodejs\;C:\Program Files\JDK11\bin;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Users\Patrick\.cargo\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\MinGW\bin;C:\Program Files (x86)\nasm;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.15.26726\bin\Hostx64\x64;C:\Users\Patrick\AppData\Local\atom\bin;C:\Users\Patrick\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Patrick\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Maven\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.4\bin;;C:\Users\Patrick\AppData\Roaming\npm;C:\Program Files\Python34\Scripts;C:\Program Files\JetBrains\IntelliJ IDEA 2020.1\bin;;C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin;C:\Users\Patrick\.dotnet\tools
 PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
 PkgDefApplicationConfigFile = C:\Users\Patrick\AppData\Local\Microsoft\VisualStudio\16.0_2d768764\devenv.exe.config
 PROCESSOR_ARCHITECTURE = x86
@@ -45,7 +45,7 @@ ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
 PYTHONPATH = C:\Users\Patrick\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.8_qbz5n2kfra8p0\LocalCache\local-packages\Python38\site-packages
-ServiceHubLogSessionKey = CF4058C1
+ServiceHubLogSessionKey = C5303A24
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -82,55 +82,64 @@ cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
   CollisionConstraintSet.cpp
   CollisionSystem.cpp
   collision_detection.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(243,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionConstraintSet.cpp(18,75): warning C4554: "&": Überprüfen Sie die Operatorrangfolge auf mögliche Fehler. Verwenden Sie Klammern, um die Rangfolge zu verdeutlichen.
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\BulletScript.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\AgeScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionConstraintSet.cpp(18,75): warning C4554: "&": Überprüfen Sie die Operatorrangfolge auf mögliche Fehler. Verwenden Sie Klammern, um die Rangfolge zu verdeutlichen.
   DummyScript.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(120): warning C4715: "fastMod": Nicht alle Codepfade geben einen Wert zurück.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionSystem.cpp)
   Engine.cpp
+  EntityManager.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(120): warning C4715: "fastMod": Nicht alle Codepfade geben einen Wert zurück.
   EventHandler.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\DummyScript.cpp)
   Game.cpp
   World.cpp
   HealthScript.cpp
   htmlCompiler.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\DummyScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\htmlCompiler.cpp(115,14): warning C4806: "==": unsichere Operation: kein Wert vom Typ "bool" erweitert auf Typ "char" kann mit der angegebenen Konstante übereinstimmen
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Engine.cpp)
-  main.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Game.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\htmlCompiler.cpp(115,14): warning C4806: "==": unsichere Operation: kein Wert vom Typ "bool" erweitert auf Typ "char" kann mit der angegebenen Konstante übereinstimmen
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Game.cpp)
+  main.cpp
   Mat3.cpp
   Mat4.cpp
-  MovementSystem.cpp
+  MovementSystemcpp
   ParticleScript.cpp
   Physics.cpp
   PhysicsSystem.cpp
   PhysicsSystem2.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\main.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\MovementSystem.cpp)
-  PlayerScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\ParticleScript.cpp)
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(30,40): warning C4305: "=": Verkürzung von "unsigned int" in "CollisionMask"
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(30,30): warning C4309: "=": Verkürzung eines konstanten Wertes
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\MovementSystemcpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(32,40): warning C4305: "=": Verkürzung von "unsigned int" in "CollisionMask"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\ParticleScript.cpp(32,30): warning C4309: "=": Verkürzung eines konstanten Wertes
+  PlayerScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
   Qtree2.cpp
   QuadTree.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\PlayerScript.cpp)
   Renderer.cpp
   RenderingWorker.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PlayerScript.cpp)
-  SuckerScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Qtree2.cpp)
+  SuckerScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\QuadTree.cpp)
-  TesterScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(275,33): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
+  TesterScript.cpp
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.hpp(55): warning C4715: "Vertex::operator[]": Nicht alle Codepfade geben einen Wert zurück.
   TextureHandler.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\SuckerScript.cpp)
   Vec2.hpp
   EntityComponentManager.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\SuckerScript.cpp)
 C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\TesterScript.cpp)
      Bibliothek "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.lib" und Objekt "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exp" werden erstellt.
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

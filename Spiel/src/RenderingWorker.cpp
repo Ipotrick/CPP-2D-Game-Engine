@@ -122,7 +122,7 @@ void RenderingWorker::operator()()
 			Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
 			Mat3 pixelProjectionMatrix = Mat3::translate(Vec2(-1, -1)) * Mat3::scale(Vec2(1.0f / window->width, 1.0f / window->height)) * Mat3::scale(Vec2(2, 2));
 
-			std::stable_sort(drawables.begin(), drawables.end(),
+			std::sort(drawables.begin(), drawables.end(),
 				[](Drawable const& a, Drawable const& b) {
 					return a.drawingPrio < b.drawingPrio;
 				}
