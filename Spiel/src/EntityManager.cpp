@@ -147,10 +147,10 @@ void EntityManager::executeDestroys()
 			// reset id references:
 			auto id = indexToIdTable[index];
 			if (id & 1) {
-				freeStaticIdQueue.push_back(id);
+				freeDynamicIdQueue.push_back(id);
 			}
 			else {
-				freeDynamicIdQueue.push_back(id);
+				freeStaticIdQueue.push_back(id);
 			}
 			indexToIdTable[index] = INVALID_ID;
 			idToIndexTable[id] = INVALID_ENTITY;

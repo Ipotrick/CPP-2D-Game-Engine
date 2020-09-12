@@ -49,16 +49,16 @@ void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions,
 	Vec2 aabb = aabbBounds(c.size, b.rotaVec);
 	std::vector<Entity> near;
 	if (colliderType & Collider::DYNAMIC) {
-		qtreeDynamic.querry(&near, b.position, aabb);
+		qtreeDynamic.querry(near, b.position, aabb);
 	}
 	if (colliderType & Collider::STATIC) {
-		qtreeStatic.querry(&near, b.position, aabb);
+		qtreeStatic.querry(near, b.position, aabb);
 	}
 	if (colliderType & Collider::PARTICLE) {
-		qtreeParticle.querry(&near, b.position, aabb);
+		qtreeParticle.querry(near, b.position, aabb);
 	}
 	if (colliderType & Collider::SENSOR) {
-		qtreeSensor.querry(&near, b.position, aabb);
+		qtreeSensor.querry(near, b.position, aabb);
 	}
 	std::vector<CollPoint> verteciesBuffer;
 	generateCollisionInfos(world, collisions, aabbCache, near, 0xFFFFFFFF, b, c, aabb, verteciesBuffer);
@@ -76,7 +76,7 @@ void CollisionSystem::prepare(World& world)
 	// TODO REDO SPLIT OF COLLIDER
 	// split collidables
 	Vec2 minPos{ 0,0 }, maxPos{ 0,0 };
-	for (auto colliderID : world.entity_view<Collider>()) {
+	for (auto colliderID : world.entityView<Collider>()) {
 		auto& collider = world.getComp<Collider>(colliderID);
 		auto& baseCollider = world.getComp<Base>(colliderID);
 		minPos = min(minPos, baseCollider.position);
@@ -156,7 +156,7 @@ void CollisionSystem::cleanBuffers(World& world)
 	cleanAndShrink(aabbCache);
 	if (aabbCache.size() < world.maxEntityIndex()) aabbCache.resize(world.maxEntityIndex());
 	cleanAndShrink(collisionInfos);
-	for (auto ent : world.entity_view<Collider>()) {
+	for (auto ent : world.entityView<Collider>()) {
 		if (!world.hasComp<CollisionsToken>(ent))
 			world.addComp<CollisionsToken>(ent);
 		else {
@@ -253,6 +253,26 @@ void CollisionSystem::collisionDetection(World& world)
 		}
 		world.getComp<CollisionsToken>(currentEntity).end = collisionInfos.size();
 	}
+
+	for (Entity ent : world.entityView<Movement, Collider>()) {
+		Movement& mov = world.getComp<Movement>(ent);
+		if (mov.velocity.length() < 0.00001f) {
+			mov.velocity = Vec2(0, 0);
+			world.getComp<Collider>(ent).sleeping = true;
+		}
+		else {
+			world.getComp<Collider>(ent).sleeping = false;
+		}
+	}
+#define DEBUG_SLEEP
+#ifdef DEBUG_SLEEP
+	for (auto ent : world.entityView<Collider>()) {
+		auto& base = world.getComp<Base>(ent);
+		auto& coll = world.getComp<Collider>(ent);
+		if (coll.sleeping)
+			debugDrawables.push_back(Drawable(0, base.position, 0.81, Vec2(0.1,0.1), Vec4(0, 1, 0, 1), Form::Circle, RotaVec2(0)));
+	}
+#endif
 #ifdef DEBUG_HITBOX
 	for (auto ent : world.entity_view<Collider>()) {
 		auto& base = world.getComp<Base>(ent);

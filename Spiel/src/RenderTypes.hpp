@@ -56,7 +56,7 @@ struct Texture {
 
 
 struct TextureRef {
-	TextureRef(int textureId = -1, Vec2 minPos_ = { 0,0 }, Vec2 maxPos_ = { 1,1 }) :
+	TextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
 		minPos{ minPos_ },
 		maxPos{ maxPos_ },
 		textureId{ textureId }

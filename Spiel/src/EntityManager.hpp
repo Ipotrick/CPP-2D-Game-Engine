@@ -76,7 +76,6 @@ public:
 	}
 	EntityId getId(Entity entity)
 	{
-		assert(hasId(index));
 		return EntityId(indexToIdTable[entity], idToVersionTable[indexToIdTable[entity]]);
 	}
 	/* this function does not check if the id is valid */

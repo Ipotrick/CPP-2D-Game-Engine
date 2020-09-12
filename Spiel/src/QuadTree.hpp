@@ -78,7 +78,7 @@ public:
 	{
 		std::lock_guard lock(mut);
 		index &= ~(3);	// clip off the last 2 bits
-		// if (pages.at(page(index)) == nullptr) throw new std::exception("error: tried to delete not allocated children");
+		if (pages.at(page(index)) == nullptr) throw new std::exception("error: tried to delete not allocated children");
 		pages.at(page(index))->nodeCount -= 4;
 		for (int i = 0; i < 4; ++i) {
 			get(index + i).firstSubTree = 0;
@@ -108,15 +108,15 @@ public:
 
 	size_t freeCapacity() 
 	{
-		return freeStack.size();
+		return freeStack.size() * 4;
 	}
 
 private:
-	static const uint32_t PAGE_BITS = 5;
+	static const uint32_t PAGE_BITS = 6;
 	static const uint32_t PAGE_SIZE = 1 << PAGE_BITS;
 	static const uint32_t OFFSET_MASK = ~(-1 << PAGE_BITS);
 	static const uint32_t PAGE_COUNT = 10000;
-	static const bool DELETE_EMPTY_PAGES = false;
+	static const bool DELETE_EMPTY_PAGES = true;
 	static int offset(uint32_t index) {
 		return OFFSET_MASK & index;
 	}
@@ -138,13 +138,16 @@ class Quadtree3 {
 public:
 	Quadtree3(const Vec2 minPos_, const Vec2 maxPos_, const size_t capacity_, World& wrld, JobManager& jobManager, uint8_t TAG = 0);
 
-	~Quadtree3();
+	~Quadtree3()
+	{
+		nodes.reset();	// deallocates all heap memory
+	}
 
 	void insert(Entity ent, const std::vector<Vec2>& aabbs);
 
 	void broadInsert(const std::vector<Entity>& entities, const std::vector<Vec2>& aabbs);
 
-	void querry(std::vector<Entity>* rVec, const Vec2 qryPos, const Vec2 qrySize) const;
+	void querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize) const;
 
 	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, std::vector<Drawable>& draw) const {
 		querryDebug(qryPos, qrySize, 0, m_pos, m_size, draw, 0);
@@ -186,7 +189,7 @@ public:
 private:
 	void insert(const uint32_t ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
 	void broadInsert(const std::vector<Entity>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
-	void querry(std::vector<Entity>* rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize) const;
+	void querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize) const;
 	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, int depth) const;
 	void querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, const Vec4 color, const int depth) const;
 

@@ -148,8 +148,8 @@ inline void generateCollisionInfos(
 		baseColl.rotaVec);
 	for (const auto otherID : nearCollidablesBuffer) {
 		if (me != otherID) { //do not check against self
-			const auto baseOther = manager.getComp<Base>(otherID);
-			const auto colliderOther = manager.getComp<Collider>(otherID);
+			const auto& baseOther = manager.getComp<Base>(otherID);
+			const auto& colliderOther = manager.getComp<Collider>(otherID);
 			if (!(colliderColl.ignoreGroupMask & colliderOther.groupMask)) {
 				if (isOverlappingAABB(baseColl.position, aabbMe, baseOther.position, aabbCache.at(otherID))) {
 					if (colliderColl.extraColliders.empty() & colliderOther.extraColliders.empty()) {
@@ -191,7 +191,7 @@ inline void generateCollisionInfos(
 						if (collisionVertices.size() > 1) {
 							Vec2 minV{ FLT_MIN, FLT_MIN };
 							Vec2 maxV{ FLT_MAX, FLT_MAX };
-							for (auto v : collisionVertices) {
+							for (const auto& v : collisionVertices) {
 								minV = min(v.pos, minV);
 								maxV = max(v.pos, maxV);
 							}

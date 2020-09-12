@@ -5,10 +5,10 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 10000 }, // 10000 microseconds = 10 milliseond => 100 loops per second
-	maxDeltaTime{0.02f},
+	minimunLoopTime{ 1 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	maxDeltaTime{ 0.02f },
 	deltaTime{ 0.0 },
-	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_)},
+	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_) },
 	jobManager(std::thread::hardware_concurrency()),
 	collisionSystem{ world, jobManager, perfLog },
 	physicsSystem2{ jobManager, perfLog },
@@ -162,7 +162,7 @@ Drawable buildWorldSpaceDrawable(World& world, Entity entity) {
 
 void Engine::rendererUpdate(World& world)
 {
-	for (auto ent : world.entity_view<Base,Draw>()) {
+	for (auto ent : world.entityView<Base,Draw>()) {
 		renderer.submit(buildWorldSpaceDrawable(world, ent));
 	}
 	renderer.setCamera(camera);

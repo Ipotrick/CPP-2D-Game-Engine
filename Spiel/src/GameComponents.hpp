@@ -34,6 +34,7 @@ struct ParticleScriptComp : public CompData {
 		ar& endSize;
 		ar& startColor;
 		ar& endColor;
+		ar& collisionCount;
 	}
 	ParticleScriptComp() {}
 	ParticleScriptComp(Vec2 startSize, Vec2 endSize, Vec4 startColor, Vec4 endColor) : startSize{ startSize }, endSize{ endSize }, startColor{ startColor }, endColor{ endColor } {}
@@ -41,6 +42,7 @@ struct ParticleScriptComp : public CompData {
 	Vec2 endSize;
 	Vec4 startColor;
 	Vec4 endColor;
+	int collisionCount = 0;
 };
 
 // player component
@@ -55,7 +57,7 @@ struct Player : public CompData {
 		ar& dummyExis;
 		ar& power;
 	}
-	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.001f }, dummyExis{ EntityId() } {}
+	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.008f }, dummyExis{ EntityId() } {}
 	LapTimer<> bulletShotLapTimer;
 	LapTimer<> flameSpawnTimer;
 	EntityId dummyExis;

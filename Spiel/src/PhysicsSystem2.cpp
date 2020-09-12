@@ -353,9 +353,11 @@ void PhysicsSystem2::applyImpulsesMultiThreadded(World& world)
 
 void PhysicsSystem2::applyForcefields(World& world, float deltaTime)
 {
-	for (auto ent : world.entity_view<PhysicsBody, Movement, Base>()) {
-		world.getComp<Movement>(ent).velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
-		world.getComp<Movement>(ent).velocity += world.physics.linearEffectDir * world.physics.linearEffectForce * (1.0f / world.getComp<PhysicsBody>(ent).mass) * deltaTime;
+	for (auto [ent, p, mov, base] : world.entityComponentView<PhysicsBody, Movement, Base>()) {
+		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
+		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce * (1.0f / world.getComp<PhysicsBody>(ent).mass) * deltaTime;
+		mov.velocity *= (1.0f - world.physics.friction * deltaTime);
+		mov.angleVelocity *= (1.0f - world.physics.friction * deltaTime);
 	}
 }
 

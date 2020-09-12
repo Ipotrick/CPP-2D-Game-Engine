@@ -231,9 +231,6 @@
     <ClInclude Include="src\SuckerScript.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\MovementSystem.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\SweepAndPrune.hpp">
       <Filter>_Engine\_Collision</Filter>
     </ClInclude>
@@ -260,6 +257,12 @@
     </ClInclude>
     <ClInclude Include="src\EntityManager.hpp">
       <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MovementSystem.hpp">
+      <Filter>_Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ComponentTypes.hpp">
+      <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -341,9 +344,6 @@
     <ClCompile Include="src\SuckerScript.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\MovementSystem.cpp">
-      <Filter>_Engine</Filter>
-    </ClCompile>
     <ClCompile Include="src\Qtree2.cpp">
       <Filter>_Engine\_Collision</Filter>
     </ClCompile>
@@ -364,6 +364,9 @@
     </ClCompile>
     <ClCompile Include="src\EntityManager.cpp">
       <Filter>_Engine\_Component</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MovementSystem.cpp">
+      <Filter>_Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

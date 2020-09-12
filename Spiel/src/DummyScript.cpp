@@ -5,8 +5,8 @@ void DummyScript::script(Entity me, Dummy& data, float deltaTime) {
 	World& world = engine.world;
 
 	auto player = world.getIndex(data.player_id);
-	auto compsPlayer = world.viewComps(player);
-	auto compsMe = world.viewComps(me);
+	auto compsPlayer = world.componentView(player);
+	auto compsMe = world.componentView(me);
 	float distance = length(compsMe.get<Base>().position - compsPlayer.get<Base>().position);
 	//std::cout << "distanz " << distance << std::endl;
 

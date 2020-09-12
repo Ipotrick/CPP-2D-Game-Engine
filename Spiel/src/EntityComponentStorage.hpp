@@ -151,7 +151,7 @@ public:
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		Entity data() {
+		CompType& data() {
 			assert(entity < end);
 			return compStore.storage[entity];
 		}
@@ -329,7 +329,7 @@ public:
 		bool operator!=(self_type const& rhs) {
 			return entity != rhs.entity;
 		}
-		Entity data() {
+		CompType& data() {
 			return compStore.pages[page(entity)]->data[offset(entity)];
 		}
 	private:
@@ -486,7 +486,7 @@ public:
 		{
 			return denseTableIndex != rhs.denseTableIndex;
 		}
-		inline CompType data()
+		inline CompType& data()
 		{
 			return compStore.storage[denseTableIndex];
 		}
@@ -654,7 +654,7 @@ public:
 		inline bool operator!=(self_type const& rhs) {
 			return denseTableIndex != rhs.denseTableIndex;
 		}
-		inline CompType data() {
+		inline CompType& data() {
 			return compStore.storage[denseTableIndex];
 		}
 	private:
