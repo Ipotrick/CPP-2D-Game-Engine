@@ -118,12 +118,12 @@ private:
 
 // ---- Component Accessors implementations --------------------------------
 
-template<typename CompType> __forceinline auto& EntityComponentManager::getAll() {
+template<typename CompType> inline auto& EntityComponentManager::getAll() {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	return std::get<tuple_index>(componentStorageTuple);
 } 
 
-template<typename CompType> __forceinline CompType& EntityComponentManager::getComp(Entity index) {
+template<typename CompType> inline CompType& EntityComponentManager::getComp(Entity index) {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	return std::get<tuple_index>(componentStorageTuple).get(index);
 }
@@ -146,7 +146,7 @@ inline auto EntityComponentManager::getComps(EntityId id)
 	return std::tuple<CompType&...>(getComp<CompType>(ent) ...);
 }
 
-template<typename CompType> __forceinline bool EntityComponentManager::hasComp(Entity index) {
+template<typename CompType> inline bool EntityComponentManager::hasComp(Entity index) {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	return std::get<tuple_index>(componentStorageTuple).contains(index);
 }
@@ -156,7 +156,7 @@ inline bool EntityComponentManager::hasComp(EntityId id)
 	return hasComp<CompType>(idToIndexTable[id.identifier]);
 }
 
-template<typename CompType> __forceinline bool EntityComponentManager::hasntComp(Entity index) {
+template<typename CompType> inline bool EntityComponentManager::hasntComp(Entity index) {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	return !std::get<tuple_index>(componentStorageTuple).contains(index);
 }
@@ -166,7 +166,7 @@ inline bool EntityComponentManager::hasntComp(EntityId id)
 	return hasntComp<CompType>(idToIndexTable[id.identifier]);
 }
 
-template<typename CompType> __forceinline CompType& EntityComponentManager::addComp(Entity index, CompType data) {
+template<typename CompType> inline CompType& EntityComponentManager::addComp(Entity index, CompType data) {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	std::get<tuple_index>(componentStorageTuple).insert(index, data);
 	return std::get<tuple_index>(componentStorageTuple)[index];
@@ -178,7 +178,7 @@ inline CompType& EntityComponentManager::addComp(EntityId id, CompType data)
 }
 
 
-template<typename CompType> __forceinline void EntityComponentManager::remComp(Entity index) {
+template<typename CompType> inline void EntityComponentManager::remComp(Entity index) {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	std::get<tuple_index>(componentStorageTuple).remove(index);
 }
@@ -372,21 +372,27 @@ using PBody = PhysicsBody;
 using TexRef = TextureRef;
 class ComponentView {
 public:
-	ComponentView(EntityComponentManager& manager, Entity index) : manager{ manager }, index{ index } {}
-	template<typename CompType> __forceinline bool has() { return manager.hasComp<CompType>(index); }
-	template<typename CompType> __forceinline CompType& add() {
-		return manager.addComp<CompType>(index);
+	ComponentView(EntityComponentManager& manager, Entity index) 
+		: manager{ manager }, index{ index } 
+	{}
+	template<typename ... CompTypes> [[nodiscard]] bool has()
+	{ 
+		return manager.hasComps<CompTypes...>(index);
 	}
-	template<typename CompType> __forceinline CompType& add(CompType comp) {
+	template<typename CompType> CompType& add(CompType comp = CompType()) 
+	{
 		return manager.addComp<CompType>(index, comp);
 	}
-	template<typename CompType> __forceinline CompType& get() { return manager.getComp<CompType>(index); }
+	template<typename ... CompTypes> [[nodiscard]] std::tuple<CompTypes&...> get()
+	{ 
+		return manager.getComps<CompTypes...>(index);
+	}
 private:
 	EntityComponentManager& manager;
 	Entity index;
 };
 
-__forceinline ComponentView EntityComponentManager::componentView(Entity index)
+inline ComponentView EntityComponentManager::componentView(Entity index)
 {
 	return ComponentView(*this, index);
 }
