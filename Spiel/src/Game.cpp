@@ -1,5 +1,4 @@
 #include "Game.hpp"
-#include "htmlCompiler.hpp"
 #include <iomanip>
 
 using namespace std_extra;
@@ -24,6 +23,17 @@ void Game::create() {
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
 	world.loadMap("world.wrld");
+
+	UIFrame frame;
+	frame.position = Vec2(50, 150);
+	frame.size = Vec2(100, 100);
+	frame.script = [](UIFrame& f, World& w) -> Drawable {
+		for (auto [playerEnt, playerComp, move] : w.entityComponentView<Player, Movement>()) {
+			float b = move.velocity.length() * 20;
+			return Drawable(0, Vec2(b/2, 0) + f.position, 1.0f, Vec2(b,0) + f.size, Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0), DrawMode::PixelSpace);
+		}
+	};
+	ui.createFrame("Test", std::move(frame));
 }
 
 void Game::update(float deltaTime) {
@@ -51,15 +61,12 @@ void Game::update(float deltaTime) {
 
 void Game::gameplayUpdate(float deltaTime)
 {
-
-
 	for (auto ent : world.entityView<Base>()) {
 		Base& b = world.getComp<Base>(ent);
 		if (b.position.length() > 1000.0f) {
 			std::cout << "WARNING: ENTITY WAY OUT LIMITS WITH DIST TO CENTER OF: " << b.position.length() << std::endl;
 		}
 	}
-
 
 	for (auto ent : world.entityView<Base, Movement>()) {
 		if (world.getComp<Base>(ent).position.length() > 1000)
@@ -127,17 +134,14 @@ void Game::gameplayUpdate(float deltaTime)
 
 	//execute scripts
 	playerScript.execute(deltaTime);
-	{
-		healthScript.execute(deltaTime);
-		ageScript.execute(deltaTime);
-		bulletScript.execute(deltaTime);
-		particleScript.execute(deltaTime);
-		dummyScript.execute(deltaTime);
-		suckerScript.execute(deltaTime);
-		{
-			testerScript.execute<500>(deltaTime, jobManager);
-		}
-	}
+	healthScript.execute(deltaTime);
+	ageScript.execute(deltaTime);
+	bulletScript.execute(deltaTime);
+	particleScript.execute(deltaTime);
+	dummyScript.execute(deltaTime);
+	suckerScript.execute(deltaTime);
+	testerScript.execute<500>(deltaTime, jobManager);
+
 	for (auto ent : world.entityView<SpawnerComp>()) {
 		auto base = world.getComp<Base>(ent);
 		int laps = spawnerLapTimer.getLaps(deltaTime);
@@ -173,6 +177,7 @@ void Game::gameplayUpdate(float deltaTime)
 
 void Game::destroy()
 {
+	ui.destroyFrame("Test");
 	world.saveMap("world.wrld");
 }
 

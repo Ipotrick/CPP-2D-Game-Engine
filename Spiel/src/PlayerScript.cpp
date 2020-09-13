@@ -103,6 +103,7 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 			world.addComp<Draw>(bullet, bulletDraw);
 			world.addComp<Collider>(bullet, bulletCollider);
 			world.addComp<Bullet>(bullet, Bullet(10, 3));
+			world.spawn(bullet);
 		}
 	}
 
