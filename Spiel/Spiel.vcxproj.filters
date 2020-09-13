@@ -216,9 +216,6 @@
     <ClInclude Include="src\PlayerScript.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\htmlCompiler.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
     <ClInclude Include="src\EntityTypes.hpp">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
@@ -263,6 +260,12 @@
     </ClInclude>
     <ClInclude Include="src\ComponentTypes.hpp">
       <Filter>Headerdateien</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIManager.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIElement.hpp">
+      <Filter>_Engine\_UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -323,9 +326,6 @@
     <ClCompile Include="src\DummyScript.cpp">
       <Filter>Quelldateien</Filter>
     </ClCompile>
-    <ClCompile Include="src\htmlCompiler.cpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClCompile>
     <ClCompile Include="src\collision_detection.cpp">
       <Filter>_Engine\_Collision</Filter>
     </ClCompile>
@@ -367,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="src\MovementSystem.cpp">
       <Filter>_Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIManager.cpp">
+      <Filter>_Engine\_UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

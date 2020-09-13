@@ -57,7 +57,8 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 
 		if (relativeAge > 0.7f || data.collisionCount > 2) {
 			world.remComp<Collider>(me);
-			mov.velocity = clamp(mov.velocity, -Vec2(0.01, 0.01), Vec2(0.01, 0.01));
+			mov.velocity = Vec2(0, 0);
+			mov.angleVelocity = 0;
 		}
 	}
 

@@ -12,7 +12,8 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	jobManager(std::thread::hardware_concurrency()),
 	collisionSystem{ world, jobManager, perfLog },
 	physicsSystem2{ jobManager, perfLog },
-	renderer{ window, world.texture }
+	renderer{ window, world.texture },
+	ui{ world, renderer }
 {
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
@@ -134,6 +135,8 @@ void Engine::run() {
 				update(getDeltaTimeSafe());
 			}
 			{
+				ui.update();
+				ui.submitUI();
 				rendererUpdate(world);
 			}
 		}

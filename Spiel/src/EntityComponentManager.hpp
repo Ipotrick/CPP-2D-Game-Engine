@@ -383,9 +383,9 @@ public:
 	{
 		return manager.addComp<CompType>(index, comp);
 	}
-	template<typename ... CompTypes> [[nodiscard]] std::tuple<CompTypes&...> get()
+	template<typename CompType> [[nodiscard]] CompType& get()
 	{ 
-		return manager.getComps<CompTypes...>(index);
+		return manager.getComp<CompType>(index);
 	}
 private:
 	EntityComponentManager& manager;

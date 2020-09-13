@@ -54,7 +54,6 @@
     <ClInclude Include="src\GameSystemUnifroms.hpp" />
     <ClInclude Include="src\GameWorld.hpp" />
     <ClInclude Include="src\HealthScript.hpp" />
-    <ClInclude Include="src\htmlCompiler.hpp" />
     <ClInclude Include="src\IndexSet.hpp" />
     <ClInclude Include="src\Input.hpp" />
     <ClInclude Include="src\JobManager.hpp" />
@@ -85,6 +84,8 @@
     <ClInclude Include="src\TextureHandler.hpp" />
     <ClInclude Include="src\TextureUniforms.hpp" />
     <ClInclude Include="src\Timing.hpp" />
+    <ClInclude Include="src\UIElement.hpp" />
+    <ClInclude Include="src\UIManager.hpp" />
     <ClInclude Include="src\Vec.hpp" />
     <ClInclude Include="src\Vec3.hpp" />
     <ClInclude Include="src\Vec4.hpp" />
@@ -107,9 +108,9 @@
     <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\UIManager.cpp" />
     <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />
-    <ClCompile Include="src\htmlCompiler.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mat3.cpp" />
     <ClCompile Include="src\Mat4.cpp" />
