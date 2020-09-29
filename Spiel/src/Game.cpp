@@ -23,17 +23,20 @@ void Game::create() {
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
 	world.loadMap("world.wrld");
+	{
+		UIFrame frame({ 500, 500 }, { 300.5f, 300.5f }, world.texture.getId("border.png"));
+		frame.borders.y = 20;
+		frame.borders.x = 20;
+		ui.setAlias("Test", ui.createFrame(std::move(frame)));
 
-	UIFrame frame;
-	frame.position = Vec2(50, 150);
-	frame.size = Vec2(100, 100);
-	frame.script = [](UIFrame& f, World& w) -> Drawable {
-		for (auto [playerEnt, playerComp, move] : w.entityComponentView<Player, Movement>()) {
-			float b = move.velocity.length() * 20;
-			return Drawable(0, Vec2(b/2, 0) + f.position, 1.0f, Vec2(b,0) + f.size, Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0), DrawMode::PixelSpace);
-		}
-	};
-	ui.createFrame("Test", std::move(frame));
+		UIText textEl = UIText("Gravitation: ", world.texture.getId("ConsolasAtlas.png"));
+		textEl.fontSize = { 20.0f };
+		textEl.borderDist = { 0.0f, 0.0f };
+		textEl.color = { 1.0f, 0.5f, 0.5f, 1.0f };
+		auto index = ui.createElement<UIText>(textEl);
+		UIText* ptr = &ui.getElement<UIText>(index);
+		ui["Test"].giveChild(ptr);
+	}
 }
 
 void Game::update(float deltaTime) {
@@ -55,18 +58,16 @@ void Game::update(float deltaTime) {
 		}
 	}
 	gameplayUpdate(deltaTime);
-	world.flushLaterActions();
+	world.update();
 
 }
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	for (auto ent : world.entityView<Base>()) {
-		Base& b = world.getComp<Base>(ent);
-		if (b.position.length() > 1000.0f) {
-			std::cout << "WARNING: ENTITY WAY OUT LIMITS WITH DIST TO CENTER OF: " << b.position.length() << std::endl;
-		}
-	}
+	std::stringstream ss;
+	for (int i = 0; i < 100; i++)
+		ss << std::to_string(rand());
+	((UIText*)ui["Test"].getChild())->text = ss.str();
 
 	for (auto ent : world.entityView<Base, Movement>()) {
 		if (world.getComp<Base>(ent).position.length() > 1000)
@@ -129,8 +130,10 @@ void Game::gameplayUpdate(float deltaTime)
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
 	}
+	if (keyPressed(KEY::B)) {
+		ui.destroyFrame("Test");
+	}
 
-	cursorManipFunc();
 
 	//execute scripts
 	playerScript.execute(deltaTime);
@@ -141,6 +144,8 @@ void Game::gameplayUpdate(float deltaTime)
 	dummyScript.execute(deltaTime);
 	suckerScript.execute(deltaTime);
 	testerScript.execute<500>(deltaTime, jobManager);
+
+	cursorManipFunc();
 
 	for (auto ent : world.entityView<SpawnerComp>()) {
 		auto base = world.getComp<Base>(ent);

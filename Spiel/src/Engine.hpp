@@ -29,6 +29,7 @@
 #include "Camera.hpp"
 #include "EventHandler.hpp"
 #include "World.hpp"
+#include "UIManager.hpp"
 
 // Core Systems
 #include "MovementSystem.hpp"
@@ -132,9 +133,11 @@ private:
 	// window
 	std::shared_ptr<Window> window;
 public:
-
 	// render
 	Renderer renderer;
+
+	// UI
+	UIManager ui;
 
 };
 

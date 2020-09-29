@@ -84,8 +84,12 @@
     <ClInclude Include="src\TextureHandler.hpp" />
     <ClInclude Include="src\TextureUniforms.hpp" />
     <ClInclude Include="src\Timing.hpp" />
+    <ClInclude Include="src\UIButton.hpp" />
     <ClInclude Include="src\UIElement.hpp" />
+    <ClInclude Include="src\UIFrame.hpp" />
     <ClInclude Include="src\UIManager.hpp" />
+    <ClInclude Include="src\UIReflect.hpp" />
+    <ClInclude Include="src\UIText.hpp" />
     <ClInclude Include="src\Vec.hpp" />
     <ClInclude Include="src\Vec3.hpp" />
     <ClInclude Include="src\Vec4.hpp" />
@@ -108,6 +112,8 @@
     <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\UIElement.cpp" />
+    <ClCompile Include="src\UIFrame.cpp" />
     <ClCompile Include="src\UIManager.cpp" />
     <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />

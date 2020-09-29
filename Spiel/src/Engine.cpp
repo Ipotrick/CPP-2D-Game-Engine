@@ -13,7 +13,7 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	collisionSystem{ world, jobManager, perfLog },
 	physicsSystem2{ jobManager, perfLog },
 	renderer{ window, world.texture },
-	ui{ world, renderer }
+	ui{ renderer, world }
 {
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
@@ -136,7 +136,8 @@ void Engine::run() {
 			}
 			{
 				ui.update();
-				ui.submitUI();
+				UIContext context;	// TODO GIVE REAL VALUES
+				ui.draw(context);
 				rendererUpdate(world);
 			}
 		}

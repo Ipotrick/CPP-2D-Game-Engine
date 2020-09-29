@@ -267,6 +267,18 @@
     <ClInclude Include="src\UIElement.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
+    <ClInclude Include="src\UIFrame.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIText.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIReflect.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIButton.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -369,6 +381,12 @@
       <Filter>_Engine</Filter>
     </ClCompile>
     <ClCompile Include="src\UIManager.cpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIFrame.cpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIElement.cpp">
       <Filter>_Engine\_UI</Filter>
     </ClCompile>
   </ItemGroup>
