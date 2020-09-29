@@ -144,11 +144,11 @@ void World::loadMap(std::string mapname_) {
 		cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
 		spawn(box);
 
-		int num = 5'000;// 250'000;
+		int num = 100'000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = create();
 			auto c = componentView(ent);
-			c.add<Base>(Base(Vec2(rand()%10000/100.0f, rand()%10000/100.0f)));
+			c.add<Base>(Base(Vec2(rand()%10000/10.0f, rand()%10000/10.0f)));
 			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.1f, Form::Rectangle));
 			c.add<Tester>();
 			spawn(ent);

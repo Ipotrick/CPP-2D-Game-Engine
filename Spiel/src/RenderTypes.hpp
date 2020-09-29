@@ -16,13 +16,13 @@
 #include "Window.hpp"
 
 enum class DrawMode : char {
-	/*world coordinates*/
+	/*world coordinates, (0,0) is world's (0,0)*/
 	WorldSpace,
-	/* window (-1 to 1 in x and y) cooordinates */
+	/* window (-1 to 1 in x and y) cooordinates, (0,0) is middle */
 	WindowSpace,
-	/* window coordinates that ignore aspect ratio*/
+	/* window coordinates that ignore aspect ratio, (0,0) is middle*/
 	UniformWindowSpace,
-	/* coordinates are pixels */
+	/* coordinates are pixels, (0,0) is lower left corner */
 	PixelSpace
 };
 

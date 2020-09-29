@@ -196,18 +196,18 @@ class ComponentStorage<CompType, paged_indexing> {
 		return entity & OFFSET_MASK;
 	}
 	static const bool DELETE_EMPTY_PAGES{ false };
-	struct Page {
+	class Page {
+	public:
+		std::array<CompType, PAGE_SIZE> data;
+		int usedCount{ 0 };
 	private:
 		friend class boost::serialization::access;
 		template<class Archive>
 		void serialize(Archive& ar, const unsigned int version)
 		{
-			ar & data;
+			ar& data;
 			ar& usedCount;
 		}
-	public:
-		std::array<CompType, PAGE_SIZE> data;
-		int usedCount{ 0 };
 	};
 public:
 	using Component = CompType;
@@ -232,13 +232,15 @@ public:
 			pages.resize(page(newEntNum-1)+1, nullptr);
 	}
 	inline void insert(Entity entity, CompType const& comp) {
-		if (pages[page(entity)] == nullptr)
+		if (pages[page(entity)] == nullptr) {
 			pages[page(entity)] = new Page;
+		}
 
 		containsVec[entity] = true;
 
 		pages[page(entity)]->data[offset(entity)] = comp;
 		pages[page(entity)]->usedCount += 1;
+		++m_size;
 	}
 	inline void remove(Entity entity) {
 		if (contains(entity)) {
@@ -251,6 +253,7 @@ public:
 					pages[page(entity)] = nullptr;
 				}
 			}
+			--m_size;
 		}
 	}
 	inline bool contains(Entity entity) const {
@@ -275,12 +278,7 @@ public:
 		return get(entity);
 	}
 	inline size_t size() const {
-		size_t size = 0;
-		for (const auto& page : pages) {
-			if (page != nullptr)
-				size += page->usedCount;
-		}
-		return size;
+		return m_size;
 	}
 
 	template<typename CompType>
@@ -369,6 +367,7 @@ public:
 	}
 private:
 	size_t usedPages{ 0 };
+	size_t m_size{ 0 };
 	std::vector<Page*> pages;
 	std::vector<bool> containsVec;
 };

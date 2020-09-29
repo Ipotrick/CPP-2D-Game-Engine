@@ -65,7 +65,7 @@ public:
 	[[nodiscard]] ComponentView componentView(EntityId id);
 
 	// Meta utility:
-	void flushLaterActions();
+	void update();
 	enum class DefragMode {
 		NONE,
 		LAZY,

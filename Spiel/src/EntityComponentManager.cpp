@@ -1,6 +1,6 @@
 #include "EntityComponentManager.hpp"
 
-void EntityComponentManager::flushLaterActions()
+void EntityComponentManager::update()
 {
 	executeDelayedSpawns();
 	deregisterDestroyedEntities();
