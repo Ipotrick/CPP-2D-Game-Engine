@@ -5,6 +5,7 @@
 #include <optional>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/static_string.hpp>
 
 #include "robin_hood.h"
 
@@ -53,10 +54,68 @@ struct Texture {
 	bool good{ true };
 };
 
+struct TextureId {
+	int index{ -1 };
+	int version{ 0 };
+	void reset()
+	{
+		index = -1;
+		version = 0;
+	}
+};
+
+class TextureRef2 {
+public:
+
+	TextureRef2(const std::string& filename = "default", Vec2 minPos = { 0,0 }, Vec2 maxPos = { 0,0 })
+		:filename{ filename }, minPos{ minPos }, maxPos{ maxPos }
+	{}
+	TextureRef2(const std::string_view& filename, Vec2 minPos = { 0,0 }, Vec2 maxPos = { 0,0 })
+		:minPos{ minPos }, maxPos{ maxPos }
+	{
+		this->filename.resize(std::min(filename.size(), size_t(32)));
+		for (int i = 0; i < 32 && i < filename.size(); i++) {
+			this->filename.at(i) = filename.at(i);
+		}
+	}
+
+	void setFilename(const std::string& filename)
+	{
+		this->filename = filename;
+		id.reset();
+	}
+	const boost::static_string<32>& getFilename() const
+	{
+		return filename;
+	}
+	void setId(TextureId texId)
+	{
+		this->id = texId;
+	}
+	TextureId getId() const
+	{
+		return this->id;
+	}
+
+	Vec2 minPos{ 0.0f, 0.0f };
+	Vec2 maxPos{ 1.0f, 1.0f };
+private:
+	boost::static_string<32> filename{ "default" };
+	TextureId id;
+	friend class boost::serialization::access;
+
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& filename;
+		ar& minPos;
+		ar& maxPos;
+	}
+};
 
 
-struct TextureRef {
-	TextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
+struct SmallTextureRef {
+	SmallTextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
 		minPos{ minPos_ },
 		maxPos{ maxPos_ },
 		textureId{ textureId }
@@ -78,9 +137,22 @@ private:
 	}
 };
 
-inline TextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
+inline TextureRef2 makeAtlasRef2(const std::string_view& name, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
 {
-	TextureRef texRef;
+	TextureRef2 texRef(name);
+	texRef.minPos = startAtlasCell / atlasGridSize;
+	if (endAtlasCell == Vec2{ 0,0 }) {
+		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
+	}
+	else {
+		texRef.maxPos = (endAtlasCell + Vec2(1, 1)) / atlasGridSize;
+	}
+	return texRef;
+}
+
+inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
+{
+	SmallTextureRef texRef;
 	texRef.textureId = atlasId;
 	texRef.minPos = startAtlasCell / atlasGridSize;
 	if (endAtlasCell == Vec2{ 0,0 }) {
@@ -92,9 +164,18 @@ inline TextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2
 	return texRef;
 }
 
-inline TextureRef makeAsciiRef(int atlasTextureId, char c)
+inline TextureRef2 makeAsciiRef2(const std::string_view& name, char c)
 {
-	TextureRef texRef;
+	TextureRef2 texRef;
+	c -= 0x20;
+	Vec2 atlasCoord(c % 8, 15 - c / 8);
+	texRef = makeAtlasRef2(name, Vec2(8, 16), atlasCoord);
+	return texRef;
+}
+
+inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
+{
+	SmallTextureRef texRef;
 	c -= 0x20;
 	Vec2 atlasCoord(c % 8, 15 - c / 8);
 	texRef = makeAtlasRef(atlasTextureId, Vec2(8, 16), atlasCoord);
@@ -111,9 +192,9 @@ public:
 	float drawingPrio;
 	uint32_t id;
 	Form form;
-	std::optional<TextureRef> texRef;
+	std::optional<SmallTextureRef> texRef;
 
-	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, DrawMode drawMode = DrawMode::WorldSpace, TextureRef texRef = {}) :
+	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, DrawMode drawMode = DrawMode::WorldSpace, SmallTextureRef texRef = {}) :
 		position{ position_ },
 		rotationVec{ rotation_ },
 		drawingPrio{ drawingPrio_ },
@@ -147,6 +228,7 @@ struct Light {
 struct RenderBuffer {
 	std::vector<Drawable> drawables{};
 	std::vector<std::string*> textureNames;
+	bool resetTextureCache{ false };
 	Camera camera{};
 };
 

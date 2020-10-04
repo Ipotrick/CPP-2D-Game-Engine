@@ -10,7 +10,7 @@
 class TextureUniforms {
 public:
 	static constexpr int WHITE = 0;
-	static constexpr int DEFAULT = 1;
+	static constexpr int DEFAULT = 1; 
 	TextureUniforms()
 	{
 		textureNames.push_back(std::make_unique<std::string>("white"));
@@ -20,7 +20,7 @@ public:
 	}
 	int getId(const std::string& filename);
 	const std::string& getTextureName(int textureId) const;
-	const std::string& getTextureName(const TextureRef& texRef) const;
+	const std::string& getTextureName(const SmallTextureRef& texRef) const;
 private:
 	friend class boost::serialization::access;
 	template<class Archive>
@@ -30,6 +30,7 @@ private:
 		for (const auto& s : textureNames) {
 			sv.emplace_back(std::string(*s));
 		}
+		printf("sv size save: %i\n", sv.size());
 		ar << sv;
 		ar << textureNameToId;
 	}
@@ -37,13 +38,15 @@ private:
 	template<class Archive>
 	void load(Archive& ar, const unsigned int version)
 	{
-		textureNameToId.clear();
 		textureNames.clear();
 		std::vector<std::string> sv;
 		ar >> sv;
+		printf("\n\nsv size load: %i\n\n\n", sv.size());
 		for (auto& s : sv) {
 			textureNames.push_back(std::make_unique<std::string>(std::move(s)));
 		}
+
+		textureNameToId.clear();
 		ar >> textureNameToId;
 	}
 
@@ -63,11 +66,8 @@ inline int TextureUniforms::getId(const std::string& filename)
 	if (iter == textureNameToId.end()) {
 		textureNames.push_back(std::make_unique<std::string>(filename));
 		textureNameToId[filename] = (int)textureNames.size() - 1;
-		return (int)textureNames.size() - 1;
 	}
-	else {
-		return textureNameToId[filename];
-	}
+	return textureNameToId[filename];
 }
 
 inline const std::string& TextureUniforms::getTextureName(int textureIndex) const
@@ -79,7 +79,7 @@ inline const std::string& TextureUniforms::getTextureName(int textureIndex) cons
 	return *textureNames[textureIndex];
 }
 
-inline const std::string& TextureUniforms::getTextureName(const TextureRef& texRef) const
+inline const std::string& TextureUniforms::getTextureName(const SmallTextureRef& texRef) const
 {
 	if (texRef.textureId < 0 || texRef.textureId >= textureNames.size()) {
 		std::cerr << "ERROR: The texture index: " << texRef.textureId << " has no correcponding texture!" << std::endl;

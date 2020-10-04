@@ -43,6 +43,9 @@
     <Filter Include="_Engine\_Collision">
       <UniqueIdentifier>{af4549b1-e840-49f3-be88-0a5b9e8721f0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_IO">
+      <UniqueIdentifier>{1389f8ae-44f9-42d1-8125-c1cccaef4dec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
@@ -279,6 +282,9 @@
     <ClInclude Include="src\UIButton.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
+    <ClInclude Include="src\InputManager.hpp">
+      <Filter>_Engine\_IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -388,6 +394,9 @@
     </ClCompile>
     <ClCompile Include="src\UIElement.cpp">
       <Filter>_Engine\_UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputManager.cpp">
+      <Filter>_Engine\_IO</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

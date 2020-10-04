@@ -12,7 +12,7 @@ public:
 	UIFrame()
 	{ }
 
-	UIFrame(Vec2 pos, Vec2 size, TextureRef texAtlas)
+	UIFrame(Vec2 pos, Vec2 size, SmallTextureRef texAtlas)
 		:position{pos}, size{size}, texAtlas{texAtlas}
 	{ }
 
@@ -22,8 +22,8 @@ public:
 	Vec2 getSize() const { return size; }
 	void setDrawMode(const DrawMode drawMode) { this->drawMode = drawMode; }
 	DrawMode getDrawMode() const { return drawMode; }
-	void setTextureAtlas(const TextureRef texRef) { texAtlas = texRef; }
-	void setTextureAtlas(TextureRef&& texRef) { texAtlas = texRef; }
+	void setTextureAtlas(const SmallTextureRef texRef) { texAtlas = texRef; }
+	void setTextureAtlas(SmallTextureRef&& texRef) { texAtlas = texRef; }
 	void setBorders(float width)
 	{
 		borders.x = width;
@@ -52,5 +52,5 @@ private:
 	Vec2 size		{ 0.0f, 0.0f };
 	float scaling{ 1.0f };
 	DrawMode drawMode{ DrawMode::PixelSpace };
-	TextureRef texAtlas;
+	SmallTextureRef texAtlas;
 };

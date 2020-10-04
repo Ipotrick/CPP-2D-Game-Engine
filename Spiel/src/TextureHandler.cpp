@@ -2,6 +2,16 @@
 
 #include "GL/glew.h"
 
+void TextureCache::reset()
+{
+	for (const auto& el : textures) {
+		glDeleteTextures(1, &el.openglTexID);
+	}
+	textures.clear();
+	loaded.clear();
+	initialize();
+}
+
 void TextureCache::initialize()
 {
 	{
@@ -68,13 +78,31 @@ bool TextureCache::loadTexture(int texId)
 {
 	bool success{ false };
 	if (!isTextureLoaded(texId)) {
+		printf("texid %i\n", texId);
 		std::cout << "load texture with id: " << texId << " and name: \"" << *textureNames->at(texId) << "\"" << std::endl;
 
 		Texture tex;
 
+		GLint filterMethod = GL_NEAREST;
+		GLint clampMethod = GL_CLAMP_TO_EDGE;
+
+		std::string texName = *textureNames->at(texId);
+		if (texName.size() > 4) {
+			if (texName[0] == '_' && texName[1] == 'p' && texName[2] == 'l' && texName[3] == '_') {
+				filterMethod = GL_LINEAR;
+				texName = texName.substr(4, texName.size());
+			}
+		}
+		if (texName.size() > 4) {
+			if (texName[0] == '_' && texName[1] == 'p' && texName[2] == 'r' && texName[3] == '_') {
+				clampMethod = GL_REPEAT;
+				texName = texName.substr(4, texName.size());
+			}
+		}
+
 		std::string path;
 		path.append(texturesPath);
-		path.append(*textureNames->at(texId));
+		path.append(texName);
 
 		stbi_set_flip_vertically_on_load(1);
 		stbi_uc* localBuffer = stbi_load(path.c_str(), &tex.width, &tex.height, &tex.channelPerPixel, 4/*rgba*/);	// generate cpu texture data
@@ -83,12 +111,15 @@ bool TextureCache::loadTexture(int texId)
 			glGenTextures(1, &tex.openglTexID);
 			glBindTexture(GL_TEXTURE_2D, tex.openglTexID);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMethod);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMethod);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clampMethod);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clampMethod);
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, localBuffer);
+			GLfloat fLargest;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &fLargest);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest);
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			//stbi_image_free(localBuffer);	// free cpu texture data

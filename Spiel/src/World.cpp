@@ -144,7 +144,7 @@ void World::loadMap(std::string mapname_) {
 		cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
 		spawn(box);
 
-		int num = 100'000;// 250'000;
+		int num = 00'000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = create();
 			auto c = componentView(ent);
@@ -169,7 +169,7 @@ void World::loadMap(std::string mapname_) {
 			addComp(trash, Draw(color, scale, 0.5f, form));
 			addComp(trash, trashSolidBody);
 			addComp(trash, Health(100));
-			addComp(trash, TextureRef(texture.getId("Dir.png")));
+			addComp(trash, SmallTextureRef(texture.getId("Dir.png")));
 			spawn(trash);
 		}
 

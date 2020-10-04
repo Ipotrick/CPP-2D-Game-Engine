@@ -114,6 +114,11 @@ void RenderingWorker::operator()()
 		auto& camera = data->renderBuffer->camera; 
 		{	
 			Timer<> t(data->new_renderTime);
+
+			if (data->renderBuffer->resetTextureCache) {
+				texCache.reset();
+			}
+
 			texCache.textureNames = &data->renderBuffer->textureNames;
 			for (auto el : data->renderBuffer->textureNames)
 			// refresh texture Refs

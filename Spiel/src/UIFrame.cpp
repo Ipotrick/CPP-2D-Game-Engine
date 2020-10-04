@@ -70,7 +70,7 @@ void UIFrame::drawBorders(std::vector<Drawable>& buffer, UIContext context)
 
 void UIFrame::drawFill(std::vector<Drawable>& buffer, UIContext context)
 {
-	TextureRef fillTex = texAtlas;
+	SmallTextureRef fillTex = texAtlas;
 	fillTex.maxPos = Vec2(1.0f, 0.5f);
 	fillTex.minPos = Vec2(0.5f, 0.0f);
 	buffer.push_back(

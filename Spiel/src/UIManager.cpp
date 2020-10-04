@@ -27,11 +27,17 @@ void UIManager::update()
 		if (frames.get(uient).isDestroyed()) {
 			frames.destroy(uient);
 		}
+		else {
+			frames.get(uient).update();
+		}
 	}
 	tuple_for_each(uiElementTuple, [](auto& container) {
 		for (auto& uient : container) {
 			if (container.get(uient).isDestroyed()) {
 				container.destroy(uient);
+			}
+			else {
+				container.get(uient).update();
 			}
 		}
 		});

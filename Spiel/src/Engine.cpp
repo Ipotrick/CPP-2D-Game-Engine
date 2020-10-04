@@ -58,21 +58,15 @@ std::string Engine::getPerfInfo(int detail) {
 	return ss.str();
 }
 
-InputStatus Engine::getKeyStatus(KEY key_) {
-	std::lock_guard<std::mutex> l(window->mut);
-	return (InputStatus)glfwGetKey(window->glfwWindow, int(key_));
-}
-
-bool Engine::keyPressed(KEY key_) {
-	return getKeyStatus(key_) == InputStatus::PRESS;
-}
-
-bool Engine::keyReleased(KEY key_) {
-	return getKeyStatus(key_) == InputStatus::RELEASE;
-}
-
-bool Engine::keyRepeating(KEY key_) {
-	return getKeyStatus(key_) == InputStatus::REPEAT;
+void Engine::manualInputStateUpdate()
+{
+	if (!b_didUserUpdateInput) {
+		io.updateKeyStates(*window);
+		b_didUserUpdateInput = true;
+	}
+	else {
+		std::cerr << "WARNING: manualInputStateUpdate SHOULD NEVER be called twice in a frame!\n";
+	}
 }
 
 Vec2 Engine::getCursorPos() {
@@ -89,11 +83,11 @@ InputStatus Engine::getButtonStatus(BUTTON but_) {
 }
 
 bool Engine::buttonPressed(BUTTON but_) {
-	return getButtonStatus(but_) == InputStatus::PRESS;
+	return getButtonStatus(but_) == InputStatus::DOWN;
 }
 
 bool Engine::buttonReleased(BUTTON but_) {
-	return getButtonStatus(but_) == InputStatus::RELEASE;
+	return getButtonStatus(but_) == InputStatus::UP;
 }
 
 Vec2 Engine::getWindowSize() {
@@ -133,6 +127,11 @@ void Engine::run() {
 			{
 				Timer t(perfLog.getInputRef("updatetime"));
 				update(getDeltaTimeSafe());
+			}
+			{
+				if (!b_didUserUpdateInput)
+					io.updateKeyStates(*window);
+				b_didUserUpdateInput = false;
 			}
 			{
 				ui.update();

@@ -27,15 +27,32 @@ void Game::create() {
 		UIFrame frame({ 500, 500 }, { 300.5f, 300.5f }, world.texture.getId("border.png"));
 		frame.borders.y = 20;
 		frame.borders.x = 20;
-		ui.setAlias("Test", ui.createFrame(std::move(frame)));
+		UIEntity e = ui.createFrame(std::move(frame));
+		ui.setAlias("Test", e);
 
-		UIText textEl = UIText("Gravitation: ", world.texture.getId("ConsolasAtlas.png"));
+		UIText textEl = UIText("Gravitation: ", world.texture.getId("_pl_ConsolasAtlas.png"));
 		textEl.fontSize = { 20.0f };
 		textEl.borderDist = { 0.0f, 0.0f };
-		textEl.color = { 1.0f, 0.5f, 0.5f, 1.0f };
-		auto index = ui.createElement<UIText>(textEl);
-		UIText* ptr = &ui.getElement<UIText>(index);
-		ui["Test"].giveChild(ptr);
+		textEl.color = { 0, 0, 0, 1.0f };
+		textEl.setUpdateFn(
+			[&](UIElement* me) 
+			{
+				Entity player{ 0 };
+				for (auto ent : world.entityView<Player>()) {
+					player = ent;
+				}
+				
+				std::stringstream ss;
+				ss << "Gravitation:\n";
+				ss << world.physics.linearEffectAccel << "\n";
+				ss << "Player Speed:\n";
+				ss << world.getComp<Movement>(player).velocity.length();
+				((UIText*)me)->text = ss.str();
+			}
+		);
+		UIEntity id = ui.createElement<UIText>(textEl);
+
+		ui["Test"].giveChild(&ui.getElement<UIText>(id));
 	}
 }
 
@@ -64,10 +81,7 @@ void Game::update(float deltaTime) {
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	std::stringstream ss;
-	for (int i = 0; i < 100; i++)
-		ss << std::to_string(rand());
-	((UIText*)ui["Test"].getChild())->text = ss.str();
+
 
 	for (auto ent : world.entityView<Base, Movement>()) {
 		if (world.getComp<Base>(ent).position.length() > 1000)
@@ -75,65 +89,105 @@ void Game::gameplayUpdate(float deltaTime)
 	}
 	Vec2 size(10, 13);
 	Vec2 startpos(0, getWindowSize().y-size.y);
-	drawString(getPerfInfo(5), "ColnsolasAtlas.png", startpos, size);
+	drawString(getPerfInfo(5), "_pl_ColnsolasAtlas.png", startpos, size);
 
 	//take input
 	const std::string filename("world.wrld");
 
-	if (keyPressed(KEY::J)) {
+	if (io.keyJustPressed(KEY::J)) {
 		world.loadMap("standart");
+		// renderer.resetTextureCache();
 	}
 
-	if (keyPressed(KEY::K)) {
+	if (io.keyJustPressed(KEY::K)) {
 		world.saveMap(filename);
 	}
 	
-	if (keyPressed(KEY::L)) {
+	if (io.keyJustPressed(KEY::L)) {
 		world.loadMap(filename);
+		// renderer.resetTextureCache();
 	}
 
-	if (keyPressed(KEY::LEFT_ALT) && keyPressed(KEY::F4)) {
+	if (io.keyPressed(KEY::LEFT_ALT, GLOBAL_FOCUS) && io.keyPressed(KEY::F4, GLOBAL_FOCUS)) {
 		quit();
 	}
-	if (keyPressed(KEY::G)) {
+	if (io.keyJustPressed(KEY::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
 	}
-	if (keyPressed(KEY::H)) {
+	if (io.keyPressed(KEY::H)) {
 		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
-	if (keyPressed(KEY::UP)) {
+	if (io.keyPressed(KEY::UP)) {
 		camera.position -= rotate(Vec2(0.0f, -5.0f), camera.rotation) * deltaTime;
 	}
-	if (keyPressed(KEY::LEFT)) {
+	if (io.keyPressed(KEY::LEFT)) {
 		camera.position -= rotate(Vec2(5.0f, 0.0f), camera.rotation) * deltaTime;
 	}
-	if (keyPressed(KEY::DOWN)) {
+	if (io.keyPressed(KEY::DOWN)) {
 		camera.position -= rotate(Vec2(0.0f, 5.0f), camera.rotation) * deltaTime;
 	}
-	if (keyPressed(KEY::RIGHT)) {
+	if (io.keyPressed(KEY::RIGHT)) {
 		camera.position -= rotate(Vec2(-5.0f, 0.0f), camera.rotation) * deltaTime;
 	}
-	if (keyPressed(KEY::NP_ADD)) {
+	if (io.keyPressed(KEY::NP_ADD)) {
 		camera.zoom *= 1.0f + (1.0f * deltaTime);
 	}
-	if (keyPressed(KEY::NP_SUBTRACT)) {
+	if (io.keyPressed(KEY::NP_SUBTRACT)) {
 		camera.zoom *= 1.0f - (1.0f * deltaTime);
 	}
-	if (keyPressed(KEY::NP_7)) {
+	if (io.keyPressed(KEY::NP_7)) {
 		camera.rotation -= 100.0f * deltaTime;
 	}
-	if (keyPressed(KEY::NP_9)) {
+	if (io.keyPressed(KEY::NP_9)) {
 		camera.rotation += 100.0f * deltaTime;
 	}
-	if (keyPressed(KEY::NP_0)) {
+	if (io.keyPressed(KEY::NP_0)) {
 		camera.rotation = 0.0f;
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
 	}
-	if (keyPressed(KEY::B)) {
-		ui.destroyFrame("Test");
+	if (io.keyJustPressed(KEY::B) && io.keyReleased(KEY::LEFT_SHIFT)) {
+		if (ui.doesAliasExist("Test")) {
+			ui.destroyFrame("Test");
+		}
+	}
+	if (io.keyJustPressed(KEY::B) && io.keyPressed(KEY::LEFT_SHIFT)) {
+		if (!ui.doesAliasExist("Test")) {
+			UIFrame frame({ 500, 500 }, { 300.5f, 300.5f }, world.texture.getId("border.png"));
+			frame.borders.y = 20;
+			frame.borders.x = 20;
+			ui.setAlias("Test", ui.createFrame(std::move(frame)));
+
+			UIText textEl = UIText("Gravitation: ", world.texture.getId("ConsolasAtlas.png"));
+			textEl.fontSize = { 20.0f };
+			textEl.borderDist = { 0.0f, 0.0f };
+			textEl.color = { 0, 0, 0, 1.0f };
+			textEl.setUpdateFn([&](UIElement* me) {
+				Entity player{ 0 };
+				for (auto ent : world.entityView<Player>()) {
+					player = ent;
+				}
+
+				std::stringstream ss;
+				ss << "Gravitation:\n";
+				ss << world.physics.linearEffectAccel << "\n";
+				ss << "Player Speed:\n";
+				ss << world.getComp<Movement>(player).velocity.length();
+				static_cast<UIText*>(me)->text = ss.str();
+				});
+			auto index = ui.createElement<UIText>(textEl);
+			UIText* ptr = &ui.getElement<UIText>(index);
+			ui["Test"].giveChild(ptr);
+		}
+	}
+	if (io.keyPressed(KEY::PERIOD, GLOBAL_FOCUS) && io.keyReleased(KEY::LEFT_SHIFT, GLOBAL_FOCUS)) {
+		io.setFocus(2);
+	}
+	if (io.keyPressed(KEY::PERIOD, GLOBAL_FOCUS) && io.keyPressed(KEY::LEFT_SHIFT, GLOBAL_FOCUS)) {
+		io.setFocus(STANDART_FOCUS);
 	}
 
+	manualInputStateUpdate();
 
 	//execute scripts
 	playerScript.execute(deltaTime);
@@ -247,14 +301,14 @@ void Game::cursorManipFunc()
 	//			}
 	//			auto& baseControlled = world.getComp<Base>(cursorManipData.lockedID);
 	//			auto& colliderControlled = world.getComp<Collider>(cursorManipData.lockedID);
-	//			if (keyPressed(KEY::LEFT_SHIFT)) {	//rotate
+	//			if (io.keyPressed(KEY::LEFT_SHIFT)) {	//rotate
 	//				float cursorOldRot = getRotation(normalize(cursorManipData.oldCursorPos - baseControlled.position));
 	//				float cursorNewRot = getRotation(normalize(baseCursor.position - baseControlled.position));
 	//				float diff = cursorNewRot - cursorOldRot;
 	//				baseControlled.rotation += diff;
 	//				cursorManipData.lockedIDDist = baseControlled.position - baseCursor.position;
 	//			}
-	//			else if (keyPressed(KEY::LEFT_CONTROL)) {	//scale
+	//			else if (io.keyPressed(KEY::LEFT_CONTROL)) {	//scale
 	//				Vec2 ControlledEntRelativeCoordVec = rotate(Vec2(1, 0), baseControlled.rotation);
 	//				Vec2 cursormovement = baseCursor.position - cursorManipData.oldCursorPos;
 	//				float relativeXMovement = dot(cursormovement, ControlledEntRelativeCoordVec);
@@ -293,7 +347,7 @@ void Game::cursorManipFunc()
 	//		}
 	//	}
 	//
-	//	if (keyPressed(KEY::DELETE) || keyPressed(KEY::BACKSPACE)) {
+	//	if (io.keyPressed(KEY::DELETE) || io.keyPressed(KEY::BACKSPACE)) {
 	//		if (cursorManipData.locked == true) {
 	//			world.destroy(cursorManipData.lockedID);
 	//		}
@@ -303,7 +357,7 @@ void Game::cursorManipFunc()
 	//	cursorManipData.locked = false;
 	//
 	//	// spawns:
-	//	if (keyPressed(KEY::U)) {
+	//	if (io.keyPressed(KEY::U)) {
 	//		Vec2 scale = Vec2(0.3f, 0.3f);
 	//		Collider trashCollider = Collider(scale, Form::Circle);
 	//		PhysicsBody trashSolidBody(0.0f, 1.0f, calcMomentOfIntertia(1, scale), 1.0f);
@@ -324,7 +378,7 @@ void Game::cursorManipFunc()
 	//		}
 	//	}
 	//
-	//	if (keyPressed(KEY::I)) {
+	//	if (io.keyPressed(KEY::I)) {
 	//		Vec2 scale = Vec2(0.5f, 0.5f);
 	//		Collider trashCollider(scale, Form::Rectangle);
 	//		PhysicsBody trashSolidBody(0.00f, 100000000000000000.f, calcMomentOfIntertia(100000000000000000.f, scale), 1.0f);

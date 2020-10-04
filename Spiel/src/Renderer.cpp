@@ -36,6 +36,7 @@ void Renderer::flushSubmissions() {
 			frontBuffer->textureNames.push_back(&*el);
 		std::swap(frontBuffer, workerSharedData->renderBuffer);
 		frontBuffer->textureNames.clear();
+		frontBuffer->resetTextureCache = false;
 	}
 }
 

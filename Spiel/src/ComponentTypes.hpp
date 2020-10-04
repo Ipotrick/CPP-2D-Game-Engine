@@ -13,7 +13,7 @@ std::tuple<
 	ComponentStorage<CollisionsToken, paged_indexing>,
 	ComponentStorage<Movement, paged_indexing>,
 	ComponentStorage<PhysicsBody, paged_indexing>,
-	ComponentStorage<TextureRef, paged_set>,
+	ComponentStorage<SmallTextureRef, paged_set>,
 	ComponentStorage<LinearEffector, paged_set>,
 	ComponentStorage<FrictionEffector, paged_set>,
 	// Game Components:

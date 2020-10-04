@@ -30,6 +30,7 @@
 #include "EventHandler.hpp"
 #include "World.hpp"
 #include "UIManager.hpp"
+#include "InputManager.hpp"
 
 // Core Systems
 #include "MovementSystem.hpp"
@@ -41,10 +42,10 @@
 
 class Engine {
 public:
-	Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
+	explicit Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
 	~Engine();
 
-	/* ends programm after finisheing the current tick */
+	/* ends programm after finishing the current frame */
 	inline void quit() { running = false; }
 
 	/* call run to start the rpogramm */
@@ -68,14 +69,14 @@ public:
 	std::string getPerfInfo(int detail);
 
 					/*-- input utility --*/
-	/* returns the status(KEYSTATUS) of a given key_(KEY), O(1) (mutex locking) */
-	InputStatus getKeyStatus(KEY key);
-	/* returns if a given key_ is pressed, O(1) (mutex locking) */
-	bool keyPressed(KEY key);
-	/* returns if a given key_ is released, O(1) (mutex locking) */
-	bool keyReleased(KEY key);
-	/* returns if a given key_ is repeating, O(1) (mutex locking) */
-	bool keyRepeating(KEY key);
+	/*  
+		the engine updates input states ONCE per frame before the update() call. 
+		One can call manualInpoutStateUpdate, once per frame to get a perhaps more rescent input state. 
+		Calling this function causes the engine to NOT update the states itself in the next frame.
+		Note that this function can only be called ONCE per frame. 
+		Calling theis function more than once per frame can lead to the missing of certain key states like justDown and justUp.
+	*/
+	void manualInputStateUpdate();
 	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
 	Vec2 getCursorPos();
 	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
@@ -97,11 +98,19 @@ public:
 					/* graphics utility */
 	/*  submit a Drawable to be rendered the next frame, O(1)  */
 	void drawString(std::string str, std::string_view fontAtlas, Vec2 pos, Vec2 fontSize);
-	void submitDrawable(Drawable && d);
-	void submitDrawable(Drawable const& d);
+	void submitDrawable(Drawable&& d)
+	{
+		renderer.submit(d);
+	}
+	void submitDrawable(Drawable const& d)
+	{
+		renderer.submit(d);
+	}
 
 private:
 	void rendererUpdate(World& world);
+
+	bool b_didUserUpdateInput{ false };
 public:
 	World& world;
 	EventHandler events;
@@ -115,7 +124,6 @@ public:
 	BaseSystem baseSystem;
 	MovementSystem movementSystem;
 	CollisionSystem collisionSystem;
-	//PhysicsSystem physicsSystem;
 	PhysicsSystem2 physicsSystem2;
 
 	PerfLogger perfLog;
@@ -132,6 +140,8 @@ private:
 
 	// window
 	std::shared_ptr<Window> window;
+
+
 public:
 	// render
 	Renderer renderer;
@@ -139,6 +149,8 @@ public:
 	// UI
 	UIManager ui;
 
+	// Input
+	InputManager io;
 };
 
 inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2 pos, Vec2 fontSize)
@@ -159,12 +171,4 @@ inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2
 		submitDrawable(d);
 		lineStride++;
 	}
-}
-
-__forceinline void Engine::submitDrawable(Drawable && d) {
-	renderer.submit(d);
-}
-
-__forceinline void Engine::submitDrawable(Drawable const& d) {
-	renderer.submit(d);
 }

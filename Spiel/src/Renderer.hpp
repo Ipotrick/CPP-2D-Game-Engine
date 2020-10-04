@@ -38,6 +38,10 @@ public:
 
 	// ends worker thread
 	void end();
+	void resetTextureCache()
+	{
+		frontBuffer->resetTextureCache = true;
+	}
 
 	// returns the time spend rendering
 	inline std::chrono::microseconds getRenderingTime() { return renderingTime ; }

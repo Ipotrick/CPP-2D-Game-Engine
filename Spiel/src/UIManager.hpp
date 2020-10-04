@@ -19,6 +19,9 @@ public:
 
 	void setAlias(std::string_view alias, int index) 
 	{ 
+		if (aliasToEntity.contains(alias) || entityToAlias.contains(index)) {
+			throw new std::exception("ERROR: the alias to entity relationships MUST be injectiv!");
+		}
 		aliasToEntity[alias] = index;
 		entityToAlias[index] = alias;
 	}
@@ -29,6 +32,10 @@ public:
 	const std::string_view& getAlias(UIEntity index)
 	{
 		return entityToAlias[index];
+	}
+	bool doesAliasExist(std::string_view alias) const
+	{
+		return aliasToEntity.contains(alias);
 	}
 	UIFrame& getFrame(UIEntity index)
 	{

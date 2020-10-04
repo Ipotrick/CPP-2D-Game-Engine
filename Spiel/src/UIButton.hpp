@@ -4,7 +4,7 @@
 
 class UIButton : public UIElement {
 public:
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context)
+	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override
 	{
 
 	}

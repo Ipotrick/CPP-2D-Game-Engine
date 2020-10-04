@@ -16,30 +16,52 @@ struct UIContext {
 class UIElement {
 public:
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) = 0;
-	void destroy() { 
+	virtual void destroy() final {
 		b_destroyMark = true;
 		if (hasChild()) {
 			getChild()->destroy();
 		}
 	}
-	bool isDestroyed() const { return b_destroyMark; }
+	virtual bool isDestroyed() const final { return b_destroyMark; }
 
-	void giveChild(UIElement* child)
+	virtual void update() final
+	{
+		if (hasUpdateFn()) {
+			fn_update(this);
+		}
+	}
+	virtual bool hasUpdateFn() const final
+	{
+		return static_cast<bool>(fn_update);
+	}
+	virtual void setUpdateFn(std::function<void(UIElement*)> fn) final
+	{
+		fn_update = fn;
+	}
+	virtual std::function<void(UIElement*)> getUpdateFn() const final
+	{
+		return fn_update;
+	}
+
+	virtual void giveChild(UIElement* child) final
 	{
 		childElement = child;
 	}
-	const UIElement* getChild() const
+	virtual const UIElement* getChild() const final
 	{
 		return childElement;
 	}
-	UIElement* getChild()
+	virtual UIElement* getChild() final
 	{
 		return childElement;
 	}
-	bool hasChild() const { return childElement != nullptr; }
+	virtual bool hasChild() const final { return childElement != nullptr; }
 protected:
 	std::pair<Vec2, Vec2> lastDrawnArea;	// this is used to check for mouse intersections 
 private:
 	bool b_destroyMark{ false };
+
 	UIElement* childElement{ nullptr };
+
+	std::function<void(UIElement*)> fn_update{ {} };
 };

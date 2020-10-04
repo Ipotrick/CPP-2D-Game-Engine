@@ -1,5 +1,8 @@
 #pragma once
 
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
+
 enum class BUTTON {
 	MB_LEFT = 0,
 	MB_RIGHT = 1,
@@ -135,8 +138,15 @@ MENU              = 348
 
 };
 
+inline static constexpr int MAX_KEY_INDEX = 348;
+inline static constexpr int MIN_KEY_INDEX = 32;
+
+inline static constexpr char KEY_UP = 0;
+inline static constexpr char KEY_DOWN = 1;
+inline static constexpr char KEY_REPEAT = 2;
+
 enum class InputStatus {
-	PRESS = GLFW_PRESS,
-	REPEAT = GLFW_REPEAT,
-	RELEASE = GLFW_RELEASE
+	UP = GLFW_RELEASE,
+	DOWN = GLFW_PRESS,
+	REPEAT = GLFW_REPEAT
 };

@@ -20,12 +20,13 @@ public:
 			glDeleteTextures(1, &el.openglTexID);
 		}
 	}
+	void reset();
 	void initialize();
 	bool loadTexture(int texId);
 	bool isTextureLoaded(int texId);
 	Texture& getTexture(int texId);
 	void cacheTextures(std::vector<Drawable>& drawables);
-	std::vector<std::string*>* textureNames;
+	std::vector<std::string*>* textureNames{ nullptr };
 private:
 	std::string texturesPath;
 	std::vector<Texture> textures;
