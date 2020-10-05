@@ -14,6 +14,7 @@
 #include "PhysicsTypes.hpp"
 #include "RenderingWorker.hpp"
 #include "TextureUniforms.hpp"
+#include "TextureRefManager.hpp"
 
 class Renderer
 {
@@ -48,6 +49,8 @@ public:
 	// returns the time spend waiting for the worker to finish
 	inline std::chrono::microseconds getWaitedTime() { return syncTime; }
 
+	inline TextureRef2 makeTexRef(const TextureInfo& texInfo) { texRefManager.makeRef(texInfo); }
+
 	// Texture utility:
 private:
 	bool wasWaitCalled{ false };
@@ -62,6 +65,7 @@ private:
 	std::chrono::microseconds syncTime;
 
 	TextureUniforms& tex;
+	TextureRefManager texRefManager;
 };
 
 inline void Renderer::submit(Drawable const& d) {

@@ -19,9 +19,9 @@
 enum class DrawMode : char {
 	/*world coordinates, (0,0) is world's (0,0)*/
 	WorldSpace,
-	/* window (-1 to 1 in x and y) cooordinates, (0,0) is middle */
+	/* window (-1 to 1 in x and y) cooordinates, (0,0) is middle of the window */
 	WindowSpace,
-	/* window coordinates that ignore aspect ratio, (0,0) is middle*/
+	/* window coordinates that ignore aspect ratio, (0,0) is middle of the window*/
 	UniformWindowSpace,
 	/* coordinates are pixels, (0,0) is lower left corner */
 	PixelSpace
@@ -37,6 +37,8 @@ struct IntColor {
 		return  { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
 	}
 };
+
+using TextureString = boost::static_string<32>;
 
 struct Texture {
 	Texture() = default;
@@ -54,43 +56,61 @@ struct Texture {
 	bool good{ true };
 };
 
-struct TextureId {
-	int index{ -1 };
-	int version{ 0 };
-	void reset()
+using TextureId = int;
+
+class TextureInfo {
+public:
+	TextureInfo(std::string_view name)
+		:name{ name.data(), name.size() }
+	{ }
+
+	TextureInfo(const TextureString& name)
+		:name{ name }
+	{ }
+	TextureString name;
+
+	bool operator==(const TextureInfo& other) const
 	{
-		index = -1;
-		version = 0;
+		return name == other.name;
+	}
+private:
+	friend class boost::serialization::access;
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		boost::serialization::split_member(ar, file_version);
+	}
+	template<class Archive> 
+	void save(Archive& ar, const unsigned int version) const
+	{
+		std::string s(name.data(), name.size());
+		ar << s;
+	}
+	template<class Archive>
+	void load(Archive& ar, const unsigned int version) const
+	{
+		std::string s;
+		ar >> s;
+		name = s;
 	}
 };
 
+
+/*
+*	one can not create a texture ref, you can copy an existing texref or request one from the renderer.
+*	one can not change the filename or the settings of a texture ref.
+*	If differenct filename or setting is desired, request a new texture ref from the renderer.
+*	The min and max pos can be modified freely.
+*/
 class TextureRef2 {
 public:
-
-	TextureRef2(const std::string& filename = "default", Vec2 minPos = { 0,0 }, Vec2 maxPos = { 0,0 })
-		:filename{ filename }, minPos{ minPos }, maxPos{ maxPos }
-	{}
-	TextureRef2(const std::string_view& filename, Vec2 minPos = { 0,0 }, Vec2 maxPos = { 0,0 })
-		:minPos{ minPos }, maxPos{ maxPos }
+	const TextureString& getFilename() const
 	{
-		this->filename.resize(std::min(filename.size(), size_t(32)));
-		for (int i = 0; i < 32 && i < filename.size(); i++) {
-			this->filename.at(i) = filename.at(i);
-		}
+		return info.name;
 	}
-
-	void setFilename(const std::string& filename)
+	const TextureInfo& getInfo() const
 	{
-		this->filename = filename;
-		id.reset();
-	}
-	const boost::static_string<32>& getFilename() const
-	{
-		return filename;
-	}
-	void setId(TextureId texId)
-	{
-		this->id = texId;
+		return info;
 	}
 	TextureId getId() const
 	{
@@ -100,14 +120,19 @@ public:
 	Vec2 minPos{ 0.0f, 0.0f };
 	Vec2 maxPos{ 1.0f, 1.0f };
 private:
-	boost::static_string<32> filename{ "default" };
-	TextureId id;
-	friend class boost::serialization::access;
+	friend class TextureRefManager;
+	TextureRef2(const TextureString& filename, TextureId id, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 0.0f, 0.0f })
+		:info{ filename }, id{ id }, minPos{ minPos }, maxPos{ maxPos }
+	{}
 
+	TextureInfo info;
+	TextureId id;
+
+	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int file_version)
 	{
-		ar& filename;
+		ar& info;
 		ar& minPos;
 		ar& maxPos;
 	}
@@ -137,18 +162,18 @@ private:
 	}
 };
 
-inline TextureRef2 makeAtlasRef2(const std::string_view& name, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
-{
-	TextureRef2 texRef(name);
-	texRef.minPos = startAtlasCell / atlasGridSize;
-	if (endAtlasCell == Vec2{ 0,0 }) {
-		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
-	}
-	else {
-		texRef.maxPos = (endAtlasCell + Vec2(1, 1)) / atlasGridSize;
-	}
-	return texRef;
-}
+//inline TextureRef2 makeAtlasRef2(const std::string_view& name, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
+//{
+//	TextureRef2 texRef(name);
+//	texRef.minPos = startAtlasCell / atlasGridSize;
+//	if (endAtlasCell == Vec2{ 0,0 }) {
+//		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
+//	}
+//	else {
+//		texRef.maxPos = (endAtlasCell   + Vec2(1, 1)) / atlasGridSize;
+//	}
+//	return texRef;
+//}
 
 inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
 {
@@ -164,14 +189,14 @@ inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const
 	return texRef;
 }
 
-inline TextureRef2 makeAsciiRef2(const std::string_view& name, char c)
-{
-	TextureRef2 texRef;
-	c -= 0x20;
-	Vec2 atlasCoord(c % 8, 15 - c / 8);
-	texRef = makeAtlasRef2(name, Vec2(8, 16), atlasCoord);
-	return texRef;
-}
+//inline TextureRef2 makeAsciiRef2(const std::string_view& name, char c)
+//{
+//	TextureRef2 texRef;
+//	c -= 0x20;
+//	Vec2 atlasCoord(c % 8, 15 - c / 8);
+//	texRef = makeAtlasRef2(name, Vec2(8, 16), atlasCoord);
+//	return texRef;
+//}
 
 inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
 {

@@ -7,8 +7,6 @@ ChocolateyLastPathUpdate = 132319681596169636
 CommonProgramFiles = C:\Program Files (x86)\Common Files
 CommonProgramFiles(x86) = C:\Program Files (x86)\Common Files
 CommonProgramW6432 = C:\Program Files\Common Files
-COMPLUS_InstallRoot = 
-COMPLUS_Version = 
 COMPUTERNAME = DESKTOP-LFB5LBB
 ComSpec = C:\WINDOWS\system32\cmd.exe
 DriverData = C:\Windows\System32\Drivers\DriverData
@@ -47,7 +45,7 @@ ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
 PYTHONPATH = C:\Users\Patrick\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.8_qbz5n2kfra8p0\LocalCache\local-packages\Python38\site-packages
-ServiceHubLogSessionKey = 7E3CB0E1
+ServiceHubLogSessionKey = 68DA709A
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -65,11 +63,238 @@ VisualStudioVersion = 16.0
 VSAPPIDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
 VSAPPIDNAME = devenv.exe
 VSLANG = 1031
-VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  stb_image.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  AgeScript.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  algo.hpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  BulletScript.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  CollisionCheckJob.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  CollisionConstraintSet.cpp
+  CollisionSystem.cpp
+  collision_detection.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\CollisionConstraintSet.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\CollisionConstraintSet.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\CollisionConstraintSet.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\CollisionConstraintSet.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\CollisionConstraintSet.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\CollisionConstraintSet.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionConstraintSet.cpp(18,75): warning C4554: "&": Überprüfen Sie die Operatorrangfolge auf mögliche Fehler. Verwenden Sie Klammern, um die Rangfolge zu verdeutlichen.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\collision_detection.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\collision_detection.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\collision_detection.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\collision_detection.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\collision_detection.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\collision_detection.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+  DummyScript.cpp
+  Engine.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(120): warning C4715: "fastMod": Nicht alle Codepfade geben einen Wert zurück.
+  EntityManager.cpp
+  EventHandler.cpp
   Game.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet
+  InputManager.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\DummyScript.cpp)
+  UIElement.cpp
+  UIFrame.cpp
+  UIManager.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\UIFrame.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\UIFrame.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\UIFrame.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\UIFrame.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\UIFrame.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\UIFrame.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\UIManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\UIManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\UIManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\UIManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\UIManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\UIManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\UIElement.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\UIElement.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\UIElement.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\UIElement.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\UIElement.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\UIElement.cpp)
+  World.cpp
+  HealthScript.cpp
+  main.cpp
+  Mat3.cpp
+  Mat4.cpp
+  MovementSystem.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\HealthScript.cpp)
+  ParticleScript.cpp
+  Physics.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\World.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\World.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\World.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\World.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\World.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\World.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Physics.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Physics.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\Physics.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Physics.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Physics.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\Physics.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\MovementSystem.cpp)
+  PhysicsSystem.cpp
+  PhysicsSystem2.cpp
+  PlayerScript.cpp
+  Qtree2.cpp
+  QuadTree.cpp
+  Renderer.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Renderer.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Renderer.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\Renderer.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\Renderer.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\Renderer.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\Renderer.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Qtree2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\QuadTree.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\QuadTree.cpp)
+  RenderingWorker.cpp
+  SuckerScript.cpp
+  TesterScript.cpp
+  TextureHandler.cpp
+  Vec2.hpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(280,33): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
+  EntityComponentManager.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.hpp(55): warning C4715: "Vertex::operator[]": Nicht alle Codepfade geben einen Wert zurück.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\EntityComponentManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\EntityComponentManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(33,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::save(Archive &,const unsigned int) const" auf. (Quelldatei wird kompiliert src\EntityComponentManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): warning C4477: "printf": Die Formatzeichenfolge "%i" erfordert ein Argument vom Typ "int", das variadic-Argument "1" weist aber den Typ "unsigned __int64" auf. (Quelldatei wird kompiliert src\EntityComponentManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Verwenden Sie ggf. "%zi" in der Formatzeichenfolge. (Quelldatei wird kompiliert src\EntityComponentManager.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\TextureUniforms.hpp(44,10): message : Diese Diagnose trat in der vom Compiler generierten Funktion "void TextureUniforms::load(Archive &,const unsigned int)" auf. (Quelldatei wird kompiliert src\EntityComponentManager.cpp)
+     Bibliothek "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.lib" und Objekt "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exp" werden erstellt.
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

@@ -285,6 +285,9 @@
     <ClInclude Include="src\InputManager.hpp">
       <Filter>_Engine\_IO</Filter>
     </ClInclude>
+    <ClInclude Include="src\TextureRefManager.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -397,6 +400,9 @@
     </ClCompile>
     <ClCompile Include="src\InputManager.cpp">
       <Filter>_Engine\_IO</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureRefManager.cpp">
+      <Filter>_Engine\_Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

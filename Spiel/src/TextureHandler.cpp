@@ -139,8 +139,6 @@ bool TextureCache::loadTexture(int texId)
 	return success;
 }
 
-
-
 bool TextureCache::isTextureLoaded(int texId)
 {
 	return ((texId >= 0) && (texId < loaded.size())) && loaded[texId];

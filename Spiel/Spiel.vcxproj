@@ -83,6 +83,7 @@
     <ClInclude Include="src\SweepAndPrune.hpp" />
     <ClInclude Include="src\TesterScript.hpp" />
     <ClInclude Include="src\TextureHandler.hpp" />
+    <ClInclude Include="src\TextureRefManager.hpp" />
     <ClInclude Include="src\TextureUniforms.hpp" />
     <ClInclude Include="src\Timing.hpp" />
     <ClInclude Include="src\UIButton.hpp" />
@@ -114,6 +115,7 @@
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\TextureRefManager.cpp" />
     <ClCompile Include="src\UIElement.cpp" />
     <ClCompile Include="src\UIFrame.cpp" />
     <ClCompile Include="src\UIManager.cpp" />
