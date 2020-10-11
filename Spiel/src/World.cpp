@@ -128,7 +128,7 @@ void World::loadMap(std::string mapname_) {
 		cmps.add(PhysicsBody(0.0, 25.0f, calcMomentOfIntertia(25.0f, scalePlayer), 0.9f));
 		cmps.add<Movement>();
 		cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.4, Form::Rectangle));
-		cmps.add(TexRef(texture.getId("bitch.png")));
+		cmps.add(TextureRef2("bitch.png"));
 		cmps.add<Player>();
 		spawn(player);
 
@@ -142,9 +142,10 @@ void World::loadMap(std::string mapname_) {
 		cmpsBox.add(PhysicsBody(0.0, 5.0f, calcMomentOfIntertia(5.0f, scaleBox), 0.9f));
 		cmpsBox.add<Movement>();
 		cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
+		cmpsBox.add(TextureRef2("Dir.png"));
 		spawn(box);
 
-		int num = 00'000;// 250'000;
+		int num = 100'000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = create();
 			auto c = componentView(ent);
@@ -158,7 +159,7 @@ void World::loadMap(std::string mapname_) {
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form);
 		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
-		for (int i = 0; i < 6000; i ++) {
+		for (int i = 0; i < 5000; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
@@ -169,7 +170,7 @@ void World::loadMap(std::string mapname_) {
 			addComp(trash, Draw(color, scale, 0.5f, form));
 			addComp(trash, trashSolidBody);
 			addComp(trash, Health(100));
-			addComp(trash, SmallTextureRef(texture.getId("Dir.png")));
+			addComp(trash, TextureRef2("Dir.png"));
 			spawn(trash);
 		}
 

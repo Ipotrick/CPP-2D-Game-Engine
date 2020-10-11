@@ -13,13 +13,12 @@
 #include "RenderTypes.hpp"
 #include "PhysicsTypes.hpp"
 #include "RenderingWorker.hpp"
-#include "TextureUniforms.hpp"
 #include "TextureRefManager.hpp"
 
 class Renderer
 {
 public:
-	Renderer(std::shared_ptr<Window> wndw, TextureUniforms& tex);
+	Renderer(std::shared_ptr<Window> wndw);
 
 	// waits till the worker thread is finished
 	void waitTillFinished();
@@ -49,30 +48,46 @@ public:
 	// returns the time spend waiting for the worker to finish
 	inline std::chrono::microseconds getWaitedTime() { return syncTime; }
 
-	inline TextureRef2 makeTexRef(const TextureInfo& texInfo) { texRefManager.makeRef(texInfo); }
+	inline TextureRef2 makeTexRef(const TextureInfo& texInfo) { return texRefManager.makeRef(texInfo); }
 
 	// Texture utility:
 private:
-	bool wasWaitCalled{ false };
+	// for debuging:
+	bool wasWaitCalled{ false };	
 	bool wasFushCalled{ false };
-	bool wasEndCalled{ false };
-	std::shared_ptr<RenderBuffer> frontBuffer;
+	bool wasEndCalled{ false };	
 
-	std::shared_ptr<Window> window;
+	// concurrent data:
+	std::shared_ptr<RenderBuffer> frontBuffer;
 	std::shared_ptr<RenderingSharedData> workerSharedData;
+	std::shared_ptr<Window> window;
 	std::thread workerThread;
+
+	// perf:
 	std::chrono::microseconds renderingTime;
 	std::chrono::microseconds syncTime;
 
-	TextureUniforms& tex;
+	// texture management:
 	TextureRefManager texRefManager;
 };
 
 inline void Renderer::submit(Drawable const& d) {
+	/*
+	* if yit crashes here, it's most likely, that an orphan SmallTextureRef was created without calling
+	* renderer.makeTexRef, and submitted with a drawable. All Texrefs (except for components of entities)
+	* must be created my the renderer!.
+	*/
+	assert(d.texRef.has_value() ? d.texRef.value().id != -1 : true);
 	frontBuffer->drawables.push_back(d);
 }
 
 inline void Renderer::submit(Drawable && d) {
+	/*
+	* if yit crashes here, it's most likely, that an orphan SmallTextureRef was created without calling
+	* renderer.makeTexRef, and submitted with a drawable. All Texrefs (except for components of entities)
+	* must be created my the renderer!.
+	*/
+	assert(d.texRef.has_value() ? d.texRef.value().id != -1 : true);
 	frontBuffer->drawables.push_back(d);
 }
 

@@ -1,8 +1,7 @@
 #include "Renderer.hpp"
 
-Renderer::Renderer(std::shared_ptr<Window> wndw, TextureUniforms& tex) :
+Renderer::Renderer(std::shared_ptr<Window> wndw) :
 	window{ wndw },
-	tex{ tex },
 	workerSharedData{ std::make_shared<RenderingSharedData>() },
 	workerThread{ RenderingWorker(window, workerSharedData) },
 	renderingTime{ 0 },
@@ -31,12 +30,16 @@ void Renderer::flushSubmissions() {
 	assert(!wasFushCalled);	// -> flush was called twice!
 	wasFushCalled = true;
 	if (!wasEndCalled) {
-		workerSharedData->renderBuffer->drawables.clear();
-		for (const auto& el : tex.textureNames)
-			frontBuffer->textureNames.push_back(&*el);
+		// write last frontbuffer data:
+		std::swap(frontBuffer->textureLoadingQueue, texRefManager.getTextureLoadingQueue());
+		texRefManager.clearTextureLoadingQueue();	// clear texture loading queue
+
+		// swap front and backbuffer:
 		std::swap(frontBuffer, workerSharedData->renderBuffer);
-		frontBuffer->textureNames.clear();
+
+		// clear frontbuffer (as it now contains the old backbuffer data):
 		frontBuffer->resetTextureCache = false;
+		frontBuffer->drawables.clear();
 	}
 }
 

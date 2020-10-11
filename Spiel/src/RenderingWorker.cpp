@@ -119,10 +119,9 @@ void RenderingWorker::operator()()
 				texCache.reset();
 			}
 
-			texCache.textureNames = &data->renderBuffer->textureNames;
-			for (auto el : data->renderBuffer->textureNames)
 			// refresh texture Refs
-			texCache.cacheTextures(data->renderBuffer->drawables);
+
+			texCache.cacheTextures(data->renderBuffer->textureLoadingQueue);
 
 			Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
 			Mat3 pixelProjectionMatrix = Mat3::translate(Vec2(-1, -1)) * Mat3::scale(Vec2(1.0f / window->width, 1.0f / window->height)) * Mat3::scale(Vec2(2, 2));
@@ -194,7 +193,7 @@ std::string RenderingWorker::readShader(std::string path_)
 std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat, Mat3 const& pixelProjectionMatrix) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
-	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value().textureId)) {
+	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value())) {
 		minTex = d.texRef.value().minPos;
 		maxTex = d.texRef.value().maxPos;
 	}
@@ -203,13 +202,13 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 
 	Mat3 modelMatrix2 = Mat3::translate(Vec2(d.position.x, d.position.y)) * Mat3::rotate(d.rotationVec) * Mat3::scale(Vec2(d.scale.x, d.scale.y));
 	switch (d.getDrawMode()) {
-	case DrawMode::WorldSpace:
+	case RenderSpace::WorldSpace:
 		modelMatrix2 = viewProjMat * modelMatrix2; break;
-	case DrawMode::WindowSpace:
+	case RenderSpace::WindowSpace:
 		break;
-	case DrawMode::UniformWindowSpace:
+	case RenderSpace::UniformWindowSpace:
 		modelMatrix2 = Mat3::scale(data->renderBuffer->camera.frustumBend) * modelMatrix2; break;
-	case DrawMode::PixelSpace: 
+	case RenderSpace::PixelSpace: 
 		modelMatrix2 = pixelProjectionMatrix * modelMatrix2; break;
 	default:
 		break;
@@ -257,7 +256,7 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 	bindTexture(TEXTURE_DEFAULT, 0);
 
 	uint32_t nextTextureSamplerSlot{ 1 }; // when there are no texture slots left, the batch is full and will be rendered.
-	robin_hood::unordered_map<int, uint32_t> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
+	robin_hood::unordered_map<TextureId, uint32_t> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
 	// fill batch with vertices
 	size_t index{ startIndex };
 	int drawableCount{ 0 };
@@ -269,11 +268,11 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 		// check if drawable has texture
 		if (d.texRef.has_value()) {
 			auto& texRef = d.texRef.value();
-			if (texCache.isTextureLoaded(texRef.textureId) && texCache.getTexture(texRef.textureId).good) {
+			if (texCache.isTextureLoaded(texRef) && texCache.getTexture(texRef).good) {
 				// is texture allready in the usedSamplerMap?
-				if (usedTexturesSamplerSlots.contains(texRef.textureId)) {
+				if (usedTexturesSamplerSlots.contains(texRef.id)) {
 					// then just use the allready sloted texture sampler:
-					drawableSamplerSlot = usedTexturesSamplerSlots[texRef.textureId];
+					drawableSamplerSlot = usedTexturesSamplerSlots[texRef.id];
 				}
 				else { 
 					// if all texture sampler slots are used flush the batch
@@ -281,9 +280,9 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 
 					// there is a free texture sampler slot
 					// add texture to usedSamplerSlotMap:
-					usedTexturesSamplerSlots.insert({ texRef.textureId , nextTextureSamplerSlot });
+					usedTexturesSamplerSlots.insert({ texRef.id , nextTextureSamplerSlot });
 					// bind texture to sampler slot
-					bindTexture(texCache.getTexture(texRef.textureId).openglTexID, nextTextureSamplerSlot);
+					bindTexture(texCache.getTexture(texRef).openglTexID, nextTextureSamplerSlot);
 					drawableSamplerSlot = nextTextureSamplerSlot;
 					nextTextureSamplerSlot++;
 				}
@@ -344,8 +343,8 @@ void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjection
 
 
 	if (d.texRef.has_value()) {
-		if (texCache.isTextureLoaded(d.texRef.value().textureId)) {
-			bindTexture(d.texRef.value().textureId, texSlot);
+		if (texCache.isTextureLoaded(d.texRef.value())) {
+			bindTexture(d.texRef.value().id, texSlot);
 		}
 		else {
 			bindTexture(TEXTURE_DEFAULT, texSlot);

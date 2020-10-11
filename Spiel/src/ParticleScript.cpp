@@ -25,11 +25,10 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 		return start * (1 - logAge) + end * logAge;
 	};
 
-	mov.angleVelocity += (rand() % 1000 / 400.0f * 90.0f - 45.0f) * deltaTime;
 	mov.velocity.x += (rand() % 1000 / 400.0f - 1.25f) * deltaTime;
 	mov.velocity.y += (rand() % 1000 / 400.0f - 1.25f) * deltaTime;
 	mov.velocity *= 1 - deltaTime;
-	mov.angleVelocity *= 1 - deltaTime;
+	mov.angleVelocity *= 1 - deltaTime*8;
 
 	if (world.hasComp<Collider>(me)) {
 		auto& collider = world.getComp<Collider>(me);
@@ -58,7 +57,7 @@ void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime
 		if (relativeAge > 0.7f || data.collisionCount > 2) {
 			world.remComp<Collider>(me);
 			mov.velocity = Vec2(0, 0);
-			mov.angleVelocity = 0;
+			mov.angleVelocity *= 0.5f;
 		}
 	}
 

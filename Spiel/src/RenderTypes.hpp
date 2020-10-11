@@ -15,17 +15,7 @@
 #include "Vec2.hpp"
 #include "Camera.hpp"
 #include "Window.hpp"
-
-enum class DrawMode : char {
-	/*world coordinates, (0,0) is world's (0,0)*/
-	WorldSpace,
-	/* window (-1 to 1 in x and y) cooordinates, (0,0) is middle of the window */
-	WindowSpace,
-	/* window coordinates that ignore aspect ratio, (0,0) is middle of the window*/
-	UniformWindowSpace,
-	/* coordinates are pixels, (0,0) is lower left corner */
-	PixelSpace
-};
+#include "RenderSpace.hpp"
 
 struct IntColor {
 	uint8_t r{ 0 }, g{ 0 }, b{ 0 }, a{ 0 };
@@ -40,27 +30,13 @@ struct IntColor {
 
 using TextureString = boost::static_string<32>;
 
-struct Texture {
-	Texture() = default;
-	Texture(GLuint id, int width_, int height_, int bitsPerPixel_) :
-		openglTexID{ id },
-		width{ width_ },
-		height{ height_ },
-		channelPerPixel{ bitsPerPixel_ } 
-	{}
-
-	GLuint openglTexID{ 0 };
-	int width{ -1 };
-	int height{ -1 };
-	int channelPerPixel{ -1 };
-	bool good{ true };
-};
 
 using TextureId = int;
 
 class TextureInfo {
 public:
-	TextureInfo(std::string_view name)
+	TextureInfo() = default;
+	TextureInfo(std::string_view&& name)
 		:name{ name.data(), name.size() }
 	{ }
 
@@ -78,7 +54,7 @@ private:
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int file_version)
 	{
-		boost::serialization::split_member(ar, file_version);
+		boost::serialization::split_member(ar, *this, file_version);
 	}
 	template<class Archive> 
 	void save(Archive& ar, const unsigned int version) const
@@ -87,11 +63,51 @@ private:
 		ar << s;
 	}
 	template<class Archive>
-	void load(Archive& ar, const unsigned int version) const
+	void load(Archive& ar, const unsigned int version)
 	{
 		std::string s;
 		ar >> s;
 		name = s;
+	}
+};
+
+struct Texture {
+	Texture() = default;
+	Texture(GLuint id, int width_, int height_, int bitsPerPixel_, TextureInfo info)
+		:openglTexID{ id },
+		width{ width_ },
+		height{ height_ },
+		channelPerPixel{ bitsPerPixel_ },
+		info{ info }
+	{}
+
+	GLuint openglTexID{ 0 };
+	int width{ -1 };
+	int height{ -1 };
+	int channelPerPixel{ -1 };
+	bool good{ true };
+	TextureInfo info;
+};
+
+struct SmallTextureRef {
+	SmallTextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
+		minPos{ minPos_ },
+		maxPos{ maxPos_ },
+		id{ textureId }
+	{
+	}
+
+	Vec2 minPos;
+	Vec2 maxPos;
+	TextureId id{ -1 };
+private:
+	friend class boost::serialization::access;
+
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int file_version)
+	{
+		ar& minPos;
+		ar& maxPos;
 	}
 };
 
@@ -114,51 +130,41 @@ public:
 	}
 	TextureId getId() const
 	{
-		return this->id;
+		return this->ref.id;
 	}
 
 	Vec2 minPos{ 0.0f, 0.0f };
 	Vec2 maxPos{ 1.0f, 1.0f };
-private:
+
+	TextureRef2()
+		:info{"default"}
+	{}
+
+	TextureRef2(const TextureString& filename, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
+		:info{ filename }, ref{ -1, minPos, maxPos }
+	{}
+
+	bool good() const { return ref.id != -1;  }
+
+	SmallTextureRef makeSmall() const
+	{
+		return ref;
+	}
+protected:
 	friend class TextureRefManager;
-	TextureRef2(const TextureString& filename, TextureId id, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 0.0f, 0.0f })
-		:info{ filename }, id{ id }, minPos{ minPos }, maxPos{ maxPos }
+	TextureRef2(const TextureString& filename, TextureId id, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
+		:info{ filename }, ref{id, minPos, maxPos}
 	{}
 
 	TextureInfo info;
-	TextureId id;
+	SmallTextureRef ref;
 
 	friend class boost::serialization::access;
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int file_version)
 	{
 		ar& info;
-		ar& minPos;
-		ar& maxPos;
-	}
-};
-
-
-struct SmallTextureRef {
-	SmallTextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
-		minPos{ minPos_ },
-		maxPos{ maxPos_ },
-		textureId{ textureId }
-	{
-	}
-
-	Vec2 minPos;
-	Vec2 maxPos;
-	int textureId;
-private:
-	friend class boost::serialization::access;
-
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		ar & textureId;
-		ar & minPos;
-		ar & maxPos;
+		ar& ref;
 	}
 };
 
@@ -178,7 +184,7 @@ private:
 inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
 {
 	SmallTextureRef texRef;
-	texRef.textureId = atlasId;
+	texRef.id = atlasId;
 	texRef.minPos = startAtlasCell / atlasGridSize;
 	if (endAtlasCell == Vec2{ 0,0 }) {
 		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
@@ -219,7 +225,7 @@ public:
 	Form form;
 	std::optional<SmallTextureRef> texRef;
 
-	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, DrawMode drawMode = DrawMode::WorldSpace, SmallTextureRef texRef = {}) :
+	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, RenderSpace drawMode = RenderSpace::WorldSpace) :
 		position{ position_ },
 		rotationVec{ rotation_ },
 		drawingPrio{ drawingPrio_ },
@@ -227,19 +233,25 @@ public:
 		color{ color_ },
 		id{ id_ },
 		drawMode{ drawMode },
-		form{ form_ }
+		form{ form_ },
+		texRef{ std::nullopt }
 	{
-		if (texRef.textureId < 0) {
-			this->texRef = {};
-		}
-		else {
-			this->texRef = texRef;
-		}
 	}
 
-	inline DrawMode getDrawMode() const { return drawMode; }
+	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, RenderSpace drawMode, SmallTextureRef texRef) 
+		:Drawable(id_, position_, drawingPrio_, scale_, color_, form_, rotation_, drawMode) 
+	{
+		/*
+		* never create a Drawable with a texref THAT WAS NOT CREATED BY THE RENDERER
+		*/
+		assert(texRef.id != -1);
+		this->texRef = texRef;
+	}
+
+
+	inline RenderSpace getDrawMode() const { return drawMode; }
 private:
-	DrawMode drawMode;
+	RenderSpace drawMode;
 };
 
 struct Light {
@@ -252,7 +264,7 @@ struct Light {
 
 struct RenderBuffer {
 	std::vector<Drawable> drawables{};
-	std::vector<std::string*> textureNames;
+	std::vector<TextureRef2> textureLoadingQueue;
 	bool resetTextureCache{ false };
 	Camera camera{};
 };

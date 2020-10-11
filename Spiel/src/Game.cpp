@@ -23,36 +23,99 @@ void Game::create() {
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
 	world.loadMap("world.wrld");
-	{
-		UIFrame frame({ 500, 500 }, { 300.5f, 300.5f }, world.texture.getId("border.png"));
+	for (int i = 0; i < 100; i++) {
+		UIFrame frame(
+			UIAnchor(UIAnchor::X::LeftAbsolute, 100.0f, UIAnchor::Y::TopRelative, 0.5f),
+			{ 260.5f, 230.5f },
+			renderer.makeTexRef(TextureInfo("border.png")).makeSmall()
+		);
 		frame.borders.y = 20;
 		frame.borders.x = 20;
-		UIEntity e = ui.createFrame(std::move(frame));
-		ui.setAlias("Test", e);
-
-		UIText textEl = UIText("Gravitation: ", world.texture.getId("_pl_ConsolasAtlas.png"));
-		textEl.fontSize = { 20.0f };
+	
+		UIText textEl = UIText("Player power: ", renderer.makeTexRef(TextureInfo("_pl_ConsolasAtlas.png")).makeSmall());
+		textEl.fontSize =	{ 16.0f, 22.0f };
 		textEl.borderDist = { 0.0f, 0.0f };
-		textEl.color = { 0, 0, 0, 1.0f };
+		textEl.color =		{ 0, 0, 0, 1 };
+		textEl.setSize({ 220.0f, 40.0f });
 		textEl.setUpdateFn(
-			[&](UIElement* me) 
+			[&](UIElement* eme) 
 			{
-				Entity player{ 0 };
-				for (auto ent : world.entityView<Player>()) {
-					player = ent;
-				}
-				
-				std::stringstream ss;
-				ss << "Gravitation:\n";
-				ss << world.physics.linearEffectAccel << "\n";
-				ss << "Player Speed:\n";
-				ss << world.getComp<Movement>(player).velocity.length();
-				((UIText*)me)->text = ss.str();
+				UIText* me = (UIText*)eme;
+				me->text = focusToString(in.getMouseFocus());
 			}
 		);
-		UIEntity id = ui.createElement<UIText>(textEl);
 
-		ui["Test"].giveChild(&ui.getElement<UIText>(id));
+		textEl.textAnchor.setCenterHorizontal();
+		
+		UIBar bar( Vec4{1,1,1,1}, Vec4{0,0,0,1} );
+		bar.anchor.setCenterHorizontal();
+		bar.setUpdateFn(
+			[&](UIElement* _me) 
+			{
+				auto me = static_cast<UIBar*>(_me);
+				Entity player;
+				for (auto ent : world.entityView<Player>()) {
+					player = ent;
+					break;
+				}
+		
+				if (player != INVALID_ENTITY) {
+					me->setFill(world.getComp<Player>(player).power / 10.0f);
+				}
+				me->setFillColor(Vec4(1, 1, 1, 1) * (1 - me->getFill()) + Vec4(1, 0, 1, 1) * me->getFill());
+			}
+		);
+		bar.setSize({ 160.0f, 30.0f });
+
+		UIButton button1;
+		button1.setSize({ 30.0f, 30.0f });
+		button1.border = 5.0f;
+		button1.anchor.setContextScalable(true);
+		button1.anchor.setLeftAbsolute(0.0f);
+		button1.setHoldFn(
+			[&](UIClickable* me) {
+				Entity player;
+				for (auto ent : world.entityView<Player>()) {
+					player = ent;
+					break;
+				}
+
+				world.getComp<Player>(player).power -= getDeltaTimeSafe() * 10;
+			}
+		);
+
+		UIButton button2 = button1; 
+		button2.anchor.setRightAbsolute(0.0f);
+		//button2.setFocusable(false);
+		button2.setHoldFn(
+			[&](UIClickable* me) {
+				Entity player;
+				for (auto ent : world.entityView<Player>()) {
+					player = ent;
+					break;
+				}
+
+				world.getComp<Player>(player).power += getDeltaTimeSafe() * 10;
+			}
+		);
+
+		UIPair buttonField;
+		buttonField.setSize({ 90.0f, 30.0f });
+		buttonField.setHorizontal(true);
+		buttonField.setFirst(ui.createAndGet(button1));
+		buttonField.setSecond(ui.createAndGet(button2));
+		buttonField.anchor.setCenterHorizontal();
+
+		UIList8 list;
+		list.setSize(frame.getSize() - frame.borders * 2.0f);
+		list.setSpacing(10.0f);
+		list.addChild(ui.createAndGet(textEl));
+		list.addChild(ui.createAndGet(bar));
+		list.addChild(ui.createAndGet(buttonField));
+
+		frame.addChild(ui.createAndGet(list));
+		
+		ui.createFrame(frame);
 	}
 }
 
@@ -74,120 +137,98 @@ void Game::update(float deltaTime) {
 			baseSystem.execute(world);
 		}
 	}
+
+	in.manualUpdate(camera);
+
 	gameplayUpdate(deltaTime);
 	world.update();
-
 }
 
 void Game::gameplayUpdate(float deltaTime)
 {
-
-
 	for (auto ent : world.entityView<Base, Movement>()) {
 		if (world.getComp<Base>(ent).position.length() > 1000)
 			world.destroy(ent);
 	}
 	Vec2 size(10, 13);
 	Vec2 startpos(0, getWindowSize().y-size.y);
-	drawString(getPerfInfo(5), "_pl_ColnsolasAtlas.png", startpos, size);
+	drawString(getPerfInfo(5), "ColnsolasAtlas.png", startpos, size);
 
 	//take input
 	const std::string filename("world.wrld");
 
-	if (io.keyJustPressed(KEY::J)) {
+	if (in.keyJustPressed(Key::J)) {
 		world.loadMap("standart");
-		// renderer.resetTextureCache();
 	}
 
-	if (io.keyJustPressed(KEY::K)) {
+	if (in.keyJustPressed(Key::K)) {
 		world.saveMap(filename);
 	}
 	
-	if (io.keyJustPressed(KEY::L)) {
+	if (in.keyJustPressed(Key::L)) {
 		world.loadMap(filename);
-		// renderer.resetTextureCache();
 	}
 
-	if (io.keyPressed(KEY::LEFT_ALT, GLOBAL_FOCUS) && io.keyPressed(KEY::F4, GLOBAL_FOCUS)) {
+	if (in.keyPressed(Key::LEFT_ALT, Focus::Global) && in.keyPressed(Key::F4, Focus::Global)) {
 		quit();
 	}
-	if (io.keyJustPressed(KEY::G)) {
+	if (in.keyJustPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
 	}
-	if (io.keyPressed(KEY::H)) {
+	if (in.keyPressed(Key::H)) {
 		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
-	if (io.keyPressed(KEY::UP)) {
+	if (in.keyPressed(Key::UP)) {
 		camera.position -= rotate(Vec2(0.0f, -5.0f), camera.rotation) * deltaTime;
 	}
-	if (io.keyPressed(KEY::LEFT)) {
+	if (in.keyPressed(Key::LEFT)) {
 		camera.position -= rotate(Vec2(5.0f, 0.0f), camera.rotation) * deltaTime;
 	}
-	if (io.keyPressed(KEY::DOWN)) {
+	if (in.keyPressed(Key::DOWN)) {
 		camera.position -= rotate(Vec2(0.0f, 5.0f), camera.rotation) * deltaTime;
 	}
-	if (io.keyPressed(KEY::RIGHT)) {
+	if (in.keyPressed(Key::RIGHT)) {
 		camera.position -= rotate(Vec2(-5.0f, 0.0f), camera.rotation) * deltaTime;
 	}
-	if (io.keyPressed(KEY::NP_ADD)) {
+	if (in.keyPressed(Key::NP_ADD)) {
 		camera.zoom *= 1.0f + (1.0f * deltaTime);
 	}
-	if (io.keyPressed(KEY::NP_SUBTRACT)) {
+	if (in.keyPressed(Key::NP_SUBTRACT)) {
 		camera.zoom *= 1.0f - (1.0f * deltaTime);
 	}
-	if (io.keyPressed(KEY::NP_7)) {
+	if (in.keyPressed(Key::NP_7)) {
 		camera.rotation -= 100.0f * deltaTime;
 	}
-	if (io.keyPressed(KEY::NP_9)) {
+	if (in.keyPressed(Key::NP_9)) {
 		camera.rotation += 100.0f * deltaTime;
 	}
-	if (io.keyPressed(KEY::NP_0)) {
+	if (in.keyPressed(Key::NP_0)) {
 		camera.rotation = 0.0f;
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
 	}
-	if (io.keyJustPressed(KEY::B) && io.keyReleased(KEY::LEFT_SHIFT)) {
+	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
 		if (ui.doesAliasExist("Test")) {
-			ui.destroyFrame("Test");
+			ui.getFrame("Test").disable();
 		}
 	}
-	if (io.keyJustPressed(KEY::B) && io.keyPressed(KEY::LEFT_SHIFT)) {
-		if (!ui.doesAliasExist("Test")) {
-			UIFrame frame({ 500, 500 }, { 300.5f, 300.5f }, world.texture.getId("border.png"));
-			frame.borders.y = 20;
-			frame.borders.x = 20;
-			ui.setAlias("Test", ui.createFrame(std::move(frame)));
-
-			UIText textEl = UIText("Gravitation: ", world.texture.getId("ConsolasAtlas.png"));
-			textEl.fontSize = { 20.0f };
-			textEl.borderDist = { 0.0f, 0.0f };
-			textEl.color = { 0, 0, 0, 1.0f };
-			textEl.setUpdateFn([&](UIElement* me) {
-				Entity player{ 0 };
-				for (auto ent : world.entityView<Player>()) {
-					player = ent;
-				}
-
-				std::stringstream ss;
-				ss << "Gravitation:\n";
-				ss << world.physics.linearEffectAccel << "\n";
-				ss << "Player Speed:\n";
-				ss << world.getComp<Movement>(player).velocity.length();
-				static_cast<UIText*>(me)->text = ss.str();
-				});
-			auto index = ui.createElement<UIText>(textEl);
-			UIText* ptr = &ui.getElement<UIText>(index);
-			ui["Test"].giveChild(ptr);
+	if (in.keyJustPressed(Key::B) && in.keyPressed(Key::LEFT_SHIFT)) {
+		if (ui.doesAliasExist("Test")) {
+			ui.getFrame("Test").enable();
 		}
 	}
-	if (io.keyPressed(KEY::PERIOD, GLOBAL_FOCUS) && io.keyReleased(KEY::LEFT_SHIFT, GLOBAL_FOCUS)) {
-		io.setFocus(2);
+	if (in.keyPressed(Key::PERIOD, Focus::Global) && in.keyReleased(Key::LEFT_SHIFT, Focus::Global)) {
+		in.takeFocus(Focus::UI);
 	}
-	if (io.keyPressed(KEY::PERIOD, GLOBAL_FOCUS) && io.keyPressed(KEY::LEFT_SHIFT, GLOBAL_FOCUS)) {
-		io.setFocus(STANDART_FOCUS);
+	if (in.keyPressed(Key::PERIOD, Focus::Global) && in.keyPressed(Key::LEFT_SHIFT, Focus::Global)) {
+		in.takeFocus(Focus::Standart);
 	}
-
-	manualInputStateUpdate();
+	if (in.keyPressed(Key::I)) {
+		guiScale = clamp(guiScale - deltaTime, 0.1f, 10.0f);
+	}
+	if (in.keyPressed(Key::O)) {
+		guiScale = clamp(guiScale + deltaTime, 0.1f, 10.0f);
+	}
 
 	//execute scripts
 	playerScript.execute(deltaTime);
@@ -202,7 +243,7 @@ void Game::gameplayUpdate(float deltaTime)
 	cursorManipFunc();
 
 	for (auto ent : world.entityView<SpawnerComp>()) {
-		auto base = world.getComp<Base>(ent);
+		const auto& base = world.getComp<Base>(ent);
 		int laps = spawnerLapTimer.getLaps(deltaTime);
 		for (int i = 1; i < laps; i++) {
 			float rotation = (float)(rand() % 360);
@@ -242,12 +283,12 @@ void Game::destroy()
 
 void Game::cursorManipFunc()
 {
-	Vec2 worldCoord = getPosWorldSpace(getCursorPos());
+	Vec2 worldCoord = getPosWorldSpace(in.getMousePosition());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
 	Base b = Base(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
-	renderer.submit(Drawable(0, worldCoord, 1, Vec2(0.02, 0.02), Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), DrawMode::WorldSpace));
-	if (!cursorData.locked && buttonPressed(BUTTON::MB_LEFT)) {
+	renderer.submit(Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / camera.zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), RenderSpace::WorldSpace));
+	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
@@ -258,7 +299,7 @@ void Game::cursorManipFunc()
 			cursorData.locked = true;
 		}
 	}
-	else if (buttonPressed(BUTTON::MB_LEFT)) {
+	else if (in.buttonPressed(Button::MB_LEFT)) {
 		if (world.isIdValid(cursorData.lockedID)) {
 			world.getComp<Base>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
 			if (world.hasComp<Movement>(cursorData.lockedID)) {

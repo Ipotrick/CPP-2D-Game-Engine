@@ -8,7 +8,7 @@
 
 
 #include "RenderTypes.hpp"
-#include "TextureHandler.hpp"
+#include "TextureCache.hpp"
 
 struct Vertex {
 	static int constexpr floatCount{ 10 };
@@ -98,7 +98,7 @@ private:
 	size_t drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix, size_t startIndex);
 	void bindTexture(GLuint texID, int slot = 0);
 private:
-	TextureCache texCache{ &data->renderBuffer->textureNames, "ressources/" };
+	TextureCache texCache{ "ressources/" };
 	static constexpr int TEXTURE_WHITE = 0;
 	static constexpr int TEXTURE_DEFAULT = 1;
 

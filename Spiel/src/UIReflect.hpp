@@ -7,28 +7,20 @@
 #include "UIFrame.hpp"
 #include "UIText.hpp"
 #include "UIButton.hpp"
+#include "UIBar.hpp"
+#include "UIList.hpp"
+#include "UIField.hpp"
+#include "UIMultiParent.hpp"
+#include "UIClickable.hpp"
+#include "UIPair.hpp"
 
 using UIEntity = Entity;
 
 template<typename T>
 class UIContainer {
 public:
+	static_assert(std::is_base_of<UIElement, T>::value);
 	UIEntity create(const T& element)
-	{
-		if (freeElements.empty()) {
-			Entity index = (Entity)elements.size();
-			elements.updateMaxEntNum(index + 1);
-			elements.insert(index, element);
-			return index;
-		}
-		else {
-			Entity index = freeElements.back();
-			freeElements.pop_back();
-			elements.insert(index, element);
-			return index;
-		}
-	}
-	UIEntity create(T&& element)
 	{
 		if (freeElements.empty()) {
 			Entity index = (Entity)elements.size();
@@ -73,24 +65,37 @@ private:
 };
 
 using UIElementTuple = std::tuple< 
+	UIContainer<UIFrame>,
 	UIContainer<UIText>, 
-	UIContainer<UIButton>
+	UIContainer<UIButton>,
+	UIContainer<UIBar>,
+	UIContainer<UIPair>,
+	UIContainer<UIList8>,
+	UIContainer<UIList16>,
+	UIContainer<UIList32>,
+	UIContainer<UIList64>,
+	UIContainer<UIField8>,
+	UIContainer<UIField16>,
+	UIContainer<UIField32>,
+	UIContainer<UIField64>
 >;
+
+template< size_t I, typename T, typename Tuple_t>
+constexpr size_t index_in_ui_storagetuple_fn()
+{
+	static_assert(I < std::tuple_size<Tuple_t>::value, "the given ui element type is unknown");
+
+	typedef typename std::tuple_element<I, Tuple_t>::type el;
+	if constexpr (std::is_same<UIContainer<T>, el>::value) {
+		return I;
+	}
+	else {
+		return index_in_ui_storagetuple_fn<I + 1, T, Tuple_t>();
+	}
+}
 
 template<typename T>
 constexpr int getUIElementTypeIndex()
 {
-	static_assert(false, "given type is not an ui element!, You can register a component by adding it into the tuple above and then overriding this template as seen below!");
-}
-
-template<>
-constexpr int getUIElementTypeIndex<UIText>()
-{
-	return 0;
-}
-
-template<>
-constexpr int getUIElementTypeIndex<UIButton>()
-{
-	return 1;
+	return index_in_ui_storagetuple_fn<0, T, UIElementTuple>();
 }

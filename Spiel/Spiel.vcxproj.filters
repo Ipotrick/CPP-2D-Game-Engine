@@ -46,6 +46,12 @@
     <Filter Include="_Engine\_IO">
       <UniqueIdentifier>{1389f8ae-44f9-42d1-8125-c1cccaef4dec}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_UI\Elements">
+      <UniqueIdentifier>{799c118d-0ce7-44a5-86d3-f7999f5d9fa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_UI\BaseClasses">
+      <UniqueIdentifier>{324d3ffe-29fe-40b5-a539-5378e40a24cb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
@@ -124,9 +130,6 @@
       <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\RenderTypes.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\TextureHandler.hpp">
       <Filter>_Engine\_Rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\Window.hpp">
@@ -252,9 +255,6 @@
     <ClInclude Include="src\CollisionConstraintSet.hpp">
       <Filter>_Engine\_Physics</Filter>
     </ClInclude>
-    <ClInclude Include="src\TextureUniforms.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\EntityManager.hpp">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
@@ -267,19 +267,10 @@
     <ClInclude Include="src\UIManager.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
-    <ClInclude Include="src\UIElement.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
     <ClInclude Include="src\UIFrame.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
-    <ClInclude Include="src\UIText.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
     <ClInclude Include="src\UIReflect.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIButton.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
     <ClInclude Include="src\InputManager.hpp">
@@ -287,6 +278,54 @@
     </ClInclude>
     <ClInclude Include="src\TextureRefManager.hpp">
       <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureCache.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIAnchor.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIContext.hpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderSpace.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIBar.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIButton.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIField.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIList.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIText.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIPair.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIClickable.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIElement.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIMultiParent.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UISingleParent.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIFocusable.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputFocus.hpp">
+      <Filter>_Engine\_IO</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -303,9 +342,6 @@
       <Filter>_Engine\_Physics</Filter>
     </ClCompile>
     <ClCompile Include="src\RenderingWorker.cpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TextureHandler.cpp">
       <Filter>_Engine\_Rendering</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
@@ -395,14 +431,26 @@
     <ClCompile Include="src\UIFrame.cpp">
       <Filter>_Engine\_UI</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIElement.cpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClCompile>
     <ClCompile Include="src\InputManager.cpp">
       <Filter>_Engine\_IO</Filter>
     </ClCompile>
     <ClCompile Include="src\TextureRefManager.cpp">
       <Filter>_Engine\_Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureCache.cpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIBar.cpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIText.cpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIPair.cpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIElement.cpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

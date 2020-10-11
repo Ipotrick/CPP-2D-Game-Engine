@@ -47,43 +47,42 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
-			world.addComp<SmallTextureRef>(particle, SmallTextureRef(world.texture.getId("Cloud.png")));
+			world.addComp(particle, engine.renderer.makeTexRef(TextureInfo("Cloud.png")));
 			world.spawn(particle);
 			world.getComp<Age>(particle).curAge += rando * 0.02f;
 			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass*100000 / world.getComp<PhysicsBody>(me).mass*10;
 		}
 	};
 
-	float powerAdjust = 1.0f;
+	float powerAdjust = 5.0f;
 	float minPower = 0.05f;
 	float maxPower = 10.0f;
 
-	if (engine.io.keyPressed(KEY::LEFT_SHIFT)) {
+	if (engine.in.keyPressed(Key::LEFT_SHIFT)) {
 		data.power = std::min(data.power + deltaTime * powerAdjust, maxPower);
 		printf("new player power: %f\n", data.power);
 	}
-	if (engine.io.keyPressed(KEY::LEFT_CONTROL)) {
+	if (engine.in.keyPressed(Key::LEFT_CONTROL)) {
 		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
 		printf("new player power: %f\n", data.power);
 	}
 	data.flameSpawnTimer.setLapTime(0.008 * (1 / data.power));
-	auto cursorPos = engine.getPosWorldSpace(engine.getCursorPos());
 
-	if (engine.io.keyPressed(KEY::Q)) {
+	if (engine.in.keyPressed(Key::Q)) {
 		world.getComp<Movement>(me).angleVelocity += 100 * deltaTime;
 	}
-	if (engine.io.keyPressed(KEY::E)) {
+	if (engine.in.keyPressed(Key::E)) {
 		world.getComp<Movement>(me).angleVelocity -= 100 * deltaTime;
 	}
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
-	if (engine.io.keyPressed(KEY::W)) {
+	if (engine.in.keyPressed(Key::W)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
 		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90) * (0.4f) );
 
 	}
 
-	if (engine.io.keyPressed(KEY::F)) {
+	if (engine.in.keyPressed(Key::F)) {
 		auto baseEnt = cmps.get<Base>();
 		auto movEnt = cmps.get<Move>();
 		auto collEnt = cmps.get<Coll>();

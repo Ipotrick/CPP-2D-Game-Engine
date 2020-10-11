@@ -29,8 +29,8 @@
 #include "Camera.hpp"
 #include "EventHandler.hpp"
 #include "World.hpp"
-#include "UIManager.hpp"
 #include "InputManager.hpp"
+#include "UIManager.hpp"
 
 // Core Systems
 #include "MovementSystem.hpp"
@@ -42,7 +42,7 @@
 
 class Engine {
 public:
-	explicit Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_);
+	explicit Engine(World& wrld, std::string windowName, uint32_t windowWidth, uint32_t windowHeight);
 	~Engine();
 
 	/* ends programm after finishing the current frame */
@@ -68,24 +68,6 @@ public:
 	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
 	std::string getPerfInfo(int detail);
 
-					/*-- input utility --*/
-	/*  
-		the engine updates input states ONCE per frame before the update() call. 
-		One can call manualInpoutStateUpdate, once per frame to get a perhaps more rescent input state. 
-		Calling this function causes the engine to NOT update the states itself in the next frame.
-		Note that this function can only be called ONCE per frame. 
-		Calling theis function more than once per frame can lead to the missing of certain key states like justDown and justUp.
-	*/
-	void manualInputStateUpdate();
-	/* returns mouse position in window relative coordinates, O(1) (mutex locking) */
-	Vec2 getCursorPos();
-	/* returns the keystatus of mouse buttons, O(1) (mutex locking) */
-	InputStatus getButtonStatus(BUTTON but);
-	/* returns true when a button is pressed, O(1) (mutex locking) */
-	bool buttonPressed(BUTTON but);
-	/* returns true when a button is NOT pressed, O(1) (mutex locking) */
-	bool buttonReleased(BUTTON but);
-
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
 	Vec2 getWindowSize();
@@ -108,15 +90,12 @@ public:
 	}
 
 private:
+	Drawable buildWorldSpaceDrawable(World& world, Entity entity);
 	void rendererUpdate(World& world);
-
-	bool b_didUserUpdateInput{ false };
 public:
 	World& world;
 	EventHandler events;
 	Camera camera;
-
-	uint32_t freeDrawableID{ 0x80000000 };
 
 	JobManager jobManager;
 
@@ -139,18 +118,18 @@ private:
 	float deltaTime;
 
 	// window
-	std::shared_ptr<Window> window;
-
-
+	std::shared_ptr<Window> window;		// TODO remove shared_ptr
 public:
 	// render
 	Renderer renderer;
 
+	// Input
+	InputManager in;
+
 	// UI
+	float guiScale{ 1.0f };
 	UIManager ui;
 
-	// Input
-	InputManager io;
 };
 
 inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2 pos, Vec2 fontSize)
@@ -164,9 +143,9 @@ inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2
 			lineStride = 0;
 			continue;
 		}
-		auto drawID = ++freeDrawableID;
-		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace, makeAsciiRef(world.texture.getId("ConsolasAtlas.png"), str[i]));
-		auto background = Drawable(++freeDrawableID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, RotaVec2(0.0f), DrawMode::PixelSpace);
+		auto drawID = 0;
+		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), RenderSpace::PixelSpace, makeAsciiRef(renderer.makeTexRef(TextureInfo("_pl_ConsolasAtlas.png")).getId(), str[i]));
+		auto background = Drawable(0, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, RotaVec2(0.0f), RenderSpace::PixelSpace);
 		submitDrawable(background);
 		submitDrawable(d);
 		lineStride++;

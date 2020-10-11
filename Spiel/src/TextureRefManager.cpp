@@ -4,6 +4,7 @@ TextureRefManager::TextureRefManager()
 {
 	cacheTextureInfo(TextureInfo(std::string_view("white")));
 	cacheTextureInfo(TextureInfo(std::string_view("default")));
+	textureLoadingQueue.clear();
 }
 
 TextureRef2 TextureRefManager::makeRef(const TextureInfo& texInfo, const Vec2 minPos, const Vec2 maxPos)
@@ -20,18 +21,16 @@ TextureRef2 TextureRefManager::makeRef(const TextureInfo& texInfo, const Vec2 mi
 
 TextureRef2 TextureRefManager::cacheTextureInfo(const TextureInfo& texInfo)
 {
-	assert(!cachedTextureRef(texInfo));
 	auto ref = TextureRef2(texInfo.name, nextIndex++);
-	texRefs[texInfo.name.c_str()].push_back(ref);
+	texRefs[texInfo.name].push_back(ref);
 	textureLoadingQueue.push_back(ref);
 	return ref;
 }
 
 TextureRef2 TextureRefManager::cacheTextureInfo(TextureInfo&& texInfo)
 {
-	assert(!cachedTextureRef(texInfo));
 	auto ref = TextureRef2(texInfo.name, nextIndex++);
-	texRefs[texInfo.name.c_str()].push_back(ref);
+	texRefs[texInfo.name].push_back(ref);
 	textureLoadingQueue.push_back(ref);
 	return ref;
 }

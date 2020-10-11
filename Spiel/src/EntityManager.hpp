@@ -17,8 +17,6 @@
 
 class EntityManager {
 public:
-	static constexpr uint32_t INVALID_ID{ 0xFFFFFFFF };
-	static constexpr Entity INVALID_ENTITY{ 0xFFFFFFFF };
 
 	// created new entity and returns it
 	Entity create();

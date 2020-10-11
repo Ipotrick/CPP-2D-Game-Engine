@@ -1,41 +1,121 @@
+#pragma once
+
 #include <array>
+#include <type_traits>
+#include <vector>
 
 #include "Input.hpp"
 #include "Window.hpp"
+#include "Vec2.hpp"
+#include "RenderSpace.hpp"
+#include "InputFocus.hpp"
+#include "Camera.hpp"
 
-inline static constexpr int GLOBAL_FOCUS = -1;
-inline static constexpr int STANDART_FOCUS = 0;
-inline static constexpr int TEXT_INPUT_FOCUS = 1;
-inline static constexpr int MAIN_MENU_FOCUS = 2;
-inline static constexpr int SUB_MENU_FOCUS = 3;
+static inline std::string focusToString(Focus focus)
+{
+	switch (focus) {
+	case Focus::Out:
+		return "OutFocus";
+	case Focus::Global:
+		return "GloabalFocus";
+	case Focus::Standart:
+		return "StandartFocus";
+	case Focus::WriteText:
+		return "WriteTextFocus";
+	case Focus::UI:
+		return "MenuFocus";
+	default:
+		assert(false);
+		return "";
+	}
+}
 
 class InputManager {
 public:
-	InputManager()
+	InputManager(Window& window);
+	bool keyPressed(const Key key, Focus focus = Focus::Standart) const;
+	/*
+	* returns if the key is pressed in the current frame but was released in the previous frame.
+	*/
+	bool keyJustPressed(const Key key, Focus focus = Focus::Standart) const;
+	bool keyReleased(const Key key, Focus focus = Focus::Standart) const;
+	/*
+	* returns if the key is released in the current frame but was pressed in the previous frame.
+	*/
+	bool keyJustReleased(const Key key, Focus focus = Focus::Standart) const;
+
+
+	bool buttonPressed(const Button but, Focus focus = Focus::Standart) const;
+	/*
+	* returns if the button is pressed in the current frame but was released in the previous frame.
+	*/
+	bool buttonJustPressed(const Button but, Focus focus = Focus::Standart) const;
+	bool buttonReleased(const Button but, Focus focus = Focus::Standart) const;
+	/*
+	* returns if the button is released in the current frame but was pressed in the previous frame.
+	*/
+	bool buttonJustReleased(const Button but, Focus focus = Focus::Standart) const;
+
+
+	Vec2 getMousePosition(RenderSpace renderSpace = RenderSpace::WindowSpace) const;
+
+	void takeFocus(Focus focus)
 	{
-		for (int i = MIN_KEY_INDEX; i < MAX_KEY_INDEX + 1; i++) {
-			oldKeyStates[i] = KEY_UP;
-			newKeyStates[i] = KEY_UP;
-		}
+		this->keyFocusStack.push_back(focus);
 	}
-	bool keyPressed(const KEY key, int focusKey = STANDART_FOCUS);
-	bool keyJustPressed(const KEY key, int focusKey = STANDART_FOCUS);
-	bool keyReleased(const KEY key, int focusKey = STANDART_FOCUS);
-	bool keyJustReleased(const KEY key, int focusKey = STANDART_FOCUS);
-	void setFocus(int focusKey)
+	Focus getFocus() const
 	{
-		focus = focusKey;
+		return keyFocusStack.back();
 	}
-	int getFocus() const
+	void returnFocus()
 	{
-		return focus;
+		keyFocusStack.pop_back();
 	}
 
+	void takeMouseFocus(Focus focus)
+	{
+		this->mouseFocusStack.push_back(focus);
+	}
+	Focus getMouseFocus() const
+	{
+		return mouseFocusStack.back();
+	}
+	void returnMouseFocus()
+	{
+		this->mouseFocusStack.pop_back();
+	}
+
+	/*
+	* you can call this function ONCE per frame to update the keystates.
+	* If you do not call this function the engine will update the keystates itself after each frame.
+	*/
+	void manualUpdate(const Camera& cam);
 private:
-	int focus{ 0 };
+	bool keyFocusGuard(const Focus focus) const
+	{
+		return getFocus() == focus || focus == Focus::Global;
+	}
+
+	bool mouseFocusGuard(const Focus focus) const
+	{
+		return getMouseFocus() == focus || focus == Focus::Global;
+	}
 
 	friend class Engine;
-	void updateKeyStates(Window& window);
-	std::array<char, MAX_KEY_INDEX + 1> oldKeyStates;
-	std::array<char, MAX_KEY_INDEX + 1> newKeyStates;
+	void engineUpdate(const Camera& cam);	// this function is ment to be called by the engine once a frame	
+
+	void inputUpdate(const Camera& cam);
+
+	Window& window;
+	bool bManuallyUpdated{ false };
+	std::vector<Focus> keyFocusStack;
+	std::vector<Focus> mouseFocusStack;
+	std::array<int, MAX_KEY_INDEX + 1> oldKeyStates;
+	std::array<int, MAX_KEY_INDEX + 1> newKeyStates;
+	std::array<int, 8> oldButtonStates;
+	std::array<int, 8> newButtonStates;
+	Vec2 mousePositionWindowSpace{ 0.0f, 0.0f };
+	Vec2 mousePositionUniformWindowSpace{ 0.0f, 0.0f };
+	Vec2 mousePositionPixelSpace{ 0.0f, 0.0f };
+	Vec2 mousePositionWorldSpace{ 0.0f, 0.0f };
 };

@@ -1,22 +1,30 @@
 #pragma once
 
 #include "UIReflect.hpp"
+#include "InputManager.hpp"
+#include "std_extra.hpp"
 
 class UIManager {
 public:
-	UIManager(Renderer& renderer, World& world)
-		:renderer{renderer}, world{world}
+	UIManager(Renderer& renderer, InputManager& in)
+		:renderer{renderer}, in{ in }
 	{
 
 	}
 
-	UIEntity createFrame(UIFrame&& frame = UIFrame())
+	UIEntity createFrame(UIFrame frame)
 	{
-		return frames.create(frame);
+		return getElementContainer<UIFrame>().create(frame);
+	}
+	UIEntity createFrame(UIFrame frame, std::string_view alias)
+	{
+		auto uient = getElementContainer<UIFrame>().create(frame);
+		setAlias(alias, uient);
+		return uient;
 	}
 	void destroyFrame(UIEntity index);
 	void destroyFrame(std::string_view name);
-
+	bool doesFrameExist(UIEntity ent);
 	void setAlias(std::string_view alias, int index) 
 	{ 
 		if (aliasToEntity.contains(alias) || entityToAlias.contains(index)) {
@@ -39,8 +47,8 @@ public:
 	}
 	UIFrame& getFrame(UIEntity index)
 	{
-		if (frames.contains(index)) {
-			return frames.get(index);
+		if (getElementContainer<UIFrame>().contains(index)) {
+			return getElementContainer<UIFrame>().get(index);
 		}
 		else {
 			throw new std::exception("invalid access");
@@ -68,36 +76,44 @@ public:
 	{
 		return getElementContainer<T>().create(element);
 	}
-	template<typename T> UIEntity createElement(T&& element)
+	template<typename T> T* getElement(UIEntity index)
 	{
-		return getElementContainer<T>().create(element);
+		return &getElementContainer<T>().get(index);
 	}
-	template<typename T> void destroyElement(UIEntity index)
+	template<typename T> UIElement* createAndGet(const T& element)
 	{
-		return getElementContainer<T>().destroy(index);
+		return getElement<T>(createElement<T>(element));
 	}
-	template<typename T> T& getElement(UIEntity index)
+	template<typename T> bool doesElementExist(UIEntity entity)
 	{
-		return getElementContainer<T>().get(index);
+		return getElementContainer<T>().contains(entity);
 	}
 
 	UIFrame& operator [] (std::string_view alias)
 	{
 		if (aliasToEntity.contains(alias)) {
-			return frames.get(aliasToEntity[alias]);
+			return getElementContainer<UIFrame>().get(aliasToEntity[alias]);
 		}
 		else {
 			throw new std::exception("invalid alias name");
 		}
 	}
 private:
+	void perEntityUpdate();
 
-	Renderer& renderer;
-	World& world;
+	void focusUpdate();
 
-	UIContainer<UIFrame> frames;
+	void clickableUpdate();
+
+	void postUpdate();
+
+	// buffers:
+	std::vector<UIFocusable*> focusedElementCandidates;	// buffer for focused element candidates used in focusUpdate()
+
+	// fields:
+	Renderer& renderer; 
+	InputManager& in;
 	robin_hood::unordered_map<std::string_view, UIEntity> aliasToEntity;
 	robin_hood::unordered_map<UIEntity, std::string_view> entityToAlias;
-
 	UIElementTuple uiElementTuple;
 };

@@ -3,26 +3,17 @@
 #include <functional>
 #include <optional>
 
-#include "World.hpp"
-
-struct UIContext {
-	Vec2 ulCorner{ 0.0f, 0.0f };
-	Vec2 drCorner{ 0.0f, 0.0f };
-	float scale{ 1.0f };
-	int depth{ 0 };
-	DrawMode drawMode{ DrawMode::PixelSpace };
-};
+#include "UIContext.hpp"
+#include "UIAnchor.hpp"
 
 class UIElement {
 public:
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) = 0;
-	virtual void destroy() final {
-		b_destroyMark = true;
-		if (hasChild()) {
-			getChild()->destroy();
-		}
+
+	virtual void destroy() {
+		bDestroyed = true;
 	}
-	virtual bool isDestroyed() const final { return b_destroyMark; }
+	virtual bool isDestroyed() const final { return bDestroyed; }
 
 	virtual void update() final
 	{
@@ -43,25 +34,29 @@ public:
 		return fn_update;
 	}
 
-	virtual void giveChild(UIElement* child) final
-	{
-		childElement = child;
-	}
-	virtual const UIElement* getChild() const final
-	{
-		return childElement;
-	}
-	virtual UIElement* getChild() final
-	{
-		return childElement;
-	}
-	virtual bool hasChild() const final { return childElement != nullptr; }
-protected:
-	std::pair<Vec2, Vec2> lastDrawnArea;	// this is used to check for mouse intersections 
-private:
-	bool b_destroyMark{ false };
+	virtual void enable() { bEnable = true; }
+	virtual void disable() { bEnable = false; }
+	virtual bool isEnabled() const { return this->bEnable; }
 
-	UIElement* childElement{ nullptr };
+	virtual void setSize(Vec2 size) final
+	{
+		this->size = std::move(size);
+	}
+	virtual Vec2 getSize() const final
+	{
+		return this->size;
+	}
+	/*
+	* This function is called recursively for all frames and their elements AFTER the update call to all frames and elements
+	*/
+	virtual void postUpdate() {}
+
+	UIAnchor anchor;
+protected:
+	Vec2 size{ 0.0f, 0.0f };
+private:
+	bool bDestroyed{ false };
+	bool bEnable{ true };
 
 	std::function<void(UIElement*)> fn_update{ {} };
 };
