@@ -3,43 +3,60 @@
 #include <functional>
 #include <optional>
 
-#include "World.hpp"
-
-struct UIContext {
-	Vec2 ulCorner{ 0.0f, 0.0f };
-	Vec2 drCorner{ 0.0f, 0.0f };
-	float scale{ 1.0f };
-	int depth{ 0 };
-	DrawMode drawMode{ DrawMode::PixelSpace };
-};
+#include "UIContext.hpp"
+#include "UIAnchor.hpp"
 
 class UIElement {
 public:
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) = 0;
-	void destroy() { 
-		b_destroyMark = true;
-		if (hasChild()) {
-			getChild()->destroy();
+
+	virtual void destroy() {
+		bDestroyed = true;
+	}
+	virtual bool isDestroyed() const final { return bDestroyed; }
+
+	virtual void update() final
+	{
+		if (hasUpdateFn()) {
+			fn_update(this);
 		}
 	}
-	bool isDestroyed() const { return b_destroyMark; }
+	virtual bool hasUpdateFn() const final
+	{
+		return static_cast<bool>(fn_update);
+	}
+	virtual void setUpdateFn(std::function<void(UIElement*)> fn) final
+	{
+		fn_update = fn;
+	}
+	virtual std::function<void(UIElement*)> getUpdateFn() const final
+	{
+		return fn_update;
+	}
 
-	void giveChild(UIElement* child)
+	virtual void enable() { bEnable = true; }
+	virtual void disable() { bEnable = false; }
+	virtual bool isEnabled() const { return this->bEnable; }
+
+	virtual void setSize(Vec2 size) final
 	{
-		childElement = child;
+		this->size = std::move(size);
 	}
-	const UIElement* getChild() const
+	virtual Vec2 getSize() const final
 	{
-		return childElement;
+		return this->size;
 	}
-	UIElement* getChild()
-	{
-		return childElement;
-	}
-	bool hasChild() const { return childElement != nullptr; }
+	/*
+	* This function is called recursively for all frames and their elements AFTER the update call to all frames and elements
+	*/
+	virtual void postUpdate() {}
+
+	UIAnchor anchor;
 protected:
-	std::pair<Vec2, Vec2> lastDrawnArea;	// this is used to check for mouse intersections 
+	Vec2 size{ 0.0f, 0.0f };
 private:
-	bool b_destroyMark{ false };
-	UIElement* childElement{ nullptr };
+	bool bDestroyed{ false };
+	bool bEnable{ true };
+
+	std::function<void(UIElement*)> fn_update{ {} };
 };

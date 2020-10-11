@@ -5,15 +5,16 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	world{ wrld },
 	running{ true },
 	iteration{ 0 },
-	minimunLoopTime{ 1 }, // 10000 microseconds = 10 milliseond => 100 loops per second
+	minimunLoopTime{ 1 },	// 10000 microseconds = 10 milliseonds => 100 loops per second
 	maxDeltaTime{ 0.02f },
 	deltaTime{ 0.0 },
 	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_) },
 	jobManager(std::thread::hardware_concurrency()),
 	collisionSystem{ world, jobManager, perfLog },
 	physicsSystem2{ jobManager, perfLog },
-	renderer{ window, world.texture },
-	ui{ renderer, world }
+	renderer{ window },
+	in{ *window },
+	ui{ renderer, in }
 {
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
@@ -58,44 +59,6 @@ std::string Engine::getPerfInfo(int detail) {
 	return ss.str();
 }
 
-InputStatus Engine::getKeyStatus(KEY key_) {
-	std::lock_guard<std::mutex> l(window->mut);
-	return (InputStatus)glfwGetKey(window->glfwWindow, int(key_));
-}
-
-bool Engine::keyPressed(KEY key_) {
-	return getKeyStatus(key_) == InputStatus::PRESS;
-}
-
-bool Engine::keyReleased(KEY key_) {
-	return getKeyStatus(key_) == InputStatus::RELEASE;
-}
-
-bool Engine::keyRepeating(KEY key_) {
-	return getKeyStatus(key_) == InputStatus::REPEAT;
-}
-
-Vec2 Engine::getCursorPos() {
-	Vec2 size = getWindowSize();
-	std::lock_guard<std::mutex> l(window->mut);
-	double xPos, yPos;
-	glfwGetCursorPos(window->glfwWindow, &xPos, &yPos);
-	return { (float)xPos / size.x * 2.0f - 1.f, -(float)yPos / size.y * 2.0f +1.f };
-}
-
-InputStatus Engine::getButtonStatus(BUTTON but_) {
-	std::lock_guard<std::mutex> l(window->mut);
-	return static_cast<InputStatus>( glfwGetMouseButton(window->glfwWindow, static_cast<int>(but_)));
-}
-
-bool Engine::buttonPressed(BUTTON but_) {
-	return getButtonStatus(but_) == InputStatus::PRESS;
-}
-
-bool Engine::buttonReleased(BUTTON but_) {
-	return getButtonStatus(but_) == InputStatus::RELEASE;
-}
-
 Vec2 Engine::getWindowSize() {
 	std::lock_guard<std::mutex> l(window->mut);
 	return { static_cast<float>(window->width), static_cast<float>(window->height) };
@@ -117,7 +80,6 @@ Vec2 Engine::getPosWindowSpace(Vec2 worldSpacePos)
 	return viewProjectionMatrix * worldSpacePos;
 }
 
-
 void Engine::run() {
 	create();
 
@@ -126,27 +88,44 @@ void Engine::run() {
 		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY);
 		deltaTime = micsecToFloat(new_deltaTime);
 		perfLog.commitTimes();
-		//commitTimeMessurements();
-		freeDrawableID = 0x80000000;
 		{
 			Timer mainTimer(perfLog.getInputRef("maintime"));
+
+			// game update:
 			{
 				Timer t(perfLog.getInputRef("updatetime"));
 				update(getDeltaTimeSafe());
 			}
-			{
-				ui.update();
-				UIContext context;	// TODO GIVE REAL VALUES
-				ui.draw(context);
-				rendererUpdate(world);
-			}
+
+			// update io:
+			in.engineUpdate(camera);
+
+			// update rendering:
+			ui.update();
+			UIContext context;
+			context.drawingPrio = 1.0f;
+			context.drawMode = RenderSpace::PixelSpace;
+			context.scale = guiScale;
+			context.ulCorner = { 0.0f, 0.0f };
+			context.drCorner = { static_cast<float>(window->width), static_cast<float>(window->height) };
+			ui.draw(context);
+			rendererUpdate(world);
 		}
 		if (glfwWindowShouldClose(window->glfwWindow)) { // if window closes the program ends
 			running = false;
 		}
 		else {
-			//std::lock_guard l(window->mut);
+			std::lock_guard l(window->mut);
 			glfwPollEvents();
+
+			if (!glfwGetWindowAttrib(window->glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
+				in.takeFocus(Focus::Out);
+				in.takeMouseFocus(Focus::Out);
+			}
+			else if (glfwGetWindowAttrib(window->glfwWindow, GLFW_FOCUSED) && in.getFocus() == Focus::Out) {
+				in.returnFocus();
+				in.returnMouseFocus();
+			}
 			renderer.startRendering();
 			iteration++;
 		}
@@ -155,19 +134,27 @@ void Engine::run() {
 	destroy();
 }
 
-Drawable buildWorldSpaceDrawable(World& world, Entity entity) {
-	if (!world.hasComp<TexRef>(entity)) {
-		return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec));
+Drawable Engine::buildWorldSpaceDrawable(World& world, Entity entity) {
+	Base& base = world.getComp<Base>(entity);
+	Draw& draw = world.getComp<Draw>(entity);
+	if (world.hasComp<TextureRef2>(entity)) {
+		TextureRef2& texRef = world.getComp<TextureRef2>(entity);
+		if (!texRef.good()) {
+			// if a TexRef component was created without the renderer, it will be replaced here:
+			texRef = renderer.makeTexRef(texRef.getInfo());
+		}
+		return Drawable(entity, base.position, draw.drawingPrio, draw.scale, draw.color, draw.form, base.rotaVec, RenderSpace::WorldSpace, texRef.makeSmall());
 	}
 	else {
-		return std::move(Drawable(entity, world.getComp<Base>(entity).position, world.getComp<Draw>(entity).drawingPrio, world.getComp<Draw>(entity).scale, world.getComp<Draw>(entity).color, world.getComp<Draw>(entity).form, world.getComp<Base>(entity).rotaVec, DrawMode::WorldSpace, world.getComp<TexRef>(entity)));
+		return Drawable(entity, base.position, draw.drawingPrio, draw.scale, draw.color, draw.form, base.rotaVec, RenderSpace::WorldSpace);
 	}
 }
 
 void Engine::rendererUpdate(World& world)
 {
 	for (auto ent : world.entityView<Base,Draw>()) {
-		renderer.submit(buildWorldSpaceDrawable(world, ent));
+		auto d = buildWorldSpaceDrawable(world, ent);
+		renderer.submit(d);
 	}
 	renderer.setCamera(camera);
 

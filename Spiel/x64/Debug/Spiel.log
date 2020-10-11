@@ -47,7 +47,7 @@ ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
 PYTHONPATH = C:\Users\Patrick\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.8_qbz5n2kfra8p0\LocalCache\local-packages\Python38\site-packages
-ServiceHubLogSessionKey = 7E3CB0E1
+ServiceHubLogSessionKey = A52A1215
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -70,6 +70,93 @@ VSSKUEDITION = Community
 windir = C:\WINDOWS
 
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  stb_image.cpp
+  AgeScript.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  algo.hpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  BulletScript.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  CollisionCheckJob.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  CollisionConstraintSet.cpp
+  CollisionSystem.cpp
+  collision_detection.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\CollisionCheckJob.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\CollisionConstraintSet.cpp(18,75): warning C4554: "&": Überprüfen Sie die Operatorrangfolge auf mögliche Fehler. Verwenden Sie Klammern, um die Rangfolge zu verdeutlichen.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\AgeScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\BulletScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\CollisionSystem.cpp)
+  DummyScript.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\collision_detection.cpp(120): warning C4715: "fastMod": Nicht alle Codepfade geben einen Wert zurück.
+  Engine.cpp
+  EntityManager.cpp
+  EventHandler.cpp
   Game.cpp
-C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\DummyScript.cpp)
+  InputManager.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\DummyScript.cpp)
+  TextureRefManager.cpp
+  UIElement.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\InputManager.cpp(158,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert".
+  UIFrame.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\Engine.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\DummyScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Game.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\Game.cpp)
+  UIManager.cpp
+  World.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\UIFrame.cpp)
+  HealthScript.cpp
+  main.cpp
+  Mat3.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\UIManager.cpp)
+  Mat4.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\HealthScript.cpp)
+  MovementSystem.cpp
+  ParticleScript.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\main.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\main.cpp)
+  Physics.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\ParticleScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\HealthScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\MovementSystem.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\ParticleScript.cpp)
+  PhysicsSystem.cpp
+  PhysicsSystem2.cpp
+  PlayerScript.cpp
+  Qtree2.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\PlayerScript.cpp)
+  QuadTree.cpp
+  Renderer.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\PhysicsSystem2.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\PlayerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\Qtree2.cpp)
+  RenderingWorker.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\QuadTree.cpp)
+  SuckerScript.cpp
+  TesterScript.cpp
+  TextureCache.cpp
+  Vec2.hpp
+  EntityComponentManager.cpp
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(59,54): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\JobManager.hpp(239,33): warning C4267: "return": Konvertierung von "size_t" nach "int", Datenverlust möglich (Quelldatei wird kompiliert src\TesterScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.cpp(279,33): warning C4018: ">=": Konflikt zwischen "signed" und "unsigned"
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\RenderingWorker.hpp(55): warning C4715: "Vertex::operator[]": Nicht alle Codepfade geben einen Wert zurück.
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\SuckerScript.cpp)
+C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\Spiel\src\UISingleParent.hpp(57,3): warning C4002: Zu viele Argumente für den Aufruf des funktionsähnlichen Makros "assert". (Quelldatei wird kompiliert src\TesterScript.cpp)
+     Bibliothek "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.lib" und Objekt "C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exp" werden erstellt.
   Spiel.vcxproj -> C:\Users\Patrick\Repos\Spiel\Spiel\SpielMappe\x64\Debug\Spiel.exe

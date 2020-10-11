@@ -56,6 +56,8 @@
     <ClInclude Include="src\HealthScript.hpp" />
     <ClInclude Include="src\IndexSet.hpp" />
     <ClInclude Include="src\Input.hpp" />
+    <ClInclude Include="src\InputFocus.hpp" />
+    <ClInclude Include="src\InputManager.hpp" />
     <ClInclude Include="src\JobManager.hpp" />
     <ClInclude Include="src\Mat3.hpp" />
     <ClInclude Include="src\Mat4.hpp" />
@@ -73,6 +75,7 @@
     <ClInclude Include="src\random.hpp" />
     <ClInclude Include="src\Renderer.hpp" />
     <ClInclude Include="src\RenderingWorker.hpp" />
+    <ClInclude Include="src\RenderSpace.hpp" />
     <ClInclude Include="src\RenderTypes.hpp" />
     <ClInclude Include="src\Script.hpp" />
     <ClInclude Include="src\GameSystem.hpp" />
@@ -81,13 +84,23 @@
     <ClInclude Include="src\SuckerScript.hpp" />
     <ClInclude Include="src\SweepAndPrune.hpp" />
     <ClInclude Include="src\TesterScript.hpp" />
-    <ClInclude Include="src\TextureHandler.hpp" />
-    <ClInclude Include="src\TextureUniforms.hpp" />
+    <ClInclude Include="src\TextureCache.hpp" />
+    <ClInclude Include="src\TextureRefManager.hpp" />
     <ClInclude Include="src\Timing.hpp" />
+    <ClInclude Include="src\UIAnchor.hpp" />
+    <ClInclude Include="src\UIBar.hpp" />
     <ClInclude Include="src\UIButton.hpp" />
+    <ClInclude Include="src\UIClickable.hpp" />
+    <ClInclude Include="src\UIContext.hpp" />
     <ClInclude Include="src\UIElement.hpp" />
+    <ClInclude Include="src\UIField.hpp" />
+    <ClInclude Include="src\UIFocusable.hpp" />
     <ClInclude Include="src\UIFrame.hpp" />
+    <ClInclude Include="src\UIList.hpp" />
     <ClInclude Include="src\UIManager.hpp" />
+    <ClInclude Include="src\UIMultiParent.hpp" />
+    <ClInclude Include="src\UIPair.hpp" />
+    <ClInclude Include="src\UISingleParent.hpp" />
     <ClInclude Include="src\UIReflect.hpp" />
     <ClInclude Include="src\UIText.hpp" />
     <ClInclude Include="src\Vec.hpp" />
@@ -112,9 +125,14 @@
     <ClCompile Include="src\EntityManager.cpp" />
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\TextureRefManager.cpp" />
+    <ClCompile Include="src\UIBar.cpp" />
     <ClCompile Include="src\UIElement.cpp" />
     <ClCompile Include="src\UIFrame.cpp" />
     <ClCompile Include="src\UIManager.cpp" />
+    <ClCompile Include="src\UIPair.cpp" />
+    <ClCompile Include="src\UIText.cpp" />
     <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -132,7 +150,7 @@
     <ClCompile Include="src\RenderingWorker.cpp" />
     <ClCompile Include="src\SuckerScript.cpp" />
     <ClCompile Include="src\TesterScript.cpp" />
-    <ClCompile Include="src\TextureHandler.cpp" />
+    <ClCompile Include="src\TextureCache.cpp" />
     <ClCompile Include="src\Vec2.hpp" />
     <ClCompile Include="src\EntityComponentManager.cpp" />
   </ItemGroup>

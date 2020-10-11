@@ -6,7 +6,6 @@
 #include "EntityComponentManager.hpp"
 
 #include "CoreSystemUniforms.hpp"
-#include "TextureUniforms.hpp"
 
 class World : public EntityComponentManager {
 public:
@@ -17,7 +16,6 @@ public:
 public:
 	// Core System Uniform Data
 	PhysicsUniforms physics;
-	TextureUniforms texture;
 protected:
 	friend class boost::serialization::access;
 	template<class Archive>
@@ -25,7 +23,6 @@ protected:
 	{
 		ar & boost::serialization::base_object<EntityComponentManager>(*this);
 		ar & physics;
-		ar & texture;
 	}
 private:
 };

@@ -369,7 +369,7 @@ inline auto EntityComponentManager::entityComponentView()
 using Move = Movement;
 using Coll = Collider;
 using PBody = PhysicsBody;
-using TexRef = TextureRef;
+using TexRef = SmallTextureRef;
 class ComponentView {
 public:
 	ComponentView(EntityComponentManager& manager, Entity index) 

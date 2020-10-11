@@ -3,6 +3,8 @@
 
 using entity_id_t = uint32_t;
 using Entity = uint32_t;
+static constexpr uint32_t INVALID_ID{ 0xFFFFFFFF };
+static constexpr Entity INVALID_ENTITY{ 0xFFFFFFFF };
 struct EntityId {
 	friend class boost::serialization::access;
 	template<class Archive>

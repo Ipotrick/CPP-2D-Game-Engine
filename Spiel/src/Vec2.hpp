@@ -7,8 +7,8 @@
 
 class Vec2 {
 public:
-	Vec2() : x{0}, y{0} {}
-	Vec2(float x, float y) : x{ x }, y{ y } {}
+	constexpr Vec2() : x{0}, y{0} {}
+	constexpr Vec2(float x, float y) : x{ x }, y{ y } {}
 
 	// openGL access func
 	inline float const * data() const { return &x; }
