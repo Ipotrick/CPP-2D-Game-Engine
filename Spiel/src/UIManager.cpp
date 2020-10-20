@@ -34,7 +34,6 @@ bool UIManager::doesFrameExist(UIEntity ent)
 
 void UIManager::update()
 {
-	LogTimer t(std::cout << "uiupdate");
 	perEntityUpdate();
 	postUpdate();
 	focusUpdate();
@@ -43,7 +42,6 @@ void UIManager::update()
 
 void UIManager::draw(UIContext context)
 {
-	LogTimer t(std::cout << "uidraw");
 	std::vector<Drawable> buffer;
 	context.increaseDrawPrio();
 	for (auto& ent : getElementContainer<UIFrame>()) {
@@ -52,23 +50,45 @@ void UIManager::draw(UIContext context)
 			frame.draw(buffer, context);
 		}
 	}
+	lastUpdateDrwawbleCount = buffer.size();
 	for (auto&& d : buffer) {
 		renderer.submit(d);
 	}
 }
 
+size_t UIManager::elementCount() const
+{
+	size_t sum{ 0 };
+	std_extra::tuple_for_each(uiElementTuple,
+		[&](auto& container) {
+			sum += container.size();
+		}
+	);
+	return sum;
+}
+
 void UIManager::perEntityUpdate()
 {
+	// update
+	size_t activeElements{ 0 };
 	std_extra::tuple_for_each(uiElementTuple,
-		[](auto& container) {
+		[&](auto& container)
+		{
 			for (auto& uient : container) {
 				auto& element = container.get(uient);
-				if (element.isDestroyed()) {
-					element.destroy();
-				}
-				else if (element.isEnabled()) {
-					element.update();
-				}
+				element.update();
+				activeElements += element.isEnabled() ? 1 : 0;
+			}
+		}
+	);
+	lastUpdateActiveElements = activeElements;
+	// destroy
+	std_extra::tuple_for_each(uiElementTuple,
+		[](auto& container) 
+		{
+			for (auto& uient : container) {
+				auto& element = container.get(uient);
+				if (element.isDestroyed()) container.destroy(uient);
 			}
 		}
 	);

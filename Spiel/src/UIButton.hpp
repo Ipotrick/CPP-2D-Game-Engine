@@ -19,7 +19,7 @@ public:
 
 		buffer.push_back(Drawable(0, position, context.drawingPrio, size, borderColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 		context.increaseDrawPrio();
-		buffer.push_back(Drawable(0, position, context.drawingPrio, size - Vec2(border, border), innerColor, Form::Rectangle, RotaVec2(0), context.drawMode));
+		buffer.push_back(Drawable(0, position, context.drawingPrio, size - Vec2(border, border) * 2.0f, innerColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 
 		lastDrawArea = context;
 		lastDrawArea.ulCorner = position - Vec2(1, -1) * size * 0.5f;
@@ -29,6 +29,6 @@ public:
 	float border{ 2.0f };
 	Vec4 borderColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 	Vec4 innerReleasedColor{ 0.8f, 0.8f, 0.8f, 1.0f };
-	Vec4 innerPressedColor{ 0.2f, 0.2f, 0.8f, 1.0f };
+	Vec4 innerPressedColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 private:
 };

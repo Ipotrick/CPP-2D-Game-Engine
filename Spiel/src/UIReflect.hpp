@@ -13,6 +13,8 @@
 #include "UIMultiParent.hpp"
 #include "UIClickable.hpp"
 #include "UIPair.hpp"
+#include "UISeperator.hpp"
+#include "UICollapsable.hpp"
 
 using UIEntity = Entity;
 
@@ -57,6 +59,11 @@ public:
 		return elements.contains(index);
 	}
 
+	size_t size() const
+	{
+		return elements.size();
+	}
+
 	auto begin() { return elements.begin(); }
 	auto end() { return elements.end(); }
 private:
@@ -77,7 +84,9 @@ using UIElementTuple = std::tuple<
 	UIContainer<UIField8>,
 	UIContainer<UIField16>,
 	UIContainer<UIField32>,
-	UIContainer<UIField64>
+	UIContainer<UIField64>,
+	UIContainer<UISeperator>,
+	UIContainer<UICollapsable>
 >;
 
 template< size_t I, typename T, typename Tuple_t>

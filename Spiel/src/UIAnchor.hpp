@@ -6,16 +6,18 @@
 class UIAnchor {
 public:
 	enum class X {
-		LeftAbsolute,
-		RightAbsolute,
-		LeftRelative,
-		RightRelative
+		DirectPosition,
+		LeftAbsoluteDist,
+		RightAbsoluteDist,
+		LeftRelativeDist,
+		RightRelativeDist
 	};
 	enum class Y {
-		TopAbsolute,
-		BottomAbsolute,
-		TopRelative,
-		BottomRelative
+		DirectPosition,
+		TopAbsoluteDist,
+		BottomAbsoluteDist,
+		TopRelativeDist,
+		BottomRelativeDist
 	};
 
 	UIAnchor() = default;
@@ -32,54 +34,54 @@ public:
 
 	UIAnchor& setLeftAbsolute(const float x)
 	{
-		this->xMode = X::LeftAbsolute;
+		this->xMode = X::LeftAbsoluteDist;
 		this->xAnchor = x;
 		return *this;
 	}
 	UIAnchor& setRightAbsolute(const float x)
 	{
-		this->xMode = X::RightAbsolute;
+		this->xMode = X::RightAbsoluteDist;
 		this->xAnchor = x;
 		return *this;
 	}
 	UIAnchor& setLeftRelative(const float x)
 	{
 		assert(x >= 0.0f && x <= 1.0f);
-		this->xMode = X::LeftRelative;
+		this->xMode = X::LeftRelativeDist;
 		this->xAnchor = x;
 		return *this;
 	}
 	UIAnchor& setRightRelative(const float x)
 	{
 		assert(x >= 0.0f && x <= 1.0f);
-		this->xMode = X::RightRelative;
+		this->xMode = X::RightRelativeDist;
 		this->xAnchor = x;
 		return *this;
 	}
 
 	UIAnchor& setTopAbsolute(const float y)
 	{
-		this->yMode = Y::TopAbsolute;
+		this->yMode = Y::TopAbsoluteDist;
 		this->yAnchor = y;
 		return *this;
 	}
 	UIAnchor& setBottomAbsolute(const float y)
 	{
-		this->yMode = Y::BottomAbsolute;
+		this->yMode = Y::BottomAbsoluteDist;
 		this->yAnchor = y;
 		return *this;
 	}
 	UIAnchor& setTopRelative(const float y)
 	{
 		assert(y >= 0.0f && y <= 1.0f);
-		this->yMode = Y::TopRelative;
+		this->yMode = Y::TopRelativeDist;
 		this->yAnchor = y;
 		return *this;
 	}
 	UIAnchor& setBottomRelative(const float y)
 	{
 		assert(y >= 0.0f && y <= 1.0f);
-		this->yMode = Y::BottomRelative;
+		this->yMode = Y::BottomRelativeDist;
 		this->yAnchor = y;
 		return *this;
 	}
@@ -88,10 +90,41 @@ public:
 	{
 		return setLeftRelative(0.5f);
 	}
-
 	UIAnchor& setCenterVertical()
 	{
 		return setTopRelative(0.5f);
+	}
+
+	/*
+	* sets the position directly from the dl corner of the context as the coordinate center
+	*/
+	UIAnchor& setXPosition(const float x)
+	{
+		this->xMode = X::DirectPosition;
+		this->xAnchor = x;
+	}
+	/*
+	* sets the position directly from the dl corner of the context as the coordinate center
+	*/
+	UIAnchor& setYPosition(const float y)
+	{
+		this->yMode = Y::DirectPosition;
+		this->yAnchor = y;
+	}
+	/*
+	* sets the position directly from the dl corner of the context as the coordinate center
+	*/
+	UIAnchor& setAbsPosition(const Vec2 pos)
+	{
+		this->xMode = X::DirectPosition;
+		this->xAnchor = pos.x;
+		this->yMode = Y::DirectPosition;
+		this->yAnchor = pos.y;
+		return *this;
+	}
+	Vec2 get() const
+	{
+		return Vec2{ xAnchor, yAnchor };
 	}
 
 	/*
@@ -127,52 +160,14 @@ public:
 	* the returnd context is as large as the given SCALED size with the disposition of the
 	* anchor
 	*/
-	UIContext shrinkContextToMe(const Vec2 size, UIContext context)
-	{
-		Vec2 position = getOffset(size * context.scale, context);
-		context.ulCorner.x = position.x - size.x * 0.5f * context.scale;
-		context.ulCorner.y = position.y + size.y * 0.5f * context.scale;
-		context.drCorner.x = position.x + size.x * 0.5f * context.scale;
-		context.drCorner.y = position.y - size.y * 0.5f * context.scale;
-		return context;
-	}
+	UIContext shrinkContextToMe(const Vec2 size, UIContext context) const;
 
-private:
-	float getXOffset(const float size, const UIContext& context) const 
-	{
-		float scale = bContextScalable ? context.scale : 1.0f;
-		switch (xMode) {
-		case X::LeftAbsolute:
-			return context.ulCorner.x + xAnchor * scale + size * 0.5f;
-		case X::RightAbsolute:
-			return context.drCorner.x - xAnchor * scale - size * 0.5f;
-		case X::LeftRelative:
-			return context.ulCorner.x * (xAnchor) + context.drCorner.x * (1.0f - xAnchor);
-		case X::RightRelative:
-			return context.ulCorner.x * (1.0f - xAnchor) + context.drCorner.x * (xAnchor);
-		default:
-			return 0.0f;
-		}
-	}
-	float getYOffset(const float size, const UIContext& context) const
-	{
-		float scale = bContextScalable ? context.scale : 1.0f;
-		switch (yMode) {
-		case Y::TopAbsolute:
-			return context.ulCorner.y - yAnchor * scale - size * 0.5f;
-		case Y::BottomAbsolute:
-			return context.drCorner.y + yAnchor * scale + size * 0.5f;
-		case Y::TopRelative:
-			return context.ulCorner.y * (1.0f - yAnchor) + context.drCorner.y * (yAnchor);
-		case Y::BottomRelative:
-			return context.ulCorner.y * (yAnchor) + context.drCorner.y * (1.0f - yAnchor);
-		default:
-			return 0.0f;
-		}
-	}
-	bool bContextScalable{ false };
+protected:
+	float getXOffset(const float size, const UIContext& context) const;
+	float getYOffset(const float size, const UIContext& context) const;
 	float xAnchor{ 0.0f };
 	float yAnchor{ 0.0f };
-	X xMode{ X::LeftAbsolute };
-	Y yMode{ Y::TopAbsolute };
+	X xMode{ X::LeftAbsoluteDist };
+	Y yMode{ Y::TopAbsoluteDist };
+	bool bContextScalable{ false };
 };

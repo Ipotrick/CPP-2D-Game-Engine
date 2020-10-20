@@ -44,11 +44,17 @@ public:
 	}
 
 	// returns the time spend rendering
-	inline std::chrono::microseconds getRenderingTime() { return renderingTime ; }
+	std::chrono::microseconds getRenderingTime() { return renderingTime ; }
 	// returns the time spend waiting for the worker to finish
-	inline std::chrono::microseconds getWaitedTime() { return syncTime; }
+	std::chrono::microseconds getWaitedTime() { return syncTime; }
+	/*
+	* returns the amount of drawcalls the last rendererd frame
+	*/
+	int getDrawCalls() const { return drawCallCount; }
 
 	inline TextureRef2 makeTexRef(const TextureInfo& texInfo) { return texRefManager.makeRef(texInfo); }
+
+	inline SmallTextureRef makeSmallTexRef(const TextureInfo& texInfo) { return texRefManager.makeRef(texInfo).makeSmall(); }
 
 	// Texture utility:
 private:
@@ -66,6 +72,7 @@ private:
 	// perf:
 	std::chrono::microseconds renderingTime;
 	std::chrono::microseconds syncTime;
+	int drawCallCount{ 0 };
 
 	// texture management:
 	TextureRefManager texRefManager;

@@ -1,9 +1,9 @@
 #include "World.hpp"
 #include "Physics.hpp"
 
-void World::loadMap(std::string mapname_) {
+void World::loadMap(const std::string& mapname) {
 	*this = World();
-	if (mapname_ == "standart")
+	if (mapname == "standart")
 	{
 		auto makeWall = [&](int x, int y) {
 			auto wall = create();
@@ -23,7 +23,7 @@ void World::loadMap(std::string mapname_) {
 
 
 		int const height = 80;
-		int const width =32;
+		int const width = 32;
 		std::string map = {
 			"################################"
 			"#                              #"
@@ -143,9 +143,10 @@ void World::loadMap(std::string mapname_) {
 		cmpsBox.add<Movement>();
 		cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
 		cmpsBox.add(TextureRef2("Dir.png"));
+		cmpsBox.add(Health(100));
 		spawn(box);
 
-		int num = 100'000;// 250'000;
+		int num = 10'000;// 250'000;
 		for (int i = 0; i < num; i++) {
 			auto ent = create();
 			auto c = componentView(ent);
@@ -155,11 +156,11 @@ void World::loadMap(std::string mapname_) {
 			spawn(ent);
 		}
 
-		Vec2 scale = Vec2(0.2f, 0.2f);
+		Vec2 scale = Vec2(0.3f, 0.3f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form);
 		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
-		for (int i = 0; i < 5000; i ++) {
+		for (int i = 0; i < 3000; i ++) {
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
@@ -193,11 +194,11 @@ void World::loadMap(std::string mapname_) {
 		cmps3.add<SuckerComp>(suckerCmd);
 		spawn(sucker);
 	}
-	else if (mapname_ == "uitest") {
+	else if (mapname == "uitest") {
 		this->physics.linearEffectDir = Vec2(0, -1);
 	}
 	else {
-		std::ifstream ifs(mapname_, std::ios::binary);
+		std::ifstream ifs(mapname, std::ios::binary);
 		if (ifs.good()) {
 			boost::archive::binary_iarchive oa(ifs);
 			oa >> *this;
@@ -208,14 +209,30 @@ void World::loadMap(std::string mapname_) {
 	}
 }
 
-void World::saveMap(std::string filename)
+void World::saveMap(const std::string& mapname)
 {
 	defragment(DefragMode::COMPLETE);
-	std::ofstream ofs(filename, std::ios::binary);
+	std::ofstream ofs(mapname, std::ios::binary);
 	if (ofs.good()) {
 		{
 			boost::archive::binary_oarchive oa(ofs);
 			oa << *this;
 		}
 	}
+}
+
+void World::saveWorld(const std::string& filename)
+{
+}
+
+void World::loadWorld(const std::string& filename)
+{
+}
+
+void World::saveGameState(const std::string& filename)
+{
+}
+
+void World::loadGameState(const std::string& filename)
+{
 }

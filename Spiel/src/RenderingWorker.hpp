@@ -57,7 +57,7 @@ struct Vertex {
 
 struct RenderingSharedData
 {
-	// sync
+	// sync  
 	bool run{ true };
 	bool ready{ false };
 	std::mutex mut{};
@@ -69,6 +69,7 @@ struct RenderingSharedData
 	// perf
 	std::chrono::microseconds new_renderTime{ 0 };
 	std::chrono::microseconds new_renderSyncTime{ 0 };
+	int drawCallCount{ 0 };
 };
 
 class RenderingWorker

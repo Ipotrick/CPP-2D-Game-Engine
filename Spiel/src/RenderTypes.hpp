@@ -40,6 +40,11 @@ public:
 		:name{ name.data(), name.size() }
 	{ }
 
+	TextureInfo(const std::string_view& name)
+		:name{ name.data(), name.size() }
+	{
+	}
+
 	TextureInfo(const TextureString& name)
 		:name{ name }
 	{ }

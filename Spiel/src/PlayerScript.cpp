@@ -76,7 +76,7 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 	}
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
-	if (engine.in.keyPressed(Key::W)) {
+	if (engine.in.keyPressed(Key::SPACE)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
 		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Base>().rotation + 90) * (0.4f) );
 
@@ -89,7 +89,7 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 
 		Vec2 scale(0.4, 0.4);
 		float bulletVel = 20.0f;
-		uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
+		uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime) * data.power;
 		for (uint64_t i = 0; i < bullets; i++) {
 			float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
 			Vec2 bullCollVel = movEnt.velocity + (bulletVel + (rand() % 1000 / 1000.0f)) * rotate(Vec2(0, 1), baseEnt.rotation + velOffsetRota);
@@ -101,7 +101,7 @@ void PlayerScript::script(Entity me, Player& data, float deltaTime) {
 			world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1, 0));
 			world.addComp<Draw>(bullet, bulletDraw);
 			world.addComp<Collider>(bullet, bulletCollider);
-			world.addComp<Bullet>(bullet, Bullet(10, 3));
+			world.addComp<Bullet>(bullet, Bullet(1, 3));
 			world.spawn(bullet);
 		}
 	}

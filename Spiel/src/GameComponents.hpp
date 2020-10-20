@@ -82,6 +82,7 @@ struct Health : public CompData {
 	Health() : maxHealth{0}, curHealth{0} {}
 	int maxHealth;
 	int curHealth;
+	bool bUISpawned{ false };
 };
 
 // age component

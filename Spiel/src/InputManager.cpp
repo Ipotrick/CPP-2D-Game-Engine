@@ -5,14 +5,12 @@ InputManager::InputManager(Window& window)
 {
 	for (int i = MIN_KEY_INDEX; i < MAX_KEY_INDEX + 1; i++) {
 		oldKeyStates[i] = GLFW_RELEASE;
-		newKeyStates[i] = GLFW_RELEASE;
 	}
 	for (int i = 0; i < 8; ++i) {
 		oldButtonStates[i] = GLFW_RELEASE;
-		newButtonStates[i] = GLFW_RELEASE;
 	}
-	keyFocusStack.push_back(Focus::Standart);
-	mouseFocusStack.push_back(Focus::Standart);
+	keyFocusStack.push_back(Focus::Standard);
+	mouseFocusStack.push_back(Focus::Standard);
 }
 
 void InputManager::manualUpdate(const Camera& cam)
@@ -39,6 +37,11 @@ void InputManager::inputUpdate(const Camera& cam)
 	std::unique_lock lock(window.mut);
 	oldKeyStates = newKeyStates;
 	oldButtonStates = newButtonStates;
+	prevMousePositionPixelSpace = mousePositionPixelSpace;
+	prevMousePositionUniformWindowSpace = mousePositionUniformWindowSpace;
+	prevMousePositionWindowSpace = mousePositionWindowSpace;
+	prevMousePositionWorldSpace = mousePositionWorldSpace;
+	glfwPollEvents();	// update key and button states
 
 	// when the focus is Out, the keys are getting set to released
 	if (getFocus() != Focus::Out) {
@@ -163,6 +166,23 @@ Vec2 InputManager::getMousePosition(const RenderSpace renderSpace) const
 		return mousePositionWindowSpace;
 	case RenderSpace::WorldSpace:
 		return mousePositionWorldSpace;
+	default:
+		assert(false); // when this assert fails, you did not update this function for altered RenderSpace enum types >:(
+		return { 0.0f, 0.0f };
+	}
+}
+
+Vec2 InputManager::getPrevMousePosition(RenderSpace renderSpace) const
+{
+	switch (renderSpace) {
+	case RenderSpace::PixelSpace:
+		return prevMousePositionPixelSpace;
+	case RenderSpace::WindowSpace:
+		return prevMousePositionWindowSpace;
+	case RenderSpace::UniformWindowSpace:
+		return prevMousePositionWindowSpace;
+	case RenderSpace::WorldSpace:
+		return prevMousePositionWorldSpace;
 	default:
 		assert(false); // when this assert fails, you did not update this function for altered RenderSpace enum types >:(
 		return { 0.0f, 0.0f };

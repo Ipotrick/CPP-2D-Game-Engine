@@ -1,8 +1,11 @@
 #pragma once
 
+#define USE_BOOST
 
+#ifdef USE_BOOST
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#endif
 
 #include <chrono>
 #include <iostream>
@@ -134,6 +137,7 @@ protected:
 
 template <typename Unit = std::chrono::microseconds>
 class LapTimer {
+#ifdef USE_BOOST
 	friend class boost::serialization::access;
 	template<class Archive>
 	void save(Archive& ar, const unsigned int version) const
@@ -141,7 +145,6 @@ class LapTimer {
 		ar << lap_time.count();
 		ar << time_since_last_lap.count();
 	}
-
 	template<class Archive>
 	void load(Archive& ar, const unsigned int version)
 	{
@@ -158,6 +161,7 @@ class LapTimer {
 	{
 		boost::serialization::split_member(ar, *this, file_version);
 	}
+#endif
 public:
 	LapTimer(float lap_time_) : lap_time{ floatToMicsec(lap_time_) }, time_since_last_lap{ 0 } {}
 	uint64_t getLaps(float deltaTime) {

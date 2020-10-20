@@ -95,7 +95,7 @@ protected:
 		ar >> boost::serialization::base_object<EntityManager>(*this);
 		tuple_for_each(componentStorageTuple,
 			[&](auto& componentStorage) {
-				componentStorage.updateMaxEntNum(entityStorageInfo.size());
+				componentStorage.updateMaxEntNum(entityStatusVec.size());
 				decltype(componentStorage.dump()) dump;
 				ar >> dump;
 				for (auto [ent, comp] : dump) {
@@ -150,20 +150,39 @@ template<typename CompType> inline bool EntityComponentManager::hasComp(Entity i
 	constexpr auto tuple_index = storageIndex<CompType>();
 	return std::get<tuple_index>(componentStorageTuple).contains(index);
 }
+
+template<> inline bool EntityComponentManager::hasComp<void>(Entity index)
+{
+	return true;
+}
+
 template<typename CompType>
 inline bool EntityComponentManager::hasComp(EntityId id)
 {
 	return hasComp<CompType>(idToIndexTable[id.identifier]);
 }
 
+template<> inline bool EntityComponentManager::hasComp<void>(EntityId id)
+{
+	return true;
+}
+
 template<typename CompType> inline bool EntityComponentManager::hasntComp(Entity index) {
 	constexpr auto tuple_index = storageIndex<CompType>();
 	return !std::get<tuple_index>(componentStorageTuple).contains(index);
+}
+template<> inline bool EntityComponentManager::hasntComp<void>(Entity index)
+{
+	return true;
 }
 template<typename CompType>
 inline bool EntityComponentManager::hasntComp(EntityId id)
 {
 	return hasntComp<CompType>(idToIndexTable[id.identifier]);
+}
+template<> inline bool EntityComponentManager::hasntComp<void>(EntityId id)
+{
+	return true;
 }
 
 template<typename CompType> inline CompType& EntityComponentManager::addComp(Entity index, CompType data) {
@@ -407,7 +426,7 @@ inline ComponentView EntityComponentManager::componentView(EntityId id)
 inline void EntityComponentManager::updateMaxEntityToComponentSotrages(Entity entity)
 {
 	tuple_for_each(componentStorageTuple, [&](auto& componentStorage) {
-		componentStorage.updateMaxEntNum(entityStorageInfo.size());
+		componentStorage.updateMaxEntNum(entityStatusVec.size());
 		});
 }
 
@@ -435,8 +454,8 @@ inline void EntityComponentManager::deregisterDestroyedEntities()
 
 inline void EntityComponentManager::moveEntity(Entity start, Entity goal)
 {
-	assert(entityStorageInfo.size() > goal && entityStorageInfo[goal].isValid() == false);
-	assert(entityStorageInfo.size() > start && entityStorageInfo[start].isValid() == true);
+	assert(entityStatusVec.size() > goal && entityStatusVec[goal].isValid() == false);
+	assert(entityStatusVec.size() > start && entityStatusVec[start].isValid() == true);
 	if (hasId(start)) {
 		idToIndexTable[indexToIdTable[start]] = goal;
 		indexToIdTable[goal] = indexToIdTable[start];
@@ -450,10 +469,10 @@ inline void EntityComponentManager::moveEntity(Entity start, Entity goal)
 			assert(!componentStorage.contains(start));
 		}
 		});
-	entityStorageInfo[goal].setValid(true);
-	entityStorageInfo[goal].setSpawned(entityStorageInfo[start].isSpawned());
-	entityStorageInfo[start].setValid(false);
-	entityStorageInfo[start].setSpawned(false);
+	entityStatusVec[goal].setValid(true);
+	entityStatusVec[goal].setSpawned(entityStatusVec[start].isSpawned());
+	entityStatusVec[start].setValid(false);
+	entityStatusVec[start].setSpawned(false);
 }
 
 inline void EntityComponentManager::defragment(DefragMode const mode)

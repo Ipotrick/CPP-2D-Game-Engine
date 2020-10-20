@@ -25,10 +25,28 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	perfLog.submitTime("physicsexecute");
 	perfLog.submitTime("rendertime");
 	perfLog.submitTime("calcRotaVecTime");
+	deltaTimeQueue.push_back(maxDeltaTime);
 }
 
 Engine::~Engine() {
 	renderer.end();
+}
+
+inline float Engine::getDeltaTime(int sampleSize) const
+{
+	if (sampleSize == 1) {
+		return deltaTimeQueue[0];
+	}
+	else {
+		int maxSamples = std::min(deltaTimeQueue.size(), 100ui64);
+
+		sampleSize = std::min(sampleSize, maxSamples);
+		float sum{ 0.0f };
+		for (int i = 0; i < sampleSize; ++i) {
+			sum += deltaTimeQueue[i];
+		}
+		return sum / sampleSize;
+	}
 }
 
 std::string Engine::getPerfInfo(int detail) {
@@ -74,10 +92,15 @@ Vec2 Engine::getPosWorldSpace(Vec2 windowSpacePos_) {
 	return { transformedPos.x, transformedPos.y };
 }
 
-Vec2 Engine::getPosWindowSpace(Vec2 worldSpacePos)
+Vec2 Engine::getWorldToWindow(Vec2 worldSpacePos)
 {
 	Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
 	return viewProjectionMatrix * worldSpacePos;
+}
+
+Vec2 Engine::getWindowToPixel(Vec2 windowSpacePos)
+{
+	return ((windowSpacePos + Vec2(1.0f, 1.0f)) * 0.5f) * Vec2(window->width, window->height);
 }
 
 void Engine::run() {
@@ -87,6 +110,11 @@ void Engine::run() {
 		Timer loopTimer(new_deltaTime);
 		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY);
 		deltaTime = micsecToFloat(new_deltaTime);
+		if (deltaTimeQueue.size() > 99) {
+			deltaTimeQueue.pop_back();
+		}
+		deltaTimeQueue.push_front(deltaTime);
+
 		perfLog.commitTimes();
 		{
 			Timer mainTimer(perfLog.getInputRef("maintime"));
@@ -97,7 +125,7 @@ void Engine::run() {
 				update(getDeltaTimeSafe());
 			}
 
-			// update io:
+			// update in:
 			in.engineUpdate(camera);
 
 			// update rendering:
@@ -106,8 +134,8 @@ void Engine::run() {
 			context.drawingPrio = 1.0f;
 			context.drawMode = RenderSpace::PixelSpace;
 			context.scale = guiScale;
-			context.ulCorner = { 0.0f, 0.0f };
-			context.drCorner = { static_cast<float>(window->width), static_cast<float>(window->height) };
+			context.ulCorner = { 0.0f, static_cast<float>(window->height) };
+			context.drCorner = { static_cast<float>(window->width), 0.0f };
 			ui.draw(context);
 			rendererUpdate(world);
 		}
@@ -115,9 +143,6 @@ void Engine::run() {
 			running = false;
 		}
 		else {
-			std::lock_guard l(window->mut);
-			glfwPollEvents();
-
 			if (!glfwGetWindowAttrib(window->glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
 				in.takeFocus(Focus::Out);
 				in.takeMouseFocus(Focus::Out);

@@ -2,11 +2,10 @@
 
 #include "UIElement.hpp"
 
-class UISingleParent : virtual public UIElement {
+class UISingleParent {
 public:
 	/*
 	* if this function is overriden, the Base Function (UISingleParent::destroy) MUST still be called
-	*/
 	virtual void destroy() override
 	{
 		UIElement::destroy();
@@ -14,10 +13,10 @@ public:
 			destroyChild();
 		}
 	}
+	*/
 
 	/*
 	* if this function is overriden, the Base Function (UISingleParent::enable) MUST still be called
-	*/
 	virtual void enable() override
 	{
 		UIElement::enable();
@@ -25,10 +24,10 @@ public:
 			enableChild();
 		}
 	}
+	*/
 
 	/*
 	* if this function is overriden, the Base Function (UISingleParent::destdisableroy) MUST still be called
-	*/
 	virtual void disable() override
 	{
 		UIElement::disable();
@@ -36,16 +35,17 @@ public:
 			disableChild();
 		}
 	}
+	*/
 
 	/*
 	* if this function is overriden, the Base Function (UISingleParent::updateSize) MUST still be called
-	*/
 	virtual void postUpdate() override
 	{
 		if (hasChild()) {
 			getChild()->postUpdate();
 		}
 	}
+	*/
 
 	void addChild(UIElement* child)
 	{

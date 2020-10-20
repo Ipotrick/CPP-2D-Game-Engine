@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h" />
     <ClInclude Include="src\AgeScript.hpp" />
-    <ClInclude Include="src\ai.h" />
     <ClInclude Include="src\BaseSystem.hpp" />
     <ClInclude Include="src\BaseTypes.hpp" />
     <ClInclude Include="src\BasicScripts.hpp" />
@@ -33,11 +32,11 @@
     <ClInclude Include="src\CollisionCheckJob.hpp" />
     <ClInclude Include="src\CollisionConstraintSet.hpp" />
     <ClInclude Include="src\ComponentTypes.hpp" />
+    <ClInclude Include="src\DrawFrame.hpp" />
     <ClInclude Include="src\EntityManager.hpp" />
     <ClInclude Include="src\ImpulseResolutionJob.hpp" />
     <ClInclude Include="src\CollisionSystem.hpp" />
     <ClInclude Include="src\collision_detection.hpp" />
-    <ClInclude Include="src\CoreCompInclude.hpp" />
     <ClInclude Include="src\CoreComponents.hpp" />
     <ClInclude Include="src\CoreSystem.hpp" />
     <ClInclude Include="src\CoreSystemUniforms.hpp" />
@@ -50,7 +49,6 @@
     <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.hpp" />
     <ClInclude Include="src\GameComponents.hpp" />
-    <ClInclude Include="src\GameCompInclude.hpp" />
     <ClInclude Include="src\GameSystemUnifroms.hpp" />
     <ClInclude Include="src\GameWorld.hpp" />
     <ClInclude Include="src\HealthScript.hpp" />
@@ -91,6 +89,7 @@
     <ClInclude Include="src\UIBar.hpp" />
     <ClInclude Include="src\UIButton.hpp" />
     <ClInclude Include="src\UIClickable.hpp" />
+    <ClInclude Include="src\UICollapsable.hpp" />
     <ClInclude Include="src\UIContext.hpp" />
     <ClInclude Include="src\UIElement.hpp" />
     <ClInclude Include="src\UIField.hpp" />
@@ -100,6 +99,7 @@
     <ClInclude Include="src\UIManager.hpp" />
     <ClInclude Include="src\UIMultiParent.hpp" />
     <ClInclude Include="src\UIPair.hpp" />
+    <ClInclude Include="src\UISeperator.hpp" />
     <ClInclude Include="src\UISingleParent.hpp" />
     <ClInclude Include="src\UIReflect.hpp" />
     <ClInclude Include="src\UIText.hpp" />
@@ -120,6 +120,7 @@
     <ClCompile Include="src\CollisionConstraintSet.cpp" />
     <ClCompile Include="src\CollisionSystem.cpp" />
     <ClCompile Include="src\collision_detection.cpp" />
+    <ClCompile Include="src\DrawFrame.cpp" />
     <ClCompile Include="src\DummyScript.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EntityManager.cpp" />
@@ -127,11 +128,13 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\TextureRefManager.cpp" />
+    <ClCompile Include="src\UIAnchor.cpp" />
     <ClCompile Include="src\UIBar.cpp" />
-    <ClCompile Include="src\UIElement.cpp" />
+    <ClCompile Include="src\UICollapsable.cpp" />
     <ClCompile Include="src\UIFrame.cpp" />
     <ClCompile Include="src\UIManager.cpp" />
     <ClCompile Include="src\UIPair.cpp" />
+    <ClCompile Include="src\UISeperator.cpp" />
     <ClCompile Include="src\UIText.cpp" />
     <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />

@@ -131,7 +131,6 @@ bool TextureCache::loadTexture(const TextureRef2& ref)
 			GLfloat fLargest;
 			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &fLargest);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, fLargest);
-			checkGLError();
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, localBuffer);
 			glBindTexture(GL_TEXTURE_2D, 0);

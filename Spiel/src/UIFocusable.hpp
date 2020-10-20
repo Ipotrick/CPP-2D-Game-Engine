@@ -3,7 +3,7 @@
 #include "UIElement.hpp"
 #include "InputFocus.hpp"
 
-class UIFocusable : virtual public UIElement {
+class UIFocusable : public UIElement {
 public:
 
 	virtual void disable() override

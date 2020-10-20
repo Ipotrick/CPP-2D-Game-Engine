@@ -18,8 +18,8 @@ static inline std::string focusToString(Focus focus)
 		return "OutFocus";
 	case Focus::Global:
 		return "GloabalFocus";
-	case Focus::Standart:
-		return "StandartFocus";
+	case Focus::Standard:
+		return "StandardFocus";
 	case Focus::WriteText:
 		return "WriteTextFocus";
 	case Focus::UI:
@@ -33,31 +33,32 @@ static inline std::string focusToString(Focus focus)
 class InputManager {
 public:
 	InputManager(Window& window);
-	bool keyPressed(const Key key, Focus focus = Focus::Standart) const;
+	bool keyPressed(const Key key, Focus focus = Focus::Standard) const;
 	/*
 	* returns if the key is pressed in the current frame but was released in the previous frame.
 	*/
-	bool keyJustPressed(const Key key, Focus focus = Focus::Standart) const;
-	bool keyReleased(const Key key, Focus focus = Focus::Standart) const;
+	bool keyJustPressed(const Key key, Focus focus = Focus::Standard) const;
+	bool keyReleased(const Key key, Focus focus = Focus::Standard) const;
 	/*
 	* returns if the key is released in the current frame but was pressed in the previous frame.
 	*/
-	bool keyJustReleased(const Key key, Focus focus = Focus::Standart) const;
+	bool keyJustReleased(const Key key, Focus focus = Focus::Standard) const;
 
 
-	bool buttonPressed(const Button but, Focus focus = Focus::Standart) const;
+	bool buttonPressed(const Button but, Focus focus = Focus::Standard) const;
 	/*
 	* returns if the button is pressed in the current frame but was released in the previous frame.
 	*/
-	bool buttonJustPressed(const Button but, Focus focus = Focus::Standart) const;
-	bool buttonReleased(const Button but, Focus focus = Focus::Standart) const;
+	bool buttonJustPressed(const Button but, Focus focus = Focus::Standard) const;
+	bool buttonReleased(const Button but, Focus focus = Focus::Standard) const;
 	/*
 	* returns if the button is released in the current frame but was pressed in the previous frame.
 	*/
-	bool buttonJustReleased(const Button but, Focus focus = Focus::Standart) const;
+	bool buttonJustReleased(const Button but, Focus focus = Focus::Standard) const;
 
 
 	Vec2 getMousePosition(RenderSpace renderSpace = RenderSpace::WindowSpace) const;
+	Vec2 getPrevMousePosition(RenderSpace renderSpace = RenderSpace::WindowSpace) const;
 
 	void takeFocus(Focus focus)
 	{
@@ -110,12 +111,16 @@ private:
 	bool bManuallyUpdated{ false };
 	std::vector<Focus> keyFocusStack;
 	std::vector<Focus> mouseFocusStack;
-	std::array<int, MAX_KEY_INDEX + 1> oldKeyStates;
-	std::array<int, MAX_KEY_INDEX + 1> newKeyStates;
-	std::array<int, 8> oldButtonStates;
-	std::array<int, 8> newButtonStates;
+	std::array<char, MAX_KEY_INDEX + 1> oldKeyStates;
+	std::array<char, MAX_KEY_INDEX + 1> newKeyStates;
+	std::array<char, 8> oldButtonStates;
+	std::array<char, 8> newButtonStates;
 	Vec2 mousePositionWindowSpace{ 0.0f, 0.0f };
 	Vec2 mousePositionUniformWindowSpace{ 0.0f, 0.0f };
 	Vec2 mousePositionPixelSpace{ 0.0f, 0.0f };
 	Vec2 mousePositionWorldSpace{ 0.0f, 0.0f };
+	Vec2 prevMousePositionWindowSpace{ 0.0f, 0.0f };
+	Vec2 prevMousePositionUniformWindowSpace{ 0.0f, 0.0f };
+	Vec2 prevMousePositionPixelSpace{ 0.0f, 0.0f };
+	Vec2 prevMousePositionWorldSpace{ 0.0f, 0.0f };
 };

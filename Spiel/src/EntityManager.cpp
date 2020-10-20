@@ -6,13 +6,13 @@ Entity EntityManager::create()
 	if (!freeIndexQueue.empty()) {
 		Entity index = freeIndexQueue.front();
 		freeIndexQueue.pop_front();
-		entityStorageInfo[index].setValid(true);
-		entityStorageInfo[index].setSpawned(false);
+		entityStatusVec[index].setValid(true);
+		entityStatusVec[index].setSpawned(false);
 		ent = index;
 	}
 	else {
-		entityStorageInfo.emplace_back(true);
-		ent = static_cast<Entity>(entityStorageInfo.size() - 1);
+		entityStatusVec.emplace_back(true);
+		ent = static_cast<Entity>(entityStatusVec.size() - 1);
 	}
 	makeDynamicId(ent);
 	return ent;
@@ -21,7 +21,7 @@ Entity EntityManager::create()
 EntityId EntityManager::makeDynamicId(Entity entity)
 {
 	assert(exists(entity));
-	if (indexToIdTable.size() != entityStorageInfo.size()) indexToIdTable.resize(entityStorageInfo.size(), INVALID_ID);
+	if (indexToIdTable.size() != entityStatusVec.size()) indexToIdTable.resize(entityStatusVec.size(), INVALID_ID);
 	if (hasId(entity)) /* does the handle allready have an id? */ {
 		throw new std::exception();
 	}
@@ -61,7 +61,7 @@ EntityId EntityManager::makeDynamicId(Entity entity)
 EntityId EntityManager::makeStaticId(Entity entity)
 {
 	assert(exists(entity));
-	if (indexToIdTable.size() != entityStorageInfo.size()) indexToIdTable.resize(entityStorageInfo.size(), INVALID_ID);
+	if (indexToIdTable.size() != entityStatusVec.size()) indexToIdTable.resize(entityStatusVec.size(), INVALID_ID);
 	if (hasId(entity)) /* does the handle allready have an id? */ {
 		throw new std::exception();
 	}
@@ -100,8 +100,8 @@ EntityId EntityManager::makeStaticId(Entity entity)
 
 void EntityManager::destroy(Entity index)
 {
-	if (index < entityStorageInfo.size()) {
-		assert(entityStorageInfo[index].isValid());
+	if (index < entityStatusVec.size()) {
+		assert(entityStatusVec[index].isValid());
 		destroyQueue.push_back(index);
 	}
 }
@@ -123,18 +123,18 @@ void EntityManager::spawnLater(EntityId id)
 
 size_t const EntityManager::size()
 {
-	return entityStorageInfo.size() - (freeIndexQueue.size() + 1);
+	return entityStatusVec.size() - (freeIndexQueue.size() + 1);
 }
 
 size_t const EntityManager::maxEntityIndex()
 {
-	return entityStorageInfo.size();
+	return entityStatusVec.size();
 }
 
 Entity EntityManager::findBiggestValidEntityIndex()
 {
-	for (int i = entityStorageInfo.size() - 1; i > 0; i--) {
-		if (entityStorageInfo[i].isValid()) return i;
+	for (int i = entityStatusVec.size() - 1; i > 0; i--) {
+		if (entityStatusVec[i].isValid()) return i;
 	}
 	return 0;
 }
@@ -155,8 +155,8 @@ void EntityManager::executeDestroys()
 			indexToIdTable[index] = INVALID_ID;
 			idToIndexTable[id] = INVALID_ENTITY;
 			// reset status of handle:
-			entityStorageInfo[index].setValid(false);
-			entityStorageInfo[index].setSpawned(false);
+			entityStatusVec[index].setValid(false);
+			entityStatusVec[index].setSpawned(false);
 			freeIndexQueue.push_back(index);
 		}
 	}
@@ -175,11 +175,11 @@ void EntityManager::shrink()
 {
 	// !! handles must be sorted !!
 	auto lastEl = findBiggestValidEntityIndex();
-	entityStorageInfo.resize(lastEl + 1LL, EntityStatus(false));
+	entityStatusVec.resize(lastEl + 1LL, EntityStatus(false));
 	std::vector<Entity> handleVec;
 
 	for (int i = freeIndexQueue.size() - 1; i >= 0; i--) {
-		if (freeIndexQueue.at(i) < entityStorageInfo.size()) break;
+		if (freeIndexQueue.at(i) < entityStatusVec.size()) break;
 		freeIndexQueue.pop_back();
 	}
 }

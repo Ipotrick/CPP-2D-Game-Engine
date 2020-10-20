@@ -28,7 +28,7 @@ public:
 	}
 	bool exists(Entity entity)
 	{
-		return (entity < entityStorageInfo.size() ? entityStorageInfo[entity].isValid() : false);
+		return (entity < entityStatusVec.size() ? entityStatusVec[entity].isValid() : false);
 	}
 	bool exists(EntityId id)
 	{
@@ -42,8 +42,8 @@ public:
 	void spawnLater(EntityId id);
 	void spawn(Entity index)
 	{
-		assert(entityStorageInfo[index].isValid() && !entityStorageInfo[index].isSpawned());
-		entityStorageInfo[index].setSpawned(true);
+		assert(entityStatusVec[index].isValid() && !entityStatusVec[index].isSpawned());
+		entityStatusVec[index].setSpawned(true);
 	}
 	void spawn(EntityId id)
 	{
@@ -51,16 +51,16 @@ public:
 	}
 	bool isSpawned(Entity ent)
 	{
-		return entityStorageInfo[ent].isSpawned();
+		return entityStatusVec[ent].isSpawned();
 	}
 	bool isSpawned(EntityId id)
 	{
-		return entityStorageInfo[idToIndexTable[id.identifier]].isSpawned();
+		return entityStatusVec[idToIndexTable[id.identifier]].isSpawned();
 	}
 	void despawn(Entity index)
 	{
-		assert(entityStorageInfo[index].isValid() && entityStorageInfo[index].isSpawned());
-		entityStorageInfo[index].setSpawned(false);
+		assert(entityStatusVec[index].isValid() && entityStatusVec[index].isSpawned());
+		entityStatusVec[index].setSpawned(false);
 	}
 	void despawn(EntityId id)
 	{
@@ -90,7 +90,13 @@ public:
 	/* returnes how fragmented the entities are */
 	float fragmentation();
 
+	bool isIdDynamic(const entity_id_t id) const
+	{
+		return id & 1;
+	}
+
 protected:
+	/* !! handles must be sorted */
 	void shrink();
 	void executeDelayedSpawns();
 	void executeDestroys();
@@ -99,6 +105,7 @@ protected:
 	EntityId makeDynamicId(Entity index);
 	/* generates new STATIC id for index or returns existing id */
 	EntityId makeStaticId(Entity index);
+
 	bool hasId(Entity index)
 	{
 		return indexToIdTable[index] < INVALID_ID && index < indexToIdTable.size();
@@ -126,9 +133,9 @@ protected:
 		// flag 1: spawned
 		std::bitset<2> flags;
 	};
-	std::vector<EntityStatus> entityStorageInfo;
-	std::deque<Entity> freeIndexQueue;
 
+	std::vector<EntityStatus> entityStatusVec;
+	std::deque<Entity> freeIndexQueue;
 	/*
 		Notable infos about id's:
 		  id & 1  => static id
@@ -147,7 +154,7 @@ protected:
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int file_version)
 	{
-		ar& entityStorageInfo;
+		ar& entityStatusVec;
 		ar& idToIndexTable;
 		ar& idToVersionTable;
 		ar& indexToIdTable;

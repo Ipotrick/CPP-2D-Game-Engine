@@ -20,5 +20,6 @@ struct UIContext {
 		Vec2 position = (ulCorner + drCorner) * 0.5f;
 		Vec2 size = abs(ulCorner - drCorner);
 		buffer.push_back(Drawable(0, position, drawingPrio + incrementSize, size, Vec4(1, 0, 0, 0.1f), Form::Rectangle, RotaVec2(0), drawMode));
+		increaseDrawPrio();
 	}
 };

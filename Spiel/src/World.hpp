@@ -11,9 +11,13 @@ class World : public EntityComponentManager {
 public:
 	using EntityComponentManager::EntityComponentManager;
 
-	void loadMap(std::string);
-	void saveMap(std::string);
-public:
+	virtual void loadMap(const std::string& filename);
+	virtual void saveMap(const std::string& filename);
+	virtual void saveWorld(const std::string& filename);
+	virtual void loadWorld(const std::string& filename);
+	virtual void saveGameState(const std::string& filename);
+	virtual void loadGameState(const std::string& filename);
+
 	// Core System Uniform Data
 	PhysicsUniforms physics;
 protected:

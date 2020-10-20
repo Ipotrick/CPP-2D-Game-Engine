@@ -60,9 +60,9 @@ public:
 
 					/*-- general statistics utility --*/
 	/* returns time difference to last physics dispatch, O(1)*/
-	inline float getDeltaTime() { return deltaTime; }
+	inline float getDeltaTime(int sampleSize = 1) const;
 	/* returns deltatime or the lowest allowed sim time difference, O(1)*/
-	inline float getDeltaTimeSafe() { return std::min(deltaTime, maxDeltaTime); }
+	inline float getDeltaTimeSafe(int sampleSize = 1) { return std::min(getDeltaTime(sampleSize), maxDeltaTime); }
 	/* returns the number of past iterations , O(1)*/ 
 	inline uint32_t getIteration() { return iteration; }
 	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
@@ -75,7 +75,8 @@ public:
 	float getWindowAspectRatio();
 	/* transformes world space coordinates into relative window space coordinates */
 	Vec2 getPosWorldSpace(Vec2 windowSpacePos);
-	Vec2 getPosWindowSpace(Vec2 worldSpacePos);
+	Vec2 getWorldToWindow(Vec2 worldSpacePos);
+	Vec2 getWindowToPixel(Vec2 windowSpacePos);
 
 					/* graphics utility */
 	/*  submit a Drawable to be rendered the next frame, O(1)  */
@@ -115,6 +116,7 @@ private:
 	float maxDeltaTime;
 
 	std::chrono::microseconds new_deltaTime;
+	std::deque<float> deltaTimeQueue;
 	float deltaTime;
 
 	// window
@@ -144,7 +146,7 @@ inline void Engine::drawString(std::string str, std::string_view fontAtlas, Vec2
 			continue;
 		}
 		auto drawID = 0;
-		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), RenderSpace::PixelSpace, makeAsciiRef(renderer.makeTexRef(TextureInfo("_pl_ConsolasAtlas.png")).getId(), str[i]));
+		auto d = Drawable(drawID, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 1, fontSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0.0f), RenderSpace::PixelSpace, makeAsciiRef(renderer.makeTexRef(TextureInfo(fontAtlas)).getId(), str[i]));
 		auto background = Drawable(0, pos + Vec2(fontSize.x * lineStride, -fontSize.y * lineBreakCount), 0.99, fontSize, Vec4(1, 1, 1, 0.9), Form::Rectangle, RotaVec2(0.0f), RenderSpace::PixelSpace);
 		submitDrawable(background);
 		submitDrawable(d);
