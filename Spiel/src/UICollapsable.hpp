@@ -55,26 +55,57 @@ public:
 
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
 
-	void setHeadSize(const Vec2 size) { this->headSize = size; }
+	void setHeadSize(const Vec2 size) { 
+		this->headSize = size;
+		bAutoHeadWidth = false;
+	}
+	void setHeadLength(const float f)
+	{
+		this->headSize.y = f;
+	}
+	void setHeadWidth(const float f)
+	{
+		this->headSize.x = f;
+		bAutoHeadWidth = false;
+	}
 	Vec2 getHeadSize() const { return headSize; }
 
-	void setBodyHeight(const float f) { this->bodyHeight = f; }
+	void setBodyHeight(const float f) { 
+		this->bodyHeight = f;
+		this->bAutoBodyLength = false;
+	}
 	float getBodyHeight() const { return bodyHeight; }
-	void setAutoBodyHeight(const bool b = true) { this->bAutoBodyHeight = b; }
-	bool autoBodyHeight() const { return bAutoBodyHeight; }
+	void setAutoBodyHeight(const bool b = true) { this->bAutoBodyLength = b; }
+	bool autoBodyHeight() const { return bAutoBodyLength; }
 
 	void setTitleFontSize(const Vec2 size) { this->textElement.fontSize = size; }
 	UIAnchor& getTitleAnchor() { return textElement.textAnchor; }
 	void setTitleColor(const Vec4 color) { this->textElement.color = color; }
+	void setArrowScale(const float f) { this->arrowScale = clamp(f, 0.1f, 1.0f); }
+	float getArrowScale() const { return arrowScale; }
+
+	virtual void onRelease() override
+	{
+		bCollapsed = !bCollapsed;
+		if (bCollapsed) {
+			getChild()->disable();
+		}
+		else {
+			getChild()->enable();
+		}
+	}
+
 private:
 	using UIClickable::setSize;
+
+	UIText textElement;
 	Vec4 borderColor{ 1.0f, 1.0f, 1.0f, 1.0f };
 	Vec4 fillColor{ 0.0f, 0.0f, 0.0f, 1.0f };
 	Vec2 border{ standartBorder };
-
-	bool bAutoBodyHeight{ true };
-	float bodyHeight{ 0.0f };
 	Vec2 headSize{ 0.0f, 0.0f };
-
-	UIText textElement;
+	float bodyHeight{ 0.0f };
+	float arrowScale{ 0.65f };
+	bool bAutoBodyLength{ true };
+	bool bAutoHeadWidth{ true };
+	bool bCollapsed{ true };
 };

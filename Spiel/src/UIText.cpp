@@ -4,15 +4,16 @@ void UIText::draw(std::vector<Drawable>& buffer, UIContext context)
 {
 	calculateTextSize();
 	// create new context inside the UIElement size window of the text element:
-	context = anchor.shrinkContextToMe(size, context);
+	context = anchor.shrinkContextToMe(this->size, context);
 
 	// now apply letterSize and textAnchor to the context:
-	context = textAnchor.shrinkContextToMe(textSize, context);
+	context = textAnchor.shrinkContextToMe(this->textSize, context);
+	context.increaseDrawPrio();
 
 	int column = 0;
 	int row = 0;
 	Vec2 letterSize = context.scale * fontSize;
-	auto letter = Drawable(0, Vec2(), context.drawingPrio, letterSize, color, Form::Rectangle, RotaVec2(0), context.drawMode);
+	auto letter = Drawable(0, {}, context.drawingPrio, letterSize, color, Form::Rectangle, RotaVec2(0), context.drawMode);
 	for (auto c : text) {
 		if (c == '\n') {
 			row += 1;
@@ -57,5 +58,4 @@ void UIText::calculateTextSize()
 		}
 	}
 	textSize = (Vec2{ maxCol, maxRow } *fontSize);
-
 }

@@ -120,6 +120,7 @@ void World::loadMap(const std::string& mapname) {
 		auto player = idCreate();
 		auto cmps = componentView(player);
 		cmps.add<Base>(Base(Vec2(2,12),0));
+		cmps.add<Base>(Base(Vec2(2,12),0));
 		auto colliderPlayer = Collider(Vec2(0.4,0.7), Form::Rectangle);
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(1, 1)*0.4, Vec2(0,0.35), RotaVec2(0), Form::Circle));
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(0.3, 0.2), Vec2(0.2, -0.3), RotaVec2(305.0f), Form::Rectangle));
@@ -146,21 +147,18 @@ void World::loadMap(const std::string& mapname) {
 		cmpsBox.add(Health(100));
 		spawn(box);
 
-		int num = 10'000;// 250'000;
-		for (int i = 0; i < num; i++) {
-			auto ent = create();
-			auto c = componentView(ent);
-			c.add<Base>(Base(Vec2(rand()%10000/10.0f, rand()%10000/10.0f)));
-			c.add<Draw>(Draw(Vec4(rand()%1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1), Vec2(1, 1), 0.1f, Form::Rectangle));
-			c.add<Tester>();
-			spawn(ent);
-		}
-
 		Vec2 scale = Vec2(0.3f, 0.3f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form);
 		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
 		for (int i = 0; i < 3000; i ++) {
+			if (i % 2) {
+				form = Form::Rectangle;
+			}
+			else {
+				form = Form::Circle;
+			}
+			trashCollider.form = form;
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };

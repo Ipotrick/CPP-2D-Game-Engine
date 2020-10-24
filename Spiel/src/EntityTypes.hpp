@@ -26,3 +26,21 @@ struct EntityId {
 	entity_id_t identifier;
 	uint32_t version;
 };
+
+using EntityHandleIndexType = uint32_t;
+using EntityHandleVersionType = uint16_t;
+
+static constexpr EntityHandleIndexType INVALID_ENTITY_HANDLE_INDEX{ 0xFFFFFFFF };
+static constexpr EntityHandleIndexType INVALID_ENTITY_HANDLE_VERSION{ 0xFFFF };
+
+/*
+* An EntityHandle...
+*	is used to refer to an entity in one specific world.
+*	can be used to refer to the entity over multiple frames.
+*	is invalidated when the entity is serialised and deserialised.
+*	is invalidated when the entity is saved and loaded from another world.
+*/
+struct EntityHandle {
+	EntityHandleIndexType index{ INVALID_ENTITY_HANDLE_INDEX };
+	EntityHandleVersionType version{ INVALID_ENTITY_HANDLE_VERSION };
+};

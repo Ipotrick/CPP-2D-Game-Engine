@@ -2,8 +2,9 @@
 
 #include "UISingleParent.hpp"
 #include "UIFocusable.hpp"
+#include "UIPaddingBase.hpp"
 
-class UIFrame : public UIFocusable, public UISingleParent {
+class UIFrame : public UIFocusable, public UISingleParent, public UIPaddingBase {
 	friend class UIManager;
 public:
 	UIFrame()
@@ -48,8 +49,6 @@ public:
 
 	void setDrawMode(const RenderSpace drawMode) { this->drawMode = drawMode; }
 	RenderSpace getDrawMode() const { return drawMode; }
-	//void setTextureAtlas(const SmallTextureRef& texRef) { texAtlas = texRef; }
-	//void setTextureAtlas(SmallTextureRef&& texRef) { texAtlas = texRef; }
 	void setBorders(float width)
 	{
 		this->borders.x = width;
@@ -79,15 +78,64 @@ public:
 		return scale;
 	}
 
+	virtual void onEnter() override
+	{
+		onEnterFn(this);
+	}
+
+	virtual void onHover() override
+	{
+		onHoverFn(this);
+	}
+
+	virtual void onLeave() override
+	{
+		onLeaveFn(this);
+	}
+	
+	void setEnterFn(std::function<void(UIFocusable*)> fn)
+	{
+		this->onEnterFn = fn;
+	}
+	
+	void setHoverFn(std::function<void(UIFocusable*)> fn)
+	{
+		this->onHoverFn = fn;
+	}
+	
+	void setLeaveFn(std::function<void(UIFocusable*)> fn)
+	{
+		this->onLeaveFn = fn;
+	}
+
+	virtual void setSize(const Vec2 size) override
+	{
+		this->size = size;
+		this->bAutoLength = false;
+	}
+
+	void setLength(const float l)
+	{
+		this->size.y = l;
+		this->bAutoLength = false;
+	}
+
+	void setWidth(const float w)
+	{
+		this->size.x = w;
+	}
+
+	Vec4 fillColor{ 0,0,0,1 };
+	Vec4 borderColor{ 1,1,1,1 };
 private:
-	//void drawCorners(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
-	//void drawBorders(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
-	//void drawFill(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
 	void drawChildren(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
 
+	std::function<void(UIFocusable*)> onEnterFn{ [](UIFocusable* me) {} };
+	std::function<void(UIFocusable*)> onHoverFn{ [](UIFocusable* me) {} };
+	std::function<void(UIFocusable*)> onLeaveFn{ [](UIFocusable* me) {} };
 	Vec2 borders{ standartBorder };
-	bool bBorderScalable{ true };
-	RenderSpace drawMode{ RenderSpace::PixelSpace };
-	//SmallTextureRef texAtlas;
 	float scale{ 1.0f };
+	RenderSpace drawMode{ RenderSpace::PixelSpace };
+	bool bBorderScalable{ true };
+	bool bAutoLength{ true };
 };

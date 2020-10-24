@@ -18,120 +18,144 @@ Game::Game() :
 {
 }
 
+#define UI_CREATE(ui, parent, code, Type, name) \
+{ \
+	Type name; \
+	code \
+	parent.addChild(ui.createAndGet(name)); \
+}
+
+#define UI_TEXT(ui, parent, code)		UI_CREATE(ui, parent, code, UIText, me)
+
+#define UI_SEPERATOR(ui, parent, code)	UI_CREATE(ui, parent, code, UISeperator, me)
+
+#define UI_TEXT_UPDATE(code) \
+me.setUpdateFn([&](UIElement* e){ UIText& me = *((UIText*)e); code });
+
 void Game::create() {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
 	world.loadMap("world.wrld");
+
+	const float firstRowWidth = 90.0f;
+	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
+	const auto font = renderer.makeSmallTexRef(TextureInfo("_pl_ConsolasLowRes.png"));
+
+	auto makeRenderStatsUI = [&](auto& parent) {
+		UICollapsable c("Rendering Statics:", font);
+		c.setHeadLength(20);
+		{
+			UIList8 l;
+			l.setPadding({ 5.0f, 0.0f });
+			{
+				UIPair uicountPair;
+				uicountPair.setHorizontal();
+				{
+					UIText uiCountText("ui count:", font);
+					uiCountText.setSize(textFieldSize);
+					uicountPair.setFirst(ui.createAndGet(uiCountText));
+				}
+				{
+					UIText uiCountText2("", font, [&](UIElement* e) {
+						((UIText*)e)->text = std::to_string(ui.activeElementCount());
+						}
+					);
+					uiCountText2.setSize(textFieldSize);
+					uicountPair.setSecond(ui.createAndGet(uiCountText2));
+				}
+				l.addChild(ui.createAndGet(uicountPair));
+			}
+			{
+				UIPair uidcountPair;
+				uidcountPair.setHorizontal();
+				{
+					UIText uidCountText("ui draw:", font);
+					uidCountText.setSize(textFieldSize);
+					uidcountPair.setFirst(ui.createAndGet(uidCountText));
+				}
+				{
+					UIText uidCountText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(ui.drawCount()); });
+					uidCountText2.setSize(textFieldSize);
+					uidcountPair.setSecond(ui.createAndGet(uidCountText2));
+				}
+				l.addChild(ui.createAndGet(uidcountPair));
+			}
+			{
+				UIPair drawCallPair;
+				drawCallPair.setHorizontal();
+				{
+					UIText drawcallText("Drawcalls:", font);
+					drawcallText.setSize(textFieldSize);
+					drawCallPair.setFirst(ui.createAndGet(drawcallText));
+				}
+				{
+					UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCalls()); });
+					drawcallText2.setSize(textFieldSize);
+					drawCallPair.setSecond(ui.createAndGet(drawcallText2));
+				}
+				l.addChild(ui.createAndGet(drawCallPair));
+			}
+
+			c.addChild(ui.createAndGet(l));
+		}
+		parent.addChild(ui.createAndGet(c));
+	};
+
+	UIFrame frame;
+	frame.setWidth(200);
+	frame.setPadding({ 5.0f, 5.0f });
+	frame.anchor.setLeftAbsolute(10);
+	frame.anchor.setTopAbsolute(10);
 	{
-		UIFrame frame;
-		frame.anchor.setLeftAbsolute(10);
-		frame.anchor.setTopAbsolute(10);
-
-		const float firstRowWidth = 90.0f;
-		const Vec2 fontSize{ firstRowWidth , 17.0f };
-		const auto font = renderer.makeSmallTexRef(TextureInfo("_pl_ConsolasLowRes.png"));
-
-		// >--<
-
-		UIText titleText("Statistics:", font);
-		titleText.setSize({ 200, 17.0f });
-		titleText.textAnchor.setCenterHorizontal();
-
-		// >--<
-
-		UISeperator seperator;
-		seperator.setHorizontal();
-
-		// >--<
-
-		UIText ticksText("Ticks/s:", font);
-		ticksText.setSize(fontSize);
-
-		UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(100)); });
-		ticksText2.setSize(fontSize);
-
-		// >--<
-
-		UIText entitiesText("Entities:", font);
-		entitiesText.setSize(fontSize);
-
-		UIText entitiesText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(world.size()); });
-		entitiesText2.setSize(fontSize);
-
-		// >--<
-
-		UIText drawcallText("Drawcalls:", font);
-		drawcallText.setSize(fontSize);
-
-		UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCalls()); });
-		drawcallText2.setSize(fontSize);
-
-		// >--<
-
-		UIText uiCountText("ui count:", font);
-		uiCountText.setSize(fontSize);
-
-		UIText uiCountText2("", font, [&](UIElement* e) { 
-			((UIText*)e)->text = std::to_string(ui.activeElementCount()); 
-			}
-		);
-		uiCountText2.setSize(fontSize);
-
-		// >--<
-
-		UIText uidCountText("ui draw:", font);
-		uidCountText.setSize(fontSize);
-
-		UIText uidCountText2("", font, [&](UIElement* e) {
-			((UIText*)e)->text = std::to_string(ui.drawCount());
-			}
-		);
-		uidCountText2.setSize(fontSize);
-
-		// >--<
-
-		UICollapsable collapse("TEST test._:", font);
-		collapse.setHeadSize({ 180,20 });
-
-		// >--<
-
 		UIList16 list;
-		list.anchor.setCenterHorizontal();
-		list.setSize({ 180,10000 });
-		list.addChild(ui.createAndGet(titleText));
-		list.addChild(ui.createAndGet(seperator));
-
-		UIPair ticksPair(ui.createAndGet(ticksText), ui.createAndGet(ticksText2));
-		ticksPair.setHorizontal();
-		list.addChild(ui.createAndGet(ticksPair));
-
-		auto entCountPair = UIPair(ui.createAndGet(entitiesText), ui.createAndGet(entitiesText2));
-		entCountPair.setHorizontal();
-		list.addChild(ui.createAndGet(entCountPair));
-
-		auto drawCallPair = UIPair(ui.createAndGet(drawcallText), ui.createAndGet(drawcallText2));
-		drawCallPair.setHorizontal();
-		list.addChild(ui.createAndGet(drawCallPair));
-
-		auto uicountPair = UIPair(ui.createAndGet(uiCountText), ui.createAndGet(uiCountText2));
-		uicountPair.setHorizontal();
-		list.addChild(ui.createAndGet(uicountPair));
-
-		auto uidcountPair = UIPair(ui.createAndGet(uidCountText), ui.createAndGet(uidCountText2));
-		uidcountPair.setHorizontal();
-		list.addChild(ui.createAndGet(uidcountPair));
-
-		list.addChild(ui.createAndGet(collapse));
-
+		list.setSpacing(5.0f);
+		UI_TEXT(ui, list,
+			me.text = "Statistics:";
+			me.fontTexture = font;
+			me.setSize(textFieldSize);
+			me.textAnchor.setCenterHorizontal();
+			me.anchor.setCenterHorizontal();
+		)
+		UI_SEPERATOR(ui, list, me.setHorizontal();)
+		{
+			UIPair entCountPair;
+			entCountPair.setHorizontal();
+			{
+				UIText entitiesText("Entities:", font);
+				entitiesText.setSize(textFieldSize);
+				entCountPair.setFirst(ui.createAndGet(entitiesText));
+			}
+			{
+				UIText entitiesText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(world.size()); });
+				entitiesText2.setSize(textFieldSize);
+				entCountPair.setSecond(ui.createAndGet(entitiesText2));
+			}
+			list.addChild(ui.createAndGet(entCountPair));
+		}
+		makeRenderStatsUI(list);
+		{
+			UIPair ticksPair;
+			ticksPair.setHorizontal();
+			{
+				UIText ticksText("Ticks/s:", font);
+				ticksText.setSize(textFieldSize);
+				ticksPair.setFirst(ui.createAndGet(ticksText));
+			}
+			{
+				UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(100)); });
+				ticksText2.setSize(textFieldSize);
+				ticksPair.setSecond(ui.createAndGet(ticksText2));
+			}
+			list.addChild(ui.createAndGet(ticksPair));
+		}
 		frame.addChild(ui.createAndGet(list));
-		frame.setSize({ 200, 135 });
-		ui.createFrame(frame, "Statiscics");
 	}
+	ui.createFrame(frame, "Statiscics");
 }
 
 void Game::update(float deltaTime) {
-	world.defragment(World::DefragMode::LAZY);
+	renderer.submit(Drawable(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.2, 0.4, 1.0f, 1.0f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace));
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
 		{
@@ -194,6 +218,7 @@ void Game::gameplayUpdate(float deltaTime)
 		camera.rotation = 0.0f;
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
+		guiScale = 1.0f;
 	}
 	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
 		if (ui.doesAliasExist("Statiscics")) {
@@ -231,7 +256,7 @@ void Game::gameplayUpdate(float deltaTime)
 	cursorManipFunc();
 
 	for (auto ent : world.entityView<SpawnerComp>()) {
-		const auto& base = world.getComp<Base>(ent);
+		const Base base = world.getComp<Base>(ent);
 		int laps = spawnerLapTimer.getLaps(deltaTime);
 		for (int i = 1; i < laps; i++) {
 			float rotation = (float)(rand() % 360);

@@ -425,9 +425,11 @@ inline ComponentView EntityComponentManager::componentView(EntityId id)
 
 inline void EntityComponentManager::updateMaxEntityToComponentSotrages(Entity entity)
 {
-	tuple_for_each(componentStorageTuple, [&](auto& componentStorage) {
-		componentStorage.updateMaxEntNum(entityStatusVec.size());
-		});
+	tuple_for_each(componentStorageTuple, 
+		[&](auto& componentStorage) {
+			componentStorage.updateMaxEntNum(entityStatusVec.size());
+		}
+	);
 }
 
 inline Entity EntityComponentManager::create()

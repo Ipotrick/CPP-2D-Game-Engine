@@ -70,7 +70,10 @@ public:
 	/* an id has an identifier (uint32_t) and a version. an id is only valid when the identifier and the version are the same in the id and the Managers regestry */
 	bool isIdValid(EntityId entityId)
 	{
-		return idToIndexTable[entityId.identifier] < INVALID_ENTITY && entityId.identifier < idToIndexTable.size() && idToVersionTable[entityId.identifier] == entityId.version;
+		// TODO: FIX BUG: CAN CAUSE FAULTY MEMORY ACCESS
+		return idToIndexTable[entityId.identifier] < INVALID_ENTITY 
+			&& entityId.identifier < idToIndexTable.size() 
+			&& idToVersionTable[entityId.identifier] == entityId.version;
 	}
 	EntityId getId(Entity entity)
 	{

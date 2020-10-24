@@ -157,7 +157,7 @@ public:
 
 	/*
 	* This function takes UNSCALED size of object and the sub context of the anchored element
-	* the returnd context is as large as the given SCALED size with the disposition of the
+	* the returned context is as large as the given UNSCALED size with the disposition of the
 	* anchor
 	*/
 	UIContext shrinkContextToMe(const Vec2 size, UIContext context) const;

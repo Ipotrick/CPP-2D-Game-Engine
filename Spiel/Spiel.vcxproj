@@ -98,6 +98,7 @@
     <ClInclude Include="src\UIList.hpp" />
     <ClInclude Include="src\UIManager.hpp" />
     <ClInclude Include="src\UIMultiParent.hpp" />
+    <ClInclude Include="src\UIPaddingBase.hpp" />
     <ClInclude Include="src\UIPair.hpp" />
     <ClInclude Include="src\UISeperator.hpp" />
     <ClInclude Include="src\UISingleParent.hpp" />

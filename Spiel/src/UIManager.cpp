@@ -77,7 +77,7 @@ void UIManager::perEntityUpdate()
 			for (auto& uient : container) {
 				auto& element = container.get(uient);
 				element.update();
-				activeElements += element.isEnabled() ? 1 : 0;
+				activeElements += (size_t)element.isEnabled();
 			}
 		}
 	);
@@ -105,7 +105,7 @@ void UIManager::focusUpdate()
 					auto* element = &container.get(uient);
 					UIFocusable* felement = static_cast<UIFocusable*>(element);
 					if (felement->isEnabled() && felement->isFocusable()) {
-						const auto& area = felement->getLastDrawArea();
+						const auto& area = felement->getFocusArea();
 
 						Vec2 cursorPos = in.getMousePosition(area.drawMode);
 
@@ -122,6 +122,7 @@ void UIManager::focusUpdate()
 							if (felement->bHoveredOver) {
 								in.returnMouseFocus();
 								felement->onLeave();
+								felement->bHoveredOver = false;
 							}
 						}
 					}
@@ -141,7 +142,7 @@ void UIManager::focusUpdate()
 		// find element with the highest drawing prio (at the end is the higest):
 		std::sort(focusedElementCandidates.begin(), focusedElementCandidates.end(),
 			[](UIFocusable* a, UIFocusable* b) {
-				return a->getLastDrawArea().drawingPrio < b->getLastDrawArea().drawingPrio;
+				return a->getFocusArea().drawingPrio < b->getFocusArea().drawingPrio;
 			}
 		);
 
@@ -153,16 +154,19 @@ void UIManager::focusUpdate()
 			if (fe->bHoveredOver) {
 				in.returnMouseFocus();
 				fe->onLeave();
+				fe->bHoveredOver = false;
 			}
 		}
 
 		// for the focused element:
 		if (felement->bHoveredOver) {
 			felement->onHover();
+			felement->bHoveredOver = true;
 		}
 		else {
 			in.takeMouseFocus(felement->hoverFocus);
 			felement->onEnter();
+			felement->bHoveredOver = true;
 		}
 	}
 }
@@ -182,13 +186,16 @@ void UIManager::clickableUpdate()
 						if (leftClick) {
 							if (celement->bPressed) {
 								celement->onHold();
+								celement->bPressed = true;
 							}
 							else {
 								celement->onClick();
+								celement->bPressed = true;
 							}
 						}
 						else if (celement->bPressed) {
 							celement->onRelease();
+							celement->bPressed = false;
 						}
 					}
 					else if (celement->bPressed) {

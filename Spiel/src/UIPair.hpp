@@ -65,6 +65,7 @@ public:
 		this->bAutoSize = b;
 	}
 private:
+
 	bool bAutoSize{ true };
 	bool bHorizonal{ false };
 	UIElement* first{ nullptr };

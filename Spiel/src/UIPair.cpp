@@ -6,8 +6,6 @@ void UIPair::draw(std::vector<Drawable>& buffer, UIContext context)
 {
 	assert(first);
 	assert(second);
-	context.increaseDrawPrio();
-
 	// shrink context to the elements size and anchor
 	context = anchor.shrinkContextToMe(this->size, context);
 

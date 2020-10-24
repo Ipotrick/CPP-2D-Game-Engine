@@ -195,7 +195,7 @@ class ComponentStorage<CompType, paged_indexing> {
 	{
 		return entity & OFFSET_MASK;
 	}
-	static const bool DELETE_EMPTY_PAGES{ false };
+	static const bool DELETE_EMPTY_PAGES{ true };
 	class Page {
 	public:
 		std::array<CompType, PAGE_SIZE> data;
@@ -215,8 +215,9 @@ public:
 
 	~ComponentStorage() {
 		for (auto& page : pages) {
-			if (page != nullptr)
+			if (page != nullptr) {
 				delete page;
+			}
 		}
 	}
 	inline size_t memoryConsumtion() {

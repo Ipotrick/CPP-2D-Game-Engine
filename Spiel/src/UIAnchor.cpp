@@ -42,10 +42,11 @@ float UIAnchor::getYOffset(const float size, const UIContext& context) const
 
 UIContext UIAnchor::shrinkContextToMe(const Vec2 size, UIContext context) const
 {
+	auto halfSize = size * context.scale * 0.5f;
 	Vec2 position = getOffset(size * context.scale, context);
-	context.ulCorner.x = position.x - size.x * 0.5f * context.scale;
-	context.ulCorner.y = position.y + size.y * 0.5f * context.scale;
-	context.drCorner.x = position.x + size.x * 0.5f * context.scale;
-	context.drCorner.y = position.y - size.y * 0.5f * context.scale;
+	context.ulCorner.x = position.x - halfSize.x;
+	context.ulCorner.y = position.y + halfSize.y;
+	context.drCorner.x = position.x + halfSize.x;
+	context.drCorner.y = position.y - halfSize.y;
 	return context;
 }

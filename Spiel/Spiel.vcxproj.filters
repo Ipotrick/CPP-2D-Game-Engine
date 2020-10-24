@@ -333,6 +333,9 @@
     <ClInclude Include="src\DrawFrame.hpp">
       <Filter>_Engine\_UI\utility</Filter>
     </ClInclude>
+    <ClInclude Include="src\UIPaddingBase.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

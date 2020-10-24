@@ -27,14 +27,16 @@ void HealthScript::script(Entity me, Health& data, float deltaTime)
 		t.textAnchor.setCenterHorizontal();
 
 		UIPair p;
-		p.setSize({ 100, 40 });
+		p.setSize({ 110, 50 });
 		p.setFirst(engine.ui.createAndGet(t));
 		p.setSecond(engine.ui.createAndGet(bar));
 
 		UIFrame frame;
+		frame.fillColor = { 0,0,0, 0.5 };
 		frame.setFocusable(false);
-		frame.setBorders(5.0f);
+		frame.setBorders(0);
 		frame.setSize({ 110, 50 });
+		frame.setPadding({ 5,5 });
 		frame.setDrawMode(RenderSpace::PixelSpace);
 		frame.addChild(engine.ui.createAndGet(p));
 		frame.setUpdateFn(

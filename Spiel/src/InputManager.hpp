@@ -15,15 +15,15 @@ static inline std::string focusToString(Focus focus)
 {
 	switch (focus) {
 	case Focus::Out:
-		return "OutFocus";
+		return "Out";
 	case Focus::Global:
-		return "GloabalFocus";
+		return "Gloabal";
 	case Focus::Standard:
-		return "StandardFocus";
+		return "Standard";
 	case Focus::WriteText:
-		return "WriteTextFocus";
+		return "WriteText";
 	case Focus::UI:
-		return "MenuFocus";
+		return "Menu";
 	default:
 		assert(false);
 		return "";

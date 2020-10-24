@@ -56,11 +56,11 @@ public:
 	virtual void disable() { bEnable = false; }
 	virtual bool isEnabled() const { return this->bEnable; }
 
-	virtual void setSize(Vec2 size) final
+	virtual void setSize(Vec2 size)
 	{
 		this->size = std::move(size);
 	}
-	virtual Vec2 getSize() const final
+	virtual Vec2 getSize() const
 	{
 		return this->size;
 	}

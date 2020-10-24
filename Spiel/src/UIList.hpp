@@ -1,14 +1,22 @@
 #pragma once
 
 #include "UIMultiParent.hpp"
+#include "UIPaddingBase.hpp"
 
 template<std::size_t CAPACITY>
-class UIList : public UIMultiParent<CAPACITY> {
+class UIList : public UIMultiParent<CAPACITY>, public UIPaddingBase {
 public:
 
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override
 	{
+		if (bHorizontal) {
+			if (bAutoWidth) this->size.y = context.getUnscaledSize().y;
+		}
+		else {
+			if (bAutoWidth) this->size.x = context.getUnscaledSize().x;
+		}
 		context = this->anchor.shrinkContextToMe(this->size, context);
+		applyPadding(context);
 		float offset{ 0.0f };
 
 		if (bHorizontal) {
@@ -22,14 +30,13 @@ public:
 			}
 			for (auto& child : this->children) {
 				UIContext c = context;
-				c.ulCorner = context.ulCorner + Vec2(offset, 0.0f);
-				c.drCorner.y = context.drCorner.y;
-				c.drCorner.x = c.ulCorner.x + child->getSize().x * context.scale;
-				//c.debugDraw(buffer);
+				c.cutOffLeft(offset);
+				c.cutOffRight(c.getScaledSize().x - child->getSize().x * context.scale);
 				child->draw(buffer, c);
 
 				offset += (child->getSize().x + spacing) * context.scale;
 			}
+			if (bAutoLength) this->size.x = offset / context.scale + getXPadding();
 		}
 		else {
 			if (bSpacingUniform) {
@@ -42,14 +49,13 @@ public:
 			}
 			for (auto& child : this->children) {
 				UIContext c = context;
-				c.ulCorner = context.ulCorner - Vec2(0.0f, offset);
-				c.drCorner.x = context.drCorner.x;
-				c.drCorner.y = c.ulCorner.y - child->getSize().y * context.scale;
-				//c.debugDraw(buffer);
+				c.cutOffTop(offset);
+				c.cutOffBottom(c.getScaledSize().y - child->getSize().y * context.scale);
 				child->draw(buffer, c);
 
 				offset += (child->getSize().y + spacing) * context.scale;
 			}
+			if (bAutoLength) this->size.y = offset / context.scale + getYPadding();
 		}
 	}
 
@@ -65,12 +71,27 @@ public:
 		return this->bSpacingUniform;
 	}
 
+	virtual void setSize(const Vec2 size) override
+	{
+		this->size = size;
+		bAutoLength = false;
+		bAutoWidth = false;
+	}
+
 	void setHorizontal(const bool b) { this->bHorizontal = b; }
 	bool isHorizontal() const { return bHorizontal; }
+
+	void setAutoLength(const bool b = true) { this->bAutoLength = b; }
+	bool autoLenth() const { return bAutoLength; }
+
+	void setAutoWidth(const bool b = true) { this->bAutoWidth = b; }
+	bool autWidth() const { return bAutoWidth; }
 private:
 	float spacing{ 0.0f };
 	bool bSpacingUniform{ false };
 	bool bHorizontal{ false };
+	bool bAutoLength{ true };
+	bool bAutoWidth{ true };
 };
 
 using UIList8 = UIList<8>;
