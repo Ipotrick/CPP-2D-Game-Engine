@@ -98,6 +98,15 @@ public:
 			throw new std::exception("invalid alias name");
 		}
 	}
+
+	size_t elementCount() const;
+
+	size_t activeElementCount() const { return lastUpdateActiveElements; }
+
+	/*
+	* retuns the amount of drawables commited to the renderer last update
+	*/
+	size_t drawCount() const { return lastUpdateDrwawbleCount; }
 private:
 	void perEntityUpdate();
 
@@ -111,6 +120,8 @@ private:
 	std::vector<UIFocusable*> focusedElementCandidates;	// buffer for focused element candidates used in focusUpdate()
 
 	// fields:
+	size_t lastUpdateActiveElements{ 0 };
+	size_t lastUpdateDrwawbleCount{ 0 };
 	Renderer& renderer; 
 	InputManager& in;
 	robin_hood::unordered_map<std::string_view, UIEntity> aliasToEntity;

@@ -34,9 +34,6 @@
     <Filter Include="_Engine\_Rendering">
       <UniqueIdentifier>{8105babe-c711-49ff-a49d-160139bfc316}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_shader">
-      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
-    </Filter>
     <Filter Include="_Engine\_UI">
       <UniqueIdentifier>{04555f50-28a1-4672-8acd-b672ae173589}</UniqueIdentifier>
     </Filter>
@@ -52,19 +49,25 @@
     <Filter Include="_Engine\_UI\BaseClasses">
       <UniqueIdentifier>{324d3ffe-29fe-40b5-a539-5378e40a24cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_Rendering\_shader">
+      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_Core">
+      <UniqueIdentifier>{abeb544c-550b-40d3-a9c9-acbd97127f91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\_UI\utility">
+      <UniqueIdentifier>{a58c2ada-7193-4c83-b0ee-2dd55853a80c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="serialization">
+      <UniqueIdentifier>{9de1c8d4-f0a8-4b9e-8bd3-acf12988115d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
       <Filter>_stbi</Filter>
     </ClInclude>
-    <ClInclude Include="src\ai.h">
-      <Filter>_Engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\fileUtility.h">
       <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\JobManager.hpp">
-      <Filter>_Engine</Filter>
     </ClInclude>
     <ClInclude Include="src\CacheAABBJob.hpp">
       <Filter>_Engine\_Collision</Filter>
@@ -138,30 +141,6 @@
     <ClInclude Include="src\BaseSystem.hpp">
       <Filter>_Engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\BaseTypes.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreCompInclude.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EventHandler.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Perf.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\std_extra.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Timing.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\basic_math.hpp">
       <Filter>_math</Filter>
     </ClInclude>
@@ -201,9 +180,6 @@
     <ClInclude Include="src\Game.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameCompInclude.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\GameComponents.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -234,15 +210,6 @@
     <ClInclude Include="src\SuckerScript.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\SweepAndPrune.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollGrid.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SparseBuffer.hpp">
-      <Filter>_Engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\Qtree2.hpp">
       <Filter>_Engine\_Collision</Filter>
     </ClInclude>
@@ -260,9 +227,6 @@
     </ClInclude>
     <ClInclude Include="src\MovementSystem.hpp">
       <Filter>_Engine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ComponentTypes.hpp">
-      <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\UIManager.hpp">
       <Filter>_Engine\_UI</Filter>
@@ -327,6 +291,60 @@
     <ClInclude Include="src\InputFocus.hpp">
       <Filter>_Engine\_IO</Filter>
     </ClInclude>
+    <ClInclude Include="src\Input.hpp">
+      <Filter>_Engine\_IO</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ComponentTypes.hpp">
+      <Filter>_Engine\_Component</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventHandler.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\JobManager.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BaseTypes.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Perf.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SparseBuffer.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\std_extra.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Timing.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UISeperator.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UICollapsable.hpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DrawFrame.hpp">
+      <Filter>_Engine\_UI\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UIPaddingBase.hpp">
+      <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerializer.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerialize.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerializeCoreComponents.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerializeGameComponents.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -355,12 +373,6 @@
     </ClCompile>
     <ClCompile Include="src\PhysicsSystem.cpp">
       <Filter>_Engine\_Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Engine.cpp">
-      <Filter>_Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EventHandler.cpp">
-      <Filter>_Engine</Filter>
     </ClCompile>
     <ClCompile Include="src\AgeScript.cpp">
       <Filter>Quelldateien</Filter>
@@ -391,9 +403,6 @@
     </ClCompile>
     <ClCompile Include="src\CollisionSystem.cpp">
       <Filter>_Engine\_Collision</Filter>
-    </ClCompile>
-    <ClCompile Include="src\algo.hpp">
-      <Filter>_Engine</Filter>
     </ClCompile>
     <ClCompile Include="src\Vec2.hpp">
       <Filter>_math</Filter>
@@ -449,22 +458,52 @@
     <ClCompile Include="src\UIPair.cpp">
       <Filter>_Engine\_UI\Elements</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIElement.cpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
+    <ClCompile Include="src\algo.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Engine.cpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EventHandler.cpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIAnchor.cpp">
+      <Filter>_Engine\_UI</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UISeperator.cpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UICollapsable.cpp">
+      <Filter>_Engine\_UI\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DrawFrame.cpp">
+      <Filter>_Engine\_UI\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerializer.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerialize.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerializeCoreComponents.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerializeGameComponents.cpp">
+      <Filter>serialization</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\Basic.frag">
-      <Filter>_Engine\_shader</Filter>
+      <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
     <None Include="shader\Basic.vert">
-      <Filter>_Engine\_shader</Filter>
+      <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
     <None Include="shader\shadow.frag">
-      <Filter>_Engine\_shader</Filter>
+      <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
     <None Include="shader\shadow.vert">
-      <Filter>_Engine\_shader</Filter>
+      <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
   </ItemGroup>
 </Project>

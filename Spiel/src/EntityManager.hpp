@@ -7,153 +7,96 @@
 #include <bitset>
 #include <cassert>
 
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/bitset.hpp>
-#include <boost/serialization/access.hpp>
-
 #include "EntityTypes.hpp"
+
+class YAMLWorldSerializer;
+class ComponentView;
+template<typename FirstComp, typename ... RestComps> class EntityComponentView; 
+template<typename FirstComp, typename ... RestComps> class EntityView;
 
 class EntityManager {
 public:
 
-	// created new entity and returns it
-	Entity create();
-	// creates new entity and returns it's id
-	EntityId idCreate()
+	EntityHandle create();
+	void destroy(EntityHandle entity);
+	void spawnLater(EntityHandle entity);
+	void spawn(EntityHandle entity)
 	{
-		auto index = create();
-		return getId(index);
+		assert(isHandleValid(entity));
+		entitySlots[entity.index].setSpawned(true);
 	}
-	bool exists(Entity entity)
+	bool isSpawned(EntityHandleIndex index) const
 	{
-		return (entity < entityStorageInfo.size() ? entityStorageInfo[entity].isValid() : false);
+		return isIndexValid(index) && entitySlots[index].isSpawned();
 	}
-	bool exists(EntityId id)
+	bool isSpawned(EntityHandle entity) const
 	{
-		return exists(idToIndexTable[id.identifier]);
+		return isHandleValid(entity) && entitySlots[entity.index].isSpawned();
 	}
-	/* marks index for deletion, entities are deleted after each update, O(1) */
-	void destroy(Entity index);
-	void destroy(EntityId id);
-	/* delayed(after update call) spawn of an index */
-	void spawnLater(Entity index);
-	void spawnLater(EntityId id);
-	void spawn(Entity index)
+	void despawn(EntityHandle entity)
 	{
-		assert(entityStorageInfo[index].isValid() && !entityStorageInfo[index].isSpawned());
-		entityStorageInfo[index].setSpawned(true);
-	}
-	void spawn(EntityId id)
-	{
-		spawn(idToIndexTable[id.identifier]);
-	}
-	bool isSpawned(Entity ent)
-	{
-		return entityStorageInfo[ent].isSpawned();
-	}
-	bool isSpawned(EntityId id)
-	{
-		return entityStorageInfo[idToIndexTable[id.identifier]].isSpawned();
-	}
-	void despawn(Entity index)
-	{
-		assert(entityStorageInfo[index].isValid() && entityStorageInfo[index].isSpawned());
-		entityStorageInfo[index].setSpawned(false);
-	}
-	void despawn(EntityId id)
-	{
-		despawn(idToIndexTable[id.identifier]);
+		assert(isHandleValid(entity));
+		entitySlots[entity.index].setSpawned(false);
 	}
 
-	/* an id has an identifier (uint32_t) and a version. an id is only valid when the identifier and the version are the same in the id and the Managers regestry */
-	bool isIdValid(EntityId entityId)
+	bool isHandleValid(EntityHandle entity) const
 	{
-		return idToIndexTable[entityId.identifier] < INVALID_ENTITY && entityId.identifier < idToIndexTable.size() && idToVersionTable[entityId.identifier] == entityId.version;
+		return isIndexValid(entity.index) && entitySlots[entity.index].version == entity.version;
 	}
-	EntityId getId(Entity entity)
+
+	EntityHandle getHandle(EntityHandleIndex index) const
 	{
-		return EntityId(indexToIdTable[entity], idToVersionTable[indexToIdTable[entity]]);
-	}
-	/* this function does not check if the id is valid */
-	Entity getIndex(EntityId entityId)
-	{
-		assert(isIdValid(entityId));
-		return idToIndexTable[entityId.identifier];
+		assert(isIndexValid(index));
+		return EntityHandle{ index, entitySlots[index].version };
 	}
 
 	/* returns count of entities */
 	size_t const size();
 	/* returns the capacity-1 / the biggest possible entity index */
 	size_t const maxEntityIndex();
-	/* returnes how fragmented the entities are */
-	float fragmentation();
 
 protected:
-	void shrink();
+	friend class YAMLWorldSerializer;
+	friend class ComponentView;
+	template<typename FirstComp, typename ... RestComps> friend class EntityComponentView; 
+	template<typename FirstComp, typename ... RestComps> friend class EntityView;
+
+	bool isIndexValid(EntityHandleIndex index) const
+	{
+		return (size_t)index < entitySlots.size()
+			&& entitySlots[index].holdsEntity();
+	}
+
+	EntityHandleVersion getVersion(EntityHandleIndex index)
+	{
+		assert(isIndexValid(index));
+		return entitySlots[index].version;
+	}
+
 	void executeDelayedSpawns();
 	void executeDestroys();
-	Entity findBiggestValidEntityIndex();
-	/* generates new DYNAMIC id for index or returns existing id */
-	EntityId makeDynamicId(Entity index);
-	/* generates new STATIC id for index or returns existing id */
-	EntityId makeStaticId(Entity index);
-	bool hasId(Entity index)
-	{
-		return indexToIdTable[index] < INVALID_ID && index < indexToIdTable.size();
-	}
-	class EntityStatus {
-		friend class boost::serialization::access;
-		template<class Archive>
-		void serialize(Archive& ar, const unsigned int file_version)
-		{
-			ar& flags;
-		}
+	EntityHandleIndex findBiggestValidEntityIndex();
+	class EntitySlot {
 	public:
-		EntityStatus(bool valid = false) : flags{}
+		EntitySlot(bool entityExists = false) : flags{}
 		{
-			flags[0] = valid;
+			flags[0] = entityExists;
 			flags[1] = false;
 		}
-		inline void setValid(bool valid) { flags[0] = valid; }
-		inline bool isValid() { return flags[0]; }
+		inline void setHoldsEntity(bool entityExists) { flags[0] = entityExists; }
+		inline bool holdsEntity() const { return flags[0]; }
 		inline void setSpawned(bool spawned) { flags[1] = spawned; }
-		inline bool isSpawned() { return flags[1]; }
+		inline bool isSpawned() const { return flags[1]; }
 
+		EntityHandleVersion version{ 0 };
 	private:
-		// flag 0: valid
+		// flag 0: does the entityslot hold an entity or is it empty
 		// flag 1: spawned
 		std::bitset<2> flags;
 	};
-	std::vector<EntityStatus> entityStorageInfo;
-	std::deque<Entity> freeIndexQueue;
 
-	/*
-		Notable infos about id's:
-		  id & 1  => static id
-		!(id & 1) => dynamic id
-	*/
-	std::vector<Entity>		idToIndexTable;
-	std::vector<uint32_t>	idToVersionTable;
-	std::vector<entity_id_t>indexToIdTable;
-	std::deque<entity_id_t>	freeDynamicIdQueue;
-	std::deque<entity_id_t>	freeStaticIdQueue;
-
-	std::vector<Entity> destroyQueue;
-	std::vector<Entity> spawnLaterQueue;
-
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		ar& entityStorageInfo;
-		ar& idToIndexTable;
-		ar& idToVersionTable;
-		ar& indexToIdTable;
-		ar& freeDynamicIdQueue;
-		ar& destroyQueue;
-		ar& spawnLaterQueue;
-	}
-private:
+	std::vector<EntitySlot> entitySlots;
+	std::deque<EntityHandleIndex> freeIndexQueue;
+	std::vector<EntityHandleIndex> destroyQueue;
+	std::vector<EntityHandle> spawnLaterQueue;
 };

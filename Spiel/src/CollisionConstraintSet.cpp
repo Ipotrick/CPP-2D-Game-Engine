@@ -1,6 +1,6 @@
 #include "CollisionConstraintSet.hpp"
 
-CollisionConstraint* CollisionConstraintSet::getIfContains(const EntityId a, const EntityId b)
+CollisionConstraint* CollisionConstraintSet::getIfContains(const EntityHandle a, const EntityHandle b)
 {
     auto iter = lookupMap.find(makeConstraintKey(a, b));
     if (iter != lookupMap.end() && constraints[iter->second].idA == a && constraints[iter->second].idB == b)
@@ -9,7 +9,7 @@ CollisionConstraint* CollisionConstraintSet::getIfContains(const EntityId a, con
         return nullptr;
 }
 
-bool CollisionConstraintSet::contains(const EntityId a, const EntityId b)
+bool CollisionConstraintSet::contains(const EntityHandle a, const EntityHandle b)
 {
     uint64_t key = makeConstraintKey(a, b);
     if (lookupMap.contains(key)) {
@@ -22,13 +22,13 @@ bool CollisionConstraintSet::contains(const EntityId a, const EntityId b)
     }
 }
 
-CollisionConstraint& CollisionConstraintSet::get(const EntityId a, const EntityId b)
+CollisionConstraint& CollisionConstraintSet::get(const EntityHandle a, const EntityHandle b)
 {
     constraintset_assert(contains(a, b), "error: cannot retrieve not existing value!");
     return constraints[lookupMap[makeConstraintKey(a, b)]];
 }
 
-void CollisionConstraintSet::insert(const EntityId a, const EntityId b, const CollisionInfo& collinfo)
+void CollisionConstraintSet::insert(const EntityHandle a, const EntityHandle b, const CollisionInfo& collinfo)
 {
     constraintset_assert(!contains(a, b), "error: cannot insert existing value!");
     auto constraint = CollisionConstraint();
@@ -46,7 +46,7 @@ void CollisionConstraintSet::insert(const EntityId a, const EntityId b, const Co
     lookupMap.insert({ key, (uint32_t)(constraints.size() - 1) });
 }
 
-void CollisionConstraintSet::insert(EntityId a, EntityId b, const CollisionConstraint& constraint)
+void CollisionConstraintSet::insert(EntityHandle a, EntityHandle b, const CollisionConstraint& constraint)
 {
     constraintset_assert(!contains(a, b), "error: cannot insert existing value!");
     constraints.push_back(constraint);
@@ -54,7 +54,7 @@ void CollisionConstraintSet::insert(EntityId a, EntityId b, const CollisionConst
     lookupMap.insert({ key, (uint32_t)(constraints.size() - 1) });
 }
 
-void CollisionConstraintSet::erase(const EntityId a, const EntityId b)
+void CollisionConstraintSet::erase(const EntityHandle a, const EntityHandle b)
 {
     constraintset_assert(contains(a, b), "error: cannot remove not existing value!");
     const auto key = makeConstraintKey(a, b);

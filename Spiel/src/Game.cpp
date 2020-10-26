@@ -1,7 +1,7 @@
 #include "Game.hpp"
 #include <iomanip>
 
-using namespace std_extra;
+using namespace util;
 using std::cout;
 using std::endl;
 
@@ -18,113 +18,148 @@ Game::Game() :
 {
 }
 
+#define UI_CREATE(ui, parent, code, Type, name) \
+{ \
+	Type name; \
+	code \
+	parent.addChild(ui.createAndGet(name)); \
+}
+
+#define UI_TEXT(ui, parent, code)		UI_CREATE(ui, parent, code, UIText, me)
+
+#define UI_SEPERATOR(ui, parent, code)	UI_CREATE(ui, parent, code, UISeperator, me)
+
+#define UI_TEXT_UPDATE(code) \
+me.setUpdateFn([&](UIElement* e){ UIText& me = *((UIText*)e); code });
+
 void Game::create() {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
-	world.loadMap("world.wrld");
-	for (int i = 0; i < 100; i++) {
-		UIFrame frame(
-			UIAnchor(UIAnchor::X::LeftAbsolute, 100.0f, UIAnchor::Y::TopRelative, 0.5f),
-			{ 260.5f, 230.5f },
-			renderer.makeTexRef(TextureInfo("border.png")).makeSmall()
-		);
-		frame.borders.y = 20;
-		frame.borders.x = 20;
-	
-		UIText textEl = UIText("Player power: ", renderer.makeTexRef(TextureInfo("_pl_ConsolasAtlas.png")).makeSmall());
-		textEl.fontSize =	{ 16.0f, 22.0f };
-		textEl.borderDist = { 0.0f, 0.0f };
-		textEl.color =		{ 0, 0, 0, 1 };
-		textEl.setSize({ 220.0f, 40.0f });
-		textEl.setUpdateFn(
-			[&](UIElement* eme) 
+	world.loadMap("standart");
+
+	const float firstRowWidth = 90.0f;
+	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
+	const auto font = renderer.makeSmallTexRef(TextureInfo("_pl_ConsolasLowRes.png"));
+
+	auto makeRenderStatsUI = [&](auto& parent) {
+		UICollapsable c("Rendering Statics:", font);
+		c.setHeadLength(20);
+		{
+			UIList8 l;
+			l.setPadding({ 5.0f, 0.0f });
 			{
-				UIText* me = (UIText*)eme;
-				me->text = focusToString(in.getMouseFocus());
+				UIPair uicountPair;
+				uicountPair.setHorizontal();
+				{
+					UIText uiCountText("ui count:", font);
+					uiCountText.setSize(textFieldSize);
+					uicountPair.setFirst(ui.createAndGet(uiCountText));
+				}
+				{
+					UIText uiCountText2("", font, [&](UIElement* e) {
+						((UIText*)e)->text = std::to_string(ui.activeElementCount());
+						}
+					);
+					uiCountText2.setSize(textFieldSize);
+					uicountPair.setSecond(ui.createAndGet(uiCountText2));
+				}
+				l.addChild(ui.createAndGet(uicountPair));
 			}
-		);
-
-		textEl.textAnchor.setCenterHorizontal();
-		
-		UIBar bar( Vec4{1,1,1,1}, Vec4{0,0,0,1} );
-		bar.anchor.setCenterHorizontal();
-		bar.setUpdateFn(
-			[&](UIElement* _me) 
 			{
-				auto me = static_cast<UIBar*>(_me);
-				Entity player;
-				for (auto ent : world.entityView<Player>()) {
-					player = ent;
-					break;
+				UIPair uidcountPair;
+				uidcountPair.setHorizontal();
+				{
+					UIText uidCountText("ui draw:", font);
+					uidCountText.setSize(textFieldSize);
+					uidcountPair.setFirst(ui.createAndGet(uidCountText));
 				}
-		
-				if (player != INVALID_ENTITY) {
-					me->setFill(world.getComp<Player>(player).power / 10.0f);
+				{
+					UIText uidCountText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(ui.drawCount()); });
+					uidCountText2.setSize(textFieldSize);
+					uidcountPair.setSecond(ui.createAndGet(uidCountText2));
 				}
-				me->setFillColor(Vec4(1, 1, 1, 1) * (1 - me->getFill()) + Vec4(1, 0, 1, 1) * me->getFill());
+				l.addChild(ui.createAndGet(uidcountPair));
 			}
-		);
-		bar.setSize({ 160.0f, 30.0f });
-
-		UIButton button1;
-		button1.setSize({ 30.0f, 30.0f });
-		button1.border = 5.0f;
-		button1.anchor.setContextScalable(true);
-		button1.anchor.setLeftAbsolute(0.0f);
-		button1.setHoldFn(
-			[&](UIClickable* me) {
-				Entity player;
-				for (auto ent : world.entityView<Player>()) {
-					player = ent;
-					break;
+			{
+				UIPair drawCallPair;
+				drawCallPair.setHorizontal();
+				{
+					UIText drawcallText("Drawcalls:", font);
+					drawcallText.setSize(textFieldSize);
+					drawCallPair.setFirst(ui.createAndGet(drawcallText));
 				}
-
-				world.getComp<Player>(player).power -= getDeltaTimeSafe() * 10;
-			}
-		);
-
-		UIButton button2 = button1; 
-		button2.anchor.setRightAbsolute(0.0f);
-		//button2.setFocusable(false);
-		button2.setHoldFn(
-			[&](UIClickable* me) {
-				Entity player;
-				for (auto ent : world.entityView<Player>()) {
-					player = ent;
-					break;
+				{
+					UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCalls()); });
+					drawcallText2.setSize(textFieldSize);
+					drawCallPair.setSecond(ui.createAndGet(drawcallText2));
 				}
-
-				world.getComp<Player>(player).power += getDeltaTimeSafe() * 10;
+				l.addChild(ui.createAndGet(drawCallPair));
 			}
-		);
 
-		UIPair buttonField;
-		buttonField.setSize({ 90.0f, 30.0f });
-		buttonField.setHorizontal(true);
-		buttonField.setFirst(ui.createAndGet(button1));
-		buttonField.setSecond(ui.createAndGet(button2));
-		buttonField.anchor.setCenterHorizontal();
+			c.addChild(ui.createAndGet(l));
+		}
+		parent.addChild(ui.createAndGet(c));
+	};
 
-		UIList8 list;
-		list.setSize(frame.getSize() - frame.borders * 2.0f);
-		list.setSpacing(10.0f);
-		list.addChild(ui.createAndGet(textEl));
-		list.addChild(ui.createAndGet(bar));
-		list.addChild(ui.createAndGet(buttonField));
-
+	UIFrame frame;
+	frame.setWidth(200);
+	frame.setPadding({ 5.0f, 5.0f });
+	frame.anchor.setLeftAbsolute(10);
+	frame.anchor.setTopAbsolute(10);
+	{
+		UIList16 list;
+		list.setSpacing(5.0f);
+		UI_TEXT(ui, list,
+			me.text = "Statistics:";
+			me.fontTexture = font;
+			me.setSize(textFieldSize);
+			me.textAnchor.setCenterHorizontal();
+			me.anchor.setCenterHorizontal();
+		)
+		UI_SEPERATOR(ui, list, me.setHorizontal();)
+		{
+			UIPair entCountPair;
+			entCountPair.setHorizontal();
+			{
+				UIText entitiesText("Entities:", font);
+				entitiesText.setSize(textFieldSize);
+				entCountPair.setFirst(ui.createAndGet(entitiesText));
+			}
+			{
+				UIText entitiesText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(world.size()); });
+				entitiesText2.setSize(textFieldSize);
+				entCountPair.setSecond(ui.createAndGet(entitiesText2));
+			}
+			list.addChild(ui.createAndGet(entCountPair));
+		}
+		makeRenderStatsUI(list);
+		{
+			UIPair ticksPair;
+			ticksPair.setHorizontal();
+			{
+				UIText ticksText("Ticks/s:", font);
+				ticksText.setSize(textFieldSize);
+				ticksPair.setFirst(ui.createAndGet(ticksText));
+			}
+			{
+				UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(100)); });
+				ticksText2.setSize(textFieldSize);
+				ticksPair.setSecond(ui.createAndGet(ticksText2));
+			}
+			list.addChild(ui.createAndGet(ticksPair));
+		}
 		frame.addChild(ui.createAndGet(list));
-		
-		ui.createFrame(frame);
 	}
+	ui.createFrame(frame, "Statiscics");
 }
 
 void Game::update(float deltaTime) {
-	world.defragment(World::DefragMode::LAZY);
+	renderer.submit(Drawable(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.2, 0.4, 1.0f, 1.0f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace));
 	{
 		Timer t(perfLog.getInputRef("physicstime"));
 		{
-			movementSystem.execute(world, deltaTime);
+			movementSystem.execute(world, deltaTime);	// TODO enable multithreadding
 		}
 		collisionSystem.execute(world, deltaTime);
 		for (auto& d : collisionSystem.getDebugDrawables()) submitDrawable(d);
@@ -134,7 +169,7 @@ void Game::update(float deltaTime) {
 	{
 		Timer t(perfLog.getInputRef("calcRotaVecTime"));
 		{
-			baseSystem.execute(world);
+			baseSystem.execute(world);	// TODO enable multithreadding
 		}
 	}
 
@@ -146,33 +181,10 @@ void Game::update(float deltaTime) {
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	for (auto ent : world.entityView<Base, Movement>()) {
-		if (world.getComp<Base>(ent).position.length() > 1000)
-			world.destroy(ent);
-	}
-	Vec2 size(10, 13);
-	Vec2 startpos(0, getWindowSize().y-size.y);
-	drawString(getPerfInfo(5), "ColnsolasAtlas.png", startpos, size);
-
-	//take input
-	const std::string filename("world.wrld");
-
-	if (in.keyJustPressed(Key::J)) {
-		world.loadMap("standart");
-	}
-
-	if (in.keyJustPressed(Key::K)) {
-		world.saveMap(filename);
-	}
-	
-	if (in.keyJustPressed(Key::L)) {
-		world.loadMap(filename);
-	}
-
 	if (in.keyPressed(Key::LEFT_ALT, Focus::Global) && in.keyPressed(Key::F4, Focus::Global)) {
 		quit();
 	}
-	if (in.keyJustPressed(Key::G)) {
+	if (in.keyPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
 	}
 	if (in.keyPressed(Key::H)) {
@@ -206,28 +218,52 @@ void Game::gameplayUpdate(float deltaTime)
 		camera.rotation = 0.0f;
 		camera.position = { 0,0 };
 		camera.zoom = 1 / 5.0f;
+		guiScale = 1.0f;
 	}
 	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
-		if (ui.doesAliasExist("Test")) {
-			ui.getFrame("Test").disable();
+		if (ui.doesAliasExist("Statiscics")) {
+			ui.getFrame("Statiscics").disable();
 		}
 	}
 	if (in.keyJustPressed(Key::B) && in.keyPressed(Key::LEFT_SHIFT)) {
-		if (ui.doesAliasExist("Test")) {
-			ui.getFrame("Test").enable();
+		if (ui.doesAliasExist("Statiscics")) {
+			ui.getFrame("Statiscics").enable();
 		}
 	}
 	if (in.keyPressed(Key::PERIOD, Focus::Global) && in.keyReleased(Key::LEFT_SHIFT, Focus::Global)) {
 		in.takeFocus(Focus::UI);
 	}
 	if (in.keyPressed(Key::PERIOD, Focus::Global) && in.keyPressed(Key::LEFT_SHIFT, Focus::Global)) {
-		in.takeFocus(Focus::Standart);
+		in.takeFocus(Focus::Standard);
 	}
 	if (in.keyPressed(Key::I)) {
 		guiScale = clamp(guiScale - deltaTime, 0.1f, 10.0f);
 	}
 	if (in.keyPressed(Key::O)) {
 		guiScale = clamp(guiScale + deltaTime, 0.1f, 10.0f);
+	}
+	if (in.keyPressed(Key::J)) {
+		world = GameWorld();
+		world.loadMap("standart");
+		ui.update();
+	}
+	if (in.keyPressed(Key::K)) {
+		std::ofstream of("dump.yaml");
+		if (of.good()) {
+			YAMLWorldSerializer s(world);
+			of << s.serializeToString();
+			of.close();
+		}
+	}
+	if (in.keyPressed(Key::L)) {
+		std::ifstream ifstream("dump.yaml");
+		if (ifstream.good()) {
+			world = GameWorld();
+			YAMLWorldSerializer s(world);
+			std::string str;
+			std::getline(ifstream, str, '\0');
+			s.deserializeString(str);
+		}
 	}
 
 	//execute scripts
@@ -243,13 +279,13 @@ void Game::gameplayUpdate(float deltaTime)
 	cursorManipFunc();
 
 	for (auto ent : world.entityView<SpawnerComp>()) {
-		const auto& base = world.getComp<Base>(ent);
+		const Transform base = world.getComp<Transform>(ent);
 		int laps = spawnerLapTimer.getLaps(deltaTime);
 		for (int i = 1; i < laps; i++) {
 			float rotation = (float)(rand() % 360);
 			auto particle = world.create();
 			Vec2 movement = rotate(Vec2(5,0), rotation);
-			world.addComp<Base>(particle, Base(base.position));
+			world.addComp<Transform>(particle, Transform(base.position));
 			auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
 			float gray = (rand() % 1000 / 1000.0f);
 			world.addComp<Draw>(particle, Draw(Vec4(gray, gray, gray, 0.3), size, rand() % 1000 / 1000.0f, Form::Circle));
@@ -261,12 +297,13 @@ void Game::gameplayUpdate(float deltaTime)
 		}
 	}
 
-	for (auto ent : world.entityView<Base, Movement>()) {
-		auto pos = world.getComp<Base>(ent).position;
+	for (auto ent : world.entityView<Movement, Transform>()) {
+		auto pos = world.getComp<Transform>(ent).position;
 		if (pos.length() > 1000)
 			world.destroy(ent);
 	}
 
+	const std::string filename("world.wrld");
 
 	/* display performance statistics */
 	//std::cout << getPerfInfo(5) << '\n';
@@ -277,31 +314,31 @@ void Game::gameplayUpdate(float deltaTime)
 
 void Game::destroy()
 {
-	ui.destroyFrame("Test");
+	ui.destroyFrame("Statiscics");
 	world.saveMap("world.wrld");
 }
 
 void Game::cursorManipFunc()
 {
-	Vec2 worldCoord = getPosWorldSpace(in.getMousePosition());
+	Vec2 worldCoord = camera.windowToWorld(in.getMousePosition());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
-	Base b = Base(worldCoord, 0);
+	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
 	renderer.submit(Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / camera.zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), RenderSpace::WorldSpace));
 	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
-			Entity topEntity = collisions.front().indexB;
-			EntityId id = world.getId(topEntity);
-			cursorData.relativePos = world.getComp<Base>(topEntity).position - worldCoord;
+			EntityHandleIndex topEntity = collisions.front().indexB;
+			EntityHandle id = world.getHandle(topEntity);
+			cursorData.relativePos = world.getComp<Transform>(topEntity).position - worldCoord;
 			cursorData.lockedID = id;
 			cursorData.locked = true;
 		}
 	}
 	else if (in.buttonPressed(Button::MB_LEFT)) {
-		if (world.isIdValid(cursorData.lockedID)) {
-			world.getComp<Base>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
+		if (world.isHandleValid(cursorData.lockedID)) {
+			world.getComp<Transform>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
 			if (world.hasComp<Movement>(cursorData.lockedID)) {
 				world.getComp<Movement>(cursorData.lockedID).velocity = worldVel;
 				world.getComp<Movement>(cursorData.lockedID).angleVelocity = 0;
@@ -318,7 +355,7 @@ void Game::cursorManipFunc()
 	cursorData.oldPos = worldCoord;
 
 
-	//Entity cursor = world.getIndex(cursorID);
+	//EntityHandleIndex cursor = world.getIndex(cursorID);
 	//auto& baseCursor = world.getComp<Base>(cursor);
 	//auto& colliderCursor = world.getComp<Collider>(cursor);
 	//baseCursor.position = getPosWorldSpace(getCursorPos());

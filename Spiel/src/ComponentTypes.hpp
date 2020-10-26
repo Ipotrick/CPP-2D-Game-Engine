@@ -7,8 +7,8 @@
 using ComponentStorageTuple = 
 std::tuple<
 	// Core Components:
-	ComponentStorage<Base, direct_indexing>,
-	ComponentStorage<Draw, direct_indexing>,
+	ComponentStorage<Transform, paged_indexing>,
+	ComponentStorage<Draw, paged_indexing>,
 	ComponentStorage<Collider, paged_indexing>,
 	ComponentStorage<CollisionsToken, paged_indexing>,
 	ComponentStorage<Movement, paged_indexing>,

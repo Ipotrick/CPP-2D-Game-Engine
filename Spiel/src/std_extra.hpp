@@ -4,7 +4,7 @@
 #include <tuple>
 #include <functional>
 
-namespace std_extra {
+namespace util {
 	template<int s, int e>
 	struct range {
 		auto begin() {

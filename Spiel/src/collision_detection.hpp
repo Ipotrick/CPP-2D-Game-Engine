@@ -55,14 +55,14 @@ struct CollisionTestResult {
 };
 
 struct CollisionInfo {
-	Entity indexA;
-	Entity indexB;
+	EntityHandleIndex indexA;
+	EntityHandleIndex indexB;
 	Vec2 normal[2];
 	Vec2 position[2];
 	int collisionPointNum;
 	float clippingDist;
 
-	CollisionInfo(Entity idA, Entity idB, float clippingDist, Vec2 collisionNormal, Vec2 collisionNormal2, Vec2 collisionPos, Vec2 collisionPos2, int collCount)
+	CollisionInfo(EntityHandleIndex idA, EntityHandleIndex idB, float clippingDist, Vec2 collisionNormal, Vec2 collisionNormal2, Vec2 collisionPos, Vec2 collisionPos2, int collCount)
 		: indexA{ idA }, indexB{ idB }, clippingDist{ clippingDist }, normal{ collisionNormal, collisionNormal2 }, position{ collisionPos, collisionPos2 }, collisionPointNum{ collCount }
 	{}
 };
@@ -134,9 +134,9 @@ inline void generateCollisionInfos(
 	EntityComponentManager& manager,
 	std::vector<CollisionInfo>& collisionInfos, 
 	const std::vector<Vec2>& aabbCache, 
-	const std::vector<Entity>& nearCollidablesBuffer, 
-	const Entity me,
-	const Base& baseColl,
+	const std::vector<EntityHandleIndex>& nearCollidablesBuffer, 
+	const EntityHandleIndex me,
+	const Transform& baseColl,
 	const Collider& colliderColl,
 	const Vec2 aabbMe,
 	std::vector<CollPoint>& collisionVertices)
@@ -146,12 +146,12 @@ inline void generateCollisionInfos(
 		colliderColl.size,
 		colliderColl.form,
 		baseColl.rotaVec);
-	for (const auto otherID : nearCollidablesBuffer) {
-		if (me != otherID) { //do not check against self
-			const auto& baseOther = manager.getComp<Base>(otherID);
-			const auto& colliderOther = manager.getComp<Collider>(otherID);
+	for (const auto otherEnt : nearCollidablesBuffer) {
+		if (me != otherEnt) { //do not check against self
+			const auto& baseOther = manager.getComp<Transform>(otherEnt);
+			const auto& colliderOther = manager.getComp<Collider>(otherEnt);
 			if (!(colliderColl.ignoreGroupMask & colliderOther.groupMask)) {
-				if (isOverlappingAABB(baseColl.position, aabbMe, baseOther.position, aabbCache.at(otherID))) {
+				if (isOverlappingAABB(baseColl.position, aabbMe, baseOther.position, aabbCache.at(otherEnt))) {
 					if (colliderColl.extraColliders.empty() & colliderOther.extraColliders.empty()) {
 						CollidableAdapter otherAdapter(
 							baseOther.position,
@@ -161,7 +161,7 @@ inline void generateCollisionInfos(
 
 						const auto newTestResult = collisionTest(collAdapter, otherAdapter);
 						if (newTestResult.collisionCount > 0) {
-							collisionInfos.push_back(CollisionInfo(me, otherID, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionNormal, newTestResult.collisionPos, newTestResult.collisionPos2, newTestResult.collisionCount));
+							collisionInfos.push_back(CollisionInfo(me, otherEnt, newTestResult.clippingDist, newTestResult.collisionNormal, newTestResult.collisionNormal, newTestResult.collisionPos, newTestResult.collisionPos2, newTestResult.collisionCount));
 						}
 					}
 					else {
@@ -176,11 +176,11 @@ inline void generateCollisionInfos(
 								collisionVertices.push_back({ newTestResult.collisionPos2, newTestResult.collisionNormal, newTestResult.clippingDist });
 						};
 						testForCollision(collAdapter, otherAdapter);
-						for (auto oc : colliderOther.extraColliders) {
+						for (auto& oc : colliderOther.extraColliders) {
 							CollidableAdapter otherAdapter(baseOther.position + rotate(oc.relativePos, baseOther.rotaVec), oc.size, oc.form, baseOther.rotaVec * oc.relativeRota);
 							testForCollision(collAdapter, otherAdapter);
 						}
-						for (auto cc : colliderColl.extraColliders) {
+						for (auto& cc : colliderColl.extraColliders) {
 							const CollidableAdapter collAdapter = CollidableAdapter(baseColl.position + rotate(cc.relativePos, baseColl.rotaVec), cc.size, cc.form, baseColl.rotaVec * cc.relativeRota);
 							testForCollision(collAdapter, otherAdapter);
 							for (auto oc : colliderOther.extraColliders) {
@@ -226,10 +226,10 @@ inline void generateCollisionInfos(
 							}
 
 							float clip = (collisionVertices[vertex1].clip + collisionVertices[vertex2].clip) * 0.5f;
-							collisionInfos.push_back(CollisionInfo(me, otherID, clip, collisionVertices[vertex1].norm, collisionVertices[vertex2].norm, collisionVertices[vertex1].pos, collisionVertices[vertex2].pos, 2));
+							collisionInfos.push_back(CollisionInfo(me, otherEnt, clip, collisionVertices[vertex1].norm, collisionVertices[vertex2].norm, collisionVertices[vertex1].pos, collisionVertices[vertex2].pos, 2));
 						}
 						else if (collisionVertices.size() == 1) {
-							collisionInfos.push_back(CollisionInfo(me, otherID, collisionVertices[0].clip, collisionVertices[0].norm, collisionVertices[0].norm, collisionVertices[0].pos, collisionVertices[0].pos, 1));
+							collisionInfos.push_back(CollisionInfo(me, otherEnt, collisionVertices[0].clip, collisionVertices[0].norm, collisionVertices[0].norm, collisionVertices[0].pos, collisionVertices[0].pos, 1));
 						}
 					}
 				}

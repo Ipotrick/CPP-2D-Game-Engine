@@ -12,7 +12,7 @@ public:
 		: workerNum{ workerNum }
 	{
 		for (int i = 0; i < workerNum; i++) {
-			nearEntities.push_back(std::vector<Entity>());
+			nearEntities.push_back(std::vector<EntityHandleIndex>());
 			collisionInfos.push_back(std::vector<CollisionInfo>());
 		}
 	}
@@ -23,7 +23,7 @@ public:
 			collisionInfos.at(i).clear();
 		}
 	}
-	std::vector<std::vector<Entity>> nearEntities;
+	std::vector<std::vector<EntityHandleIndex>> nearEntities;
 	std::vector<std::vector<CollisionInfo>> collisionInfos;
 	const size_t workerNum;
 };
@@ -33,7 +33,7 @@ public:
 	explicit CollisionCheckJob(
 		EntityComponentManager& manager,
 		CollisionCheckJobBuffers& poolData,
-		const std::vector<Entity>& entities,
+		const std::vector<EntityHandleIndex>& entities,
 		const Quadtree& qtree1,
 		const Quadtree& qtree2,
 		const Quadtree& qtree3,
@@ -51,7 +51,7 @@ public:
 
 	void execute(int workerId) override
 	{
-		for (Entity i = 0; i < entities.size(); i++) {
+		for (EntityHandleIndex i = 0; i < entities.size(); i++) {
 			Collider& coll = manager.getComp<Collider>(entities.at(i));
 			if (!coll.sleeping) {
 				if (qtree1.IGNORE_TAG & QTREE_MASK && !coll.isIgnoring(qtree1.IGNORE_TAG))
@@ -68,19 +68,19 @@ public:
 protected:
 	EntityComponentManager& manager;
 	CollisionCheckJobBuffers& poolData;
-	const std::vector<Entity>& entities;
+	const std::vector<EntityHandleIndex>& entities;
 	const Quadtree& qtree1;
 	const Quadtree& qtree2;
 	const Quadtree& qtree3;
 	const Quadtree& qtree4;
 	const uint8_t QTREE_MASK;
 	const std::vector<Vec2>& aabbCache;
-	std::vector<Entity> near;
+	std::vector<EntityHandleIndex> near;
 	std::vector<CollPoint> collisionVertices;
 
 	void collisionFunction(
-		const Entity collID,
+		const EntityHandleIndex collID,
 		const Quadtree& qtree,
-		std::vector<Entity>& nearCollidablesBuffer,
+		std::vector<EntityHandleIndex>& nearCollidablesBuffer,
 		std::vector<CollisionInfo>& collisionInfos);
 };

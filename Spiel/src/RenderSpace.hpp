@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 enum class RenderSpace : char {
 	/*world coordinates, (0,0) is world's (0,0)*/
 	WorldSpace,
@@ -10,3 +12,26 @@ enum class RenderSpace : char {
 	/* coordinates are pixels, (0,0) is lower left corner */
 	PixelSpace
 };
+
+inline std::string renderSpaceToStr(RenderSpace rs)
+{
+	switch (rs) {
+	case RenderSpace::WorldSpace:
+		return "WorldSpace";
+	case RenderSpace::WindowSpace:
+		return "WindowSpace";
+	case RenderSpace::UniformWindowSpace:
+		return "UniformWindowSpace";
+	case RenderSpace::PixelSpace:
+		return "PixelSpace";
+	default:
+		assert(false);
+		return "";
+	}
+}
+
+inline std::ostream& operator<<(std::ostream& ostream, RenderSpace rs)
+{
+	ostream << renderSpaceToStr(rs);
+	return ostream;
+}

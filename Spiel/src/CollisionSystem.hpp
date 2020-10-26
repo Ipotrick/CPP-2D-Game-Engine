@@ -11,7 +11,6 @@
 #include "Perf.hpp"
 #include "JobManager.hpp"
 #include "CollisionCheckJob.hpp"
-#include "CollGrid.hpp"
 
 class CollisionSystem {
 	friend class PhysicsSystem;
@@ -68,9 +67,13 @@ public:
 	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, uint32_t qtreeCapacity = 6);
 	void execute(World& world, float deltaTime);
 	std::vector<CollisionInfo>& getCollisions();
-	const CollisionsView collisions_view(Entity entity);
+	const CollisionsView collisions_view(EntityHandle entity)
+	{
+		return collisions_view(entity.index);
+	}
+	const CollisionsView collisions_view(EntityHandleIndex entity);
 	const std::vector<Drawable>& getDebugDrawables() const;
-	void checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Base const& b, Collider const& c) const;
+	void checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Transform const& b, Collider const& c) const;
 private:
 	void prepare(World& world);
 	void cleanBuffers(World& world);
@@ -95,17 +98,15 @@ private:
 
 	std::vector<Vec2> aabbCache;
 
-	std::vector<Entity> sensorEntities;
-	std::vector<Entity> particleEntities;
-	std::vector<Entity> dynamicSolidEntities;
-	std::vector<Entity> staticSolidEntities;
+	std::vector<EntityHandleIndex> sensorEntities;
+	std::vector<EntityHandleIndex> particleEntities;
+	std::vector<EntityHandleIndex> dynamicSolidEntities;
+	std::vector<EntityHandleIndex> staticSolidEntities;
 	CollisionCheckJobBuffers workerBuffers;
 
-	std::vector<std::unique_ptr<std::vector<Entity>>> jobEntityBuffers;
+	std::vector<std::unique_ptr<std::vector<EntityHandleIndex>>> jobEntityBuffers;
 
 	std::vector<CollisionInfo> collisionInfos{};
-	//robin_hood::unordered_map<Entity, size_t> collisionInfoBegins;
-	//robin_hood::unordered_map<Entity, size_t> collisionInfoEnds;
 	// buffers for jobs:
 	std::vector<CollisionCheckJob> collisionCheckJobs;
 	std::vector<Tag> collisionCheckJobTags;

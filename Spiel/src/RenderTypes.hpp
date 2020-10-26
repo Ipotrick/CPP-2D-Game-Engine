@@ -3,8 +3,6 @@
 #include <vector>
 #include <string>
 #include <optional>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
 #include <boost/static_string.hpp>
 
 #include "robin_hood.h"
@@ -40,6 +38,11 @@ public:
 		:name{ name.data(), name.size() }
 	{ }
 
+	TextureInfo(const std::string_view& name)
+		:name{ name.data(), name.size() }
+	{
+	}
+
 	TextureInfo(const TextureString& name)
 		:name{ name }
 	{ }
@@ -50,25 +53,6 @@ public:
 		return name == other.name;
 	}
 private:
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		boost::serialization::split_member(ar, *this, file_version);
-	}
-	template<class Archive> 
-	void save(Archive& ar, const unsigned int version) const
-	{
-		std::string s(name.data(), name.size());
-		ar << s;
-	}
-	template<class Archive>
-	void load(Archive& ar, const unsigned int version)
-	{
-		std::string s;
-		ar >> s;
-		name = s;
-	}
 };
 
 struct Texture {
@@ -97,18 +81,9 @@ struct SmallTextureRef {
 	{
 	}
 
-	Vec2 minPos;
-	Vec2 maxPos;
+	Vec2 minPos{ 0.0f, 0.0f };
+	Vec2 maxPos{ 1.0f, 1.0f };
 	TextureId id{ -1 };
-private:
-	friend class boost::serialization::access;
-
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		ar& minPos;
-		ar& maxPos;
-	}
 };
 
 
@@ -118,7 +93,7 @@ private:
 *	If differenct filename or setting is desired, request a new texture ref from the renderer.
 *	The min and max pos can be modified freely.
 */
-class TextureRef2 {
+class TextureRef2 : private SmallTextureRef {
 public:
 	const TextureString& getFilename() const
 	{
@@ -130,56 +105,37 @@ public:
 	}
 	TextureId getId() const
 	{
-		return this->ref.id;
+		return this->id;
 	}
-
-	Vec2 minPos{ 0.0f, 0.0f };
-	Vec2 maxPos{ 1.0f, 1.0f };
+	using SmallTextureRef::minPos;
+	using SmallTextureRef::maxPos;
 
 	TextureRef2()
-		:info{"default"}
+		:info{"default"}, SmallTextureRef{}
 	{}
 
 	TextureRef2(const TextureString& filename, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
-		:info{ filename }, ref{ -1, minPos, maxPos }
+		:info{ filename }, SmallTextureRef{ -1, minPos, maxPos }
 	{}
 
-	bool good() const { return ref.id != -1;  }
+	TextureRef2(TextureInfo info, SmallTextureRef ref)
+		:info{ info }, SmallTextureRef{ ref }
+	{}
+
+	bool good() const { return id != -1;  }
 
 	SmallTextureRef makeSmall() const
 	{
-		return ref;
+		return SmallTextureRef{ id, minPos, maxPos };
 	}
 protected:
 	friend class TextureRefManager;
 	TextureRef2(const TextureString& filename, TextureId id, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
-		:info{ filename }, ref{id, minPos, maxPos}
+		:info{ filename }, SmallTextureRef{id, minPos, maxPos}
 	{}
 
 	TextureInfo info;
-	SmallTextureRef ref;
-
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		ar& info;
-		ar& ref;
-	}
 };
-
-//inline TextureRef2 makeAtlasRef2(const std::string_view& name, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
-//{
-//	TextureRef2 texRef(name);
-//	texRef.minPos = startAtlasCell / atlasGridSize;
-//	if (endAtlasCell == Vec2{ 0,0 }) {
-//		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
-//	}
-//	else {
-//		texRef.maxPos = (endAtlasCell   + Vec2(1, 1)) / atlasGridSize;
-//	}
-//	return texRef;
-//}
 
 inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
 {
@@ -194,15 +150,6 @@ inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const
 	}
 	return texRef;
 }
-
-//inline TextureRef2 makeAsciiRef2(const std::string_view& name, char c)
-//{
-//	TextureRef2 texRef;
-//	c -= 0x20;
-//	Vec2 atlasCoord(c % 8, 15 - c / 8);
-//	texRef = makeAtlasRef2(name, Vec2(8, 16), atlasCoord);
-//	return texRef;
-//}
 
 inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
 {

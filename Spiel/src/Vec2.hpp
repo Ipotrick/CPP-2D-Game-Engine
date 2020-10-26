@@ -68,14 +68,6 @@ public:
 		return sqrtf(x * x + y * y);
 	}
 public:
-
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		ar& x;
-		ar& y;
-	}
 	float x;
 	float y;
 };
@@ -236,6 +228,7 @@ inline Vec2 abs(Vec2 v)
 
 class RotaVec2 {
 public:
+	RotaVec2() = default;
 	RotaVec2(float sin, float cos) : sin{ sin }, cos{ cos } {}
 	explicit RotaVec2(float angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
 
@@ -249,15 +242,8 @@ public:
 		return this->cos == v.cos && this->sin == v.sin;
 	}
 public:
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive& ar, const unsigned int file_version)
-	{
-		ar& sin;
-		ar& cos;
-	}
-	float sin = 0;
-	float cos = 1;
+	float sin{ 0.0f };
+	float cos{ 1.0f };
 };
 
 inline RotaVec2 operator*(RotaVec2 a, RotaVec2 b)

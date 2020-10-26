@@ -17,25 +17,25 @@
 #endif
 
 
-inline uint64_t makeConstraintKey(EntityId a, EntityId b)
+inline uint64_t makeConstraintKey(EntityHandle a, EntityHandle b)
 {
-	constraintset_assert(a.identifier < b.identifier, "error: id's must be in order!");
-	return (uint64_t)a.identifier << 32 | (uint64_t)b.identifier;
+	constraintset_assert(a.index < b.index, "error: id's must be in order!");
+	return (uint64_t)a.index << 32 | (uint64_t)b.index;
 }
 
-inline std::pair<entity_id_t, entity_id_t> decompConstraintKey(uint64_t key)
+inline std::pair<EntityHandleIndex, EntityHandleIndex> decompConstraintKey(uint64_t key)
 {
 	return { (uint32_t)(key >> 32), (uint32_t)key };
 }
 
 class CollisionConstraintSet {
 public:
-	CollisionConstraint* getIfContains(const EntityId a, const EntityId b);
-	bool contains(const EntityId a, const EntityId b);
-	CollisionConstraint& get(const EntityId a, const EntityId b);
-	void insert(const EntityId a, const EntityId b, const CollisionInfo& collinfo);
-	void insert(const EntityId a, const EntityId b, const CollisionConstraint& constraint);
-	void erase(const EntityId a, const EntityId b);
+	CollisionConstraint* getIfContains(const EntityHandle a, const EntityHandle b);
+	bool contains(const EntityHandle a, const EntityHandle b);
+	CollisionConstraint& get(const EntityHandle a, const EntityHandle b);
+	void insert(const EntityHandle a, const EntityHandle b, const CollisionInfo& collinfo);
+	void insert(const EntityHandle a, const EntityHandle b, const CollisionConstraint& constraint);
+	void erase(const EntityHandle a, const EntityHandle b);
 	void erase(const uint32_t index);
 	auto begin()
 	{

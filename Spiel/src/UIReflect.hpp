@@ -13,8 +13,10 @@
 #include "UIMultiParent.hpp"
 #include "UIClickable.hpp"
 #include "UIPair.hpp"
+#include "UISeperator.hpp"
+#include "UICollapsable.hpp"
 
-using UIEntity = Entity;
+using UIEntity = uint32_t;
 
 template<typename T>
 class UIContainer {
@@ -23,13 +25,13 @@ public:
 	UIEntity create(const T& element)
 	{
 		if (freeElements.empty()) {
-			Entity index = (Entity)elements.size();
+			UIEntity index = (UIEntity)elements.size();
 			elements.updateMaxEntNum(index + 1);
 			elements.insert(index, element);
 			return index;
 		}
 		else {
-			Entity index = freeElements.back();
+			UIEntity index = freeElements.back();
 			freeElements.pop_back();
 			elements.insert(index, element);
 			return index;
@@ -57,6 +59,11 @@ public:
 		return elements.contains(index);
 	}
 
+	size_t size() const
+	{
+		return elements.size();
+	}
+
 	auto begin() { return elements.begin(); }
 	auto end() { return elements.end(); }
 private:
@@ -77,7 +84,9 @@ using UIElementTuple = std::tuple<
 	UIContainer<UIField8>,
 	UIContainer<UIField16>,
 	UIContainer<UIField32>,
-	UIContainer<UIField64>
+	UIContainer<UIField64>,
+	UIContainer<UISeperator>,
+	UIContainer<UICollapsable>
 >;
 
 template< size_t I, typename T, typename Tuple_t>

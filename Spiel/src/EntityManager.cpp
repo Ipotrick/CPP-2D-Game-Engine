@@ -1,164 +1,60 @@
 #include "EntityManager.hpp"
 
-Entity EntityManager::create()
+EntityHandle EntityManager::create()
 {
-	Entity ent;
+	EntityHandle ent;
 	if (!freeIndexQueue.empty()) {
-		Entity index = freeIndexQueue.front();
+		ent.index = freeIndexQueue.front();
 		freeIndexQueue.pop_front();
-		entityStorageInfo[index].setValid(true);
-		entityStorageInfo[index].setSpawned(false);
-		ent = index;
+		auto& slot = entitySlots[ent.index];
+		slot.setHoldsEntity(true);
+		slot.setSpawned(false);
+		ent.version = ++slot.version;
 	}
 	else {
-		entityStorageInfo.emplace_back(true);
-		ent = static_cast<Entity>(entityStorageInfo.size() - 1);
+		entitySlots.emplace_back(EntitySlot(true));
+		ent.index = static_cast<EntityHandleIndex>(entitySlots.size() - 1);
+		ent.version = ++entitySlots[ent.index].version;
 	}
-	makeDynamicId(ent);
 	return ent;
 }
 
-EntityId EntityManager::makeDynamicId(Entity entity)
+void EntityManager::destroy(EntityHandle entity)
 {
-	assert(exists(entity));
-	if (indexToIdTable.size() != entityStorageInfo.size()) indexToIdTable.resize(entityStorageInfo.size(), INVALID_ID);
-	if (hasId(entity)) /* does the handle allready have an id? */ {
-		throw new std::exception();
-	}
-	else {
-		// generate id for entity
-		if (!freeDynamicIdQueue.empty()) {
-			// reuse existing index of id vector
-			auto id = freeDynamicIdQueue.front();
-			freeDynamicIdQueue.pop_front();
-
-			// emplace new dynamic id:
-			idToIndexTable[id] = entity;
-			idToVersionTable[id] += 1;	// for every reuse the version gets an increase
-			indexToIdTable[entity] = id;
-
-			return EntityId(id, idToVersionTable[id]);
-		}
-		else {
-			// expand id vectors
-
-			// push back memory space for static id:
-			idToIndexTable.push_back(INVALID_ENTITY);
-			idToVersionTable.emplace_back(0);
-			freeStaticIdQueue.push_back(idToIndexTable.size() - 1);
-
-			// emplate new dynamic id:
-			idToIndexTable.push_back(entity);
-			idToVersionTable.emplace_back(0);
-			entity_id_t id = idToIndexTable.size() - 1;
-			indexToIdTable[entity] = id;
-
-			return EntityId(id, 0);
-		}
+	if (isHandleValid(entity)) {
+		destroyQueue.push_back(entity.index);
 	}
 }
 
-EntityId EntityManager::makeStaticId(Entity entity)
-{
-	assert(exists(entity));
-	if (indexToIdTable.size() != entityStorageInfo.size()) indexToIdTable.resize(entityStorageInfo.size(), INVALID_ID);
-	if (hasId(entity)) /* does the handle allready have an id? */ {
-		throw new std::exception();
-	}
-	else {
-		// generate id for entity
-		if (!freeStaticIdQueue.empty()) {
-			// reuse existing index of id vector
-			auto id = freeStaticIdQueue.front();
-			freeStaticIdQueue.pop_front();
-
-			// emplace new static id:
-			idToIndexTable[id] = entity;
-			idToVersionTable[id] += 1;	// for every reuse the version gets an increase
-			indexToIdTable[entity] = id;
-
-			return EntityId(id, idToVersionTable[id]);
-		}
-		else {
-			// expand id vector
-
-			// emplace new static id:
-			idToIndexTable.push_back(entity);
-			idToVersionTable.emplace_back(0);
-			entity_id_t id = idToIndexTable.size() - 1;
-			indexToIdTable[entity] = id;
-
-			// push back memory space for dynamic id:
-			idToIndexTable.push_back(INVALID_ENTITY);
-			idToVersionTable.emplace_back(0);
-			freeDynamicIdQueue.push_back(idToIndexTable.size() - 1);
-
-			return EntityId(id, 0);
-		}
-	}
-}
-
-void EntityManager::destroy(Entity index)
-{
-	if (index < entityStorageInfo.size()) {
-		assert(entityStorageInfo[index].isValid());
-		destroyQueue.push_back(index);
-	}
-}
-
-void EntityManager::destroy(EntityId id)
-{
-	destroy(idToIndexTable[id.identifier]);
-}
-
-void EntityManager::spawnLater(Entity entity)
+void EntityManager::spawnLater(EntityHandle entity)
 {
 	spawnLaterQueue.emplace_back(entity);
 }
 
-void EntityManager::spawnLater(EntityId id)
-{
-	spawnLater(idToIndexTable[id.identifier]);
-}
-
 size_t const EntityManager::size()
 {
-	return entityStorageInfo.size() - (freeIndexQueue.size() + 1);
+	return entitySlots.size() - (freeIndexQueue.size() + 1);
 }
 
 size_t const EntityManager::maxEntityIndex()
 {
-	return entityStorageInfo.size();
+	return entitySlots.size();
 }
 
-Entity EntityManager::findBiggestValidEntityIndex()
+EntityHandleIndex EntityManager::findBiggestValidEntityIndex()
 {
-	for (int i = entityStorageInfo.size() - 1; i > 0; i--) {
-		if (entityStorageInfo[i].isValid()) return i;
+	for (int i = entitySlots.size() - 1; i > 0; i--) {
+		if (entitySlots[i].holdsEntity()) return i;
 	}
 	return 0;
 }
 
 void EntityManager::executeDestroys()
 {
-
-	for (Entity index : destroyQueue) {
-		if (hasId(index)) {	// if the index has no id, the entity allready got destroyed
-			// reset id references:
-			auto id = indexToIdTable[index];
-			if (id & 1) {
-				freeDynamicIdQueue.push_back(id);
-			}
-			else {
-				freeStaticIdQueue.push_back(id);
-			}
-			indexToIdTable[index] = INVALID_ID;
-			idToIndexTable[id] = INVALID_ENTITY;
-			// reset status of handle:
-			entityStorageInfo[index].setValid(false);
-			entityStorageInfo[index].setSpawned(false);
-			freeIndexQueue.push_back(index);
-		}
+	for (EntityHandleIndex entSlotIndex : destroyQueue) {
+		entitySlots[entSlotIndex].setHoldsEntity(false);
+		entitySlots[entSlotIndex].setSpawned(false);
+		freeIndexQueue.push_back(entSlotIndex);
 	}
 	destroyQueue.clear();
 }
@@ -166,25 +62,8 @@ void EntityManager::executeDestroys()
 void EntityManager::executeDelayedSpawns()
 {
 	for (auto ent : spawnLaterQueue) {
-		spawn(ent);
+		if (isHandleValid(ent))
+			spawn(ent);
 	}
 	spawnLaterQueue.clear();
-}
-
-void EntityManager::shrink()
-{
-	// !! handles must be sorted !!
-	auto lastEl = findBiggestValidEntityIndex();
-	entityStorageInfo.resize(lastEl + 1LL, EntityStatus(false));
-	std::vector<Entity> handleVec;
-
-	for (int i = freeIndexQueue.size() - 1; i >= 0; i--) {
-		if (freeIndexQueue.at(i) < entityStorageInfo.size()) break;
-		freeIndexQueue.pop_back();
-	}
-}
-
-float EntityManager::fragmentation()
-{
-	return (float)freeIndexQueue.size() / (float)maxEntityIndex();
 }

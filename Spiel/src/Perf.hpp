@@ -2,8 +2,6 @@
 
 #include <chrono>
 
-#include "robin_hood.h"
-
 #include "Timing.hpp"
 
 struct PerfLogger {

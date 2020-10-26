@@ -34,7 +34,6 @@ bool UIManager::doesFrameExist(UIEntity ent)
 
 void UIManager::update()
 {
-	LogTimer t(std::cout << "uiupdate");
 	perEntityUpdate();
 	postUpdate();
 	focusUpdate();
@@ -43,7 +42,6 @@ void UIManager::update()
 
 void UIManager::draw(UIContext context)
 {
-	LogTimer t(std::cout << "uidraw");
 	std::vector<Drawable> buffer;
 	context.increaseDrawPrio();
 	for (auto& ent : getElementContainer<UIFrame>()) {
@@ -52,23 +50,45 @@ void UIManager::draw(UIContext context)
 			frame.draw(buffer, context);
 		}
 	}
+	lastUpdateDrwawbleCount = buffer.size();
 	for (auto&& d : buffer) {
 		renderer.submit(d);
 	}
 }
 
+size_t UIManager::elementCount() const
+{
+	size_t sum{ 0 };
+	util::tuple_for_each(uiElementTuple,
+		[&](auto& container) {
+			sum += container.size();
+		}
+	);
+	return sum;
+}
+
 void UIManager::perEntityUpdate()
 {
-	std_extra::tuple_for_each(uiElementTuple,
-		[](auto& container) {
+	// update
+	size_t activeElements{ 0 };
+	util::tuple_for_each(uiElementTuple,
+		[&](auto& container)
+		{
 			for (auto& uient : container) {
 				auto& element = container.get(uient);
-				if (element.isDestroyed()) {
-					element.destroy();
-				}
-				else if (element.isEnabled()) {
-					element.update();
-				}
+				element.update();
+				activeElements += (size_t)element.isEnabled();
+			}
+		}
+	);
+	lastUpdateActiveElements = activeElements;
+	// destroy
+	util::tuple_for_each(uiElementTuple,
+		[](auto& container) 
+		{
+			for (auto& uient : container) {
+				auto& element = container.get(uient);
+				if (element.isDestroyed()) container.destroy(uient);
 			}
 		}
 	);
@@ -78,14 +98,14 @@ void UIManager::focusUpdate()
 {
 	focusedElementCandidates.clear();
 	// find potential elements, that could be focused:
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[&](auto& container) {
 			if constexpr (std::is_base_of<UIFocusable, std::remove_reference<decltype(container.get(0))>::type>::value) {
 				for (auto& uient : container) {
 					auto* element = &container.get(uient);
 					UIFocusable* felement = static_cast<UIFocusable*>(element);
 					if (felement->isEnabled() && felement->isFocusable()) {
-						const auto& area = felement->getLastDrawArea();
+						const auto& area = felement->getFocusArea();
 
 						Vec2 cursorPos = in.getMousePosition(area.drawMode);
 
@@ -102,6 +122,7 @@ void UIManager::focusUpdate()
 							if (felement->bHoveredOver) {
 								in.returnMouseFocus();
 								felement->onLeave();
+								felement->bHoveredOver = false;
 							}
 						}
 					}
@@ -121,7 +142,7 @@ void UIManager::focusUpdate()
 		// find element with the highest drawing prio (at the end is the higest):
 		std::sort(focusedElementCandidates.begin(), focusedElementCandidates.end(),
 			[](UIFocusable* a, UIFocusable* b) {
-				return a->getLastDrawArea().drawingPrio < b->getLastDrawArea().drawingPrio;
+				return a->getFocusArea().drawingPrio < b->getFocusArea().drawingPrio;
 			}
 		);
 
@@ -133,23 +154,26 @@ void UIManager::focusUpdate()
 			if (fe->bHoveredOver) {
 				in.returnMouseFocus();
 				fe->onLeave();
+				fe->bHoveredOver = false;
 			}
 		}
 
 		// for the focused element:
 		if (felement->bHoveredOver) {
 			felement->onHover();
+			felement->bHoveredOver = true;
 		}
 		else {
 			in.takeMouseFocus(felement->hoverFocus);
 			felement->onEnter();
+			felement->bHoveredOver = true;
 		}
 	}
 }
 
 void UIManager::clickableUpdate()
 {
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[&](auto& container) {
 			if constexpr (std::is_base_of<UIClickable, std::remove_reference<decltype(container.get(0))>::type>::value) {
 				for (auto& uient : container) {
@@ -162,13 +186,16 @@ void UIManager::clickableUpdate()
 						if (leftClick) {
 							if (celement->bPressed) {
 								celement->onHold();
+								celement->bPressed = true;
 							}
 							else {
 								celement->onClick();
+								celement->bPressed = true;
 							}
 						}
 						else if (celement->bPressed) {
 							celement->onRelease();
+							celement->bPressed = false;
 						}
 					}
 					else if (celement->bPressed) {

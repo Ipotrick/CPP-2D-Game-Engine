@@ -15,7 +15,7 @@ CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogge
 	qtreeParticle({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::PARTICLE),
 	qtreeSensor({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::SENSOR)
 {
-	jobEntityBuffers.push_back(std::make_unique<std::vector<Entity>>());
+	jobEntityBuffers.push_back(std::make_unique<std::vector<EntityHandleIndex>>());
 }
 
 void CollisionSystem::execute(World& world, float deltaTime)
@@ -29,7 +29,7 @@ std::vector<CollisionInfo>& CollisionSystem::getCollisions()
 	return this->collisionInfos;
 }
 
-const CollisionSystem::CollisionsView CollisionSystem::collisions_view(Entity entity)
+const CollisionSystem::CollisionsView CollisionSystem::collisions_view(EntityHandleIndex entity)
 {
 	if (world.hasComp<CollisionsToken>(entity)) {
 		return CollisionsView((size_t)world.getComp<CollisionsToken>(entity).begin, (size_t)world.getComp<CollisionsToken>(entity).end, collisionInfos);
@@ -44,10 +44,10 @@ const std::vector<Drawable>& CollisionSystem::getDebugDrawables() const
 	return debugDrawables;
 }
 
-void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Base const& b, Collider const& c) const
+void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Transform const& b, Collider const& c) const
 {
 	Vec2 aabb = aabbBounds(c.size, b.rotaVec);
-	std::vector<Entity> near;
+	std::vector<EntityHandleIndex> near;
 	if (colliderType & Collider::DYNAMIC) {
 		qtreeDynamic.querry(near, b.position, aabb);
 	}
@@ -76,9 +76,10 @@ void CollisionSystem::prepare(World& world)
 	// TODO REDO SPLIT OF COLLIDER
 	// split collidables
 	Vec2 minPos{ 0,0 }, maxPos{ 0,0 };
-	for (auto colliderID : world.entityView<Collider>()) {
+	for (auto colliderEnt : world.entityView<Collider>()) {
+		auto colliderID = colliderEnt.index;
 		auto& collider = world.getComp<Collider>(colliderID);
-		auto& baseCollider = world.getComp<Base>(colliderID);
+		auto& baseCollider = world.getComp<Transform>(colliderID);
 		minPos = min(minPos, baseCollider.position);
 		maxPos = max(maxPos, baseCollider.position);
 	
@@ -193,7 +194,7 @@ void CollisionSystem::collisionDetection(World& world)
 	size_t cap = collisionCheckJobs.capacity();
 
 	int currentBuffer = 0;
-	auto makeJobs = [&](const std::vector<Entity>& entities, const uint8_t qtreeMask) {
+	auto makeJobs = [&](const std::vector<EntityHandleIndex>& entities, const uint8_t qtreeMask) {
 		auto pushJob = [&]() {
 			if (collisionCheckJobs.size() == maximumJobCount - 1)
 				throw new std::exception("ERROR: DO NOT REALLOCATE JOB VECTOR WHEN EXECUTING JOBS!");
@@ -201,7 +202,7 @@ void CollisionSystem::collisionDetection(World& world)
 			collisionCheckJobTags.push_back(jobManager.addJob(&collisionCheckJobs.back()));
 			++currentBuffer;
 			if (currentBuffer >= jobEntityBuffers.size()) {
-				jobEntityBuffers.push_back(std::make_unique<std::vector<Entity>>());
+				jobEntityBuffers.push_back(std::make_unique<std::vector<EntityHandleIndex>>());
 				jobEntityBuffers.back()->reserve(MAX_ENTITIES_PER_JOB);
 			}
 		};
@@ -241,7 +242,7 @@ void CollisionSystem::collisionDetection(World& world)
 	}
 
 	if (collisionInfos.size() > 0) {
-		Entity currentEntity = collisionInfos[0].indexA;
+		EntityHandleIndex currentEntity = collisionInfos[0].indexA;
 		world.getComp<CollisionsToken>(currentEntity).begin = 0;
 		for (int i = 1; i < collisionInfos.size(); i++) {
 			if (currentEntity != collisionInfos[i].indexA) {	//new idA found
@@ -254,7 +255,7 @@ void CollisionSystem::collisionDetection(World& world)
 		world.getComp<CollisionsToken>(currentEntity).end = collisionInfos.size();
 	}
 
-	for (Entity ent : world.entityView<Movement, Collider>()) {
+	for (EntityHandle ent : world.entityView<Movement, Collider>()) {
 		Movement& mov = world.getComp<Movement>(ent);
 		if (mov.velocity.length() < 0.00001f) {
 			mov.velocity = Vec2(0, 0);
@@ -267,7 +268,7 @@ void CollisionSystem::collisionDetection(World& world)
 #define DEBUG_SLEEP
 #ifdef DEBUG_SLEEP
 	for (auto ent : world.entityView<Collider>()) {
-		auto& base = world.getComp<Base>(ent);
+		auto& base = world.getComp<Transform>(ent);
 		auto& coll = world.getComp<Collider>(ent);
 		if (coll.sleeping)
 			debugDrawables.push_back(Drawable(0, base.position, 0.81, Vec2(0.1,0.1), Vec4(0, 1, 0, 1), Form::Circle, RotaVec2(0)));
@@ -293,11 +294,11 @@ void CollisionSystem::collisionDetection(World& world)
 	}
 #endif
 #ifdef DEBUG_QTREE_FINDPLAYER
-	Entity player;
+	EntityHandleIndex player;
 	for (auto p : world.entity_view<Player>())
 		player = p;
 
-	std::vector<Entity> near;
+	std::vector<EntityHandleIndex> near;
 	size_t max = 0;
 	for (auto ent : world.entity_view<Collider, Movement>()) {
 		near.clear();

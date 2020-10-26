@@ -10,42 +10,12 @@ public:
 		bPressed = false;
 	}
 
-	virtual void onClick() final
-	{
-		bPressed = true;
-		onClickFn(this);
-	}
+	virtual void onClick() {}
 
-	virtual void onHold() final
-	{
-		bPressed = true;
-		onHoldFn(this);
-	}
+	virtual void onHold() {}
 
-	virtual void onRelease() final
-	{
-		bPressed = false;
-		onReleaseFn(this);
-	}
-	
-	virtual void setClickFn(std::function<void(UIClickable*)> fn) final 
-	{
-		this->onClickFn = fn;
-	}
-
-	virtual void setHoldFn(std::function<void(UIClickable*)> fn) final 
-	{
-		this->onHoldFn = fn;
-	}
-
-	virtual void setReleaseFn(std::function<void(UIClickable*)> fn) final
-	{
-		this->onReleaseFn = fn;
-	}
+	virtual void onRelease() {}
 
 	bool bPressed{ false };
 private:
-	std::function<void(UIClickable*)> onClickFn{ [](UIClickable* me) {} };
-	std::function<void(UIClickable*)> onHoldFn{ [](UIClickable* me) {} };
-	std::function<void(UIClickable*)> onReleaseFn{ [](UIClickable* me) {} };
 };

@@ -22,6 +22,7 @@ void Renderer::waitTillFinished() {
 		// reset data
 		workerSharedData->ready = false; // reset ready flag
 		renderingTime = workerSharedData->new_renderTime;
+		drawCallCount = workerSharedData->drawCallCount;
 	}
 }
 

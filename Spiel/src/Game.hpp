@@ -2,9 +2,12 @@
 
 #include <iostream>
 
+
 #include "Engine.hpp"
 #include "GameWorld.hpp"
 #include "GameComponents.hpp"
+#include "serialization/YAMLSerializer.hpp"
+
 #include "BasicScripts.hpp"
 #include "ParticleScript.hpp"
 #include "DummyScript.hpp"
@@ -16,7 +19,7 @@ struct CursorManipData {
 
 	bool locked;
 	Vec2 oldPos{0,0};
-	EntityId lockedID;
+	EntityHandle lockedID;
 	Vec2 relativePos;
 	LapTimer<> ballSpawnLap;
 	LapTimer<> wallSpawnLap;
