@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "EntityTypes.hpp"
-#define DEBUG_COMPONENT_STORAGE
+//#define DEBUG_COMPONENT_STORAGE
 
 struct CompData {
 };
@@ -52,6 +52,12 @@ public:
 	inline iterator end();
 	inline std::vector<std::pair<EntityHandleIndex, CompType>> dump() const;
 };
+
+
+/*
+* -------------------------DIRECT INDEXING------------------------------------
+*/
+
 
 template<typename CompType>
 class ComponentStorage<CompType, direct_indexing>{
@@ -180,6 +186,13 @@ private:
 	std::vector<CompType> storage;
 	std::vector<bool> containsVec;
 };
+
+
+/*
+* -------------------------PAGED INDEXING------------------------------------
+*/
+
+
 
 template<typename CompType>
 class ComponentStorage<CompType, paged_indexing> {
@@ -366,6 +379,13 @@ private:
 	std::vector<bool> containsVec;
 };
 
+
+/*
+* -------------------------SPARSE SET------------------------------------
+*/
+
+
+
 template<typename CompType>
 class ComponentStorage<CompType, sparse_set> {
 public:
@@ -389,8 +409,6 @@ public:
 		denseTable.push_back(entity);
 		storage.push_back(comp);
 		sparseTable.at(entity) = denseTable.size() - 1;
-
-		assert(storage.size() == denseTable.size());
 	}
 	inline void remove(EntityHandleIndex entity)
 	{
@@ -503,6 +521,13 @@ private:
 	std::vector<EntityHandleIndex> denseTable;
 	std::vector<CompType> storage;
 };
+
+
+/*
+* -------------------------PAGED SET------------------------------------
+*/
+
+
 
 template<typename CompType>
 class ComponentStorage<CompType, paged_set> {

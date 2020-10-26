@@ -32,8 +32,7 @@ public:
 	/* per entity component access */
 	template<typename CompType>		CompType&	getComp(EntityHandleIndex index)
 	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		return std::get<tuple_index>(componentStorageTuple).get(index);
+		return storage<CompType>().get(index);
 	}
 	template<typename CompType>		CompType&	getComp(EntityHandle entity)
 	{
@@ -51,8 +50,7 @@ public:
 
 	template<typename CompType>		bool		hasComp(EntityHandleIndex index)
 	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		return std::get<tuple_index>(componentStorageTuple).contains(index);
+		return storage<CompType>().contains(index);
 	}
 	template<typename CompType>		bool		hasComp(EntityHandle entity)
 	{
@@ -70,8 +68,7 @@ public:
 
 	template<typename CompType>		bool		hasntComp(EntityHandleIndex index)
 	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		return !std::get<tuple_index>(componentStorageTuple).contains(index);
+		return !storage<CompType>().contains(index);
 	}
 	template<typename CompType>		bool		hasntComp(EntityHandle entity)
 	{
@@ -89,9 +86,8 @@ public:
 
 	template<typename CompType>		CompType&	addComp(EntityHandleIndex index, CompType data = CompType())
 	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		std::get<tuple_index>(componentStorageTuple).insert(index, data);
-		return std::get<tuple_index>(componentStorageTuple)[index];
+		storage<CompType>().insert(index, data);
+		return storage<CompType>()[index];
 	}
 	template<typename CompType>		CompType&	addComp(EntityHandle entity, CompType data = CompType())
 	{
@@ -100,8 +96,7 @@ public:
 
 	template<typename CompType>		void		remComp(EntityHandleIndex index)
 	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		std::get<tuple_index>(componentStorageTuple).remove(index);
+		storage<CompType>().remove(index);
 	}
 	template<typename CompType>		void		remComp(EntityHandle entity)
 	{
@@ -111,11 +106,6 @@ public:
 	[[nodiscard]]				ComponentView	componentView(EntityHandle entity);
 
 	/* general entity and storage access */
-	template<typename CompType>		auto& getAll()
-	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		return std::get<tuple_index>(componentStorageTuple);
-	}
 	template<typename FirstComp, typename ... RestComps> [[nodiscard]] auto entityView();
 	template<typename FirstComp, typename ... RestComps> [[nodiscard]] auto entityComponentView();
 
@@ -128,15 +118,14 @@ protected:
 	{
 		return index_in_storagetuple<T, decltype(componentStorageTuple)>::value;
 	}
+	template<typename CompType> constexpr auto& storage()
+	{
+		constexpr auto tuple_index = storageIndex<CompType>();
+		return std::get<tuple_index>(componentStorageTuple);
+	}
 	void updateMaxEntityToComponentSotrages();
 	void deregisterDestroyedEntities();
 
-	/*
-	* the int pair here refers to {
-	*	first(size_t)		= component storage index, 
-	*	second(storage_t)	= component storage type
-	* }
-	*/
 	ComponentStorageTuple componentStorageTuple;
 };
 
