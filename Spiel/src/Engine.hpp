@@ -91,7 +91,7 @@ public:
 	}
 
 private:
-	Drawable buildWorldSpaceDrawable(World& world, Entity entity);
+	Drawable buildWorldSpaceDrawable(World& world, EntityHandleIndex entity);
 	void rendererUpdate(World& world);
 public:
 	World& world;

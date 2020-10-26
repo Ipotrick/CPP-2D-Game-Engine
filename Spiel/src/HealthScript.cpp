@@ -1,9 +1,9 @@
 #include "HealthScript.hpp"
 
-void HealthScript::script(Entity me, Health& data, float deltaTime) 
+void HealthScript::script(EntityHandle me, Health& data, float deltaTime)
 {
 	auto createUI = 
-		[&](EntityId id) 
+		[&](EntityHandle id)
 	{
 		UIBar bar;
 		bar.setSize({ 100.0f, 20.0f });
@@ -42,7 +42,7 @@ void HealthScript::script(Entity me, Health& data, float deltaTime)
 		frame.setUpdateFn(
 			[&, id](UIElement* e) {
 				UIFrame* f = (UIFrame*)e;
-				Vec2 windowPos = engine.getWorldToWindow(world.getComp<Base>(id).position);
+				Vec2 windowPos = engine.getWorldToWindow(world.getComp<Transform>(id).position);
 				Vec2 pixelPos = engine.getWindowToPixel(windowPos);
 				float scale = engine.camera.zoom * 3.5f;
 				f->anchor.setAbsPosition(pixelPos + Vec2(0.0f, 60.0f) * scale);
@@ -51,7 +51,7 @@ void HealthScript::script(Entity me, Health& data, float deltaTime)
 		);
 		frame.setDestroyIfFn(
 			[&, id](UIElement* e) -> bool {
-				return !(world.isIdValid(id) && world.hasComp<Health>(id)) || !world.getComp<Health>(id).bUISpawned;
+				return !(world.isHandleValid(id) && world.hasComp<Health>(id)) || !world.getComp<Health>(id).bUISpawned;
 			}
 		);
 		frame.setEnableIfFn(
@@ -77,7 +77,7 @@ void HealthScript::script(Entity me, Health& data, float deltaTime)
 	}
 
 	if (!data.bUISpawned) {
-		createUI(world.getId(me));
+		createUI(me);
 		data.bUISpawned = true;
 	}
 }

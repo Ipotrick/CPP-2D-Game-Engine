@@ -58,6 +58,9 @@
     <Filter Include="_Engine\_UI\utility">
       <UniqueIdentifier>{a58c2ada-7193-4c83-b0ee-2dd55853a80c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="serialization">
+      <UniqueIdentifier>{9de1c8d4-f0a8-4b9e-8bd3-acf12988115d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
@@ -207,12 +210,6 @@
     <ClInclude Include="src\SuckerScript.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\SweepAndPrune.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollGrid.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
     <ClInclude Include="src\Qtree2.hpp">
       <Filter>_Engine\_Collision</Filter>
     </ClInclude>
@@ -335,6 +332,18 @@
     </ClInclude>
     <ClInclude Include="src\UIPaddingBase.hpp">
       <Filter>_Engine\_UI\BaseClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerializer.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerialize.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerializeCoreComponents.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLSerializeGameComponents.hpp">
+      <Filter>serialization</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -469,6 +478,18 @@
     </ClCompile>
     <ClCompile Include="src\DrawFrame.cpp">
       <Filter>_Engine\_UI\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerializer.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerialize.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerializeCoreComponents.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLSerializeGameComponents.cpp">
+      <Filter>serialization</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

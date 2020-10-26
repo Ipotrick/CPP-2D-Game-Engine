@@ -31,12 +31,12 @@ void PhysicsSystem2::updateCollisionConstraints(World& world, CollisionSystem& c
 {
 	for (CollisionInfo collinfo : collSys.collisionInfos) {
 		if (world.hasComp<PhysicsBody>(collinfo.indexA) && world.hasComp<PhysicsBody>(collinfo.indexB)) {
-			EntityId a = world.getId(collinfo.indexA);
-			EntityId b = world.getId(collinfo.indexB);
+			EntityHandle a = world.getHandle(collinfo.indexA);
+			EntityHandle b = world.getHandle(collinfo.indexB);
 				// order a and b
 			collinfo.normal[0] *= -1;			// in physics the normal goes from a to b
 			collinfo.normal[1] *= -1;			// in physics the normal goes from a to b
-			if (a.identifier > b.identifier) {
+			if (a.index > b.index) {
 				const auto temp = a;
 				a = b;
 				b = temp;
@@ -99,14 +99,14 @@ void PhysicsSystem2::prepareConstraints(World& world, float deltaTime)
 	float k_biasFactor = positionCorrection ? 0.2f : 0.0f;
 
 	for (auto& c : collConstraints) {
-		const EntityId entA = c.idA;
-		const EntityId entB = c.idB;
+		const EntityHandle entA = c.idA;
+		const EntityHandle entB = c.idB;
 		auto movementDummy = Movement();
-		auto& baseA = world.getComp<Base>(entA);
+		auto& baseA = world.getComp<Transform>(entA);
 		auto& collA = world.getComp<Collider>(entA);
 		auto& moveA = world.hasComp<Movement>(entA) ? world.getComp<Movement>(entA) : movementDummy;
 		auto& bodyA = world.getComp<PhysicsBody>(entA);
-		auto& baseB = world.getComp<Base>(entB);
+		auto& baseB = world.getComp<Transform>(entB);
 		auto& collB = world.getComp<Collider>(entB);
 		auto& moveB = world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : movementDummy;
 		auto& bodyB = world.getComp<PhysicsBody>(entB);
@@ -155,24 +155,24 @@ void PhysicsSystem2::springyPositionCorrection(World& world, float deltaTime)
 
 	for (auto& c : collConstraints) {
 		if (world.hasComps<Movement>(c.idA)) {
-			world.getComp<Base>(c.idA).position -= (c.collisionPoints[0].normal + c.collisionPoints[1].normal) * springForce(c.clippingDist);
+			world.getComp<Transform>(c.idA).position -= (c.collisionPoints[0].normal + c.collisionPoints[1].normal) * springForce(c.clippingDist);
 		}
 		if (world.hasComps<Movement>(c.idB)) {
-			world.getComp<Base>(c.idB).position += (c.collisionPoints[0].normal + c.collisionPoints[1].normal) * springForce(c.clippingDist);
+			world.getComp<Transform>(c.idB).position += (c.collisionPoints[0].normal + c.collisionPoints[1].normal) * springForce(c.clippingDist);
 		}
 	}
 }
 
 void PhysicsSystem2::applyImpulse(World& world, CollisionConstraint& c)
 {
-	const EntityId entA = c.idA;
-	const EntityId entB = c.idB;
+	const EntityHandle entA = c.idA;
+	const EntityHandle entB = c.idB;
 	auto movementDummy = Movement();
-	auto& baseA = world.getComp<Base>(entA);
+	auto& baseA = world.getComp<Transform>(entA);
 	auto& collA = world.getComp<Collider>(entA);
 	auto& moveA = world.hasComp<Movement>(entA) ? world.getComp<Movement>(entA) : movementDummy;
 	auto& bodyA = world.getComp<PhysicsBody>(entA);
-	auto& baseB = world.getComp<Base>(entB);
+	auto& baseB = world.getComp<Transform>(entB);
 	auto& collB = world.getComp<Collider>(entB);
 	auto& moveB = world.hasComp<Movement>(entB) ? world.getComp<Movement>(entB) : movementDummy;
 	auto& bodyB = world.getComp<PhysicsBody>(entB);
@@ -276,10 +276,10 @@ void PhysicsSystem2::applyImpulsesMultiThreadded(World& world)
 		visited.clear();
 		visited.resize(world.maxEntityIndex() + 1, false);
 		for (int i = 0; i < collConstraints.size(); i++) {
-			if (!used[i] && !visited[world.getIndex(collConstraints[i].idA)] & !visited[world.getIndex(collConstraints[i].idB)]) {
+			if (!used[i] && !visited[(collConstraints[i].idA).index] & !visited[(collConstraints[i].idB).index]) {
 				disjointPairs[dpi].push_back(&collConstraints[i]);
-				visited[world.getIndex(collConstraints[i].idA)] = true;
-				visited[world.getIndex(collConstraints[i].idB)] = true;
+				visited[(collConstraints[i].idA).index] = true;
+				visited[(collConstraints[i].idB).index] = true;
 				used[i] = true;
 				size++;
 			}
@@ -353,7 +353,7 @@ void PhysicsSystem2::applyImpulsesMultiThreadded(World& world)
 
 void PhysicsSystem2::applyForcefields(World& world, float deltaTime)
 {
-	for (auto [ent, p, mov, base] : world.entityComponentView<PhysicsBody, Movement, Base>()) {
+	for (auto [ent, p, mov, base] : world.entityComponentView<PhysicsBody, Movement, Transform>()) {
 		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectAccel * deltaTime;
 		mov.velocity += world.physics.linearEffectDir * world.physics.linearEffectForce * (1.0f / world.getComp<PhysicsBody>(ent).mass) * deltaTime;
 		mov.velocity *= (1.0f - world.physics.friction * deltaTime);

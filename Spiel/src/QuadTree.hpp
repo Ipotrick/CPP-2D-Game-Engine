@@ -143,11 +143,11 @@ public:
 		nodes.reset();	// deallocates all heap memory
 	}
 
-	void insert(Entity ent, const std::vector<Vec2>& aabbs);
+	void insert(EntityHandleIndex ent, const std::vector<Vec2>& aabbs);
 
-	void broadInsert(const std::vector<Entity>& entities, const std::vector<Vec2>& aabbs);
+	void broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs);
 
-	void querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize) const;
+	void querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, const Vec2 qrySize) const;
 
 	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, std::vector<Drawable>& draw) const {
 		querryDebug(qryPos, qrySize, 0, m_pos, m_size, draw, 0);
@@ -188,8 +188,8 @@ public:
 	const uint8_t IGNORE_TAG;
 private:
 	void insert(const uint32_t ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
-	void broadInsert(const std::vector<Entity>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
-	void querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize) const;
+	void broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
+	void querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize) const;
 	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, int depth) const;
 	void querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, const Vec4 color, const int depth) const;
 

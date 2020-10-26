@@ -138,7 +138,7 @@ public:
 		// The elements size must be smaller than the size of the context
 		// the element must fit into the context
 		Vec2 diff = abs(context.ulCorner - context.drCorner) - scaledSize * context.scale;
-		assert(diff.x >= 0.0f && diff.y >= 0.0f);
+		//assert(diff.x >= 0.0f && diff.y >= 0.0f);
 #endif
 		return { 
 			getXOffset(scaledSize.x, context),

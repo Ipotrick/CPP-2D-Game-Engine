@@ -8,7 +8,7 @@ void World::loadMap(const std::string& mapname) {
 		auto makeWall = [&](int x, int y) {
 			auto wall = create();
 			auto comp = componentView(wall);
-			comp.add<Base>(Base(Vec2(x, y), 0));
+			comp.add<Transform>(Transform(Vec2(x, y), 0));
 			comp.add<Draw>(Draw(Vec4(1, 1, 1, 1), Vec2(1.2, 1.2), 0.45f, Form::Rectangle));
 			auto coll = Collider(Vec2(1.2, 1.2), Form::Rectangle);
 			coll.setIgnore(Collider::DYNAMIC);
@@ -117,10 +117,10 @@ void World::loadMap(const std::string& mapname) {
 		}
 
 		Vec2 scalePlayer(1, 1);
-		auto player = idCreate();
+		auto player = create();
 		auto cmps = componentView(player);
-		cmps.add<Base>(Base(Vec2(2,12),0));
-		cmps.add<Base>(Base(Vec2(2,12),0));
+		cmps.add<Transform>(Transform(Vec2(2,12),0));
+		cmps.add<Transform>(Transform(Vec2(2,12),0));
 		auto colliderPlayer = Collider(Vec2(0.4,0.7), Form::Rectangle);
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(1, 1)*0.4, Vec2(0,0.35), RotaVec2(0), Form::Circle));
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(0.3, 0.2), Vec2(0.2, -0.3), RotaVec2(305.0f), Form::Rectangle));
@@ -134,9 +134,9 @@ void World::loadMap(const std::string& mapname) {
 		spawn(player);
 
 		Vec2 scaleBox(1, 1);
-		auto box = idCreate();
+		auto box = create();
 		auto cmpsBox = componentView(box);
-		cmpsBox.add<Base>(Base(Vec2(2, 2), 0));
+		cmpsBox.add<Transform>(Transform(Vec2(2, 2), 0));
 		auto colliderBox = Collider(scalePlayer, Form::Rectangle);
 		colliderBox.groupMask |= CollisionGroup<1>::mask;
 		cmpsBox.add(colliderBox);
@@ -149,7 +149,7 @@ void World::loadMap(const std::string& mapname) {
 
 		Vec2 scale = Vec2(0.3f, 0.3f);
 		Form form = Form::Circle;
-		Collider trashCollider = Collider(scale, form);
+		Collider trashCollider = Collider(scale, form); 
 		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
 		for (int i = 0; i < 3000; i ++) {
 			if (i % 2) {
@@ -163,7 +163,7 @@ void World::loadMap(const std::string& mapname) {
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 			Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
 			auto trash = create();
-			addComp(trash, Base(position, RotaVec2(0)));
+			addComp(trash, Transform(position, RotaVec2(0)));
 			addComp(trash, Movement());
 			addComp(trash, trashCollider); 
 			addComp(trash, Draw(color, scale, 0.5f, form));
@@ -173,9 +173,9 @@ void World::loadMap(const std::string& mapname) {
 			spawn(trash);
 		}
 
-		auto spawner = idCreate();
+		auto spawner = create();
 		auto cmps2 = componentView(spawner);
-		cmps2.add<Base>(Base(Vec2(20, 40), 0));
+		cmps2.add<Transform>(Transform(Vec2(20, 40), 0));
 		cmps2.add<Collider>(Collider(Vec2(0.3, 0.3), Form::Circle));
 		cmps2.add<PhysicsBody>(PhysicsBody(0.0f, 100000000000000000000000000000000.0f,10000000000000000000000000000000000.0f,0));
 		cmps2.add<SpawnerComp>();
@@ -183,7 +183,7 @@ void World::loadMap(const std::string& mapname) {
 		
 		auto sucker = create();
 		auto cmps3 = componentView(sucker);
-		cmps3.add<Base>(Base(Vec2(20, 2), 0));
+		cmps3.add<Transform>(Transform(Vec2(20, 2), 0));
 		auto coll = Collider(Vec2(7, 7), Form::Circle);
 		cmps3.add<Collider>(coll);
 		cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
@@ -192,45 +192,8 @@ void World::loadMap(const std::string& mapname) {
 		cmps3.add<SuckerComp>(suckerCmd);
 		spawn(sucker);
 	}
-	else if (mapname == "uitest") {
-		this->physics.linearEffectDir = Vec2(0, -1);
-	}
-	else {
-		std::ifstream ifs(mapname, std::ios::binary);
-		if (ifs.good()) {
-			boost::archive::binary_iarchive oa(ifs);
-			oa >> *this;
-		}
-		else {
-			loadMap("standart");
-		}
-	}
 }
 
 void World::saveMap(const std::string& mapname)
-{
-	defragment(DefragMode::COMPLETE);
-	std::ofstream ofs(mapname, std::ios::binary);
-	if (ofs.good()) {
-		{
-			boost::archive::binary_oarchive oa(ofs);
-			oa << *this;
-		}
-	}
-}
-
-void World::saveWorld(const std::string& filename)
-{
-}
-
-void World::loadWorld(const std::string& filename)
-{
-}
-
-void World::saveGameState(const std::string& filename)
-{
-}
-
-void World::loadGameState(const std::string& filename)
 {
 }

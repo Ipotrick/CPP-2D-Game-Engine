@@ -7,7 +7,7 @@
 using ComponentStorageTuple = 
 std::tuple<
 	// Core Components:
-	ComponentStorage<Base, paged_indexing>,
+	ComponentStorage<Transform, paged_indexing>,
 	ComponentStorage<Draw, paged_indexing>,
 	ComponentStorage<Collider, paged_indexing>,
 	ComponentStorage<CollisionsToken, paged_indexing>,

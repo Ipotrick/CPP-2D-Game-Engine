@@ -1,6 +1,6 @@
 #include "ParticleScript.hpp"
 
-void ParticleScript::script(Entity me, ParticleScriptComp& data, float deltaTime) {
+void ParticleScript::script(EntityHandle me, ParticleScriptComp& data, float deltaTime) {
 
 	//auto[age, draw, mov] = world.getComps<Age, Draw, Movement>(me);
 	auto& age = world.getComp<Age>(me);

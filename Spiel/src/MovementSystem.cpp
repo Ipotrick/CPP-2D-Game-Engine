@@ -3,8 +3,8 @@
 void MovementSystem::execute(World& world, float deltaTime)
 {
 	// execute physics changes in pos, rota:
-	for (auto ent : world.entityView<Movement, Base>()) {
-		auto [base, mov] = world.getComps<Base, Movement>(ent);
+	for (auto ent : world.entityView<Movement, Transform>()) {
+		auto [base, mov] = world.getComps<Transform, Movement>(ent);
 
 		if (fabs(mov.velocity.x) + fabs(mov.velocity.y) < Physics::nullDelta) mov.velocity = Vec2(0, 0);
 		if (fabs(mov.angleVelocity) < Physics::nullDelta) mov.angleVelocity = 0;

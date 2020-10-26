@@ -28,7 +28,6 @@
     <ClInclude Include="src\BulletScript.hpp" />
     <ClInclude Include="src\CacheAABBJob.hpp" />
     <ClInclude Include="src\Camera.hpp" />
-    <ClInclude Include="src\CollGrid.hpp" />
     <ClInclude Include="src\CollisionCheckJob.hpp" />
     <ClInclude Include="src\CollisionConstraintSet.hpp" />
     <ClInclude Include="src\ComponentTypes.hpp" />
@@ -77,10 +76,13 @@
     <ClInclude Include="src\RenderTypes.hpp" />
     <ClInclude Include="src\Script.hpp" />
     <ClInclude Include="src\GameSystem.hpp" />
+    <ClInclude Include="src\serialization\YAMLSerialize.hpp" />
+    <ClInclude Include="src\serialization\YAMLSerializeCoreComponents.hpp" />
+    <ClInclude Include="src\serialization\YAMLSerializeGameComponents.hpp" />
+    <ClInclude Include="src\serialization\YAMLSerializer.hpp" />
     <ClInclude Include="src\SparseBuffer.hpp" />
     <ClInclude Include="src\std_extra.hpp" />
     <ClInclude Include="src\SuckerScript.hpp" />
-    <ClInclude Include="src\SweepAndPrune.hpp" />
     <ClInclude Include="src\TesterScript.hpp" />
     <ClInclude Include="src\TextureCache.hpp" />
     <ClInclude Include="src\TextureRefManager.hpp" />
@@ -128,6 +130,10 @@
     <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\serialization\YAMLSerialize.cpp" />
+    <ClCompile Include="src\serialization\YAMLSerializeCoreComponents.cpp" />
+    <ClCompile Include="src\serialization\YAMLSerializeGameComponents.cpp" />
+    <ClCompile Include="src\serialization\YAMLSerializer.cpp" />
     <ClCompile Include="src\TextureRefManager.cpp" />
     <ClCompile Include="src\UIAnchor.cpp" />
     <ClCompile Include="src\UIBar.cpp" />
@@ -255,7 +261,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\yaml-cpp\include;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
@@ -272,8 +278,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\glew-2.1.0\lib\Debug\x64;$(SolutionDir)\Libraries\glfw-3.3.2\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32sd.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\yaml-cpp\build\Debug;$(SolutionDir)\Libraries\glew-2.1.0\lib\Debug\x64;$(SolutionDir)\Libraries\glfw-3.3.2\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;yaml-cppd.lib;glew32sd.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -309,7 +315,7 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\yaml-cpp\include;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -330,8 +336,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\glfw-3.3.2\src\Release;$(SolutionDir)\Libraries\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\yaml-cpp\build\Release;$(SolutionDir)\Libraries\glfw-3.3.2\src\Release;$(SolutionDir)\Libraries\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;yaml-cpp.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>

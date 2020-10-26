@@ -23,15 +23,16 @@ constexpr storage_t paged_set = 3;
 template<typename CompType, storage_t storageType>
 class ComponentStorage {
 public:
+	constexpr storage_t storageType() const { return storageType; }
 	using Component = CompType;
 	inline void updateMaxEntNum(size_t newEntNum);
 	inline size_t memoryConsumtion();
-	inline void insert(Entity entity, CompType const& comp);
-	inline void remove(Entity entity);
-	inline bool contains(Entity entity) const;
-	inline CompType& get(Entity entity);
-	inline const CompType& get(Entity entity) const;
-	inline CompType& operator[](Entity ent);
+	inline void insert(EntityHandleIndex entity, CompType const& comp);
+	inline void remove(EntityHandleIndex entity);
+	inline bool contains(EntityHandleIndex entity) const;
+	inline CompType& get(EntityHandleIndex entity);
+	inline const CompType& get(EntityHandleIndex entity) const;
+	inline CompType& operator[](EntityHandleIndex ent);
 	inline size_t size() const;
 	class iterator {
 	public:
@@ -46,18 +47,17 @@ public:
 		pointer operator->();
 		bool operator==(const self_type& rhs);
 		bool operator!=(const self_type& rhs);
-		Entity id();
 	};
 	inline iterator begin();
 	inline iterator end();
-	inline std::vector<std::pair<Entity, CompType>> dump() const;
+	inline std::vector<std::pair<EntityHandleIndex, CompType>> dump() const;
 };
 
 template<typename CompType>
 class ComponentStorage<CompType, direct_indexing>{
 public:
 	using Component = CompType;
-	using storage_t = std::vector<CompType>;
+	constexpr storage_t storageType() const { return direct_indexing; }
 
 	inline size_t memoryConsumtion() {
 		return storage.capacity() * sizeof(CompType);
@@ -67,7 +67,7 @@ public:
 			containsVec.resize(newEntNum, false);
 		}
 	}
-	inline void insert(Entity entity, CompType const& comp) {
+	inline void insert(EntityHandleIndex entity, CompType const& comp) {
 		assert(!contains(entity));
 		if (entity >= containsVec.size()) containsVec.resize(entity + 1, false);
 		containsVec[entity] = true;
@@ -82,15 +82,15 @@ public:
 			storage[entity] = comp;
 		}
 	}
-	inline void remove(Entity entity) {
+	inline void remove(EntityHandleIndex entity) {
 		if (contains(entity)) {
 			containsVec[entity] = false;
 		}
 	}
-	inline bool contains(Entity entity) const {
+	inline bool contains(EntityHandleIndex entity) const {
 		return containsVec[entity];
 	}
-	inline CompType& get(Entity entity) {
+	inline CompType& get(EntityHandleIndex entity) {
 #ifdef DEBUG_COMPONENT_STORAGE
 		assert(contains(entity));
 		return storage.at(entity);
@@ -98,7 +98,7 @@ public:
 		return storage[entity];
 #endif
 	}
-	inline const CompType& get(Entity entity) const
+	inline const CompType& get(EntityHandleIndex entity) const
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		assert(contains(entity));
@@ -107,7 +107,7 @@ public:
 		return storage[entity];
 #endif
 	}
-	inline CompType& operator[](Entity entity) {
+	inline CompType& operator[](EntityHandleIndex entity) {
 		assert(contains(entity));
 		return get(entity);
 	}
@@ -117,12 +117,12 @@ public:
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef Entity value_type;
-		typedef Entity& reference;
-		typedef Entity* pointer;
+		typedef EntityHandleIndex value_type;
+		typedef EntityHandleIndex& reference;
+		typedef EntityHandleIndex* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(Entity entity_, ComponentStorage<CompType, direct_indexing>& compStore) 
-			: entity{ entity_ }, compStore{ compStore }, end{ (Entity)compStore.size() } {}
+		iterator(EntityHandleIndex entity_, ComponentStorage<CompType, direct_indexing>& compStore) 
+			: entity{ entity_ }, compStore{ compStore }, end{ (EntityHandleIndex)compStore.size() } {}
 		self_type operator++(int dummy) {
 			assert(entity < end);
 			do {
@@ -156,20 +156,20 @@ public:
 			return compStore.storage[entity];
 		}
 	private:
-		Entity entity; 
+		EntityHandleIndex entity; 
 		ComponentStorage<CompType, direct_indexing>& compStore;
-		const Entity end;
+		const EntityHandleIndex end;
 	};
 	inline iterator<CompType> begin() {
-		Entity entity = 0;
+		EntityHandleIndex entity = 0;
 		while (entity < storage.size() && !contains(entity)) ++entity;
 		return iterator<CompType>(entity, *this);
 	}
 	inline iterator<CompType> end() { return iterator<CompType>(storage.size(), *this); }
-	inline std::vector<std::pair<Entity, CompType>> dump() const
+	inline std::vector<std::pair<EntityHandleIndex, CompType>> dump() const
 	{
-		std::vector<std::pair<Entity, CompType>> res;
-		for (Entity ent = 0; ent < containsVec.size(); ent++) {
+		std::vector<std::pair<EntityHandleIndex, CompType>> res;
+		for (EntityHandleIndex ent = 0; ent < containsVec.size(); ent++) {
 			if (contains(ent)) {
 				res.emplace_back(ent, get(ent));
 			}
@@ -177,7 +177,7 @@ public:
 		return res;
 	}
 private:
-	storage_t storage;
+	std::vector<CompType> storage;
 	std::vector<bool> containsVec;
 };
 
@@ -187,11 +187,11 @@ class ComponentStorage<CompType, paged_indexing> {
 	static const int PAGE_SIZE{ 1 << PAGE_BITS };
 	static const int OFFSET_MASK{ ~(-1 << PAGE_BITS) };
 
-	static inline int page(Entity entity)
+	static inline int page(EntityHandleIndex entity)
 	{
 		return entity >> PAGE_BITS;
 	}
-	static inline int offset(Entity entity)
+	static inline int offset(EntityHandleIndex entity)
 	{
 		return entity & OFFSET_MASK;
 	}
@@ -200,18 +200,9 @@ class ComponentStorage<CompType, paged_indexing> {
 	public:
 		std::array<CompType, PAGE_SIZE> data;
 		int usedCount{ 0 };
-	private:
-		friend class boost::serialization::access;
-		template<class Archive>
-		void serialize(Archive& ar, const unsigned int version)
-		{
-			ar& data;
-			ar& usedCount;
-		}
 	};
 public:
 	using Component = CompType;
-	using storage_t = std::vector<CompType>;
 
 	~ComponentStorage() {
 		for (auto& page : pages) {
@@ -220,6 +211,8 @@ public:
 			}
 		}
 	}
+	constexpr storage_t storageType() const { return paged_indexing; }
+
 	inline size_t memoryConsumtion() {
 		return pages.size() * sizeof(Page*) + usedPages * PAGE_SIZE * sizeof(CompType);
 	}
@@ -232,7 +225,7 @@ public:
 		if (page(newEntNum-1)+1 > pages.size())
 			pages.resize(page(newEntNum-1)+1, nullptr);
 	}
-	inline void insert(Entity entity, CompType const& comp) {
+	inline void insert(EntityHandleIndex entity, CompType const& comp) {
 		if (pages[page(entity)] == nullptr) {
 			pages[page(entity)] = new Page;
 		}
@@ -243,7 +236,7 @@ public:
 		pages[page(entity)]->usedCount += 1;
 		++m_size;
 	}
-	inline void remove(Entity entity) {
+	inline void remove(EntityHandleIndex entity) {
 		if (contains(entity)) {
 			containsVec[entity] = false;
 
@@ -257,17 +250,17 @@ public:
 			--m_size;
 		}
 	}
-	inline bool contains(Entity entity) const {
+	inline bool contains(EntityHandleIndex entity) const {
 		return containsVec[entity];
 	}
-	inline CompType& get(Entity entity) {
+	inline CompType& get(EntityHandleIndex entity) {
 #ifdef DEBUG_COMPONENT_STORAGE
 		return pages.at(page(entity))->data.at(offset(entity));
 #else
 		return pages[page(entity)]->data[offset(entity)];
 #endif
 	}
-	inline const CompType& get(Entity entity) const
+	inline const CompType& get(EntityHandleIndex entity) const
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		return pages.at(page(entity))->data.at(offset(entity));
@@ -275,7 +268,7 @@ public:
 		return pages[page(entity)]->data[offset(entity)];
 #endif
 	}
-	inline CompType& operator[](Entity entity) {
+	inline CompType& operator[](EntityHandleIndex entity) {
 		return get(entity);
 	}
 	inline size_t size() const {
@@ -286,12 +279,12 @@ public:
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef Entity value_type;
-		typedef Entity& reference;
-		typedef Entity* pointer;
+		typedef EntityHandleIndex value_type;
+		typedef EntityHandleIndex& reference;
+		typedef EntityHandleIndex* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(Entity entity_, ComponentStorage<CompType, paged_indexing>& compStore) 
-			: entity{ entity_ }, compStore{ compStore }, end{ (Entity)compStore.containsVec.size() } {}
+		iterator(EntityHandleIndex entity_, ComponentStorage<CompType, paged_indexing>& compStore) 
+			: entity{ entity_ }, compStore{ compStore }, end{ (EntityHandleIndex)compStore.containsVec.size() } {}
 		self_type operator++(int dummy) {
 			++entity;
 			while (entity < end) {
@@ -332,12 +325,12 @@ public:
 			return compStore.pages[page(entity)]->data[offset(entity)];
 		}
 	private:
-		Entity entity;
+		EntityHandleIndex entity;
 		ComponentStorage<CompType, paged_indexing>& compStore;
-		const Entity end;
+		const EntityHandleIndex end;
 	};
 	inline iterator<CompType> begin() {
-		Entity entity = 0;
+		EntityHandleIndex entity = 0;
 		while (entity < containsVec.size()) {
 			if (pages[page(entity)] == nullptr) // skip empty pages
 			{
@@ -356,10 +349,10 @@ public:
 		return iterator<CompType>(entity, *this);
 	}
 	inline iterator<CompType> end() { return iterator<CompType>(containsVec.size(), *this); }
-	inline std::vector<std::pair<Entity, CompType>> dump() const
+	inline std::vector<std::pair<EntityHandleIndex, CompType>> dump() const
 	{
-		std::vector<std::pair<Entity, CompType>> res;
-		for (Entity ent = 0; ent < containsVec.size(); ent++) {
+		std::vector<std::pair<EntityHandleIndex, CompType>> res;
+		for (EntityHandleIndex ent = 0; ent < containsVec.size(); ent++) {
 			if (contains(ent)) {
 				res.emplace_back( ent, get(ent) );
 			}
@@ -377,9 +370,10 @@ template<typename CompType>
 class ComponentStorage<CompType, sparse_set> {
 public:
 	using Component = CompType;
+	constexpr storage_t storageType() const { return sparse_set; }
 	inline size_t memoryConsumtion()
 	{
-		return sparseTable.capacity() * sizeof(Entity) + denseTable.capacity() * sizeof(Entity); +storage.capacity() * sizeof(CompType);
+		return sparseTable.capacity() * sizeof(EntityHandleIndex) + denseTable.capacity() * sizeof(EntityHandleIndex); +storage.capacity() * sizeof(CompType);
 	}
 	inline void updateMaxEntNum(size_t newEntNum)
 	{
@@ -387,7 +381,7 @@ public:
 			sparseTable.resize(newEntNum, 0xFFFFFFFF);
 		}
 	}
-	inline void insert(Entity entity, CompType const& comp)
+	inline void insert(EntityHandleIndex entity, CompType const& comp)
 	{
 		assert(!contains(entity));
 		assert(entity < sparseTable.size());
@@ -398,7 +392,7 @@ public:
 
 		assert(storage.size() == denseTable.size());
 	}
-	inline void remove(Entity entity)
+	inline void remove(EntityHandleIndex entity)
 	{
 		if (contains(entity)) {
 			if (entity == denseTable.at(denseTable.size() - 1)) {
@@ -420,11 +414,11 @@ public:
 			assert(storage.size() == denseTable.size());
 		}
 	}
-	inline bool contains(Entity entity) const
+	inline bool contains(EntityHandleIndex entity) const
 	{
 		return sparseTable[entity] != 0xFFFFFFFF;
 	}
-	inline CompType& get(Entity entity)
+	inline CompType& get(EntityHandleIndex entity)
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		return storage.at(sparseTable.at(entity));
@@ -432,7 +426,7 @@ public:
 		return storage[sparseTable[entity]];
 #endif
 	}
-	inline const CompType& get(Entity entity) const
+	inline const CompType& get(EntityHandleIndex entity) const
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		return storage.at(sparseTable.at(entity));
@@ -440,7 +434,7 @@ public:
 		return storage[sparseTable[entity]];
 #endif
 	}
-	inline CompType& operator[](Entity entity)
+	inline CompType& operator[](EntityHandleIndex entity)
 	{
 		return get(entity);
 	}
@@ -452,11 +446,11 @@ public:
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef Entity value_type;
-		typedef Entity& reference;
-		typedef Entity* pointer;
+		typedef EntityHandleIndex value_type;
+		typedef EntityHandleIndex& reference;
+		typedef EntityHandleIndex* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(Entity denseTableIndex, ComponentStorage<CompType, sparse_set>& compStore)
+		iterator(EntityHandleIndex denseTableIndex, ComponentStorage<CompType, sparse_set>& compStore)
 			: denseTableIndex{ denseTableIndex }, compStore{ compStore } {}
 		inline self_type operator++(int dummy)
 		{
@@ -491,22 +485,22 @@ public:
 			return compStore.storage[denseTableIndex];
 		}
 	private:
-		Entity denseTableIndex;
+		EntityHandleIndex denseTableIndex;
 		ComponentStorage<CompType, sparse_set>& compStore;
 	};
 	inline iterator<CompType> begin() { return iterator<CompType>(0, *this); }
 	inline iterator<CompType> end() { return iterator<CompType>(denseTable.size(), *this); }
-	inline std::vector<std::pair<Entity, CompType>> dump() const
+	inline std::vector<std::pair<EntityHandleIndex, CompType>> dump() const
 	{
-		std::vector<std::pair<Entity, CompType>> res;
-		for (Entity ent : denseTable) {
+		std::vector<std::pair<EntityHandleIndex, CompType>> res;
+		for (EntityHandleIndex ent : denseTable) {
 			res.emplace_back(ent, get(ent));
 		}
 		return res;
 	}
 private:
-	std::vector<Entity> sparseTable;
-	std::vector<Entity> denseTable;
+	std::vector<EntityHandleIndex> sparseTable;
+	std::vector<EntityHandleIndex> denseTable;
 	std::vector<CompType> storage;
 };
 
@@ -516,11 +510,11 @@ class ComponentStorage<CompType, paged_set> {
 	static const int PAGE_SIZE{ 1 << PAGE_BITS };
 	static const int OFFSET_MASK{ ~(-1 << PAGE_BITS) };
 
-	static inline int page(Entity entity)
+	static inline int page(EntityHandleIndex entity)
 	{
 		return entity >> PAGE_BITS;
 	}
-	static inline int offset(Entity entity)
+	static inline int offset(EntityHandleIndex entity)
 	{
 		return entity & OFFSET_MASK;
 	}
@@ -533,19 +527,12 @@ class ComponentStorage<CompType, paged_set> {
 		}
 		std::array<uint32_t, PAGE_SIZE> data;
 		int usedCount{ 0 };
-	private:
-		friend class boost::serialization::access;
-		template<class Archive>
-		void serialize(Archive& ar, const unsigned int version)
-		{
-			ar& data;
-			ar& usedCount;
-		}
 	};
 public:
 	using Component = CompType;
+	constexpr storage_t storageType() const { return paged_set; }
 	inline size_t memoryConsumtion() {
-		size_t s = denseTable.capacity() * sizeof(Entity); +storage.capacity() * sizeof(CompType) + pages.size() * sizeof(Page*);
+		size_t s = denseTable.capacity() * sizeof(EntityHandleIndex); +storage.capacity() * sizeof(CompType) + pages.size() * sizeof(Page*);
 		for (auto& page : pages) {
 			if (page != nullptr) {
 				s += sizeof(Page);
@@ -558,7 +545,7 @@ public:
 			pages.resize(page(newEntNum - 1) + 1, nullptr);
 		}
 	}
-	inline void insert(Entity entity, CompType const& comp) {
+	inline void insert(EntityHandleIndex entity, CompType const& comp) {
 		assert(!contains(entity));
 		
 		denseTable.push_back(entity);
@@ -572,7 +559,7 @@ public:
 
 		assert(contains(entity));
 	}
-	inline void remove(Entity entity) {
+	inline void remove(EntityHandleIndex entity) {
 		if (contains(entity)) {
 			if (entity == denseTable.back()) {
 				sparseTable(entity) = 0xFFFFFFFF;
@@ -584,7 +571,7 @@ public:
 				uint32_t slot = sparseTable(entity);
 				sparseTable(entity) = 0xFFFFFFFF;
 				pages[page(entity)]->usedCount--;
-				Entity lastEnt = denseTable.back();
+				EntityHandleIndex lastEnt = denseTable.back();
 				denseTable.pop_back();
 				sparseTable(lastEnt) = slot;
 				denseTable.at(slot) = lastEnt;
@@ -598,17 +585,17 @@ public:
 			}
 		}
 	}
-	inline bool contains(Entity entity) const {
+	inline bool contains(EntityHandleIndex entity) const {
 		return pages.at(page(entity)) != nullptr && sparseTable(entity) != 0xFFFFFFFF;
 	}
-	inline CompType& get(Entity entity) {
+	inline CompType& get(EntityHandleIndex entity) {
 #ifdef DEBUG_COMPONENT_STORAGE
 		return storage.at(pages.at(page(entity))->data.at(offset(entity)));
 #else
 		return storage[pages[page(entity)]->data[offset(entity)]];
 #endif
 	}
-	inline const CompType& get(Entity entity) const
+	inline const CompType& get(EntityHandleIndex entity) const
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		return storage.at(pages.at(page(entity))->data.at(offset(entity)));
@@ -616,7 +603,7 @@ public:
 		return storage[pages[page(entity)]->data[offset(entity)]];
 #endif
 	}
-	inline CompType& operator[](Entity entity) {
+	inline CompType& operator[](EntityHandleIndex entity) {
 		return get(entity);
 	}
 	inline size_t size() const {
@@ -626,11 +613,11 @@ public:
 	class iterator {
 	public:
 		typedef iterator self_type;
-		typedef Entity value_type;
-		typedef Entity& reference;
-		typedef Entity* pointer;
+		typedef EntityHandleIndex value_type;
+		typedef EntityHandleIndex& reference;
+		typedef EntityHandleIndex* pointer;
 		typedef std::forward_iterator_tag iterator_category;
-		iterator(Entity denseTableIndex, ComponentStorage<CompType, paged_set>& compStore) 
+		iterator(EntityHandleIndex denseTableIndex, ComponentStorage<CompType, paged_set>& compStore) 
 			: denseTableIndex{ denseTableIndex }, compStore{ compStore } {}
 		inline self_type operator++(int dummy) {
 			assert(denseTableIndex < compStore.denseTable.size());
@@ -658,21 +645,21 @@ public:
 			return compStore.storage[denseTableIndex];
 		}
 	private:
-		Entity denseTableIndex; 
+		EntityHandleIndex denseTableIndex; 
 		ComponentStorage<CompType, paged_set>& compStore;
 	};
 	inline iterator<CompType> begin() { return iterator<CompType>(0, *this); }
 	inline iterator<CompType> end()   { return iterator<CompType>(denseTable.size(), *this); }
-	inline std::vector<std::pair<Entity, CompType>> dump() const
+	inline std::vector<std::pair<EntityHandleIndex, CompType>> dump() const
 	{
-		std::vector<std::pair<Entity, CompType>> res;
-		for (Entity ent : denseTable) {
+		std::vector<std::pair<EntityHandleIndex, CompType>> res;
+		for (EntityHandleIndex ent : denseTable) {
 			res.emplace_back( ent, get(ent) );
 		}
 		return res;
 	}
 private:
-	inline uint32_t& sparseTable(Entity ent)
+	inline uint32_t& sparseTable(EntityHandleIndex ent)
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		return pages.at(page(ent))->data.at(offset(ent));
@@ -680,7 +667,7 @@ private:
 		return pages[page(ent)]->data[offset(ent)];
 #endif
 	}
-	inline const uint32_t& sparseTable(Entity ent) const
+	inline const uint32_t& sparseTable(EntityHandleIndex ent) const
 	{
 #ifdef DEBUG_COMPONENT_STORAGE
 		return pages.at(page(ent))->data.at(offset(ent));
@@ -689,7 +676,7 @@ private:
 #endif
 	}
 	std::vector<Page*> pages;
-	std::vector<Entity> denseTable;
+	std::vector<EntityHandleIndex> denseTable;
 	std::vector<CompType> storage;
 };
 

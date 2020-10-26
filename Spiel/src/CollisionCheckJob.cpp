@@ -2,12 +2,12 @@
 
 
 void CollisionCheckJob::collisionFunction(
-	const Entity collID,
+	const EntityHandleIndex collID,
 	const Quadtree& qtree,
-	std::vector<Entity>& nearCollidablesBuffer,
+	std::vector<EntityHandleIndex>& nearCollidablesBuffer,
 	std::vector<CollisionInfo>& collisionInfos)
 {
-	const auto& baseColl = manager.getComp<Base>(collID);
+	const auto& baseColl = manager.getComp<Transform>(collID);
 	const auto& colliderColl = manager.getComp<Collider>(collID);
 
 	if (!colliderColl.sleeping) {

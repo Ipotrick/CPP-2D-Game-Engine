@@ -52,9 +52,23 @@ public:
 	*/
 	int getDrawCalls() const { return drawCallCount; }
 
-	inline TextureRef2 makeTexRef(const TextureInfo& texInfo) { return texRefManager.makeRef(texInfo); }
+	inline TextureRef2 makeTexRef(
+		const TextureInfo& texInfo, 
+		const Vec2& min = { 0.0f, 0.0f }, 
+		const Vec2& max = { 1.0f, 1.0f }) 
+	{ 
+		return texRefManager.makeRef(texInfo, min, max);
+	}
 
-	inline SmallTextureRef makeSmallTexRef(const TextureInfo& texInfo) { return texRefManager.makeRef(texInfo).makeSmall(); }
+	inline SmallTextureRef makeSmallTexRef(
+		const TextureInfo& texInfo, 
+		const Vec2& min = { 0.0f, 0.0f }, 
+		const Vec2& max = { 1.0f, 1.0f }) 
+	{ 
+		return texRefManager.makeRef(texInfo, min, max).makeSmall();
+	}
+
+	void validateTextureRef(TextureRef2& ref) { texRefManager.validate(ref); }
 
 	// Texture utility:
 private:

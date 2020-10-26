@@ -1,7 +1,7 @@
 #include "Game.hpp"
 #include <iomanip>
 
-using namespace std_extra;
+using namespace util;
 using std::cout;
 using std::endl;
 
@@ -36,7 +36,7 @@ void Game::create() {
 	auto size = getWindowSize();
 	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	camera.zoom = 1 / 3.5f;
-	world.loadMap("world.wrld");
+	world.loadMap("standart");
 
 	const float firstRowWidth = 90.0f;
 	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
@@ -242,6 +242,29 @@ void Game::gameplayUpdate(float deltaTime)
 	if (in.keyPressed(Key::O)) {
 		guiScale = clamp(guiScale + deltaTime, 0.1f, 10.0f);
 	}
+	if (in.keyPressed(Key::J)) {
+		world = GameWorld();
+		world.loadMap("standart");
+		ui.update();
+	}
+	if (in.keyPressed(Key::K)) {
+		std::ofstream of("dump.yaml");
+		if (of.good()) {
+			YAMLWorldSerializer s(world);
+			of << s.serializeToString();
+			of.close();
+		}
+	}
+	if (in.keyPressed(Key::L)) {
+		std::ifstream ifstream("dump.yaml");
+		if (ifstream.good()) {
+			world = GameWorld();
+			YAMLWorldSerializer s(world);
+			std::string str;
+			std::getline(ifstream, str, '\0');
+			s.deserializeString(str);
+		}
+	}
 
 	//execute scripts
 	playerScript.execute(deltaTime);
@@ -256,13 +279,13 @@ void Game::gameplayUpdate(float deltaTime)
 	cursorManipFunc();
 
 	for (auto ent : world.entityView<SpawnerComp>()) {
-		const Base base = world.getComp<Base>(ent);
+		const Transform base = world.getComp<Transform>(ent);
 		int laps = spawnerLapTimer.getLaps(deltaTime);
 		for (int i = 1; i < laps; i++) {
 			float rotation = (float)(rand() % 360);
 			auto particle = world.create();
 			Vec2 movement = rotate(Vec2(5,0), rotation);
-			world.addComp<Base>(particle, Base(base.position));
+			world.addComp<Transform>(particle, Transform(base.position));
 			auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
 			float gray = (rand() % 1000 / 1000.0f);
 			world.addComp<Draw>(particle, Draw(Vec4(gray, gray, gray, 0.3), size, rand() % 1000 / 1000.0f, Form::Circle));
@@ -274,26 +297,13 @@ void Game::gameplayUpdate(float deltaTime)
 		}
 	}
 
-	for (auto ent : world.entityView<Movement, Base>()) {
-		auto pos = world.getComp<Base>(ent).position;
+	for (auto ent : world.entityView<Movement, Transform>()) {
+		auto pos = world.getComp<Transform>(ent).position;
 		if (pos.length() > 1000)
 			world.destroy(ent);
 	}
 
 	const std::string filename("world.wrld");
-
-	if (in.keyJustPressed(Key::J)) {
-		world.loadMap("standart");
-	}
-
-	if (in.keyJustPressed(Key::K)) {
-		world.saveMap(filename);
-	}
-
-	if (in.keyJustPressed(Key::L)) {
-		world.loadMap(filename);
-		ui.update();
-	}
 
 	/* display performance statistics */
 	//std::cout << getPerfInfo(5) << '\n';
@@ -312,23 +322,23 @@ void Game::cursorManipFunc()
 {
 	Vec2 worldCoord = camera.windowToWorld(in.getMousePosition());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
-	Base b = Base(worldCoord, 0);
+	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
 	renderer.submit(Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / camera.zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), RenderSpace::WorldSpace));
 	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
-			Entity topEntity = collisions.front().indexB;
-			EntityId id = world.getId(topEntity);
-			cursorData.relativePos = world.getComp<Base>(topEntity).position - worldCoord;
+			EntityHandleIndex topEntity = collisions.front().indexB;
+			EntityHandle id = world.getHandle(topEntity);
+			cursorData.relativePos = world.getComp<Transform>(topEntity).position - worldCoord;
 			cursorData.lockedID = id;
 			cursorData.locked = true;
 		}
 	}
 	else if (in.buttonPressed(Button::MB_LEFT)) {
-		if (world.isIdValid(cursorData.lockedID)) {
-			world.getComp<Base>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
+		if (world.isHandleValid(cursorData.lockedID)) {
+			world.getComp<Transform>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
 			if (world.hasComp<Movement>(cursorData.lockedID)) {
 				world.getComp<Movement>(cursorData.lockedID).velocity = worldVel;
 				world.getComp<Movement>(cursorData.lockedID).angleVelocity = 0;
@@ -345,7 +355,7 @@ void Game::cursorManipFunc()
 	cursorData.oldPos = worldCoord;
 
 
-	//Entity cursor = world.getIndex(cursorID);
+	//EntityHandleIndex cursor = world.getIndex(cursorID);
 	//auto& baseCursor = world.getComp<Base>(cursor);
 	//auto& colliderCursor = world.getComp<Collider>(cursor);
 	//baseCursor.position = getPosWorldSpace(getCursorPos());

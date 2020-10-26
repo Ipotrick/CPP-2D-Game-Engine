@@ -13,7 +13,7 @@
 #define GAME_SCRIPT(name, Component) \
 struct name : public GameScript<Component> { \
 using GameScript<Component>::GameScript; \
-virtual void script(Entity id, Component& data, float deltaTime) override; \
+virtual void script(EntityHandle me, Component& data, float deltaTime) override; \
 };
 
 template<typename CompType>
@@ -26,7 +26,7 @@ public:
 	/* calls "executeSample" in jobs */
 	template<int JobSize>
 	void execute(float deltaTime, JobManager& jobManager);
-	virtual void script(Entity, CompType&, float) = 0;
+	virtual void script(EntityHandle, CompType&, float) = 0;
 protected:
 	friend class ScriptJob;
 	Engine& engine;
@@ -51,12 +51,12 @@ inline void GameScript<CompType>::execute(float deltaTime, JobManager& jobManage
 		ScriptJob(GameScript& gameScript, float deltaTime) : gameScript{ gameScript }, deltaTime{ deltaTime }{}
 		GameScript& gameScript;
 		const float deltaTime;
-		std::array<Entity, JobSize> entities;
+		std::array<EntityHandle, JobSize> entities;
 		size_t size{ 0 };
 		void execute(int workerId)
 		{
 			for (int i = 0; i < size; ++i) {
-				Entity entity = entities[i];
+				EntityHandle entity = entities[i];
 				gameScript.script(entity, gameScript.engine.world.getComp<CompType>(entity), deltaTime);
 			}
 		}

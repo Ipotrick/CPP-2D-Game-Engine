@@ -33,7 +33,7 @@ public:
 				collInfo.clippingDist += dot((collInfo.normal[0] + collInfo.normal[1])*0.5f, bMoveRelativeToA);
 			}
 			for (const auto ent : manager.entity_view<Collider,PhysicsBody,Movement>()) {
-				auto& base = manager.getComp<Base>(ent);
+				auto& base = manager.getComp<Transform>(ent);
 				base.position += collisionResponses[ent].posChange * 1;
 			}
 		}

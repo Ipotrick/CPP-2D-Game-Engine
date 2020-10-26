@@ -7,12 +7,12 @@
 
 class CacheAABBJob : public JobFunctor{
 public:
-	CacheAABBJob(std::vector<Entity>& entities_to_cache, EntityComponentManager& manager, std::vector<Vec2>& aabbs)
+	CacheAABBJob(std::vector<EntityHandleIndex>& entities_to_cache, EntityComponentManager& manager, std::vector<Vec2>& aabbs)
 		:entities_to_cache{ entities_to_cache }, manager{ manager }, aabbs{ aabbs } 
 	{}
 	void execute(int workerId) override {
 		for (auto ent : entities_to_cache) {
-			auto base = manager.getComp<Base>(ent);
+			auto base = manager.getComp<Transform>(ent);
 			auto collider = manager.getComp<Collider>(ent);
 			aabbs.at(ent) = collider.form == Form::Circle ? collider.size : aabbBounds(collider.size, base.rotaVec);
 			for (auto& c : collider.extraColliders) {
@@ -24,7 +24,7 @@ public:
 		}
 	}
 private:
-	std::vector<Entity>& entities_to_cache;
+	std::vector<EntityHandleIndex>& entities_to_cache;
 	EntityComponentManager& manager;
 	std::vector<Vec2>& aabbs;
 };

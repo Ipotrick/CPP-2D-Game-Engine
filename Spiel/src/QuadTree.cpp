@@ -15,7 +15,7 @@ Quadtree3::Quadtree3(const Vec2 minPos_, const Vec2 maxPos_, const size_t capaci
 
 
 
-void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, int depth) 
+void Quadtree3::insert(const EntityHandleIndex ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, int depth) 
 {
 	//printf("depth: %i\n", depth);
 	auto& node = nodes.get(thisID);
@@ -28,7 +28,7 @@ void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs, const u
 			// if the node has no subtrees and is at capacity, split tree in subtrees:
 
 			// clear collidables and save old collidables temporarily
-			std::vector<Entity> collidablesOld;
+			std::vector<EntityHandleIndex> collidablesOld;
 			collidablesOld.reserve(node.collidables.size() + 1);
 			collidablesOld = node.collidables;
 			collidablesOld.push_back(ent);
@@ -37,7 +37,7 @@ void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs, const u
 
 			// redistribute own collidables into subtrees:
 			for (auto& pcoll : collidablesOld) {
-				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(pcoll).position,
+				auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Transform>(pcoll).position,
 					aabbs.at(pcoll));
 				int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 				if (isInCount > STABILITY) {
@@ -62,7 +62,7 @@ void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs, const u
 	}
 	else {
 		// this node has subtrees and tries to distribute them into the subtrees
-		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(ent).position,
+		auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Transform>(ent).position,
 			aabbs.at(ent));
 		int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 		if (isInCount > STABILITY) {
@@ -85,9 +85,9 @@ void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs, const u
 	}
 }
 
-void Quadtree3::insert(const Entity ent, const std::vector<Vec2>& aabbs)
+void Quadtree3::insert(const EntityHandleIndex ent, const std::vector<Vec2>& aabbs)
 {
-	auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(m_pos, m_size, world.getComp<Base>(ent).position,
+	auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(m_pos, m_size, world.getComp<Transform>(ent).position,
 		aabbs.at(ent));
 	int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 	if (isInCount > STABILITY) {
@@ -124,7 +124,7 @@ constexpr std::pair<float, float> iToFactor(int i)
 	return { 0.0f, 0.0f };
 }
 
-void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth)
+void Quadtree3::broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth)
 {
 	if (entities.empty()) return;
 	auto& node = nodes.get(thisID);
@@ -136,11 +136,11 @@ void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vect
 			node.firstSubTree = nodes.make4Children();
 		}
 
-		std::array<std::vector<Entity>*, 4> entityLists{
-			new std::vector<Entity>(),
-			new std::vector<Entity>(),
-			new std::vector<Entity>(),
-			new std::vector<Entity>()
+		std::array<std::vector<EntityHandleIndex>*, 4> entityLists{
+			new std::vector<EntityHandleIndex>(),
+			new std::vector<EntityHandleIndex>(),
+			new std::vector<EntityHandleIndex>(),
+			new std::vector<EntityHandleIndex>()
 		};
 		auto& ul = *entityLists[0];
 		auto& ur = *entityLists[1];
@@ -151,7 +151,7 @@ void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vect
 		dl.reserve(entities.size() / 3);
 		dr.reserve(entities.size() / 3);
 		for (auto ent : entities) {
-			auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Base>(ent).position, aabbs.at(ent));
+			auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(thisPos, thisSize, world.getComp<Transform>(ent).position, aabbs.at(ent));
 			int isInCount = (int)isInUl + (int)isInDl + (int)isInUr + (int)isInDr;
 			if (isInCount > STABILITY) {
 				node.collidables.push_back(ent);
@@ -197,16 +197,16 @@ void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vect
 	}
 }
 
-void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vector<Vec2>& aabbs)
+void Quadtree3::broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs)
 {
-	std::vector<Entity> ul, ur, dl, dr;
+	std::vector<EntityHandleIndex> ul, ur, dl, dr;
 	ul.reserve(entities.size() / 3);
 	ur.reserve(entities.size() / 3);
 	dl.reserve(entities.size() / 3);
 	dr.reserve(entities.size() / 3);
 	for (auto ent : entities) {
 		if (!world.getComp<Collider>(ent).isIgnoredBy(IGNORE_TAG)) {
-			auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(m_pos, m_size, world.getComp<Base>(ent).position, aabbs.at(ent));
+			auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(m_pos, m_size, world.getComp<Transform>(ent).position, aabbs.at(ent));
 			if (isInUl) ul.push_back(ent);
 			if (isInUr) ur.push_back(ent);
 			if (isInDl) dl.push_back(ent);
@@ -224,7 +224,7 @@ void Quadtree3::broadInsert(const std::vector<Entity>& entities, const std::vect
 	jobs.clear();
 }
 
-void Quadtree3::querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const  Vec2 thisSize) const 
+void Quadtree3::querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const  Vec2 thisSize) const 
 {
 	const auto& node = nodes.get(thisID);
 	for (const auto ent : node.collidables) {
@@ -248,7 +248,7 @@ void Quadtree3::querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 
 	}
 }
 
-void Quadtree3::querry(std::vector<Entity>& rVec, const Vec2 qryPos, const Vec2 qrySize) const 
+void Quadtree3::querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, const Vec2 qrySize) const 
 {
 	for (const auto ent : root.collidables)
 		rVec.push_back(ent);

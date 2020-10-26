@@ -19,6 +19,16 @@ TextureRef2 TextureRefManager::makeRef(const TextureInfo& texInfo, const Vec2 mi
 	return ref;
 }
 
+void TextureRefManager::validate(TextureRef2& ref)
+{
+	auto refOpt = getCachedTextureRef(ref.getInfo());
+	auto validRef =
+		refOpt.has_value()
+		? refOpt.value()
+		: cacheTextureInfo(ref.getInfo());
+	ref.id = validRef.id;
+}
+
 TextureRef2 TextureRefManager::cacheTextureInfo(const TextureInfo& texInfo)
 {
 	auto ref = TextureRef2(texInfo.name, nextIndex++);

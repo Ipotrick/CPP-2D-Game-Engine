@@ -159,14 +159,14 @@ void Engine::run() {
 	destroy();
 }
 
-Drawable Engine::buildWorldSpaceDrawable(World& world, Entity entity) {
-	Base& base = world.getComp<Base>(entity);
+Drawable Engine::buildWorldSpaceDrawable(World& world, EntityHandleIndex entity) {
+	Transform& base = world.getComp<Transform>(entity);
 	Draw& draw = world.getComp<Draw>(entity);
 	if (world.hasComp<TextureRef2>(entity)) {
 		TextureRef2& texRef = world.getComp<TextureRef2>(entity);
 		if (!texRef.good()) {
 			// if a TexRef component was created without the renderer, it will be replaced here:
-			texRef = renderer.makeTexRef(texRef.getInfo());
+			renderer.validateTextureRef(texRef);
 		}
 		return Drawable(entity, base.position, draw.drawingPrio, draw.scale, draw.color, draw.form, base.rotaVec, RenderSpace::WorldSpace, texRef.makeSmall());
 	}
@@ -177,8 +177,8 @@ Drawable Engine::buildWorldSpaceDrawable(World& world, Entity entity) {
 
 void Engine::rendererUpdate(World& world)
 {
-	for (auto ent : world.entityView<Base,Draw>()) {
-		auto d = buildWorldSpaceDrawable(world, ent);
+	for (auto ent : world.entityView<Transform,Draw>()) {
+		auto d = buildWorldSpaceDrawable(world, ent.index);
 		renderer.submit(d);
 	}
 	renderer.setCamera(camera);

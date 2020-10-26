@@ -12,9 +12,9 @@
 #include "EntityComponentManager.hpp"
 
 
-inline uint64_t entPairToKey(EntityId a, EntityId b)
+inline uint64_t entPairToKey(EntityHandle a, EntityHandle b)
 {
-	return (uint64_t)a.identifier << 32 | (uint64_t)b.identifier;
+	return (uint64_t)a.index << 32 | (uint64_t)b.index;
 }
 struct PhysicsCollisionData {
 	uint32_t entAVersion;
@@ -36,8 +36,8 @@ struct CollisionPoint {
 
 struct CollisionConstraint {
 	// meta:
-	EntityId idA{ 0 };
-	EntityId idB{ 0 };
+	EntityHandle idA{ 0, 0 };
+	EntityHandle idB{ 0, 0 };
 	bool updated{ true };
 	// collision info:
 	CollisionPoint collisionPoints[2] = { CollisionPoint(), CollisionPoint() };

@@ -59,7 +59,7 @@ void UIManager::draw(UIContext context)
 size_t UIManager::elementCount() const
 {
 	size_t sum{ 0 };
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[&](auto& container) {
 			sum += container.size();
 		}
@@ -71,7 +71,7 @@ void UIManager::perEntityUpdate()
 {
 	// update
 	size_t activeElements{ 0 };
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[&](auto& container)
 		{
 			for (auto& uient : container) {
@@ -83,7 +83,7 @@ void UIManager::perEntityUpdate()
 	);
 	lastUpdateActiveElements = activeElements;
 	// destroy
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[](auto& container) 
 		{
 			for (auto& uient : container) {
@@ -98,7 +98,7 @@ void UIManager::focusUpdate()
 {
 	focusedElementCandidates.clear();
 	// find potential elements, that could be focused:
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[&](auto& container) {
 			if constexpr (std::is_base_of<UIFocusable, std::remove_reference<decltype(container.get(0))>::type>::value) {
 				for (auto& uient : container) {
@@ -173,7 +173,7 @@ void UIManager::focusUpdate()
 
 void UIManager::clickableUpdate()
 {
-	std_extra::tuple_for_each(uiElementTuple,
+	util::tuple_for_each(uiElementTuple,
 		[&](auto& container) {
 			if constexpr (std::is_base_of<UIClickable, std::remove_reference<decltype(container.get(0))>::type>::value) {
 				for (auto& uient : container) {

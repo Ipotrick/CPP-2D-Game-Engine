@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Spiel", "Spiel\Spiel.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glew_static", "Libraries\glew-2.1.0\build\vc12\glew_static.vcxproj", "{664E6F0D-6784-4760-9565-D54F8EB1EDF4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glfw", "Libraries\glfw-3.3.2\ALL_BUILD.vcxproj", "{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml-cpp static", "Libraries\yaml-cpp\build\yaml-cpp.vcxproj", "{03822670-5611-3755-99E1-CCA3A8B5A521}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,18 +53,18 @@ Global
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4}.RelWithDebInfo|x64.Build.0 = Release|x64
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
 		{664E6F0D-6784-4760-9565-D54F8EB1EDF4}.RelWithDebInfo|x86.Build.0 = Release|Win32
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.Debug|x64.ActiveCfg = Debug|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.Debug|x64.Build.0 = Debug|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.Debug|x86.ActiveCfg = Debug|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.MinSizeRel|x86.ActiveCfg = MinSizeRel|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.Release|x64.ActiveCfg = Release|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.Release|x64.Build.0 = Release|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.Release|x86.ActiveCfg = Release|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
-		{7DEA77FC-7B07-3D79-91FC-5F1976EBAD71}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.Debug|x64.ActiveCfg = Debug|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.Debug|x64.Build.0 = Debug|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.Debug|x86.ActiveCfg = Debug|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.MinSizeRel|x86.ActiveCfg = MinSizeRel|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.Release|x64.ActiveCfg = Release|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.Release|x64.Build.0 = Release|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.Release|x86.ActiveCfg = Release|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+		{03822670-5611-3755-99E1-CCA3A8B5A521}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,9 +1,9 @@
 #include "TesterScript.hpp"
 
-void TesterScript::script(Entity me, Tester& data, float deltaTime)
+void TesterScript::script(EntityHandle me, Tester& data, float deltaTime)
 {
-	if (world.hasComps<Base, Draw>(me)) {
-		auto [b, d] = engine.world.getComps<Base, Draw>(me);
+	if (world.hasComps<Transform, Draw>(me)) {
+		auto [b, d] = engine.world.getComps<Transform, Draw>(me);
 		data.changeDirTime += deltaTime;
 		if (data.changeDirTime > 10.0f)
 			data.changeDirTime = -10.0f;

@@ -16,7 +16,7 @@
 #include "UISeperator.hpp"
 #include "UICollapsable.hpp"
 
-using UIEntity = Entity;
+using UIEntity = uint32_t;
 
 template<typename T>
 class UIContainer {
@@ -25,13 +25,13 @@ public:
 	UIEntity create(const T& element)
 	{
 		if (freeElements.empty()) {
-			Entity index = (Entity)elements.size();
+			UIEntity index = (UIEntity)elements.size();
 			elements.updateMaxEntNum(index + 1);
 			elements.insert(index, element);
 			return index;
 		}
 		else {
-			Entity index = freeElements.back();
+			UIEntity index = freeElements.back();
 			freeElements.pop_back();
 			elements.insert(index, element);
 			return index;
