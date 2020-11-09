@@ -5,8 +5,8 @@ dependencies:
 the dependencies are all available in vcpkg, there is no integration of the dependencies outside of vcpkg.
 the dependencies are all linked staticly for windows on x64
 the configuration triple is: package:x64-windows-static
-##  glfw3
-##  glew
-##  robin_hood-hashing
-##  boost
-##  yaml-cpp
+  * glfw3
+  * glew
+  * robin_hood-hashing
+  * boost
+  * yaml-cpp
