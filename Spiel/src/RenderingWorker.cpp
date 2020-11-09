@@ -113,7 +113,7 @@ void RenderingWorker::operator()()
 		auto& drawables = data->renderBuffer->drawables;
 		auto& camera = data->renderBuffer->camera; 
 		{	
-			Timer<> t(data->new_renderTime);
+			Timer t(data->new_renderTime);
 
 			if (data->renderBuffer->resetTextureCache) {
 				texCache.reset();
@@ -148,18 +148,16 @@ void RenderingWorker::operator()()
 		}
 
 		{	// process render side events
-			{	// window
-				std::lock_guard<std::mutex> l(window->mut);
-				int width, height;
-				glfwGetWindowSize(window->glfwWindow, &width, &height);
-				glViewport(0, 0, window->width, window->height);
-				window->width = width;
-				window->height = height;
-			}
+			std::lock_guard<std::mutex> l(window->mut);
+			int width, height;
+			glfwGetWindowSize(window->glfwWindow, &width, &height);
+			glViewport(0, 0, window->width, window->height);
+			window->width = width;
+			window->height = height;
 		}
 
 		{	// wait for main
-			Timer<> t(data->new_renderSyncTime);
+			Timer t(data->new_renderSyncTime);
 			std::unique_lock<std::mutex> switch_lock(data->mut);
 			data->ready = true;
 			data->cond.notify_one();

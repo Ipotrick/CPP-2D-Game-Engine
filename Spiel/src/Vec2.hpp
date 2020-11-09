@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <boost/serialization/access.hpp>
 
 #include "basic_math.hpp"
 

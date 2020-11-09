@@ -2,17 +2,10 @@
 
 #include <iostream>
 
-
 #include "Engine.hpp"
-#include "GameWorld.hpp"
-#include "GameComponents.hpp"
-#include "serialization/YAMLSerializer.hpp"
-
-#include "BasicScripts.hpp"
-#include "ParticleScript.hpp"
-#include "DummyScript.hpp"
-#include "SuckerScript.hpp"
-#include "TesterScript.hpp"
+// Core Systems
+#include "CollisionSystem.hpp"
+#include "PhysicsSystem2.hpp"
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
@@ -21,8 +14,8 @@ struct CursorManipData {
 	Vec2 oldPos{0,0};
 	EntityHandle lockedID;
 	Vec2 relativePos;
-	LapTimer<> ballSpawnLap;
-	LapTimer<> wallSpawnLap;
+	LapTimer ballSpawnLap;
+	LapTimer wallSpawnLap;
 };
 
 class Game : public Engine {
@@ -33,32 +26,20 @@ public:
 
 	void update(float dTime) override;
 
-	void gameplayUpdate(float deltaTime);
-
 	void destroy() override;
 
-public:
-	CursorManipData cursorData;
-
-	GameWorld world;
-	PlayerScript	playerScript;
-	HealthScript	healthScript;
-	AgeScript		ageScript;
-	BulletScript	bulletScript;
-	ParticleScript	particleScript;
-	DummyScript		dummyScript;
-	SuckerScript	suckerScript;
-	TesterScript	testerScript;
+	void gameplayUpdate(float deltaTime);
 
 	void cursorManipFunc();
 
-	static bool testEventReaction(std::string_view, uint32_t);
+	inline static CursorManipData cursorData;
+	inline static CollisionSystem collisionSystem{ world, jobManager, perfLog };
+	inline static PhysicsSystem2 physicsSystem2{ jobManager, perfLog };
 
 	// TEMP TODO REMOVE
-	LapTimer<> spawnerLapTimer{0.0001f};
-};
+	LapTimer spawnerLapTimer{0.0001f};
 
-inline bool Game::testEventReaction(std::string_view name, uint32_t id) {
-	std::cout << "player got hit" << std::endl;
-	return false;
-}
+	bool bLoading{ false };
+	Tag loadingWorkerTag{ Tag() };
+	World* loadedWorld{ nullptr };
+};

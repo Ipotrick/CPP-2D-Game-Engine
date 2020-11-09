@@ -1,46 +1,59 @@
 #include "Game.hpp"
+
 #include <iomanip>
 
+#include "log/Log.hpp"
+#include "GameComponents.hpp"
+#include "serialization/YAMLSerializer.hpp"
+//#include "serialization/YAMLECM.hpp"
+
+#include "transformScript.hpp"
+#include "movementScript.hpp"
+#include "BasicScripts.hpp"
+#include "ParticleScript.hpp"
+#include "SuckerScript.hpp"
+#include "TesterScript.hpp"
+#include "drawScript.hpp"
+
 using namespace util;
-using std::cout;
-using std::endl;
 
-Game::Game() : 
-	Engine(world,"Spiel Fenster", 1600, 900),
-	playerScript{ *this },
-	healthScript{ *this },
-	ageScript   { *this },
-	bulletScript{ *this },
-	particleScript{ *this },
-	dummyScript{ *this },
-	suckerScript{ *this },
-	testerScript{ *this }
-{
-}
+Game::Game()
+	: Engine("Spiel Fenster", 1600, 900)
+{}
 
-#define UI_CREATE(ui, parent, code, Type, name) \
+#define UI_CREATE(parent, code, Type, name) \
 { \
 	Type name; \
 	code \
-	parent.addChild(ui.createAndGet(name)); \
+	parent.addChild(Engine::ui.createAndGet(name)); \
 }
 
-#define UI_TEXT(ui, parent, code)		UI_CREATE(ui, parent, code, UIText, me)
+#define UI_TEXT(parent, code)		UI_CREATE(parent, code, UIText, me)
 
-#define UI_SEPERATOR(ui, parent, code)	UI_CREATE(ui, parent, code, UISeperator, me)
+#define UI_SEPERATOR(parent, code)	UI_CREATE(parent, code, UISeperator, me)
 
 #define UI_TEXT_UPDATE(code) \
 me.setUpdateFn([&](UIElement* e){ UIText& me = *((UIText*)e); code });
 
 void Game::create() {
 	auto size = getWindowSize();
-	camera.frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
-	camera.zoom = 1 / 3.5f;
-	world.loadMap("standart");
+	renderer.getCamera().frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
+	renderer.getCamera().zoom = 1 / 3.5f;
 
 	const float firstRowWidth = 90.0f;
 	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
 	const auto font = renderer.makeSmallTexRef(TextureInfo("_pl_ConsolasLowRes.png"));
+
+	std::string str;
+	std::ifstream ifs("world.yaml");
+	if (ifs) {
+		std::getline(ifs, str, '\0');
+		YAMLWorldSerializer s(world);
+		s.deserializeString(str);
+	}
+	else {
+		world.loadMap("standart");
+	}
 
 	auto makeRenderStatsUI = [&](auto& parent) {
 		UICollapsable c("Rendering Statics:", font);
@@ -110,14 +123,14 @@ void Game::create() {
 	{
 		UIList16 list;
 		list.setSpacing(5.0f);
-		UI_TEXT(ui, list,
+		UI_TEXT(list,
 			me.text = "Statistics:";
 			me.fontTexture = font;
 			me.setSize(textFieldSize);
 			me.textAnchor.setCenterHorizontal();
 			me.anchor.setCenterHorizontal();
 		)
-		UI_SEPERATOR(ui, list, me.setHorizontal();)
+		UI_SEPERATOR(list, me.setHorizontal();)
 		{
 			UIPair entCountPair;
 			entCountPair.setHorizontal();
@@ -152,37 +165,52 @@ void Game::create() {
 		frame.addChild(ui.createAndGet(list));
 	}
 	ui.createFrame(frame, "Statiscics");
+
 }
 
 void Game::update(float deltaTime) {
-	renderer.submit(Drawable(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.2, 0.4, 1.0f, 1.0f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace));
-	{
-		Timer t(perfLog.getInputRef("physicstime"));
-		{
-			movementSystem.execute(world, deltaTime);	// TODO enable multithreadding
-		}
-		collisionSystem.execute(world, deltaTime);
-		for (auto& d : collisionSystem.getDebugDrawables()) submitDrawable(d);
-		physicsSystem2.execute(world, deltaTime, collisionSystem);
-		for (auto& d : physicsSystem2.getDebugDrawables()) submitDrawable(d);
-	}
-	{
-		Timer t(perfLog.getInputRef("calcRotaVecTime"));
-		{
-			baseSystem.execute(world);	// TODO enable multithreadding
+	if (bLoading) {
+		if (jobManager.finished(loadingWorkerTag)) {
+			jobManager.clear(loadingWorkerTag);
+			bLoading = false;
+			in.returnFocus();
+			in.returnMouseFocus();
+			world = *loadedWorld;
+			delete loadedWorld;
+			if (ui.exists("loadingtext")) {
+				ui.destroyFrame("loadingtext");
+			}
+			ui.update();
 		}
 	}
+	else {
+		renderer.submit(Drawable(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.2, 0.4, 1.0f, 1.0f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace));
+		{
+			collisionSystem.execute(world, deltaTime);
+			for (auto& d : collisionSystem.getDebugDrawables()) renderer.submit(d);
+			physicsSystem2.execute(world, deltaTime, collisionSystem);
+			for (auto& d : physicsSystem2.getDebugDrawables()) renderer.submit(d);
 
-	in.manualUpdate(camera);
+			for (auto [ent, t] : world.entityComponentView<Transform>()) {
+				transformScript(ent, t);
+				if (world.hasComp<Movement>(ent)) movementScript(ent, t, world.getComp<Movement>(ent), deltaTime);
+			}
+		}
 
-	gameplayUpdate(deltaTime);
-	world.update();
+		in.manualUpdate(renderer.getCamera());
+
+		gameplayUpdate(deltaTime);
+
+		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) drawScript(ent, t, d);
+
+		world.update();
+	}
 }
 
 void Game::gameplayUpdate(float deltaTime)
 {
 	if (in.keyPressed(Key::LEFT_ALT, Focus::Global) && in.keyPressed(Key::F4, Focus::Global)) {
-		quit();
+		Engine::quit();
 	}
 	if (in.keyPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
@@ -191,42 +219,43 @@ void Game::gameplayUpdate(float deltaTime)
 		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
 	if (in.keyPressed(Key::UP)) {
-		camera.position -= rotate(Vec2(0.0f, -5.0f), camera.rotation) * deltaTime;
+		renderer.getCamera().position -= rotate(Vec2(0.0f, -5.0f), renderer.getCamera().rotation) * deltaTime;
 	}
 	if (in.keyPressed(Key::LEFT)) {
-		camera.position -= rotate(Vec2(5.0f, 0.0f), camera.rotation) * deltaTime;
+		renderer.getCamera().position -= rotate(Vec2(5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
 	if (in.keyPressed(Key::DOWN)) {
-		camera.position -= rotate(Vec2(0.0f, 5.0f), camera.rotation) * deltaTime;
+		renderer.getCamera().position -= rotate(Vec2(0.0f, 5.0f), renderer.getCamera().rotation) * deltaTime;
 	}
 	if (in.keyPressed(Key::RIGHT)) {
-		camera.position -= rotate(Vec2(-5.0f, 0.0f), camera.rotation) * deltaTime;
+		renderer.getCamera().position -= rotate(Vec2(-5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
 	if (in.keyPressed(Key::NP_ADD)) {
-		camera.zoom *= 1.0f + (1.0f * deltaTime);
+		renderer.getCamera().zoom += 2;
+		renderer.getCamera().zoom *= 1.0f + (1.0f * deltaTime);
 	}
 	if (in.keyPressed(Key::NP_SUBTRACT)) {
-		camera.zoom *= 1.0f - (1.0f * deltaTime);
+		renderer.getCamera().zoom *= 1.0f - (1.0f * deltaTime);
 	}
 	if (in.keyPressed(Key::NP_7)) {
-		camera.rotation -= 100.0f * deltaTime;
+		renderer.getCamera().rotation -= 100.0f * deltaTime;
 	}
 	if (in.keyPressed(Key::NP_9)) {
-		camera.rotation += 100.0f * deltaTime;
+		renderer.getCamera().rotation += 100.0f * deltaTime;
 	}
 	if (in.keyPressed(Key::NP_0)) {
-		camera.rotation = 0.0f;
-		camera.position = { 0,0 };
-		camera.zoom = 1 / 5.0f;
+		renderer.getCamera().rotation = 0.0f;
+		renderer.getCamera().position = { 0, 0 };
+		renderer.getCamera().zoom = 1 / 5.0f;
 		guiScale = 1.0f;
 	}
 	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
-		if (ui.doesAliasExist("Statiscics")) {
+		if (ui.exists("Statiscics")) {
 			ui.getFrame("Statiscics").disable();
 		}
 	}
 	if (in.keyJustPressed(Key::B) && in.keyPressed(Key::LEFT_SHIFT)) {
-		if (ui.doesAliasExist("Statiscics")) {
+		if (ui.exists("Statiscics")) {
 			ui.getFrame("Statiscics").enable();
 		}
 	}
@@ -243,38 +272,78 @@ void Game::gameplayUpdate(float deltaTime)
 		guiScale = clamp(guiScale + deltaTime, 0.1f, 10.0f);
 	}
 	if (in.keyPressed(Key::J)) {
-		world = GameWorld();
+		world = World();
 		world.loadMap("standart");
 		ui.update();
 	}
-	if (in.keyPressed(Key::K)) {
-		std::ofstream of("dump.yaml");
-		if (of.good()) {
-			YAMLWorldSerializer s(world);
-			of << s.serializeToString();
-			of.close();
-		}
+	if (in.keyJustPressed(Key::K)) {
+		World w = world;
+		auto job = LambdaJob(
+			[w](int id) mutable {
+				Monke::log("Start saving...");
+
+				std::ofstream of("dump.yaml");
+				if (of.good()) {
+					YAMLWorldSerializer s(w);
+					of << s.serializeToString();
+					of.close();
+				}
+				Monke::log("Finished saving!");
+			}
+		);
+		job.bEnableWaiting = false;
+		job.bSelfDestruct = true;
+		jobManager.addJob(new LambdaJob(job));
 	}
-	if (in.keyPressed(Key::L)) {
-		std::ifstream ifstream("dump.yaml");
-		if (ifstream.good()) {
-			world = GameWorld();
-			YAMLWorldSerializer s(world);
-			std::string str;
-			std::getline(ifstream, str, '\0');
-			s.deserializeString(str);
-		}
+	if (in.keyJustPressed(Key::L)) {
+		bLoading = true;
+		in.takeFocus(Focus::UI);
+		in.takeMouseFocus(Focus::UI);
+
+		auto* job =  new LambdaJob(
+			[&](int id) 
+			{
+				Monke::log("Start loading...");
+				loadedWorld = new World();
+				std::ifstream ifstream("dump.yaml");
+				if (ifstream.good()) {
+					YAMLWorldSerializer s(*loadedWorld);
+					std::string str;
+					std::getline(ifstream, str, '\0');
+					s.deserializeString(str);
+				}
+				Monke::log("Finished loading!");
+			}
+		);
+		job->bSelfDestruct = true;
+
+		loadingWorkerTag = jobManager.addJob(job);
+
+		UIFrame f;
+		f.setSize({ 1000, 200 });
+		f.setBorders(5);
+		f.anchor.setCenterHorizontal();
+		f.anchor.setCenterVertical();
+
+		UIText text("Loading..", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas.png")));
+		text.setSize({ 1000, 200 });
+		text.textAnchor.setCenterHorizontal();
+		text.textAnchor.setCenterVertical();
+		text.fontSize = { 30, 100 };
+
+		f.addChild(ui.createAndGet(text));
+
+		ui.createFrame(f, "loadingtext");
 	}
 
 	//execute scripts
-	playerScript.execute(deltaTime);
-	healthScript.execute(deltaTime);
-	ageScript.execute(deltaTime);
-	bulletScript.execute(deltaTime);
-	particleScript.execute(deltaTime);
-	dummyScript.execute(deltaTime);
-	suckerScript.execute(deltaTime);
-	testerScript.execute<500>(deltaTime, jobManager);
+	for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(ent, comp, deltaTime);
 
 	cursorManipFunc();
 
@@ -302,29 +371,24 @@ void Game::gameplayUpdate(float deltaTime)
 		if (pos.length() > 1000)
 			world.destroy(ent);
 	}
-
-	const std::string filename("world.wrld");
-
-	/* display performance statistics */
-	//std::cout << getPerfInfo(5) << '\n';
-	//std::cout << "fragmentation: " << world.fragmentation() << std::endl;
-	//std::cout << "ent count: " << world.entityCount() << std::endl;
-	//std::cout << "ent memsize: " << world.maxEntityIndex() << std::endl;
 }
 
 void Game::destroy()
 {
 	ui.destroyFrame("Statiscics");
-	world.saveMap("world.wrld");
+	YAMLWorldSerializer s(world);
+	auto str = s.serializeToString();
+	std::ofstream ofs("world.yaml");
+	ofs << str;
 }
 
 void Game::cursorManipFunc()
 {
-	Vec2 worldCoord = camera.windowToWorld(in.getMousePosition());
+	Vec2 worldCoord = renderer.getCamera().windowToWorld(in.getMousePosition());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
 	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
-	renderer.submit(Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / camera.zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), RenderSpace::WorldSpace));
+	renderer.submit(Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), RenderSpace::WorldSpace));
 	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
@@ -360,14 +424,14 @@ void Game::cursorManipFunc()
 	//auto& colliderCursor = world.getComp<Collider>(cursor);
 	//baseCursor.position = getPosWorldSpace(getCursorPos());
 	//
-	//baseCursor.rotation = camera.rotation;
-	//colliderCursor.size = Vec2(1, 1) / camera.zoom / 100.0f;
+	//baseCursor.rotation = renderer.getCamera().rotation;
+	//colliderCursor.size = Vec2(1, 1) / renderer.getCamera().zoom / 100.0f;
 	//
 	//for (auto ent : world.entity_view<Player>()) {
-	//	camera.position = world.getComp<Base>(ent).position;
+	//	renderer.getCamera().position = world.getComp<Base>(ent).position;
 	//}
 	//
-	////world.getComp<Draw>(cursorID).scale = vec2(1, 1) / camera.zoom / 100.0f;
+	////world.getComp<Draw>(cursorID).scale = vec2(1, 1) / renderer.getCamera().zoom / 100.0f;
 	//if (buttonPressed(BUTTON::MB_LEFT)) {
 	//	world.setStaticsChanged();
 	//	if (cursorManipData.locked) {
@@ -475,4 +539,3 @@ void Game::cursorManipFunc()
 	//}
 	//cursorManipData.oldCursorPos = getPosWorldSpace(getCursorPos());
 }
-

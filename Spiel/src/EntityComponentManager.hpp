@@ -10,76 +10,67 @@
 #include <functional>
 
 #include "robin_hood.h"
-#include "algo.hpp"
+#include "utils.hpp"
 #include "EntityManager.hpp"
 #include "ComponentTypes.hpp"
 
 class EntityComponentManager : public EntityManager {
-	template<typename FirstComp, typename ... OtherComps>
-	friend class EntityComponentView;
-	template<typename FirstComp, typename ... OtherComps>
-	friend class EntityView;
 public:
 
 	/* creates blank entity and returns it */
-	EntityHandle create()
-	{
-		EntityHandle ent = EntityManager::create();
-		updateMaxEntityToComponentSotrages();
-		return ent;
-	}
+	EntityHandle create(UUID uuid = UUID());
 
 	/* per entity component access */
-	template<typename CompType>		CompType&	getComp(EntityHandleIndex index)
+	template<typename CompType>		CompType& getComp(EntityHandleIndex index)
 	{
 		return storage<CompType>().get(index);
 	}
-	template<typename CompType>		CompType&	getComp(EntityHandle entity)
+	template<typename CompType>		CompType& getComp(EntityHandle entity)
 	{
 		return getComp<CompType>(entity.index);
 	}
 
-	template<typename ... CompType> auto		getComps(EntityHandleIndex index)
+	template<typename ... CompType> std::tuple<CompType&...> getComps(EntityHandleIndex index)
 	{
 		return std::tuple<CompType&...>(getComp<CompType>(index) ...);
 	}
-	template<typename ... CompType> auto		getComps(EntityHandle entity)
+	template<typename ... CompType> std::tuple<CompType&...> getComps(EntityHandle entity)
 	{
 		return getComps<CompType...>(entity.index);
 	}
 
-	template<typename CompType>		bool		hasComp(EntityHandleIndex index)
+	template<typename CompType>		bool hasComp(EntityHandleIndex index)
 	{
 		return storage<CompType>().contains(index);
 	}
-	template<typename CompType>		bool		hasComp(EntityHandle entity)
+	template<typename CompType>		bool hasComp(EntityHandle entity)
 	{
 		return hasComp<CompType>(entity.index);
 	}
 
-	template<typename... CompTypes> bool		hasComps(EntityHandleIndex index)
+	template<typename... CompTypes> bool hasComps(EntityHandleIndex index)
 	{
 		return (hasComp<CompTypes>(index) && ...);
 	}
-	template<typename... CompTypes> bool		hasComps(EntityHandle entity)
+	template<typename... CompTypes> bool hasComps(EntityHandle entity)
 	{
 		return hasComps<CompTypes...>(entity.index);
 	}
 
-	template<typename CompType>		bool		hasntComp(EntityHandleIndex index)
+	template<typename CompType>		bool hasntComp(EntityHandleIndex index)
 	{
 		return !storage<CompType>().contains(index);
 	}
-	template<typename CompType>		bool		hasntComp(EntityHandle entity)
+	template<typename CompType>		bool hasntComp(EntityHandle entity)
 	{
 		return hasntComp<CompType>(entity);
 	}
 
-	template<typename... CompTypes> bool		hasntComps(EntityHandleIndex index)
+	template<typename... CompTypes> bool hasntComps(EntityHandleIndex index)
 	{
 		return (hasntComp<CompTypes>(index) && ...);
 	}
-	template<typename... CompTypes> bool		hasntComps(EntityHandle entity)
+	template<typename... CompTypes> bool hasntComps(EntityHandle entity)
 	{
 		return hasntComps<CompTypes...>(entity.index);
 	}
@@ -87,45 +78,61 @@ public:
 	template<typename CompType>		CompType&	addComp(EntityHandleIndex index, CompType data = CompType())
 	{
 		storage<CompType>().insert(index, data);
-		return storage<CompType>()[index];
+		return storage<CompType>().get(index);
 	}
 	template<typename CompType>		CompType&	addComp(EntityHandle entity, CompType data = CompType())
 	{
 		return addComp<CompType>(entity.index, data);
 	}
 
-	template<typename CompType>		void		remComp(EntityHandleIndex index)
+	template<typename CompType>		void remComp(EntityHandleIndex index)
 	{
 		storage<CompType>().remove(index);
 	}
-	template<typename CompType>		void		remComp(EntityHandle entity)
+	template<typename CompType>		void remComp(EntityHandle entity)
 	{
 		remComp<CompType>(entity.index);
 	}
 
-	[[nodiscard]]				ComponentView	componentView(EntityHandle entity);
+	[[nodiscard]]
+	ComponentView	componentView(EntityHandle entity);
 
 	/* general entity and storage access */
-	template<typename FirstComp, typename ... RestComps> [[nodiscard]] auto entityView();
-	template<typename FirstComp, typename ... RestComps> [[nodiscard]] auto entityComponentView();
+	template<typename FirstComp, typename ... RestComps> 
+	[[nodiscard]] 
+	auto entityView()
+	{
+		return EntityView<FirstComp, RestComps...>(*this);
+	}
 
-	// Meta utility:
+	template<typename FirstComp, typename ... RestComps> 
+	[[nodiscard]] 
+	auto entityComponentView()
+	{
+		return EntityComponentView<FirstComp, RestComps...>(*this);
+	}
+
 	void update();
-protected:
-	friend class YAMLWorldSerializer;
 
-	template<typename T> static inline constexpr size_t storageIndex()
+protected:
+	template<typename FirstComp, typename ... OtherComps> 
+	friend class EntityComponentView;
+	template<typename FirstComp, typename ... OtherComps> 
+	friend class EntityView;
+	friend class YAMLWorldSerializer;
+	friend class Serializer;
+
+	template<typename CompType> 
+	constexpr auto& storage()
 	{
-		return index_in_storagetuple<T, decltype(componentStorageTuple)>::value;
+		return std::get<findIndexInComponentStorageTuple<0, CompType>()>(componentStorageTuple);
 	}
-	template<typename CompType> constexpr auto& storage()
-	{
-		constexpr auto tuple_index = storageIndex<CompType>();
-		return std::get<tuple_index>(componentStorageTuple);
-	}
+
 	void updateMaxEntityToComponentSotrages();
+
 	void deregisterDestroyedEntities();
 
+	friend ComponentStorageTuple& getNakedStorage(EntityComponentManager& manager);
 	ComponentStorageTuple componentStorageTuple;
 };
 
@@ -143,7 +150,7 @@ template<typename FirstComp, typename ... RestComps>
 class EntityComponentView {
 public:
 	EntityComponentView(EntityComponentManager& manager)
-		: manager{ manager }, compStore{ std::get<manager.storageIndex<FirstComp>()>(manager.componentStorageTuple) }, iterEnd{ compStore.end() }
+		: manager{ manager }, compStore{ manager.storage<FirstComp>() }, iterEnd{ compStore.end() }
 	{ }
 	template<typename MainIterT, typename FirstCompType, typename ... RestCompTypes>
 	class iterator {
@@ -203,18 +210,15 @@ public:
 	}
 private:
 	EntityComponentManager& manager;
-	decltype(std::get<manager.storageIndex<FirstComp>()>(manager.componentStorageTuple))& compStore;
+	decltype(manager.storage<FirstComp>())& compStore;
 	const decltype(compStore.end()) iterEnd;
 };
 
 template<typename FirstComp, typename ... RestComps>
 class EntityView {
-	EntityComponentManager& manager;
-	decltype(std::get<manager.storageIndex<FirstComp>()>(manager.componentStorageTuple))& compStore;
-	const decltype(compStore.end()) iterEnd;
 public:
 	EntityView(EntityComponentManager& manager)
-		: manager{ manager }, compStore{ std::get<manager.storageIndex<FirstComp>()>(manager.componentStorageTuple) }, iterEnd{ compStore.end() }
+		: manager{ manager }, compStore{ manager.storage<FirstComp>() }, iterEnd{ compStore.end() }
 	{ }
 	template<typename MainIterT, typename FirstCompType, typename ... RestCompTypes>
 	class iterator {
@@ -270,21 +274,10 @@ public:
 		return iterator<decltype(compStore.begin()), FirstComp, RestComps...>(iterEnd, *this);
 	}
 private:
+	EntityComponentManager& manager;
+	decltype(manager.storage<FirstComp>())& compStore;
+	const decltype(compStore.end()) iterEnd;
 };
-
-template<typename FirstComp, typename ... RestComps>
-[[nodiscard]]
-inline auto EntityComponentManager::entityView() 
-{
-	return EntityView<FirstComp, RestComps...>(*this);
-}
-
-template<typename FirstComp, typename ... RestComps>
-[[nodiscard]]
-inline auto EntityComponentManager::entityComponentView()
-{
-	return EntityComponentView<FirstComp, RestComps...>(*this);
-}
 
 // -------- ComponentView implementation -----------------------------------
 
@@ -297,46 +290,25 @@ public:
 	ComponentView(EntityComponentManager& manager, EntityHandle entity) 
 		: manager{ manager }, entity{ entity }
 	{}
-	template<typename ... CompTypes> [[nodiscard]] bool has()
-	{ 
-		return manager.hasComps<CompTypes...>(entity);
-	}
-	template<typename CompType> CompType& add(CompType comp = CompType()) 
-	{
-		return manager.addComp<CompType>(entity, comp);
-	}
-	template<typename CompType> [[nodiscard]] CompType& get()
-	{ 
-		return manager.getComp<CompType>(entity);
-	}
+	template<typename ... CompTypes> 
+	[[nodiscard]] 
+	bool has() {  return manager.hasComps<CompTypes...>(entity); }
+	template<typename CompType> 
+	CompType& add(CompType comp = CompType()) { return manager.addComp<CompType>(entity, comp); }
+	template<typename CompType> 
+	[[nodiscard]] 
+	CompType& get() {  return manager.getComp<CompType>(entity); }
 private:
 	EntityComponentManager& manager;
 	EntityHandle entity;
 };
 
-inline ComponentView EntityComponentManager::componentView(EntityHandle entity)
-{
-	return ComponentView(*this, entity);
-}
+inline ComponentView EntityComponentManager::componentView(EntityHandle entity) { return ComponentView(*this, entity); }
 
-// ------------------------------------------------------------------------
-
-inline void EntityComponentManager::updateMaxEntityToComponentSotrages()
+/*
+* This breaks encapsulation. Please only use it for serialization
+*/
+inline ComponentStorageTuple& getNakedStorage(EntityComponentManager& manager)
 {
-	tuple_for_each(componentStorageTuple, 
-		[&](auto& componentStorage) {
-			componentStorage.updateMaxEntNum(entitySlots.size());
-		}
-	);
-}
-
-inline void EntityComponentManager::deregisterDestroyedEntities()
-{
-	for (EntityHandleIndex entity : destroyQueue) {
-		tuple_for_each(componentStorageTuple, 
-			[&](auto& componentStorage) {
-				componentStorage.remove(entity);
-			}
-		);
-	}
+	return manager.componentStorageTuple;
 }

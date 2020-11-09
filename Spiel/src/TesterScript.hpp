@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Script.hpp"
+#include "Engine.hpp"
 
-GAME_SCRIPT(TesterScript, Tester)
+void testerScript(EntityHandle me, Tester& data, float deltaTime);

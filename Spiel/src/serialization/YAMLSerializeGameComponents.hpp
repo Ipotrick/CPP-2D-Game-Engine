@@ -19,8 +19,8 @@ namespace YAML {
                 return false;
             }
 
-            rhs.bulletShotLapTimer = node["BullletShotFrequency"].as<LapTimer<>>();
-            rhs.flameSpawnTimer = node["FireSpwanFrequency"].as<LapTimer<>>();
+            rhs.bulletShotLapTimer = node["BullletShotFrequency"].as<LapTimer>();
+            rhs.flameSpawnTimer = node["FireSpwanFrequency"].as<LapTimer>();
             rhs.flameSpawnTimer = node["Power"].as<float>();
 
             return true;
@@ -151,6 +151,48 @@ namespace YAML {
 
             rhs.changeDirTime = node["changeDirTime"].as<float>();
 
+            return true;
+        }
+    };
+}
+
+template<> constexpr bool isYAMLSerializable<SuckerComp>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const SuckerComp& v);
+namespace YAML {
+    template<>
+    struct convert<SuckerComp> {
+        static Node encode(const SuckerComp& rhs)
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, SuckerComp& rhs)
+        {
+            if (node.size() != 1) {
+                return false;
+            }
+
+            rhs.spawner = node["spawner"].as<UUID>();
+
+            return true;
+        }
+    };
+}
+
+template<> constexpr bool isYAMLSerializable<SpawnerComp>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const SpawnerComp& v);
+namespace YAML {
+    template<>
+    struct convert<SpawnerComp> {
+        static Node encode(const SpawnerComp& rhs)
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, SpawnerComp& rhs)
+        {
             return true;
         }
     };

@@ -1,21 +1,27 @@
 #include "Engine.hpp"
 
+using namespace std::literals::chrono_literals;
 
-Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_) :
-	world{ wrld },
-	running{ true },
-	iteration{ 0 },
-	minimunLoopTime{ 1 },	// 10000 microseconds = 10 milliseonds => 100 loops per second
-	maxDeltaTime{ 0.02f },
-	deltaTime{ 0.0 },
-	window{ std::make_shared<Window>(windowName_, windowWidth_, windowHeight_) },
-	jobManager(std::thread::hardware_concurrency()),
-	collisionSystem{ world, jobManager, perfLog },
-	physicsSystem2{ jobManager, perfLog },
-	renderer{ window },
-	in{ *window },
-	ui{ renderer, in }
+Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_)
 {
+	/*
+	* there can only be one engine instance at a time
+	*/
+	if (bInstantiated) {
+		std::cerr << "ERRROR: there can only be one instance of an engine at a time!" << std::endl;
+		exit(-1);
+	}
+	bInstantiated = true;
+
+	running = true;
+	iteration = 0;
+	minimunLoopTime = 1ms;	// 10000 microseconds = 10 milliseonds => 100 loops per second
+	maxDeltaTime = 0.02f;
+	deltaTime = 0.0;
+	window.open(windowName_, windowWidth_, windowHeight_);
+	renderer.initialize(&window);
+	running = true;
+
 	perfLog.submitTime("maintime");
 	perfLog.submitTime("mainwait");
 	perfLog.submitTime("updatetime");
@@ -28,11 +34,22 @@ Engine::Engine(World& wrld, std::string windowName_, uint32_t windowWidth_, uint
 	deltaTimeQueue.push_back(maxDeltaTime);
 }
 
-Engine::~Engine() {
+Engine::~Engine()
+{
+	/*
+	* there can only be one engine instance at a time
+	*/
+	if (!bInstantiated) {
+		std::cerr << "ERRROR: there can only be one instance of an engine at a time!" << std::endl;
+		exit(-1);
+	}
+	bInstantiated = false;
+
 	renderer.end();
+	window.close();
 }
 
-inline float Engine::getDeltaTime(int sampleSize) const
+float Engine::getDeltaTime(int sampleSize)
 {
 	if (sampleSize == 1) {
 		return deltaTimeQueue[0];
@@ -78,29 +95,13 @@ std::string Engine::getPerfInfo(int detail) {
 }
 
 Vec2 Engine::getWindowSize() {
-	std::lock_guard<std::mutex> l(window->mut);
-	return { static_cast<float>(window->width), static_cast<float>(window->height) };
+	std::lock_guard<std::mutex> l(window.mut);
+	return { static_cast<float>(window.width), static_cast<float>(window.height) };
 }
 
 float Engine::getWindowAspectRatio() {
-	std::lock_guard<std::mutex> l(window->mut);
-	return static_cast<float>(window->width)/ static_cast<float>(window->height);
-}
-
-Vec2 Engine::getPosWorldSpace(Vec2 windowSpacePos_) {
-	auto transformedPos = Mat3::translate(camera.position) * Mat3::rotate(camera.rotation) * Mat3::scale(Vec2(1 / camera.frustumBend.x, 1/ camera.frustumBend.y)) * Mat3::scale(1/camera.zoom) * Vec3(windowSpacePos_.x, windowSpacePos_.y, 1);
-	return { transformedPos.x, transformedPos.y };
-}
-
-Vec2 Engine::getWorldToWindow(Vec2 worldSpacePos)
-{
-	Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
-	return viewProjectionMatrix * worldSpacePos;
-}
-
-Vec2 Engine::getWindowToPixel(Vec2 windowSpacePos)
-{
-	return ((windowSpacePos + Vec2(1.0f, 1.0f)) * 0.5f) * Vec2(window->width, window->height);
+	std::lock_guard<std::mutex> l(window.mut);
+	return static_cast<float>(window.width)/ static_cast<float>(window.height);
 }
 
 void Engine::run() {
@@ -108,7 +109,7 @@ void Engine::run() {
 
 	while (running) {
 		Timer loopTimer(new_deltaTime);
-		Waiter<> loopWaiter(minimunLoopTime, Waiter<>::Type::BUSY);
+		Waiter loopWaiter(minimunLoopTime, Waiter::Type::BUSY);
 		deltaTime = micsecToFloat(new_deltaTime);
 		if (deltaTimeQueue.size() > 99) {
 			deltaTimeQueue.pop_back();
@@ -126,7 +127,7 @@ void Engine::run() {
 			}
 
 			// update in:
-			in.engineUpdate(camera);
+			in.engineUpdate(renderer.getCamera());
 
 			// update rendering:
 			ui.update();
@@ -134,20 +135,20 @@ void Engine::run() {
 			context.drawingPrio = 1.0f;
 			context.drawMode = RenderSpace::PixelSpace;
 			context.scale = guiScale;
-			context.ulCorner = { 0.0f, static_cast<float>(window->height) };
-			context.drCorner = { static_cast<float>(window->width), 0.0f };
+			context.ulCorner = { 0.0f, static_cast<float>(window.height) };
+			context.drCorner = { static_cast<float>(window.width), 0.0f };
 			ui.draw(context);
 			rendererUpdate(world);
 		}
-		if (glfwWindowShouldClose(window->glfwWindow)) { // if window closes the program ends
+		if (glfwWindowShouldClose(window.glfwWindow)) { // if window closes the program ends
 			running = false;
 		}
 		else {
-			if (!glfwGetWindowAttrib(window->glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
+			if (!glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
 				in.takeFocus(Focus::Out);
 				in.takeMouseFocus(Focus::Out);
 			}
-			else if (glfwGetWindowAttrib(window->glfwWindow, GLFW_FOCUSED) && in.getFocus() == Focus::Out) {
+			else if (glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() == Focus::Out) {
 				in.returnFocus();
 				in.returnMouseFocus();
 			}
@@ -159,30 +160,8 @@ void Engine::run() {
 	destroy();
 }
 
-Drawable Engine::buildWorldSpaceDrawable(World& world, EntityHandleIndex entity) {
-	Transform& base = world.getComp<Transform>(entity);
-	Draw& draw = world.getComp<Draw>(entity);
-	if (world.hasComp<TextureRef2>(entity)) {
-		TextureRef2& texRef = world.getComp<TextureRef2>(entity);
-		if (!texRef.good()) {
-			// if a TexRef component was created without the renderer, it will be replaced here:
-			renderer.validateTextureRef(texRef);
-		}
-		return Drawable(entity, base.position, draw.drawingPrio, draw.scale, draw.color, draw.form, base.rotaVec, RenderSpace::WorldSpace, texRef.makeSmall());
-	}
-	else {
-		return Drawable(entity, base.position, draw.drawingPrio, draw.scale, draw.color, draw.form, base.rotaVec, RenderSpace::WorldSpace);
-	}
-}
-
 void Engine::rendererUpdate(World& world)
 {
-	for (auto ent : world.entityView<Transform,Draw>()) {
-		auto d = buildWorldSpaceDrawable(world, ent.index);
-		renderer.submit(d);
-	}
-	renderer.setCamera(camera);
-
 	renderer.waitTillFinished();
 	renderer.flushSubmissions();
 

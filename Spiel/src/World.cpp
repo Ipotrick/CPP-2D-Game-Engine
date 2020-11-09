@@ -18,7 +18,7 @@ void World::loadMap(const std::string& mapname) {
 		};
 
 		this->physics.friction = 0.25f;
-		this->physics.linearEffectAccel = 2.3;
+		//this->physics.linearEffectAccel = 3.0;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 
@@ -120,7 +120,6 @@ void World::loadMap(const std::string& mapname) {
 		auto player = create();
 		auto cmps = componentView(player);
 		cmps.add<Transform>(Transform(Vec2(2,12),0));
-		cmps.add<Transform>(Transform(Vec2(2,12),0));
 		auto colliderPlayer = Collider(Vec2(0.4,0.7), Form::Rectangle);
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(1, 1)*0.4, Vec2(0,0.35), RotaVec2(0), Form::Circle));
 		colliderPlayer.extraColliders.push_back(CompountCollider(Vec2(0.3, 0.2), Vec2(0.2, -0.3), RotaVec2(305.0f), Form::Rectangle));
@@ -131,6 +130,7 @@ void World::loadMap(const std::string& mapname) {
 		cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.4, Form::Rectangle));
 		cmps.add(TextureRef2("bitch.png"));
 		cmps.add<Player>();
+		identify(player);
 		spawn(player);
 
 		Vec2 scaleBox(1, 1);
@@ -150,14 +150,18 @@ void World::loadMap(const std::string& mapname) {
 		Vec2 scale = Vec2(0.3f, 0.3f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form); 
-		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
+		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 4.5f, calcMomentOfIntertia(4.5, scale),0.9f);
 		for (int i = 0; i < 3000; i ++) {
-			if (i % 2) {
-				form = Form::Rectangle;
-			}
-			else {
+			//if (i % 2) {
+			//	form = Form::Rectangle;
+			//	scale = { 0.2f, 0.4f }; 
+			//	trashCollider = Collider(scale, form);
+			//}
+			//else {
 				form = Form::Circle;
-			}
+				scale = { 0.1f, 0.1f }; 
+				trashCollider = Collider(scale, form);
+			//}
 			trashCollider.form = form;
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 			//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
@@ -188,7 +192,7 @@ void World::loadMap(const std::string& mapname) {
 		cmps3.add<Collider>(coll);
 		cmps3.add<Draw>(Draw(Vec4(0, 0, 1, 1), Vec2(7, 7), 0.4f, Form::Circle));
 		auto suckerCmd = SuckerComp();
-		suckerCmd.spawner = spawner;
+		suckerCmd.spawner = identify(spawner);
 		cmps3.add<SuckerComp>(suckerCmd);
 		spawn(sucker);
 	}

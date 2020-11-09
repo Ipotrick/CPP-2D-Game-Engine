@@ -3,9 +3,13 @@
 void YAMLWorldSerializer::serializeEntity(YAML::Emitter& out, EntityHandle entity)
 {
 	out << YAML::BeginMap;
-	out << YAML::Comment("Entity:");
+	UUID id;
+	if (world.hasId(entity)) {
+		id = world.identify(entity);
+	}
+	out << YAML::Key << "Entity" << YAML::Value << id;
 
-	tuple_for_each(world.componentStorageTuple, 
+	util::tuple_for_each(world.componentStorageTuple, 
 		[&](auto& componentStorage) {
 			using ComponentType = std::remove_reference<decltype(componentStorage.get(0))>::type;
 			if constexpr (isYAMLSerializable<ComponentType>()) {
@@ -22,8 +26,11 @@ void YAMLWorldSerializer::serializeEntity(YAML::Emitter& out, EntityHandle entit
 
 bool YAMLWorldSerializer::deserializeEntity(const YAML::Node& entityNode)
 {
-	auto entity = world.create();
-	tuple_for_each(world.componentStorageTuple,
+	auto uuidNode = entityNode["Entity"];
+	if (!uuidNode) return false;
+
+	auto entity = world.create(uuidNode.as<UUID>());
+	util::tuple_for_each(world.componentStorageTuple,
 		[&](auto& componentStorage) {
 			using ComponentType = std::remove_reference<decltype(componentStorage.get(0))>::type;
 			const std::string COMPONENT_NAME = typeid(ComponentType).name();

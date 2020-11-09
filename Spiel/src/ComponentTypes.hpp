@@ -1,30 +1,57 @@
+#include <type_traits>
+
 #include "CoreComponents.hpp"
 #include "GameComponents.hpp"
 #include "EntityComponentStorage.hpp"
 #include "BaseTypes.hpp"
 #include "Renderer.hpp"
 
-using ComponentStorageTuple = 
-std::tuple<
+
+/*
+* This tuple defines wich types the EntityComponentManager can store and how they are stored.
+* if this tuple is changed in any way, the whole solution and the engine MUST be recomlpiled!
+*/
+using ComponentStorageTuple =
+std::tuple <
 	// Core Components:
-	ComponentStorage<Transform, paged_indexing>,
-	ComponentStorage<Draw, paged_indexing>,
-	ComponentStorage<Collider, paged_indexing>,
-	ComponentStorage<CollisionsToken, paged_indexing>,
-	ComponentStorage<Movement, paged_indexing>,
-	ComponentStorage<PhysicsBody, paged_indexing>,
-	ComponentStorage<TextureRef2, paged_set>,
-	ComponentStorage<LinearEffector, paged_set>,
-	ComponentStorage<FrictionEffector, paged_set>,
+	ComponentStoragePagedIndexing<Transform>,
+	ComponentStoragePagedIndexing<Draw>,
+	ComponentStoragePagedIndexing<Collider>,
+	ComponentStoragePagedIndexing<CollisionsToken>,
+	ComponentStoragePagedIndexing<Movement>,
+	ComponentStoragePagedIndexing<PhysicsBody>,
+	ComponentStoragePagedSet<TextureRef2>,
+	ComponentStoragePagedSet<LinearEffector>,
+	ComponentStoragePagedSet<FrictionEffector>,
 	// Game Components:
-	ComponentStorage<Health, paged_set>,
-	ComponentStorage<Age, paged_set>,
-	ComponentStorage<Player, paged_set>,
-	ComponentStorage<Bullet, paged_set>,
-	ComponentStorage<Enemy, paged_set>,
-	ComponentStorage<ParticleScriptComp, paged_set>,
-	ComponentStorage<Dummy, paged_set>,
-	ComponentStorage<SpawnerComp, paged_set>,
-	ComponentStorage<SuckerComp, paged_set>,
-	ComponentStorage<Tester, paged_set>
->;
+	ComponentStoragePagedSet<Health>,
+	ComponentStoragePagedSet<Age>,
+	ComponentStoragePagedSet<Player>,
+	ComponentStoragePagedSet<Bullet>,
+	ComponentStoragePagedSet<Enemy>,
+	ComponentStoragePagedSet<ParticleScriptComp>,
+	ComponentStoragePagedSet<Dummy>,
+	ComponentStoragePagedSet<SpawnerComp>,
+	ComponentStoragePagedSet<SuckerComp>,
+	ComponentStoragePagedSet<Tester>
+> ;
+
+
+
+template< size_t I, typename T>
+static constexpr size_t findIndexInComponentStorageTuple()
+{
+	static_assert(I < std::tuple_size<ComponentStorageTuple>::value, "the given component type is unknown");
+
+	using el = typename std::tuple_element<I, ComponentStorageTuple>::type;
+	if constexpr (
+		std::is_same<ComponentStorageDirectIndexing<T>, el>::value
+		|| std::is_same<ComponentStoragePagedIndexing<T>, el>::value
+		|| std::is_same<ComponentStoragePagedSet<T>, el>::value
+		) {
+		return I;
+	}
+	else {
+		return findIndexInComponentStorageTuple<I + 1, T>();
+	}
+}

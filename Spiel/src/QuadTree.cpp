@@ -124,7 +124,7 @@ constexpr std::pair<float, float> iToFactor(int i)
 	return { 0.0f, 0.0f };
 }
 
-void Quadtree3::broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth)
+void Quadtree3::broadInsert(std::vector<EntityHandleIndex>&& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth)
 {
 	if (entities.empty()) return;
 	auto& node = nodes.get(thisID);
@@ -136,16 +136,16 @@ void Quadtree3::broadInsert(const std::vector<EntityHandleIndex>& entities, cons
 			node.firstSubTree = nodes.make4Children();
 		}
 
-		std::array<std::vector<EntityHandleIndex>*, 4> entityLists{
-			new std::vector<EntityHandleIndex>(),
-			new std::vector<EntityHandleIndex>(),
-			new std::vector<EntityHandleIndex>(),
-			new std::vector<EntityHandleIndex>()
+		std::array<std::vector<EntityHandleIndex>, 4> entityLists{
+			std::vector<EntityHandleIndex>(),
+			std::vector<EntityHandleIndex>(),
+			std::vector<EntityHandleIndex>(),
+			std::vector<EntityHandleIndex>()
 		};
-		auto& ul = *entityLists[0];
-		auto& ur = *entityLists[1];
-		auto& dl = *entityLists[2];
-		auto& dr = *entityLists[3];
+		auto& ul = entityLists[0];
+		auto& ur = entityLists[1];
+		auto& dl = entityLists[2];
+		auto& dr = entityLists[3];
 		ul.reserve(entities.size() / 3);
 		ur.reserve(entities.size() / 3);
 		dl.reserve(entities.size() / 3);
@@ -170,22 +170,17 @@ void Quadtree3::broadInsert(const std::vector<EntityHandleIndex>& entities, cons
 			const auto xFactor = tuple.first;
 			const auto yFactor = tuple.second;
 		
-			auto* entities = entityLists[i];
-			auto* aabbsPtr = &aabbs;
-		
-			if (entityLists[i]->size() < MAX_ENTITIES_PER_JOB && jobs.size() < MAX_JOBS) {
-				jobs.push_back(LambdaJob([this, aabbsPtr, thisID, entities, i, xFactor, yFactor, thisSize, thisPos, depth] (int workerId) 
+			if (entityLists[i].size() < MAX_ENTITIES_PER_JOB && jobs.size() < MAX_JOBS) {
+				jobs.emplace_back(LambdaJob([this, &aabbs, thisID, entities = std::move(entityLists[i]), i, xFactor, yFactor, thisSize, thisPos, depth] (int workerId)
 					{
 					auto node = nodes.get(thisID);
-					for (const auto ent : *entities)
-						insert(ent, *aabbsPtr, node.firstSubTree + i, thisPos + Vec2(thisSize.x * xFactor, thisSize.y * yFactor) * 0.25f, thisSize * 0.5000001f, depth + 1);
-					delete entities;
+					for (const auto ent : entities)
+						insert(ent, aabbs, node.firstSubTree + i, thisPos + Vec2(thisSize.x * xFactor, thisSize.y * yFactor) * 0.25f, thisSize * 0.5000001f, depth + 1);
 					}));
 				tags.push_back(jobManager.addJob(&jobs.back()));
 			}
 			else {
-				broadInsert(*entityLists[i], aabbs, node.firstSubTree + i, thisPos + Vec2(thisSize.x * xFactor, thisSize.y * yFactor) * 0.25f, thisSize * 0.5000001f, depth + 1);
-				delete entities;
+				broadInsert(std::move(entityLists[i]), aabbs, node.firstSubTree + i, thisPos + Vec2(thisSize.x * xFactor, thisSize.y * yFactor) * 0.25f, thisSize * 0.5000001f, depth + 1);
 			}
 		}
 
@@ -214,10 +209,10 @@ void Quadtree3::broadInsert(const std::vector<EntityHandleIndex>& entities, cons
 		}
 	}
 
-	broadInsert(ul, aabbs, 0, m_pos + Vec2(-m_size.x, -m_size.y) * 0.25f, m_size * 0.5000001f, 1);
-	broadInsert(ur, aabbs, 1, m_pos + Vec2(m_size.x, -m_size.y) * 0.25f, m_size * 0.5000001f, 1);
-	broadInsert(dl, aabbs, 2, m_pos + Vec2(-m_size.x, m_size.y) * 0.25f, m_size * 0.5000001f, 1);
-	broadInsert(dr, aabbs, 3, m_pos + Vec2(m_size.x, m_size.y) * 0.25f, m_size * 0.5000001f, 1);
+	broadInsert(std::move(ul), aabbs, 0, m_pos + Vec2(-m_size.x, -m_size.y) * 0.25f, m_size * 0.5000001f, 1);
+	broadInsert(std::move(ur), aabbs, 1, m_pos + Vec2(m_size.x, -m_size.y) * 0.25f, m_size * 0.5000001f, 1);
+	broadInsert(std::move(dl), aabbs, 2, m_pos + Vec2(-m_size.x, m_size.y) * 0.25f, m_size * 0.5000001f, 1);
+	broadInsert(std::move(dr), aabbs, 3, m_pos + Vec2(m_size.x, m_size.y) * 0.25f, m_size * 0.5000001f, 1);
 
 	jobManager.waitAndHelp(&tags);
 	tags.clear();
@@ -228,7 +223,6 @@ void Quadtree3::querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, 
 {
 	const auto& node = nodes.get(thisID);
 	for (const auto ent : node.collidables) {
-		volatile auto dummy = rVec;
 		rVec.push_back(ent);
 	}
 	if (node.hasSubTrees()) {

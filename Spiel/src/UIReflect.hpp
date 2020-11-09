@@ -67,7 +67,7 @@ public:
 	auto begin() { return elements.begin(); }
 	auto end() { return elements.end(); }
 private:
-	ComponentStorage<T, paged_indexing> elements;
+	ComponentStoragePagedIndexing<T> elements;
 	std::vector<UIEntity> freeElements;
 };
 

@@ -1,13 +1,16 @@
 #include "Renderer.hpp"
 
-Renderer::Renderer(std::shared_ptr<Window> wndw) :
-	window{ wndw },
-	workerSharedData{ std::make_shared<RenderingSharedData>() },
-	workerThread{ RenderingWorker(window, workerSharedData) },
-	renderingTime{ 0 },
-	syncTime{ 0 },
-	frontBuffer{ std::make_shared<RenderBuffer>()}
+using namespace std::literals::chrono_literals;
+
+void Renderer::initialize(Window* wndw)
 {
+	window = wndw;
+	workerSharedData = std::make_shared<RenderingSharedData>();
+	workerThread = std::thread(RenderingWorker(window, workerSharedData));
+	renderingTime = 0ms;
+	syncTime = 0ms;
+	frontBuffer = std::make_shared<RenderBuffer>();
+
 	workerThread.detach();
 }
 
@@ -34,11 +37,13 @@ void Renderer::flushSubmissions() {
 		// write last frontbuffer data:
 		std::swap(frontBuffer->textureLoadingQueue, texRefManager.getTextureLoadingQueue());
 		texRefManager.clearTextureLoadingQueue();	// clear texture loading queue
+		Camera c = frontBuffer->camera;
 
 		// swap front and backbuffer:
 		std::swap(frontBuffer, workerSharedData->renderBuffer);
 
 		// clear frontbuffer (as it now contains the old backbuffer data):
+		frontBuffer->camera = c;
 		frontBuffer->resetTextureCache = false;
 		frontBuffer->drawables.clear();
 	}

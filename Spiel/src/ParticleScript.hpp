@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Script.hpp"
+#include "Game.hpp"
 
-GAME_SCRIPT(ParticleScript, ParticleScriptComp)
+void particleScript(EntityHandle me, ParticleScriptComp& data, float deltaTime);

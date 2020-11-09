@@ -2,7 +2,7 @@
 
 #include "UIReflect.hpp"
 #include "InputManager.hpp"
-#include "std_extra.hpp"
+#include "utils.hpp"
 
 class UIManager {
 public:
@@ -41,7 +41,7 @@ public:
 	{
 		return entityToAlias[index];
 	}
-	bool doesAliasExist(std::string_view alias) const
+	bool exists(std::string_view alias) const
 	{
 		return aliasToEntity.contains(alias);
 	}
@@ -113,7 +113,7 @@ private:
 	void focusUpdate();
 
 	void clickableUpdate();
-
+	 
 	void postUpdate();
 
 	// buffers:

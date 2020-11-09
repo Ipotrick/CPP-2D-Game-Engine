@@ -21,7 +21,10 @@
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h" />
     <ClInclude Include="src\AgeScript.hpp" />
-    <ClInclude Include="src\BaseSystem.hpp" />
+    <ClInclude Include="src\movementScript.hpp" />
+    <ClInclude Include="src\serialization\YAMLECM.hpp" />
+    <ClInclude Include="src\serialize\YAMLSerialize.hpp" />
+    <ClInclude Include="src\transformScript.hpp" />
     <ClInclude Include="src\BaseTypes.hpp" />
     <ClInclude Include="src\BasicScripts.hpp" />
     <ClInclude Include="src\basic_math.hpp" />
@@ -32,33 +35,30 @@
     <ClInclude Include="src\CollisionConstraintSet.hpp" />
     <ClInclude Include="src\ComponentTypes.hpp" />
     <ClInclude Include="src\DrawFrame.hpp" />
+    <ClInclude Include="src\drawScript.hpp" />
     <ClInclude Include="src\EntityManager.hpp" />
     <ClInclude Include="src\ImpulseResolutionJob.hpp" />
     <ClInclude Include="src\CollisionSystem.hpp" />
     <ClInclude Include="src\collision_detection.hpp" />
     <ClInclude Include="src\CoreComponents.hpp" />
-    <ClInclude Include="src\CoreSystem.hpp" />
     <ClInclude Include="src\CoreSystemUniforms.hpp" />
     <ClInclude Include="src\debug.hpp" />
-    <ClInclude Include="src\DummyScript.hpp" />
     <ClInclude Include="src\EntityComponentStorage.hpp" />
     <ClInclude Include="src\Engine.hpp" />
     <ClInclude Include="src\EntityTypes.hpp" />
-    <ClInclude Include="src\EventHandler.hpp" />
     <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.hpp" />
     <ClInclude Include="src\GameComponents.hpp" />
     <ClInclude Include="src\GameSystemUnifroms.hpp" />
-    <ClInclude Include="src\GameWorld.hpp" />
     <ClInclude Include="src\HealthScript.hpp" />
     <ClInclude Include="src\IndexSet.hpp" />
     <ClInclude Include="src\Input.hpp" />
     <ClInclude Include="src\InputFocus.hpp" />
     <ClInclude Include="src\InputManager.hpp" />
     <ClInclude Include="src\JobManager.hpp" />
+    <ClInclude Include="src\log\Log.hpp" />
     <ClInclude Include="src\Mat3.hpp" />
     <ClInclude Include="src\Mat4.hpp" />
-    <ClInclude Include="src\MovementSystem.hpp" />
     <ClInclude Include="src\ParticleScript.hpp" />
     <ClInclude Include="src\Perf.hpp" />
     <ClInclude Include="src\Physics.hpp" />
@@ -74,14 +74,12 @@
     <ClInclude Include="src\RenderingWorker.hpp" />
     <ClInclude Include="src\RenderSpace.hpp" />
     <ClInclude Include="src\RenderTypes.hpp" />
-    <ClInclude Include="src\Script.hpp" />
-    <ClInclude Include="src\GameSystem.hpp" />
     <ClInclude Include="src\serialization\YAMLSerialize.hpp" />
     <ClInclude Include="src\serialization\YAMLSerializeCoreComponents.hpp" />
     <ClInclude Include="src\serialization\YAMLSerializeGameComponents.hpp" />
     <ClInclude Include="src\serialization\YAMLSerializer.hpp" />
     <ClInclude Include="src\SparseBuffer.hpp" />
-    <ClInclude Include="src\std_extra.hpp" />
+    <ClInclude Include="src\utils.hpp" />
     <ClInclude Include="src\SuckerScript.hpp" />
     <ClInclude Include="src\TesterScript.hpp" />
     <ClInclude Include="src\TextureCache.hpp" />
@@ -106,6 +104,7 @@
     <ClInclude Include="src\UISingleParent.hpp" />
     <ClInclude Include="src\UIReflect.hpp" />
     <ClInclude Include="src\UIText.hpp" />
+    <ClInclude Include="src\UUID.hpp" />
     <ClInclude Include="src\Vec.hpp" />
     <ClInclude Include="src\Vec3.hpp" />
     <ClInclude Include="src\Vec4.hpp" />
@@ -117,17 +116,18 @@
   <ItemGroup>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp" />
     <ClCompile Include="src\AgeScript.cpp" />
-    <ClCompile Include="src\algo.hpp" />
+    <ClCompile Include="src\movementScript.cpp" />
+    <ClCompile Include="src\serialization\YAMLECM.cpp" />
+    <ClCompile Include="src\transformScript.cpp" />
     <ClCompile Include="src\BulletScript.cpp" />
     <ClCompile Include="src\CollisionCheckJob.cpp" />
     <ClCompile Include="src\CollisionConstraintSet.cpp" />
     <ClCompile Include="src\CollisionSystem.cpp" />
     <ClCompile Include="src\collision_detection.cpp" />
     <ClCompile Include="src\DrawFrame.cpp" />
-    <ClCompile Include="src\DummyScript.cpp" />
+    <ClCompile Include="src\drawScript.cpp" />
     <ClCompile Include="src\Engine.cpp" />
     <ClCompile Include="src\EntityManager.cpp" />
-    <ClCompile Include="src\EventHandler.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\serialization\YAMLSerialize.cpp" />
@@ -143,12 +143,13 @@
     <ClCompile Include="src\UIPair.cpp" />
     <ClCompile Include="src\UISeperator.cpp" />
     <ClCompile Include="src\UIText.cpp" />
+    <ClCompile Include="src\UUID.cpp" />
+    <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\World.cpp" />
     <ClCompile Include="src\HealthScript.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mat3.cpp" />
     <ClCompile Include="src\Mat4.cpp" />
-    <ClCompile Include="src\MovementSystem.cpp" />
     <ClCompile Include="src\ParticleScript.cpp" />
     <ClCompile Include="src\Physics.cpp" />
     <ClCompile Include="src\PhysicsSystem.cpp" />
@@ -236,6 +237,12 @@
     <LinkIncremental>false</LinkIncremental>
     <SourcePath>$(SolutionDir)\Libraries\stb_image\;$(SourcePath)</SourcePath>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -259,15 +266,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\yaml-cpp\include;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -278,8 +285,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\yaml-cpp\build\Debug;$(SolutionDir)\Libraries\glew-2.1.0\lib\Debug\x64;$(SolutionDir)\Libraries\glfw-3.3.2\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;yaml-cppd.lib;glew32sd.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -315,14 +322,14 @@
       <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\dev\Boost\boost;$(SolutionDir)\Libraries\yaml-cpp\include;$(SolutionDir)\Libraries\stb_image;$(SolutionDir)\Libraries\robin_hood;$(SolutionDir)\Libraries\nlohmann;$(SolutionDir)\Libraries\glfw-3.3.2\include;$(SolutionDir)\Libraries\glew-2.1.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <ControlFlowGuard>false</ControlFlowGuard>
@@ -336,8 +343,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\Boost\boost\stage\lib;$(SolutionDir)\Libraries\yaml-cpp\build\Release;$(SolutionDir)\Libraries\glfw-3.3.2\src\Release;$(SolutionDir)\Libraries\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;yaml-cpp.lib;glew32s.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
