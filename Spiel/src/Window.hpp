@@ -8,36 +8,19 @@
 
 class Window {
 public:
-	Window(std::string name_ = "Default", uint32_t width_ = 1, uint32_t height_ = 1):
-		mut{},
-		glfwWindow{nullptr},
-		name{ name_ },
-		height{ height_ },
-		width{ width_ }
-	{
-		initialize();
-	}
+	Window();
+
+	~Window();
+
+	[[nodiscard]] bool open(std::string name_ = "Default", uint32_t width_ = 1, uint32_t height_ = 1);
+
+	void close();
+
+	std::mutex mut{};
+	GLFWwindow* glfwWindow{ nullptr };
+	uint32_t height{ 100 };
+	uint32_t width{ 100 };
+	std::string name{ "WindowName" };
 private:
-
-	int initialize() {
-		if (!glfwInit()) {
-			return -1;
-		}
-		else {
-			glfwWindowHint(GLFW_SAMPLES, 8);
-			glfwWindow = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
-			if (!glfwWindow) {
-				glfwTerminate();
-				return -2;
-			}
-		}
-		return 0;
-	}
-
-public:
-	std::mutex mut;
-	GLFWwindow* glfwWindow;
-	uint32_t height;
-	uint32_t width;
-	std::string name;
+	inline static bool bGLEWInit{ false };
 };

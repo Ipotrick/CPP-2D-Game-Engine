@@ -6,7 +6,7 @@
 
 class YAMLWorldSerializer {
 public:
-	YAMLWorldSerializer(GameWorld& world)
+	YAMLWorldSerializer(World& world)
 		:world{world}
 	{ }
 
@@ -21,5 +21,5 @@ private:
 	const std::string ENTITITES_NODE_KEY{ "Entities" };
 
 
-	GameWorld& world;
+	World& world;
 };

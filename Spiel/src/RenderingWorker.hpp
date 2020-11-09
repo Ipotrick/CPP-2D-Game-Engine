@@ -75,7 +75,7 @@ struct RenderingSharedData
 class RenderingWorker
 {
 public:
-	RenderingWorker(std::shared_ptr<Window> wndw, std::shared_ptr<RenderingSharedData> dt) :
+	RenderingWorker(Window* wndw, std::shared_ptr<RenderingSharedData> dt) :
 		window{ wndw },
 		data{ dt }
 	{}
@@ -89,7 +89,7 @@ public:
 	void initiate();
 	void end();
 public:
-	std::shared_ptr<Window> window;
+	Window* window;
 	std::shared_ptr<RenderingSharedData> data;
 private:
 	std::string readShader(std::string path_);

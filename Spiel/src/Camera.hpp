@@ -19,7 +19,7 @@ public:
 
 
 	Vec2 position;
+	Vec2 frustumBend;
 	float zoom;
 	float rotation;
-	Vec2 frustumBend;
 };

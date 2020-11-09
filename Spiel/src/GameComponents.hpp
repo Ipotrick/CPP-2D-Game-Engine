@@ -2,19 +2,19 @@
 
 #include "Timing.hpp"
 #include "BaseTypes.hpp"
+#include "UUID.hpp"
 
 #include "EntityComponentStorage.hpp"
 
 struct SpawnerComp : public CompData {
-	EntityHandle sucker;
 };
 
 struct SuckerComp : public CompData {
-	EntityHandle spawner;
+	UUID spawner;
 };
 
 struct ParticleScriptComp : public CompData {
-	ParticleScriptComp() {}
+	ParticleScriptComp() = default;
 	ParticleScriptComp(Vec2 startSize, Vec2 endSize, Vec4 startColor, Vec4 endColor) : startSize{ startSize }, endSize{ endSize }, startColor{ startColor }, endColor{ endColor } {}
 	Vec2 startSize;
 	Vec2 endSize;
@@ -27,8 +27,8 @@ struct ParticleScriptComp : public CompData {
 
 struct Player : public CompData {
 	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.008f } {}
-	LapTimer<> bulletShotLapTimer;
-	LapTimer<> flameSpawnTimer;
+	LapTimer bulletShotLapTimer;
+	LapTimer flameSpawnTimer;
 	float power{ 1.0f };
 };
 

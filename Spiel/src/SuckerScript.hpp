@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Script.hpp"
+#include "Engine.hpp"
 
-GAME_SCRIPT(SuckerScript, SuckerComp)
+void suckerScript(EntityHandle me, SuckerComp& data, float deltaTime);

@@ -1,17 +1,12 @@
 #include "PlayerScript.hpp"
 
-void PlayerScript::script(EntityHandle me, Player& data, float deltaTime) {
-	World& world = engine.world;
-
-	auto cmps = world.componentView(me);
-	for (const auto collision : engine.collisionSystem.collisions_view(me.index)) {
-		if (engine.world.hasComp<PhysicsBody>(collision.indexB)) {
-			engine.events.triggerEvent("playerHit");
-		}
-	}
+void playerScript(EntityHandle me, Player& data, float deltaTime)
+{
+	World& world = Engine::world;
+	auto cmps = Engine::world.componentView(me);
 
 	for (auto ent : world.entityView<Player>()) {
-		engine.camera.position = world.getComp<Transform>(ent).position;
+		Engine::renderer.getCamera().position = world.getComp<Transform>(ent).position;
 	}
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
@@ -47,7 +42,7 @@ void PlayerScript::script(EntityHandle me, Player& data, float deltaTime) {
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
-			world.addComp(particle, engine.renderer.makeTexRef(TextureInfo("Cloud.png")));
+			world.addComp(particle, Engine::renderer.makeTexRef(TextureInfo("Cloud.png")));
 			world.spawn(particle);
 			world.getComp<Age>(particle).curAge += rando * 0.02f;
 			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass*100000 / world.getComp<PhysicsBody>(me).mass*10;
@@ -58,32 +53,32 @@ void PlayerScript::script(EntityHandle me, Player& data, float deltaTime) {
 	float minPower = 0.05f;
 	float maxPower = 10.0f;
 
-	if (engine.in.keyPressed(Key::LEFT_SHIFT)) {
+	if (Engine::in.keyPressed(Key::LEFT_SHIFT)) {
 		data.power = std::min(data.power + deltaTime * powerAdjust, maxPower);
 		printf("new player power: %f\n", data.power);
 	}
-	if (engine.in.keyPressed(Key::LEFT_CONTROL)) {
+	if (Engine::in.keyPressed(Key::LEFT_CONTROL)) {
 		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
 		printf("new player power: %f\n", data.power);
 	}
 	data.flameSpawnTimer.setLapTime(0.008 * (1 / data.power));
 
-	if (engine.in.keyPressed(Key::Q)) {
+	if (Engine::in.keyPressed(Key::Q)) {
 		world.getComp<Movement>(me).angleVelocity += 100 * deltaTime;
 	}
-	if (engine.in.keyPressed(Key::E)) {
+	if (Engine::in.keyPressed(Key::E)) {
 		world.getComp<Movement>(me).angleVelocity -= 100 * deltaTime;
 	}
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
-	if (engine.in.keyPressed(Key::SPACE)) {
+	if (Engine::in.keyPressed(Key::SPACE)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
 		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Transform>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Transform>().rotation + 90) * (0.4f) );
 
 	}
 
-	if (engine.in.keyPressed(Key::F)) {
-		auto baseEnt = cmps.get<Transform>();
+	if (Engine::in.keyPressed(Key::F)) {
+		auto const& baseEnt = cmps.get<Transform>();
 		auto movEnt = cmps.get<Move>();
 		auto collEnt = cmps.get<Coll>();
 
@@ -105,33 +100,4 @@ void PlayerScript::script(EntityHandle me, Player& data, float deltaTime) {
 			world.spawn(bullet);
 		}
 	}
-
-	
-	//if (engine.io.keyPressed(KEY::K) && !world.isIdValid(data.dummyExis)) {
-	//	std::cout << "stored ID " << data.dummyExis.id << std::endl;
-	//	auto baseEnt = cmps.get<Base>();
-	//	auto movEnt = cmps.get<Move>();
-	//	auto collEnt = cmps.get<Coll>();
-	//
-	//	Vec2 scale(0.8, 0.8);
-	//	float dummyVel = 0.0f;
-	//
-	//	float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-	//	Collider DummyCollider = Collider(scale, Form::Circle, false);
-	//	Draw dummyDraw = Draw(Vec4(1.f, 1.f, 1.f, 1), scale, 0.4f, Form::Circle);
-	//	
-	//	auto dummy = world.id_create();
-	//	world.addComp<Base>(dummy, Base(baseEnt));
-	//	world.addComp<Movement>(dummy);
-	//	world.addComp<PhysicsBody>(dummy, PhysicsBody(0.9f, 0.01f, 1, 0));
-	//	world.addComp<Draw>(dummy, dummyDraw);
-	//	world.addComp<Collider>(dummy, DummyCollider);
-	//	world.addComp<Dummy>(dummy, Dummy(world.getId(me)));
-	//	world.addComp<Health>(dummy, 100);
-	//	world.spawn(dummy);
-	//	if (!world.isIdValid(data.dummyExis))
-	//	{
-	//		std::cout << " error, id is not valid " << std::endl;
-	//	}
-	//}
 }

@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Script.hpp"
+#include "Game.hpp"
 
-GAME_SCRIPT(BulletScript, Bullet)
+void bulletScript(EntityHandle me, Bullet& data, float deltaTime);

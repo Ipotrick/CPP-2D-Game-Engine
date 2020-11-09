@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <optional>
+
 #include <boost/static_string.hpp>
 
 #include "robin_hood.h"

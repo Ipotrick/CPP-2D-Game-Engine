@@ -12,6 +12,5 @@ public:
 
 	// Core System Uniform Data
 	PhysicsUniforms physics;
-protected:
 private:
 };

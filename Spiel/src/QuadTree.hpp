@@ -30,14 +30,14 @@ public:
 
 	inline QuadtreeNode& get(uint32_t index)  
 	{
-		if (page(index) > pages.size() || pages[page(index)] == nullptr)
+		if (page(index) > pages.size() || !pages[page(index)])
 			throw new std::exception();
 		return pages[page(index)]->nodes[offset(index)];
 	}
 
 	inline const QuadtreeNode& get(uint32_t index) const
 	{
-		if (page(index) > pages.size() || pages[page(index)] == nullptr)
+		if (page(index) > pages.size() || !pages[page(index)])
 			throw new std::exception();
 		return pages[page(index)]->nodes[offset(index)];
 	}
@@ -52,8 +52,8 @@ public:
 	{
 		std::lock_guard lock(mut);
 		if (freeStack.empty()) {
-			if (pages.at(page(nextIndex)) == nullptr) {
-				pages.at(page(nextIndex)) = new Page();
+			if (!pages.at(page(nextIndex))) {
+				pages.at(page(nextIndex)) = std::make_unique<Page>();
 			}
 			pages.at(page(nextIndex))->nodeCount += 4;
 			auto index = nextIndex;
@@ -63,8 +63,8 @@ public:
 		else {
 			int index = freeStack.back();
 			freeStack.pop_back();
-			if (pages.at(page(index)) == nullptr) {
-				pages.at(page(index)) = new Page();
+			if (!pages.at(page(index))) {
+				pages.at(page(index)) = std::make_unique<Page>();
 			}
 			pages.at(page(index))->nodeCount += 4;
 			return index;
@@ -78,7 +78,7 @@ public:
 	{
 		std::lock_guard lock(mut);
 		index &= ~(3);	// clip off the last 2 bits
-		if (pages.at(page(index)) == nullptr) throw new std::exception("error: tried to delete not allocated children");
+		if (!pages.at(page(index))) throw new std::exception("error: tried to delete not allocated children");
 		pages.at(page(index))->nodeCount -= 4;
 		for (int i = 0; i < 4; ++i) {
 			get(index + i).firstSubTree = 0;
@@ -86,8 +86,7 @@ public:
 		}
 		if constexpr (DELETE_EMPTY_PAGES) {
 			if (pages.at(page(index))->nodeCount == 0) {
-				delete pages.at(page(index));
-				pages.at(page(index)) = nullptr;
+				pages.at(page(index)).reset();
 			}
 		}
 		freeStack.push_back(index);
@@ -99,9 +98,8 @@ public:
 	void reset() 
 	{
 		for (auto& page : pages) {
-			if (page != nullptr) {
-				delete page;
-				page = nullptr;
+			if (page) {
+				page.reset();
 			}
 		}
 	}
@@ -124,10 +122,10 @@ private:
 		return index >> PAGE_BITS;
 	}
 	struct Page {
+		size_t nodeCount{ 0 };
 		std::array<QuadtreeNode, PAGE_SIZE> nodes;
-		uint32_t nodeCount{ 0 };
 	};
-	std::array<Page*, PAGE_COUNT> pages{ nullptr };
+	std::array<std::unique_ptr<Page>, PAGE_COUNT> pages;
 	std::mutex mut{};
 	uint32_t nextIndex{ 0 };
 	std::vector<uint32_t> freeStack;
@@ -136,7 +134,7 @@ private:
 
 class Quadtree3 {
 public:
-	Quadtree3(const Vec2 minPos_, const Vec2 maxPos_, const size_t capacity_, World& wrld, JobManager& jobManager, uint8_t TAG = 0);
+	Quadtree3(const Vec2 minPos_, const Vec2 maxPos_, const size_t capacity_, World&wrld, JobManager& jobManager, uint8_t TAG = 0);
 
 	~Quadtree3()
 	{
@@ -188,7 +186,7 @@ public:
 	const uint8_t IGNORE_TAG;
 private:
 	void insert(const uint32_t ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
-	void broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
+	void broadInsert(std::vector<EntityHandleIndex>&& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
 	void querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize) const;
 	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, int depth) const;
 	void querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, const Vec4 color, const int depth) const;
@@ -206,7 +204,7 @@ private:
 		};
 	}
 public:
-	World& world;
+	World&world;
 	JobManager& jobManager;
 private:
 	static const int STABILITY = 2;	// 1 = high stability lower speed 2 = lower stability higher speed

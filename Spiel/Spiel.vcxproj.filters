@@ -25,9 +25,6 @@
     <Filter Include="_Engine\_Component">
       <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_Executors">
-      <UniqueIdentifier>{1c16b84b-8a9c-4e7d-bfb4-14ba9c429120}</UniqueIdentifier>
-    </Filter>
     <Filter Include="_Engine\_Physics">
       <UniqueIdentifier>{70648b4a-dee6-4dfa-81c0-4f69d61be49b}</UniqueIdentifier>
     </Filter>
@@ -61,6 +58,12 @@
     <Filter Include="serialization">
       <UniqueIdentifier>{9de1c8d4-f0a8-4b9e-8bd3-acf12988115d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_Entity">
+      <UniqueIdentifier>{edc83beb-3c6e-43bc-a2f7-09a24e981bec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Engine\CoreComponents">
+      <UniqueIdentifier>{b4e5e893-b1c0-4acb-9e60-eafd8e65f5e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.h">
@@ -87,9 +90,6 @@
     <ClInclude Include="src\QuadTree.hpp">
       <Filter>_Engine\_Collision</Filter>
     </ClInclude>
-    <ClInclude Include="src\CoreComponents.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
     <ClInclude Include="src\CoreSystemUniforms.hpp">
       <Filter>_Engine\_Component</Filter>
     </ClInclude>
@@ -101,15 +101,6 @@
     </ClInclude>
     <ClInclude Include="src\World.hpp">
       <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreSystem.hpp">
-      <Filter>_Engine\_Executors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystem.hpp">
-      <Filter>_Engine\_Executors</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Script.hpp">
-      <Filter>_Engine\_Executors</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics.hpp">
       <Filter>_Engine\_Physics</Filter>
@@ -137,9 +128,6 @@
     </ClInclude>
     <ClInclude Include="src\Window.hpp">
       <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BaseSystem.hpp">
-      <Filter>_Engine</Filter>
     </ClInclude>
     <ClInclude Include="src\basic_math.hpp">
       <Filter>_math</Filter>
@@ -174,9 +162,6 @@
     <ClInclude Include="src\BulletScript.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="src\DummyScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\Game.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
@@ -184,9 +169,6 @@
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\GameSystemUnifroms.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameWorld.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="src\HealthScript.hpp">
@@ -224,9 +206,6 @@
     </ClInclude>
     <ClInclude Include="src\EntityManager.hpp">
       <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MovementSystem.hpp">
-      <Filter>_Engine</Filter>
     </ClInclude>
     <ClInclude Include="src\UIManager.hpp">
       <Filter>_Engine\_UI</Filter>
@@ -300,9 +279,6 @@
     <ClInclude Include="src\Engine.hpp">
       <Filter>_Engine\_Core</Filter>
     </ClInclude>
-    <ClInclude Include="src\EventHandler.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
     <ClInclude Include="src\JobManager.hpp">
       <Filter>_Engine\_Core</Filter>
     </ClInclude>
@@ -313,9 +289,6 @@
       <Filter>_Engine\_Core</Filter>
     </ClInclude>
     <ClInclude Include="src\SparseBuffer.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\std_extra.hpp">
       <Filter>_Engine\_Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Timing.hpp">
@@ -343,6 +316,33 @@
       <Filter>serialization</Filter>
     </ClInclude>
     <ClInclude Include="src\serialization\YAMLSerializeGameComponents.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\log\Log.hpp">
+      <Filter>_Engine\_Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UUID.hpp">
+      <Filter>_Engine\_Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CoreComponents.hpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="src\drawScript.hpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="src\transformScript.hpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="src\movementScript.hpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialize\YAMLSerialize.hpp">
+      <Filter>serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\serialization\YAMLECM.hpp">
       <Filter>serialization</Filter>
     </ClInclude>
   </ItemGroup>
@@ -392,9 +392,6 @@
     <ClCompile Include="src\EntityComponentManager.cpp">
       <Filter>_Engine\_Component</Filter>
     </ClCompile>
-    <ClCompile Include="src\DummyScript.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
     <ClCompile Include="src\collision_detection.cpp">
       <Filter>_Engine\_Collision</Filter>
     </ClCompile>
@@ -431,9 +428,6 @@
     <ClCompile Include="src\EntityManager.cpp">
       <Filter>_Engine\_Component</Filter>
     </ClCompile>
-    <ClCompile Include="src\MovementSystem.cpp">
-      <Filter>_Engine</Filter>
-    </ClCompile>
     <ClCompile Include="src\UIManager.cpp">
       <Filter>_Engine\_UI</Filter>
     </ClCompile>
@@ -458,13 +452,7 @@
     <ClCompile Include="src\UIPair.cpp">
       <Filter>_Engine\_UI\Elements</Filter>
     </ClCompile>
-    <ClCompile Include="src\algo.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\Engine.cpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClCompile>
-    <ClCompile Include="src\EventHandler.cpp">
       <Filter>_Engine\_Core</Filter>
     </ClCompile>
     <ClCompile Include="src\UIAnchor.cpp">
@@ -489,6 +477,24 @@
       <Filter>serialization</Filter>
     </ClCompile>
     <ClCompile Include="src\serialization\YAMLSerializeGameComponents.cpp">
+      <Filter>serialization</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Window.cpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UUID.cpp">
+      <Filter>_Engine\_Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\drawScript.cpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="src\transformScript.cpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="src\movementScript.cpp">
+      <Filter>_Engine\CoreComponents</Filter>
+    </ClCompile>
+    <ClCompile Include="src\serialization\YAMLECM.cpp">
       <Filter>serialization</Filter>
     </ClCompile>
   </ItemGroup>

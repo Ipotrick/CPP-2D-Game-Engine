@@ -4,6 +4,8 @@
 #include <ostream>
 #include <string>
 
+class Serializer {};
+
 enum class Form : uint8_t {
 	Circle = 0x00,
 	Rectangle = 0x01

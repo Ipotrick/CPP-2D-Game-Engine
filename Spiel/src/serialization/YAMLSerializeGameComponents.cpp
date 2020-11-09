@@ -68,3 +68,18 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const Tester& v)
 	out << YAML::EndMap;
 	return out;
 }
+
+YAML::Emitter& operator<<(YAML::Emitter& out, const SuckerComp& v)
+{
+	out << YAML::BeginMap;
+	out << YAML::Key << "spawner" << YAML::Value << v.spawner;
+	return out << YAML::EndMap;
+}
+
+YAML::Emitter& operator<<(YAML::Emitter& out, const SpawnerComp& v)
+{
+	out << YAML::BeginMap;
+	out << YAML::Key << "Dummy" << YAML::Value << "dummy";
+	out << YAML::EndMap;
+	return out;
+}

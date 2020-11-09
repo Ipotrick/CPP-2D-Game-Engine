@@ -6,129 +6,120 @@
 #include <sstream>
 #include <thread>
 
-inline float micsecToFloat(std::chrono::microseconds mics) {
-	return mics.count() * 0.000001f;
+using Micsec = std::chrono::microseconds;
+
+using StandartClock = std::chrono::system_clock;
+
+inline float micsecToFloat(Micsec mics) 
+{
+	return static_cast<float>(mics.count()) * 0.000001f;
 }
 
-inline std::chrono::microseconds floatToMicsec(float fl) {
-	return std::chrono::microseconds( static_cast<uint32_t>(fl * 1'000'000.0f) );
+inline Micsec floatToMicsec(float fl) 
+{
+	return Micsec( static_cast<uint32_t>(fl * 1'000'000.0f) );
 }
 
-template <typename Clock = std::chrono::high_resolution_clock ,typename Unit = std::chrono::microseconds>
+inline std::ostream& operator<<(std::ostream& os, Micsec us)
+{
+	return os << us.count() << "us";
+}
+
 class Timer {
 public:
-	Timer(Unit & p_output) :
-		startTimePoint{Clock::now()}, output{p_output}, stopped{ false }
+	Timer(Micsec& outTime) :
+		startTimePoint{ StandartClock::now()}, output{ outTime }, bStopped{ false }
 	{}
 	~Timer() {
-		if (!stopped) {
+		if (!bStopped) {
 			stop();
 		}
 	}
 
 	void stop() {
-		auto stopTimePoint = Clock::now();
-		Unit difference = std::chrono::duration_cast<Unit>(stopTimePoint - startTimePoint);
+		auto stopTimePoint = StandartClock::now();
+		Micsec difference = std::chrono::duration_cast<Micsec>(stopTimePoint - startTimePoint);
 		output = difference;
-		stopped = true;
+		bStopped = true;
 	}
 protected:
-	bool stopped;
-	std::chrono::time_point<Clock> startTimePoint;
-	Unit & output;
+	bool bStopped;
+	std::chrono::time_point<StandartClock> startTimePoint;
+	Micsec& output;
 };
 
-template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
 class LogTimer {
 public:
-	LogTimer(std::ostream& os_) :
-		startTimePoint{ Clock::now() }, os{ os_ }, stopped{ false }
+	LogTimer(std::ostream& os, std::string_view const& pre = "time taken: ") :
+		preString{ pre }, startTimePoint{ StandartClock::now() }, os{ os }
 	{}
 	~LogTimer() {
-		if (!stopped) {
+		if (!bStopped) {
 			stop();
 		}
 	}
 	void stop() {
-		auto stopTimePoint = Clock::now();
-		Unit difference = std::chrono::duration_cast<Unit>(stopTimePoint - startTimePoint);
+		auto stopTimePoint = StandartClock::now();
+		Micsec difference = std::chrono::duration_cast<Micsec>(stopTimePoint - startTimePoint);
 		std::stringstream ss;
-		ss << "time taken: " << difference.count() << "us\n";
+		ss << preString << difference.count() << "us\n";
 		os << ss.str();
-		stopped = true;
+		bStopped = true;
 	}
 protected:
-	bool stopped;
-	std::chrono::time_point<Clock> startTimePoint;
+	std::string_view preString;
+	std::chrono::time_point<StandartClock> startTimePoint;
 	std::ostream& os;
+	bool bStopped{ false };
 };
 
-template <typename Clock = std::chrono::high_resolution_clock , typename Unit = std::chrono::microseconds>
-class AccTimer {
-public:
-	AccTimer(Unit & accum) :
-		startTimePoint{Clock::now()},
-		accumulator{accum}
-	{}
-	~AccTimer() {
-		auto stopTimePoint = Clock::now();
-		Unit difference = std::chrono::duration_cast<Unit>(stopTimePoint - startTimePoint);
-		accumulator += difference;
-	}
-protected:
-	std::chrono::time_point<Clock> startTimePoint;
-	Unit & accumulator;
-};
-
-template <typename Clock = std::chrono::high_resolution_clock, typename Unit = std::chrono::microseconds>
 class Waiter {
 public:
 	enum class Type {
 		SLEEPY,
 		BUSY
 	};
-	Waiter(Unit waiting_time_, Type type_ = Type::SLEEPY, Unit* actual_waiting_time_ = nullptr)
-		: waitingTime{ waiting_time_ }, was_wait_called{ false }, actual_waiting_time{ actual_waiting_time_}, type{ type_ }
+	Waiter(Micsec waitingTime, Type type = Type::SLEEPY, Micsec* outRealWaittime = nullptr)
+		: waitingTime{ waitingTime }, bWaitCalled{ false }, realWaitTime{ outRealWaittime}, type{ type }
 	{
-		startTimePoint = Clock::now();
+		startTimePoint = StandartClock::now();
 	}
 
 	void wait() {
 		if (type == Type::SLEEPY) {
-			actualWaitingStartTimePoint = Clock::now();
-			was_wait_called = true;
-			if ((startTimePoint + waitingTime) > Clock::now()) {
+			actualWaitingStartTimePoint = StandartClock::now();
+			bWaitCalled = true;
+			if ((startTimePoint + waitingTime) > StandartClock::now()) {
 				std::this_thread::sleep_until((startTimePoint + waitingTime));
 			}
 		}
 		else {
-			actualWaitingStartTimePoint = Clock::now();
-			if (!was_wait_called) {
-				while (Clock::now() < waitingTime + startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec*/);
+			actualWaitingStartTimePoint = StandartClock::now();
+			if (!bWaitCalled) {
+				while (StandartClock::now() < waitingTime + startTimePoint - std::chrono::microseconds(40)/*return from function call and destructors cost about 40usec*/);
 			}
-			was_wait_called = true;
+			bWaitCalled = true;
 		}
 	}
 
 	~Waiter() {
-		if (!was_wait_called) {
+		if (!bWaitCalled) {
 			wait();
 		}
-		if (actual_waiting_time != nullptr) {
-			*actual_waiting_time = std::chrono::duration_cast<Unit>(Clock::now() - actualWaitingStartTimePoint);
+		if (realWaitTime != nullptr) {
+			*realWaitTime = std::chrono::duration_cast<Micsec>(StandartClock::now() - actualWaitingStartTimePoint);
 		}
 	}
 
 protected:
-	std::chrono::time_point<Clock> startTimePoint;
-	std::chrono::time_point<Clock> actualWaitingStartTimePoint;
+	std::chrono::time_point<StandartClock> startTimePoint;
+	std::chrono::time_point<StandartClock> actualWaitingStartTimePoint;
 	Type type;
-	Unit* actual_waiting_time;
-	Unit waitingTime;
-	bool was_wait_called;
+	Micsec* realWaitTime;
+	Micsec waitingTime;
+	bool bWaitCalled;
 };
 
-template <typename Unit = std::chrono::microseconds>
 class LapTimer {
 public:
 	LapTimer() = default;
@@ -149,6 +140,6 @@ public:
 	float getLapTime() const { return micsecToFloat(lap_time); }
 
 private:
-	Unit lap_time{ Unit() };
-	Unit time_since_last_lap{ Unit() };
+	Micsec lap_time{ Micsec() };
+	Micsec time_since_last_lap{ Micsec() };
 };

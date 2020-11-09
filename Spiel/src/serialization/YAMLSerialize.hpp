@@ -2,14 +2,13 @@
 
 #include <yaml-cpp/yaml.h>
 
-#include "../GameWorld.hpp"
+#include "../World.hpp"
 
 
 /*
 * spezialize this template to make your type serializable
 */
 template<typename T> constexpr bool isYAMLSerializable() { return false; }
-template<typename T> T deserializeYAML(YAML::Node const& node) { static_assert(false); return T(); }
 
 template<> constexpr bool isYAMLSerializable<Vec2>() { return true; }
 YAML::Emitter& operator<<(YAML::Emitter& out, const Vec2& v);
@@ -142,25 +141,48 @@ namespace YAML {
     };
 }
 
-template<> constexpr bool isYAMLSerializable<LapTimer<>>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const LapTimer<>& v);
+template<> constexpr bool isYAMLSerializable<LapTimer>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const LapTimer& v);
 namespace YAML {
     template<>
-    struct convert<LapTimer<>> {
-        static Node encode(const LapTimer<>& rhs)
+    struct convert<LapTimer> {
+        static Node encode(const LapTimer& rhs)
         {
             Node node;
             node = rhs.getLapTime();
             return node;
         }
 
-        static bool decode(const Node& node, LapTimer<>& rhs)
+        static bool decode(const Node& node, LapTimer& rhs)
         {
             //if (node.size() != 1) {
             //    return false;
             //}
 
             rhs.setLapTime(node.as<float>());
+            return true;
+        }
+    };
+}
+
+template<> constexpr bool isYAMLSerializable<UUID>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const UUID& v);
+namespace YAML {
+    template<>
+    struct convert<UUID> {
+        static Node encode(const UUID& rhs)
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, UUID& rhs)
+        {
+            if (!node.IsSequence() || node.size() != 2) {
+                return false;
+            }
+            rhs.high = node[0].as<uint64_t>();
+            rhs.low = node[1].as<uint64_t>();
             return true;
         }
     };

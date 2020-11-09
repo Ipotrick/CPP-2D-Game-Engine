@@ -1,5 +1,5 @@
 #pragma once
 
-#include "Script.hpp"
+#include "Game.hpp"
 
-GAME_SCRIPT(HealthScript, Health)
+void healthScript(EntityHandle me, Health& data, float deltaTime);

@@ -1,7 +1,8 @@
 #include "ParticleScript.hpp"
 
-void ParticleScript::script(EntityHandle me, ParticleScriptComp& data, float deltaTime) {
-
+void particleScript(EntityHandle me, ParticleScriptComp& data, float deltaTime)
+{
+	auto& world = Engine::world;
 	//auto[age, draw, mov] = world.getComps<Age, Draw, Movement>(me);
 	auto& age = world.getComp<Age>(me);
 	auto& draw = world.getComp<Draw>(me);
@@ -33,7 +34,7 @@ void ParticleScript::script(EntityHandle me, ParticleScriptComp& data, float del
 	if (world.hasComp<Collider>(me)) {
 		auto& collider = world.getComp<Collider>(me);
 		bool coll = false;
-		for (const auto collision : engine.collisionSystem.collisions_view(me)) {
+		for (const auto collision : Game::collisionSystem.collisions_view(me)) {
 			if (world.hasComps<Collider, PhysicsBody>(collision.indexB)) {
 				coll = true;
 			}

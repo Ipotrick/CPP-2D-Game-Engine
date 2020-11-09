@@ -7,7 +7,20 @@
 #include <bitset>
 #include <cassert>
 
+#include "robin_hood.h"
+
+#include "UUID.hpp"
 #include "EntityTypes.hpp"
+
+#ifdef _DEBUG
+#define DEBUG_ENTITY_MANAGER
+#endif
+
+#ifdef DEBUG_ENTITY_MANAGER
+#define assertEntityManager(x) if(!(x)) throw new std::exception()
+#else
+#define assertEntityManager(x)
+#endif
 
 class YAMLWorldSerializer;
 class ComponentView;
@@ -17,26 +30,28 @@ template<typename FirstComp, typename ... RestComps> class EntityView;
 class EntityManager {
 public:
 
-	EntityHandle create();
+	EntityHandle create(UUID uuid = UUID());
 	void destroy(EntityHandle entity);
 	void spawnLater(EntityHandle entity);
 	void spawn(EntityHandle entity)
 	{
-		assert(isHandleValid(entity));
-		entitySlots[entity.index].setSpawned(true);
+		assertEntityManager(isHandleValid(entity));
+		entitySlots[entity.index].valid = true;
 	}
 	bool isSpawned(EntityHandleIndex index) const
 	{
-		return isIndexValid(index) && entitySlots[index].isSpawned();
+		assertEntityManager(isIndexValid(index));
+		return entitySlots[index].valid;
 	}
 	bool isSpawned(EntityHandle entity) const
 	{
-		return isHandleValid(entity) && entitySlots[entity.index].isSpawned();
+		assertEntityManager(isHandleValid(entity));
+		return entitySlots[entity.index].spawned;
 	}
 	void despawn(EntityHandle entity)
 	{
-		assert(isHandleValid(entity));
-		entitySlots[entity.index].setSpawned(false);
+		assertEntityManager(isHandleValid(entity));
+		entitySlots[entity.index].spawned = false;
 	}
 
 	bool isHandleValid(EntityHandle entity) const
@@ -46,8 +61,43 @@ public:
 
 	EntityHandle getHandle(EntityHandleIndex index) const
 	{
-		assert(isIndexValid(index));
+		assertEntityManager(isIndexValid(index));
 		return EntityHandle{ index, entitySlots[index].version };
+	}
+
+	/*
+	* !!WARNING EXPENSIVE OPERATION!!
+	* returns a uuid for the entity.
+	* if the entity does not have a uuid, a new one is generated and asigned
+	*/
+	UUID identify(EntityHandle entity)
+	{
+		assertEntityManager(isHandleValid(entity));
+		// when entity has no uuid, one is generated on the fly
+		if (!entitySlots[entity.index].uuid.isValid()) {
+			entitySlots[entity.index].uuid = generateUUID();
+			uuidToEntityIndex[entitySlots[entity.index].uuid] = entity.index;
+		}
+		return entitySlots[entity.index].uuid;
+	}
+	/*
+	* !!WARNING EXPENSIVE OPERATION!!
+	* checks if entity with given uuid is present in EntityHandler
+	*/
+	bool exists(UUID id) { return uuidToEntityIndex.contains(id); }
+	/*
+	* !!WARNING EXPENSIVE OPERATION!!
+	* returns entityhandle of entity with given uuid
+	*/
+	EntityHandle getEntity(UUID id)
+	{
+		assert(exists(id));
+		EntityHandleIndex index = uuidToEntityIndex[id];
+		return EntityHandle{ index, entitySlots[index].version };
+	}
+	bool hasId(EntityHandle entity) {
+		assertEntityManager(isHandleValid(entity));
+		return entitySlots[entity.index].uuid.isValid();
 	}
 
 	/* returns count of entities */
@@ -64,7 +114,7 @@ protected:
 	bool isIndexValid(EntityHandleIndex index) const
 	{
 		return (size_t)index < entitySlots.size()
-			&& entitySlots[index].holdsEntity();
+			&& entitySlots[index].valid;
 	}
 
 	EntityHandleVersion getVersion(EntityHandleIndex index)
@@ -78,25 +128,22 @@ protected:
 	EntityHandleIndex findBiggestValidEntityIndex();
 	class EntitySlot {
 	public:
-		EntitySlot(bool entityExists = false) : flags{}
+		EntitySlot(bool entityExists = false)
 		{
-			flags[0] = entityExists;
-			flags[1] = false;
+			valid = entityExists;
+			spawned = false;
 		}
-		inline void setHoldsEntity(bool entityExists) { flags[0] = entityExists; }
-		inline bool holdsEntity() const { return flags[0]; }
-		inline void setSpawned(bool spawned) { flags[1] = spawned; }
-		inline bool isSpawned() const { return flags[1]; }
 
+		UUID uuid;
 		EntityHandleVersion version{ 0 };
+		bool valid{ false };
+		bool spawned{ false };
 	private:
-		// flag 0: does the entityslot hold an entity or is it empty
-		// flag 1: spawned
-		std::bitset<2> flags;
 	};
 
 	std::vector<EntitySlot> entitySlots;
 	std::deque<EntityHandleIndex> freeIndexQueue;
 	std::vector<EntityHandleIndex> destroyQueue;
 	std::vector<EntityHandle> spawnLaterQueue;
+	robin_hood::unordered_map<UUID, EntityHandleIndex> uuidToEntityIndex;
 };

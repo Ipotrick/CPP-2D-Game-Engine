@@ -18,13 +18,18 @@ using Tag = int;
 class JobFunctor {
 public:
     virtual void execute(int workerId) = 0;
+
+    bool bEnableWaiting{ true };
+    bool bSelfDestruct{ false };
 };
 
 class LambdaJob : public JobFunctor {
     std::function<void(int)> lambda;
 public:
-    LambdaJob(std::function<void(int)> lambda)
+    LambdaJob(const std::function<void(int)>& lambda)
         :lambda{ lambda } {}
+    LambdaJob(std::function<void(int)>&& lambda)
+        :lambda{ std::move(lambda) } {}
     void execute(int workerId) override {
         lambda(workerId);
     }
@@ -83,7 +88,12 @@ inline void jobWorkerFunction(JobWorkerPoolData* poolData, int workerId) {
         lock.unlock();          // unlock here as we do not need access to the syncronisation and meta data while executing a job
         job->execute(workerId);
         lock.lock();            // here we need to lock again, as this whole function needs secure access outside of the job execution
-        poolData->closedJobs.emplace(currentJobTag);
+        if (job->bEnableWaiting) {
+            poolData->closedJobs.emplace(currentJobTag);
+        }
+        if (job->bSelfDestruct) {
+            delete job;
+        }
 
         // if a client currently waits for the rescently completed job he will be notified:
         for (auto& clientRequestTag : poolData->singleFinishRequests) {
@@ -121,7 +131,13 @@ inline void helpFunction(JobWorkerPoolData* poolData, int workerId, std::vector<
         lock.unlock();                                  // unlock here as we do not need access to the syncronisation and meta data while executing a job
         job->execute(workerId);
         lock.lock();                                    // here we need to lock again, as this whole function needs secure access outside of the job execution
-        poolData->closedJobs.emplace(currentJobTag);
+
+        if (job->bEnableWaiting) {
+            poolData->closedJobs.emplace(currentJobTag);
+        }
+        if (job->bSelfDestruct) {
+            delete job;
+        }
 
         // we only need to check if we completed our own multi request, as we are ONLY processing our own jobs here:
         if (poolData->areJobsFinished(myRequest)) {
@@ -134,13 +150,13 @@ inline void helpFunction(JobWorkerPoolData* poolData, int workerId, std::vector<
 
 class JobManager {
     //meta:
-    int workerNum = 0;
+    uint32_t workerNum = 0;
     int nextWorkerTag = 0;
     std::unique_ptr<JobWorkerPoolData> jobMetaData;
     std::vector<std::thread> workerThreads{};
 public:
-    JobManager(int hardwareThreads) 
-    : workerNum{ std::max(hardwareThreads - 1,1) }
+    JobManager(uint32_t hardwareThreads) 
+    : workerNum{ std::max(hardwareThreads - 1, 1u) }
     {
         jobMetaData = std::make_unique<JobWorkerPoolData>();
         workerThreads.reserve(this->workerNum);
@@ -168,6 +184,18 @@ public:
         }
         jobMetaData->workerCV.notify_one();
         return tag;
+    }
+
+    bool finished(Tag tag)
+    {
+        std::unique_lock<std::mutex> lock(jobMetaData->mut);
+        return jobMetaData->closedJobs.contains(tag);
+    }
+
+    void clear(Tag tag)
+    {
+        std::unique_lock<std::mutex> lock(jobMetaData->mut);
+        jobMetaData->closedJobs.erase(tag);
     }
 
     /*

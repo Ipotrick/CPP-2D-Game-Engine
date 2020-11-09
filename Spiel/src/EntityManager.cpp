@@ -1,20 +1,25 @@
 #include "EntityManager.hpp"
 
-EntityHandle EntityManager::create()
+EntityHandle EntityManager::create(UUID uuid)
 {
 	EntityHandle ent;
 	if (!freeIndexQueue.empty()) {
 		ent.index = freeIndexQueue.front();
 		freeIndexQueue.pop_front();
 		auto& slot = entitySlots[ent.index];
-		slot.setHoldsEntity(true);
-		slot.setSpawned(false);
+		slot.valid = true;
+		slot.spawned = false;
 		ent.version = ++slot.version;
 	}
 	else {
 		entitySlots.emplace_back(EntitySlot(true));
 		ent.index = static_cast<EntityHandleIndex>(entitySlots.size() - 1);
 		ent.version = ++entitySlots[ent.index].version;
+	}
+	if (uuid.isValid()) {
+		assertEntityManager(!uuidToEntityIndex.contains(uuid));
+		entitySlots[ent.index].uuid = uuid;
+		uuidToEntityIndex[uuid] = ent.index;
 	}
 	return ent;
 }
@@ -28,6 +33,7 @@ void EntityManager::destroy(EntityHandle entity)
 
 void EntityManager::spawnLater(EntityHandle entity)
 {
+	assertEntityManager(isHandleValid(entity));
 	spawnLaterQueue.emplace_back(entity);
 }
 
@@ -44,7 +50,7 @@ size_t const EntityManager::maxEntityIndex()
 EntityHandleIndex EntityManager::findBiggestValidEntityIndex()
 {
 	for (int i = entitySlots.size() - 1; i > 0; i--) {
-		if (entitySlots[i].holdsEntity()) return i;
+		if (entitySlots[i].valid) return i;
 	}
 	return 0;
 }
@@ -52,8 +58,13 @@ EntityHandleIndex EntityManager::findBiggestValidEntityIndex()
 void EntityManager::executeDestroys()
 {
 	for (EntityHandleIndex entSlotIndex : destroyQueue) {
-		entitySlots[entSlotIndex].setHoldsEntity(false);
-		entitySlots[entSlotIndex].setSpawned(false);
+		auto& entityData = entitySlots[entSlotIndex];
+		entityData.valid = false;
+		entityData.spawned = false;
+		if (entityData.uuid.isValid()) {
+			uuidToEntityIndex.erase(entityData.uuid);
+		}
+		entityData.uuid.invalidate();
 		freeIndexQueue.push_back(entSlotIndex);
 	}
 	destroyQueue.clear();

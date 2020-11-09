@@ -40,8 +40,15 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const Form& f)
 	return out;
 }
 
-YAML::Emitter& operator<<(YAML::Emitter& out, const LapTimer<>& v)
+YAML::Emitter& operator<<(YAML::Emitter& out, const LapTimer& v)
 {
 	out << YAML::Value << v.getLapTime();
+	return out;
+}
+
+YAML::Emitter& operator<<(YAML::Emitter& out, const UUID& v)
+{
+	out << YAML::Flow;
+	out << YAML::BeginSeq << v.high << v.low << YAML::EndSeq;
 	return out;
 }

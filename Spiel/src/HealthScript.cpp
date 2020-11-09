@@ -1,6 +1,6 @@
 #include "HealthScript.hpp"
 
-void HealthScript::script(EntityHandle me, Health& data, float deltaTime)
+void healthScript(EntityHandle me, Health& data, float deltaTime)
 {
 	auto createUI = 
 		[&](EntityHandle id)
@@ -12,13 +12,13 @@ void HealthScript::script(EntityHandle me, Health& data, float deltaTime)
 			[&, id](UIElement* e) {
 				if (e->isEnabled()) {
 					UIBar* b = (UIBar*)e;
-					Health& h = world.getComp<Health>(id);
+					Health& h = Engine::world.getComp<Health>(id);
 					b->setFill((float)h.curHealth / (float)h.maxHealth);
 				}
 			}
 		);
 
-		UIText t("Health:", engine.renderer.makeTexRef(TextureInfo("ConsolasLowRes.png")).makeSmall());
+		UIText t("Health:", Engine::renderer.makeTexRef(TextureInfo("ConsolasLowRes.png")).makeSmall());
 		t.setSize({ 100.0f, 20.0f });
 		t.fontSize = { 17.0f / 2.0f, 17.0f };
 		t.anchor.setCenterHorizontal();
@@ -28,8 +28,8 @@ void HealthScript::script(EntityHandle me, Health& data, float deltaTime)
 
 		UIPair p;
 		p.setSize({ 110, 50 });
-		p.setFirst(engine.ui.createAndGet(t));
-		p.setSecond(engine.ui.createAndGet(bar));
+		p.setFirst(Engine::ui.createAndGet(t));
+		p.setSecond(Engine::ui.createAndGet(bar));
 
 		UIFrame frame;
 		frame.fillColor = { 0,0,0, 0.5 };
@@ -38,35 +38,34 @@ void HealthScript::script(EntityHandle me, Health& data, float deltaTime)
 		frame.setSize({ 110, 50 });
 		frame.setPadding({ 5,5 });
 		frame.setDrawMode(RenderSpace::PixelSpace);
-		frame.addChild(engine.ui.createAndGet(p));
+		frame.addChild(Engine::ui.createAndGet(p));
 		frame.setUpdateFn(
 			[&, id](UIElement* e) {
 				UIFrame* f = (UIFrame*)e;
-				Vec2 windowPos = engine.getWorldToWindow(world.getComp<Transform>(id).position);
-				Vec2 pixelPos = engine.getWindowToPixel(windowPos);
-				float scale = engine.camera.zoom * 3.5f;
-				f->anchor.setAbsPosition(pixelPos + Vec2(0.0f, 60.0f) * scale);
+				Vec2 pos = Engine::renderer.convertCoordinate<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Engine::world.getComp<Transform>(id).position);
+				float scale = Engine::renderer.getCamera().zoom * 3.5f;
+				f->anchor.setAbsPosition(pos + Vec2(0.0f, 60.0f) * scale);
 				f->setScale(scale);
 			}
 		);
 		frame.setDestroyIfFn(
 			[&, id](UIElement* e) -> bool {
-				return !(world.isHandleValid(id) && world.hasComp<Health>(id)) || !world.getComp<Health>(id).bUISpawned;
+				return !(Engine::world.isHandleValid(id) && Engine::world.hasComp<Health>(id)) || !Engine::world.getComp<Health>(id).bUISpawned;
 			}
 		);
 		frame.setEnableIfFn(
 			[&, id](UIElement* e) -> bool {
-				Health& h = world.getComp<Health>(id);
+				Health& h = Engine::world.getComp<Health>(id);
 				return h.curHealth != h.maxHealth;
 			}
 		);
 
-		engine.ui.createFrame(frame);
+		Engine::ui.createFrame(frame);
 	};
 
-	World& world = engine.world;
+	World& world = Engine::world;
 	bool gotHitByBullet{ false };
-	for (auto collision : engine.collisionSystem.collisions_view(me)) {
+	for (auto collision : Game::collisionSystem.collisions_view(me)) {
 		if (world.hasComp<Bullet>(collision.indexB)) {
 			gotHitByBullet = true;
 		}
