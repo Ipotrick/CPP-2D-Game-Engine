@@ -19,7 +19,13 @@ public:
 		this->leftPadding = v.x;
 		this->rightPadding = v.x;
 	}
+	/*
+	* returns unscaled padding in x axis
+	*/
 	float getXPadding() const { return leftPadding + rightPadding; }
+	/*
+	* returns unscaled padding in y axis
+	*/
 	float getYPadding() const { return topPadding + bottomPadding; }
 
 	void applyPadding(UIContext& context)

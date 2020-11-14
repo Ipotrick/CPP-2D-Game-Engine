@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include "stb_image.h"
 #include "robin_hood.h"
 
 #include "RenderTypes.hpp"

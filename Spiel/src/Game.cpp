@@ -5,7 +5,6 @@
 #include "log/Log.hpp"
 #include "GameComponents.hpp"
 #include "serialization/YAMLSerializer.hpp"
-//#include "serialization/YAMLECM.hpp"
 
 #include "transformScript.hpp"
 #include "movementScript.hpp"
@@ -14,12 +13,20 @@
 #include "SuckerScript.hpp"
 #include "TesterScript.hpp"
 #include "drawScript.hpp"
+#include "LayerConstants.hpp"
 
 using namespace util;
 
 Game::Game()
 	: Engine("Spiel Fenster", 1600, 900)
-{}
+{
+	renderer.setLayerCount(LAYER_MAX);
+	renderer.getLayer(LAYER_WORLD_BACKGROUND).renderMode = RenderSpace::WorldSpace;
+	renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::WorldSpace;
+	renderer.getLayer(LAYER_WORLD_FOREGROUND).renderMode = RenderSpace::WorldSpace;
+	renderer.getLayer(LAYER_FIRST_UI).renderMode = RenderSpace::PixelSpace;
+	renderer.getLayer(LAYER_SECOND_UI).renderMode = RenderSpace::PixelSpace;
+}
 
 #define UI_CREATE(parent, code, Type, name) \
 { \
@@ -44,16 +51,7 @@ void Game::create() {
 	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
 	const auto font = renderer.makeSmallTexRef(TextureInfo("_pl_ConsolasLowRes.png"));
 
-	std::string str;
-	std::ifstream ifs("world.yaml");
-	if (ifs) {
-		std::getline(ifs, str, '\0');
-		YAMLWorldSerializer s(world);
-		s.deserializeString(str);
-	}
-	else {
-		world.loadMap("standart");
-	}
+	world.loadMap("standart");
 
 	auto makeRenderStatsUI = [&](auto& parent) {
 		UICollapsable c("Rendering Statics:", font);
@@ -116,6 +114,7 @@ void Game::create() {
 	};
 
 	UIFrame frame;
+	frame.layer = LAYER_SECOND_UI;
 	frame.setWidth(200);
 	frame.setPadding({ 5.0f, 5.0f });
 	frame.anchor.setLeftAbsolute(10);
@@ -231,7 +230,7 @@ void Game::gameplayUpdate(float deltaTime)
 		renderer.getCamera().position -= rotate(Vec2(-5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
 	if (in.keyPressed(Key::NP_ADD)) {
-		renderer.getCamera().zoom += 2;
+		//renderer.getCamera().zoom += 2;
 		renderer.getCamera().zoom *= 1.0f + (1.0f * deltaTime);
 	}
 	if (in.keyPressed(Key::NP_SUBTRACT)) {
@@ -247,7 +246,7 @@ void Game::gameplayUpdate(float deltaTime)
 		renderer.getCamera().rotation = 0.0f;
 		renderer.getCamera().position = { 0, 0 };
 		renderer.getCamera().zoom = 1 / 5.0f;
-		guiScale = 1.0f;
+		uiContext.scale = 1.0f;
 	}
 	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
 		if (ui.exists("Statiscics")) {
@@ -266,10 +265,10 @@ void Game::gameplayUpdate(float deltaTime)
 		in.takeFocus(Focus::Standard);
 	}
 	if (in.keyPressed(Key::I)) {
-		guiScale = clamp(guiScale - deltaTime, 0.1f, 10.0f);
+		uiContext.scale = clamp(uiContext.scale - deltaTime, 0.1f, 10.0f);
 	}
 	if (in.keyPressed(Key::O)) {
-		guiScale = clamp(guiScale + deltaTime, 0.1f, 10.0f);
+		uiContext.scale = clamp(uiContext.scale + deltaTime, 0.1f, 10.0f);
 	}
 	if (in.keyPressed(Key::J)) {
 		world = World();
@@ -388,7 +387,10 @@ void Game::cursorManipFunc()
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
 	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
-	renderer.submit(Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), RenderSpace::WorldSpace));
+	//renderer.submit(
+	//	Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
+	//	LAYER_FIRST_UI
+	//);
 	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);

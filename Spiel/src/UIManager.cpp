@@ -43,16 +43,18 @@ void UIManager::update()
 void UIManager::draw(UIContext context)
 {
 	std::vector<Drawable> buffer;
-	context.increaseDrawPrio();
+	++context.recursionDepth;
+	lastUpdateDrwawbleCount = 0;
 	for (auto& ent : getElementContainer<UIFrame>()) {
 		auto& frame = getElementContainer<UIFrame>().get(ent);
+		buffer.clear();
 		if (frame.isEnabled()) {
 			frame.draw(buffer, context);
 		}
-	}
-	lastUpdateDrwawbleCount = buffer.size();
-	for (auto&& d : buffer) {
-		renderer.submit(d);
+		for (auto&& d : buffer) {
+			renderer.submit(d, frame.layer);
+		}
+		lastUpdateDrwawbleCount += buffer.size();
 	}
 }
 
@@ -142,7 +144,7 @@ void UIManager::focusUpdate()
 		// find element with the highest drawing prio (at the end is the higest):
 		std::sort(focusedElementCandidates.begin(), focusedElementCandidates.end(),
 			[](UIFocusable* a, UIFocusable* b) {
-				return a->getFocusArea().drawingPrio < b->getFocusArea().drawingPrio;
+				return a->getFocusArea().sortKey < b->getFocusArea().sortKey;
 			}
 		);
 

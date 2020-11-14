@@ -163,10 +163,10 @@ inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
 
 class Drawable {
 public:
+	IntColor color;
 	Vec2 position;
 	/* in radiants 2pi = one rotation*/
 	RotaVec2 rotationVec;
-	IntColor color;
 	Vec2 scale;
 	float drawingPrio;
 	uint32_t id;
@@ -196,6 +196,10 @@ public:
 		this->texRef = texRef;
 	}
 
+	bool operator<(Drawable const& rhs) const
+	{
+		return this->drawingPrio < rhs.drawingPrio;
+	}
 
 	inline RenderSpace getDrawMode() const { return drawMode; }
 private:
@@ -208,13 +212,6 @@ struct Light {
 	float radius;
 	uint32_t id;
 	Vec4 color;
-};
-
-struct RenderBuffer {
-	std::vector<Drawable> drawables{};
-	std::vector<TextureRef2> textureLoadingQueue;
-	bool resetTextureCache{ false };
-	Camera camera{};
 };
 
 class TextDrawable {

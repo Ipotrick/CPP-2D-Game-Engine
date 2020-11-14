@@ -22,6 +22,7 @@ template<typename T>
 class UIContainer {
 public:
 	static_assert(std::is_base_of<UIElement, T>::value);
+
 	UIEntity create(const T& element)
 	{
 		if (freeElements.empty()) {

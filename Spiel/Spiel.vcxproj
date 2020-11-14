@@ -19,9 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Libraries\stb_image\stb_image.h" />
+    <ClInclude Include="..\Libraries\stb_image\stb_image.hpp" />
     <ClInclude Include="src\AgeScript.hpp" />
+    <ClInclude Include="src\Layer.hpp" />
+    <ClInclude Include="src\LayerConstants.hpp" />
     <ClInclude Include="src\movementScript.hpp" />
+    <ClInclude Include="src\RenderBuffer.hpp" />
     <ClInclude Include="src\serialization\YAMLECM.hpp" />
     <ClInclude Include="src\serialize\YAMLSerialize.hpp" />
     <ClInclude Include="src\transformScript.hpp" />
@@ -46,7 +49,6 @@
     <ClInclude Include="src\EntityComponentStorage.hpp" />
     <ClInclude Include="src\Engine.hpp" />
     <ClInclude Include="src\EntityTypes.hpp" />
-    <ClInclude Include="src\fileUtility.h" />
     <ClInclude Include="src\Game.hpp" />
     <ClInclude Include="src\GameComponents.hpp" />
     <ClInclude Include="src\GameSystemUnifroms.hpp" />
@@ -166,10 +168,10 @@
     <ClCompile Include="src\EntityComponentManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\Basic.frag" />
-    <None Include="shader\Basic.vert" />
-    <None Include="shader\shadow.frag" />
-    <None Include="shader\shadow.vert" />
+    <None Include="shader\SpriteShader.frag" />
+    <None Include="shader\SpriteShader.vert" />
+    <None Include="shader\SpriteShader_OLD.frag" />
+    <None Include="shader\SpriteShader_OLD.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

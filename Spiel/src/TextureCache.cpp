@@ -1,4 +1,5 @@
 ﻿#include "TextureCache.hpp"
+#include "stb_image.hpp"
 
 #include "GL/glew.h"
 void checkGLError()

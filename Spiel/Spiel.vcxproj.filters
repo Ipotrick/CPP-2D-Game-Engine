@@ -64,14 +64,11 @@
     <Filter Include="_Engine\CoreComponents">
       <UniqueIdentifier>{b4e5e893-b1c0-4acb-9e60-eafd8e65f5e1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Engine\_Rendering\Texture">
+      <UniqueIdentifier>{759d50ef-efea-437a-9ba2-8b78cf2ec30c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Libraries\stb_image\stb_image.h">
-      <Filter>_stbi</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fileUtility.h">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
     <ClInclude Include="src\CacheAABBJob.hpp">
       <Filter>_Engine\_Collision</Filter>
     </ClInclude>
@@ -219,12 +216,6 @@
     <ClInclude Include="src\InputManager.hpp">
       <Filter>_Engine\_IO</Filter>
     </ClInclude>
-    <ClInclude Include="src\TextureRefManager.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\TextureCache.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\UIAnchor.hpp">
       <Filter>_Engine\_UI</Filter>
     </ClInclude>
@@ -345,6 +336,24 @@
     <ClInclude Include="src\serialization\YAMLECM.hpp">
       <Filter>serialization</Filter>
     </ClInclude>
+    <ClInclude Include="..\Libraries\stb_image\stb_image.hpp">
+      <Filter>_stbi</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureCache.hpp">
+      <Filter>_Engine\_Rendering\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TextureRefManager.hpp">
+      <Filter>_Engine\_Rendering\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Layer.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderBuffer.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LayerConstants.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -437,12 +446,6 @@
     <ClCompile Include="src\InputManager.cpp">
       <Filter>_Engine\_IO</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextureRefManager.cpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TextureCache.cpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\UIBar.cpp">
       <Filter>_Engine\_UI\Elements</Filter>
     </ClCompile>
@@ -497,18 +500,24 @@
     <ClCompile Include="src\serialization\YAMLECM.cpp">
       <Filter>serialization</Filter>
     </ClCompile>
+    <ClCompile Include="src\TextureCache.cpp">
+      <Filter>_Engine\_Rendering\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TextureRefManager.cpp">
+      <Filter>_Engine\_Rendering\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\Basic.frag">
+    <None Include="shader\SpriteShader_OLD.frag">
       <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
-    <None Include="shader\Basic.vert">
+    <None Include="shader\SpriteShader_OLD.vert">
       <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
-    <None Include="shader\shadow.frag">
+    <None Include="shader\SpriteShader.vert">
       <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
-    <None Include="shader\shadow.vert">
+    <None Include="shader\SpriteShader.frag">
       <Filter>_Engine\_Rendering\_shader</Filter>
     </None>
   </ItemGroup>

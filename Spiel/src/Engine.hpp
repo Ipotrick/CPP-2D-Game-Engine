@@ -46,8 +46,6 @@ public:
 	float getDeltaTimeSafe(int sampleSize = 1) { return std::min(getDeltaTime(sampleSize), maxDeltaTime); }
 	/* returns the number of past iterations , O(1)*/ 
 	uint32_t getIteration() { return iteration; }
-	/* returnes a string wtih formated performance info. The detail level changes how much information is shown, O(1) (os call) */
-	std::string getPerfInfo(int detail);
 
 					/*-- window utility --*/
 	/* returns size of window in pixel of your desktop resolution, O(1)*/
@@ -76,10 +74,9 @@ public:
 	inline static InputManager in{ window };
 
 	// UI
-	inline static float guiScale{ 1.0f };
+	inline static UIContext uiContext;
 	inline static UIManager ui{ renderer, in };
 private:
-	static void rendererUpdate(World& world);
 
 	// meta
 	inline static bool bInstantiated{ false }; // there can only be one active instance of the Engine as it is a singleton

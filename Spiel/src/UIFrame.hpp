@@ -127,6 +127,8 @@ public:
 
 	Vec4 fillColor{ 0,0,0,1 };
 	Vec4 borderColor{ 1,1,1,1 };
+
+	int layer{ 1 };
 private:
 	void drawChildren(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
 

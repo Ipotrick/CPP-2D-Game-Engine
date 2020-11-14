@@ -6,10 +6,10 @@ void UIBar::draw(std::vector<Drawable>& buffer, UIContext context)
 	auto position = this->anchor.getOffset(size, context);
 
 	// background of bar:
-	buffer.push_back(Drawable(0, position, context.drawingPrio, size, emptyColor, Form::Rectangle, RotaVec2(0), context.drawMode));
+	buffer.push_back(Drawable(0, position, context.recursionDepth, size, emptyColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 	// bar:
 	position.x -= size.x * 0.5f * (1.0f - fill);
 	size.x = size.x * fill;
-	context.increaseDrawPrio();
-	buffer.push_back(Drawable(0, position, context.drawingPrio, size, fillColor, Form::Rectangle, RotaVec2(0), context.drawMode));
+	++context.recursionDepth;
+	buffer.push_back(Drawable(0, position, context.recursionDepth, size, fillColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 }

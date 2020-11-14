@@ -4,6 +4,9 @@ using namespace std::literals::chrono_literals;
 
 void Renderer::initialize(Window* wndw)
 {
+	assertIsState(RenderState::Uninitialized);
+	state = RenderState::PreWait;
+
 	window = wndw;
 	workerSharedData = std::make_shared<RenderingSharedData>();
 	workerThread = std::thread(RenderingWorker(window, workerSharedData));
@@ -12,63 +15,72 @@ void Renderer::initialize(Window* wndw)
 	frontBuffer = std::make_shared<RenderBuffer>();
 
 	workerThread.detach();
+	setLayerCount(1);
 }
 
 void Renderer::waitTillFinished() {	
-	assert(!wasFushCalled);	// -> did not call render after flush
-	assert(!wasWaitCalled);	// -> called wait twice!
-	wasWaitCalled = true;
-	if (!wasEndCalled) {
-		Timer t(syncTime);
-		std::unique_lock<std::mutex> switch_lock(workerSharedData->mut);
-		workerSharedData->cond.wait(switch_lock, [&]() { return workerSharedData->ready == true; });	// wait for worker to finish
-		// reset data
-		workerSharedData->ready = false; // reset ready flag
-		renderingTime = workerSharedData->new_renderTime;
-		drawCallCount = workerSharedData->drawCallCount;
-	}
+	assertIsState(RenderState::PreWait);
+	state = RenderState::PreStart;
+
+	Timer t(syncTime);
+	std::unique_lock<std::mutex> switch_lock(workerSharedData->mut);
+	workerSharedData->cond.wait(switch_lock, [&]() { return workerSharedData->ready == true; });	// wait for worker to finish
+
+	workerSharedData->ready = false; // reset ready flag
+
+	renderingTime = workerSharedData->new_renderTime;	// copy perf data
+	drawCallCount = workerSharedData->drawCallCount;	// copy perf data
+
+	state = RenderState::PreStart;
 }
 
 void Renderer::flushSubmissions() {
-	assert(wasWaitCalled);	// -> wait was not called!
-	assert(!wasFushCalled);	// -> flush was called twice!
-	wasFushCalled = true;
-	if (!wasEndCalled) {
-		// write last frontbuffer data:
-		std::swap(frontBuffer->textureLoadingQueue, texRefManager.getTextureLoadingQueue());
-		texRefManager.clearTextureLoadingQueue();	// clear texture loading queue
-		Camera c = frontBuffer->camera;
+	auto& backBuffer = workerSharedData->renderBuffer;
 
-		// swap front and backbuffer:
-		std::swap(frontBuffer, workerSharedData->renderBuffer);
+	backBuffer->camera = frontBuffer->camera;
+	backBuffer->resetTextureCache = frontBuffer->resetTextureCache;
+	std::swap(backBuffer->textureLoadingQueue, texRefManager.getTextureLoadingQueue());
+	if (backBuffer->layers.size() != frontBuffer->layers.size()) {
+		backBuffer->layers.resize(frontBuffer->layers.size());
+	}
+	for (int i = 0; i < frontBuffer->layers.size(); ++i) {
+		auto& flayer = frontBuffer->layers[i];	// f(fronbuffer)layer(at i)
+		if (flayer.bTemporary) {
+			std::swap(backBuffer->layers[i].getDrawables(), flayer.getDrawables());
+		}
+		else {
+			backBuffer->layers[i].copyFrom(flayer);
+		}
+	}
 
-		// clear frontbuffer (as it now contains the old backbuffer data):
-		frontBuffer->camera = c;
-		frontBuffer->resetTextureCache = false;
-		frontBuffer->drawables.clear();
+	/* clear frontbuffer (as it now contains the old backbuffer data):	*/
+	texRefManager.clearTextureLoadingQueue();
+	frontBuffer->resetTextureCache = false;
+	for (auto& l : frontBuffer->layers) {
+		if (l.bTemporary) {
+			l.clear();
+		}
 	}
 }
 
 void Renderer::startRendering() {
-	assert(wasFushCalled);	// -> did not call flush!
-	assert(wasWaitCalled);	// -> did not call wait!
-	wasWaitCalled = false;
-	wasFushCalled = false;
-	if (!wasEndCalled) {
-		workerSharedData->cond.notify_one(); // wake up worker
-	}
+	assertIsState(RenderState::PreStart);
+	state = RenderState::PreWait;
+
+	flushSubmissions();
+	workerSharedData->cond.notify_one(); // wake up worker
 }
 
-void Renderer::end()
+void Renderer::reset()
 {
-	if (!wasEndCalled) {
-		wasEndCalled = true;
-		if (!wasWaitCalled) {	// check if we still need to sync for the renderer
-			std::unique_lock<std::mutex> switch_lock(workerSharedData->mut);
-			workerSharedData->cond.wait(switch_lock, [&]() { return workerSharedData->ready == true; });	// wait for worker to finish
-		}
-		workerSharedData->ready = false; // reset ready flag
-		workerSharedData->run = false;
-		workerSharedData->cond.notify_one(); // wake up worker
-	}
+	assertIsNotState(RenderState::Uninitialized);
+	state = RenderState::PreWait;
+	waitTillFinished();
+	state = RenderState::Uninitialized;
+
+	workerSharedData->ready = false; // reset ready flag
+	workerSharedData->run = false;
+	workerSharedData->cond.notify_one(); // wake up worker
+
+	frontBuffer->layers.resize(0);
 }

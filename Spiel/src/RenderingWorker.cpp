@@ -5,6 +5,45 @@
 
 #include "Timing.hpp"
 
+
+Vec2 idToCorner(int id, Vec2 min, Vec2 max)
+{
+	switch (id) {
+	case 0:
+		return { min.x, max.y };	// tl
+	case 1:
+		return { max.x, max.y };	// tr
+	case 2:
+		return { min.x, min.y };	// bl
+	case 3:
+		return { max.x, min.y };	// br
+	default:
+		assert(false);
+		return { 0,0 };
+	}
+}
+
+
+GLenum glCheckError_(const char* file, int line)
+{
+	GLenum errorCode;
+	while ((errorCode = glGetError()) != GL_NO_ERROR) {
+		std::string error;
+		switch (errorCode) {
+		case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+		case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+		case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+		case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; break;
+		case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; break;
+		case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+		}
+		std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+	}
+	return errorCode;
+}
+#define glCheckError() glCheckError_(__FILE__, __LINE__) 
+
 static unsigned int compileShader(unsigned int type_, const std::string source_) {
 	unsigned id = glCreateShader(type_);
 	char const* src = source_.c_str();
@@ -35,13 +74,18 @@ static unsigned createShader(const std::string& vertexShader_, const std::string
 	assert(fs != 0);
 
 	glAttachShader(program, vs);
+	glCheckError();
 	glAttachShader(program, fs);
+	glCheckError();
 	glLinkProgram(program);
+	glCheckError();
 	glValidateProgram(program);
+	glCheckError();
 
 	glDeleteShader(vs);
+	glCheckError();
 	glDeleteShader(fs);
-
+	glCheckError();
 	return program;
 }
 
@@ -58,14 +102,9 @@ void RenderingWorker::initiate()
 
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
 
-	auto vertexShader = readShader(vertexShaderPath);
-	auto fragmentShader = readShader(fragmentShaderPath);
-	shader = createShader(vertexShader, fragmentShader);
-
-	auto vertexShadowShader = readShader(vertexShadowShaderPath);
-	auto fragmentShadowShader = readShader(fragmentShadowShaderPath);
-	shadowShader = createShader(vertexShadowShader, fragmentShadowShader);
-
+	auto spriteShaderVertex = readShader(SPRITE_SHADER_VERTEX_PATH);
+	auto spriteShaderFragment = readShader(SPRITE_SHADER_FRAGMENT_PATH);
+	spriteShaderProgram = createShader(spriteShaderVertex, spriteShaderFragment);
 	// enable blending when drawing a fragment twice
 	glEnable(GL_BLEND);
 	// change blending type to transparency blending
@@ -74,35 +113,68 @@ void RenderingWorker::initiate()
 	glEnable(GL_MULTISAMPLE);
 
 	texCache.initialize();
-	
-	verteciesRawBuffer = (float*)malloc(sizeof(Vertex) * maxVertexCount);
-	indices = (uint32_t*)malloc(sizeof(uint32_t) * maxIndicesCount);
 
+	indicesRaw = (uint32_t*)malloc(sizeof(uint32_t) * MAX_INDEX_COUNT);
 	int quadCount = 0;
-	for (int i = 0; i < maxIndicesCount; i += 6) {
-		indices[i + 0] = 0 + quadCount * 4; indices[i + 1] = 1 + quadCount * 4; indices[i + 2] = 2 + quadCount * 4;
-		indices[i + 3] = 1 + quadCount * 4; indices[i + 4] = 2 + quadCount * 4; indices[i + 5] = 3 + quadCount * 4;
+	for (int i = 0; i < MAX_INDEX_COUNT; i += 6) {
+		indicesRaw[i + 0] = 0 + quadCount * 4; indicesRaw[i + 1] = 1 + quadCount * 4; indicesRaw[i + 2] = 2 + quadCount * 4;
+		indicesRaw[i + 3] = 1 + quadCount * 4; indicesRaw[i + 4] = 2 + quadCount * 4; indicesRaw[i + 5] = 3 + quadCount * 4;
 		quadCount++;
 	}
 
-	glGenBuffers(1, &verteciesBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, verteciesBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * maxVertexCount, nullptr, GL_DYNAMIC_DRAW);
-	// positions (2 float)
+	spriteShaderVBORaw = (float*)malloc(sizeof(Vertex) * MAX_VERTEX_COUNT);
+	glGenBuffers(1, &spriteShaderVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, spriteShaderVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * MAX_VERTEX_COUNT, nullptr, GL_DYNAMIC_DRAW);
+
+	glGenVertexArrays(1, &spriteShaderVAO);
+	glBindVertexArray(spriteShaderVAO);
+
+	// corner coordinates (-0.5, 0,5), (0.5, 0.5), ...
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-	// vertex color (4 float)
+	// texture coordinates
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, color));
-	// texture uv coordinates (2 float)
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, texCoord));
+	// model index / id
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, texCoord));
-	// texture slot (1 int) 
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, texID));
-	// circle rendering mode enable
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, circle));
+	glVertexAttribIPointer(2, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, modelIndex));
+
+
+
+	//// positions (2 float)
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	//// vertex color (4 float)
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, color));
+	//// texture uv coordinates (2 float)
+	//glEnableVertexAttribArray(2);
+	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, texCoord));
+	//// corner coordiantes
+	//glEnableVertexAttribArray(5);
+	//glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, corner));
+	//// texture slot (1 int) 
+	//glEnableVertexAttribArray(3);
+	//glVertexAttribIPointer(4, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, texID));
+	//// circle rendering mode enable
+	//glEnableVertexAttribArray(4);
+	//glVertexAttribIPointer(5, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, circle));
+	//// model ssbo index
+	//glEnableVertexAttribArray(6);
+	//glVertexAttribIPointer(6, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, modelID));
+
+	modelSSBORaw = (RenderModel*)malloc(sizeof(RenderModel) * MAX_RECT_COUNT);
+	glGenBuffers(1, &modelSSBO);
+	glCheckError();
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelSSBO);
+	glCheckError();
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(RenderModel) * MAX_RECT_COUNT, modelSSBORaw, GL_DYNAMIC_COPY);
+	glCheckError();
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	glCheckError();
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, MODEL_SSBO_BINDING, modelSSBO);
+	glCheckError();
 }
 
 void RenderingWorker::operator()()
@@ -110,7 +182,6 @@ void RenderingWorker::operator()()
 	initiate();
 	
 	while (data->run) {
-		auto& drawables = data->renderBuffer->drawables;
 		auto& camera = data->renderBuffer->camera; 
 		{	
 			Timer t(data->new_renderTime);
@@ -123,22 +194,22 @@ void RenderingWorker::operator()()
 
 			texCache.cacheTextures(data->renderBuffer->textureLoadingQueue);
 
-			Mat3 viewProjectionMatrix = Mat3::scale(camera.zoom) * Mat3::scale(camera.frustumBend) * Mat3::rotate(-camera.rotation) * Mat3::translate(-camera.position);
-			Mat3 pixelProjectionMatrix = Mat3::translate(Vec2(-1, -1)) * Mat3::scale(Vec2(1.0f / window->width, 1.0f / window->height)) * Mat3::scale(Vec2(2, 2));
-
-			std::sort(drawables.begin(), drawables.end(),
-				[](Drawable const& a, Drawable const& b) {
-					return a.drawingPrio < b.drawingPrio;
-				}
-			);
+			Mat4 viewProjectionMatrix = 
+				Mat4::scale(camera.zoom) *												
+				Mat4::scale({ camera.frustumBend.x, camera.frustumBend.y, 1.0f }) *
+				Mat4::rotate_z(-camera.rotation) *
+				Mat4::translate({ -camera.position.x, -camera.position.y, 0.0f });
+			Mat4 pixelProjectionMatrix = 
+				Mat4::translate(Vec3(-1, -1, 0)) * 
+				Mat4::scale(Vec3(1.0f / window->width, 1.0f / window->height, 1.0f)) * 
+				Mat4::scale(Vec3(2.0f, 2.0f, 1.0f));
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			data->drawCallCount = 0;
-			int lastIndex{ 0 };
-			while (lastIndex != drawables.size()) {
-				lastIndex = drawBatch(drawables, viewProjectionMatrix, pixelProjectionMatrix, lastIndex);
-				data->drawCallCount += 1;
+
+			for (auto& layer : data->renderBuffer->layers) {
+				drawLayer(layer, viewProjectionMatrix, pixelProjectionMatrix);
 			}
 
 			{	// push rendered image into image buffer
@@ -190,7 +261,7 @@ std::string RenderingWorker::readShader(std::string path_)
 	return ss.str();
 }
 
-std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat, Mat3 const& pixelProjectionMatrix) {
+void RenderingWorker::generateVertices(Drawable const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, Vertex* bufferPtr) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
 	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value())) {
@@ -200,54 +271,48 @@ std::array<Vertex, 4> RenderingWorker::generateVertices(Drawable const& d, float
 
 	bool isCircle = d.form == Form::Circle ? 1.0f : 0.0f;
 
-	Mat3 modelMatrix2 = Mat3::translate(Vec2(d.position.x, d.position.y)) * Mat3::rotate(d.rotationVec) * Mat3::scale(Vec2(d.scale.x, d.scale.y));
+	Mat4 vP = Mat4::identity();
 	switch (d.getDrawMode()) {
 	case RenderSpace::WorldSpace:
-		modelMatrix2 = viewProjMat * modelMatrix2; break;
+		vP = viewProjMat;
+		break;
 	case RenderSpace::WindowSpace:
+		vP = Mat4::identity();
 		break;
 	case RenderSpace::UniformWindowSpace:
-		modelMatrix2 = Mat3::scale(data->renderBuffer->camera.frustumBend) * modelMatrix2; break;
+		vP = Mat4::scale({ data->renderBuffer->camera.frustumBend.x,data->renderBuffer->camera.frustumBend.y, 1.0f });
+		break;
 	case RenderSpace::PixelSpace: 
-		modelMatrix2 = pixelProjectionMatrix * modelMatrix2; break;
+		vP = pixelProjectionMatrix;
+		break;
 	default:
+		assert(false);
 		break;
 	}
 
-	Vertex v1;
-	Vertex v2;
-	Vertex v3;
-	Vertex v4;
-	v1.position = modelMatrix2 * Vec2{ -0.5f,  0.5f };
-	v2.position = modelMatrix2 * Vec2{  0.5f,  0.5f };
-	v3.position = modelMatrix2 * Vec2{ -0.5f, -0.5f };
-	v4.position = modelMatrix2 * Vec2{  0.5f, -0.5f };
-	v1.color = d.color;
-	v2.color = d.color;
-	v3.color = d.color;
-	v4.color = d.color;
-	v1.texCoord.x = minTex.x; v1.texCoord.y = maxTex.y;
-	v2.texCoord.x = maxTex.x; v2.texCoord.y = maxTex.y;
-	v3.texCoord.x = minTex.x; v3.texCoord.y = minTex.y;
-	v4.texCoord.x = maxTex.x; v4.texCoord.y = minTex.y;
-	v1.texID = texID;
-	v2.texID = texID;
-	v3.texID = texID;
-	v4.texID = texID;
-	v1.circle = isCircle;
-	v2.circle = isCircle;
-	v3.circle = isCircle;
-	v4.circle = isCircle;
+	RenderModel* model = modelSSBORaw + nextModelIndex;
+	model->color = d.color;
+	model->position = d.position;
+	model->rotation = d.rotationVec.toVec2();
+	model->scale = d.scale;
+	model->texId = texID;
+	model->isCircle = isCircle;
+	model->viewProj = vP;
 
-	return { v1, v2, v3, v4 };
+	for (int i = 0; i < 4; ++i) {
+		Vertex* vertex = bufferPtr + i;
+		vertex->texCoord = idToCorner(i, minTex, maxTex);
+		vertex->corner = idToCorner(i, { -0.5f, -0.5f }, { 0.5f, 0.5f });
+		vertex->modelIndex = nextModelIndex;
+	}
+	++nextModelIndex;
 }
 
-
-
-size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix, size_t startIndex)
+size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix, size_t startIndex)
 {
-	glUseProgram(shader);
-	glBindBuffer(GL_ARRAY_BUFFER, verteciesBuffer);
+	nextModelIndex = 0;
+	glUseProgram(spriteShaderProgram);
+	glBindVertexArray(spriteShaderVAO);
 
 	// give the shader the possible texture slots
 	int texSamplers[32] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
@@ -260,7 +325,7 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 	// fill batch with vertices
 	size_t index{ startIndex };
 	int drawableCount{ 0 };
-	for (; index < drawables.size()  && drawableCount < maxRectCount; index++, drawableCount++)
+	for (; index < drawables.size()  && drawableCount < MAX_RECT_COUNT; index++, drawableCount++)
 	{
 		Drawable const& d = drawables[index];
 		int drawableSamplerSlot{ 0 };
@@ -297,22 +362,19 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat3 const& 
 			drawableSamplerSlot = -1;
 		}
 
-		auto vertecies = generateVertices(d, drawableSamplerSlot, viewProjectionMatrix, pixelProjectionMatrix);
-		// push vertex data in the rawBuffer
-		int vertexOffset = 0;
-		int dr = drawableCount * 4 * Vertex::floatCount;
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < Vertex::floatCount; j++) {
-				verteciesRawBuffer[(vertexOffset + j) + (dr)] = vertecies[i][j];
-			}
-			vertexOffset += Vertex::floatCount;
-		}
+		auto bufferPtr = (Vertex*)(spriteShaderVBORaw + drawableCount * Vertex::FLOAT_SIZE * 4);	// gets index for the next 4 vertecies in raw buffer
+		generateVertices(d, drawableSamplerSlot, viewProjectionMatrix, pixelProjectionMatrix, bufferPtr);
 	}
 	// push vertex data to the gpu
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * maxVertexCount, verteciesRawBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, spriteShaderVBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * MAX_VERTEX_COUNT, spriteShaderVBORaw);
+
+	// push model data to gpu
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelSSBO);
+	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(RenderModel) * drawableCount, modelSSBORaw);
 
 	// render drawableCount amount of drawables with glDrawElements
-	glDrawElements(GL_TRIANGLES, drawableCount * 6, GL_UNSIGNED_INT, indices);
+	glDrawElements(GL_TRIANGLES, drawableCount * 6, GL_UNSIGNED_INT, indicesRaw);
 	return index;
 }
 
@@ -328,18 +390,14 @@ void RenderingWorker::bindTexture(GLuint texID, int slot)
 	glBindTexture(GL_TEXTURE_2D, texID);
 }
 
-void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix)
+void RenderingWorker::drawDrawable(Drawable const& d, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix)
 {
 	int texSlot{ 0 };
 
-	auto vertecies = generateVertices(d, texSlot, viewProjectionMatrix, pixelProjectionMatrix);
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < Vertex::floatCount; j++) {
-			verteciesRawBuffer[i * Vertex::floatCount + j] = vertecies[i][j];
-		}
-	}
+	Vertex vertecies[4];
+	generateVertices(d, texSlot, viewProjectionMatrix, pixelProjectionMatrix, vertecies);
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * maxVertexCount, verteciesRawBuffer);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * MAX_VERTEX_COUNT, spriteShaderVBORaw);
 
 
 	if (d.texRef.has_value()) {
@@ -360,4 +418,24 @@ void RenderingWorker::drawDrawable(Drawable const& d, Mat3 const& viewProjection
 
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 	glDrawArrays(GL_TRIANGLES, 1, 4);
+}
+
+void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, Mat4 const& pixelProjectionMatrix)
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	if (layer.bSortForDepth) {
+		if (layer.bStableSort) {
+			std::stable_sort(layer.getDrawables().begin(), layer.getDrawables().end());
+		}
+		else {
+			std::sort(layer.getDrawables().begin(), layer.getDrawables().end());
+		}
+	}
+
+	int lastIndex = 0;
+	while (lastIndex != layer.getDrawables().size()) {
+		lastIndex = drawBatch(layer.getDrawables(), cameraViewProj, pixelProjectionMatrix, lastIndex);
+		data->drawCallCount += 1;
+	}
 }

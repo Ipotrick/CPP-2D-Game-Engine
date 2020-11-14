@@ -6,53 +6,58 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
-
 #include "RenderTypes.hpp"
+#include "RenderBuffer.hpp"
 #include "TextureCache.hpp"
 
 struct Vertex {
-	static int constexpr floatCount{ 10 };
-	Vec2 position;
-	Vec4 color;
-	Vec2 texCoord;
-	float texID;
-	float circle;
+	static int constexpr FLOAT_SIZE{ 5 };
+	Vertex() :
+		data{ 0 }
+	{}
+	union {
+		struct {
+			Vec2 corner;		// there are 4 corners: tl,tr,br,bl / (-1,1) (1,1) (1,-1) (-1-1)
+			Vec2 texCoord;
+			int modelIndex;		// there are 3 uniform arrays for the model: position[float 2], rotation[float 2], scale[float 2]
+		};
+		float data[FLOAT_SIZE];
+	};
+};
 
-	float operator[](int i) {
-		assert(i >= 0 && i <= 9);
-		switch (i) {
-		case 0:
-			return position.x;
-			break;
-		case 1:
-			return position.y;
-			break;
-		case 2:
-			return color[0];
-			break;
-		case 3:
-			return color[1];
-			break;
-		case 4:
-			return color[2];
-			break;
-		case 5:
-			return color[3];
-			break;
-		case 6:
-			return texCoord.x;
-			break;
-		case 7:
-			return texCoord.y;
-			break;
-		case 8:
-			return texID;
-			break;
-		case 9:
-			return circle;
-			break;
-		}
+struct RenderModel {
+	static int constexpr FLOAT_SIZE{ 24 };
+	RenderModel() :
+		data{ 0 }
+	{
 	}
+	union {
+		struct {
+			Vec4 color;
+			Vec2 position;
+			Vec2 rotation;
+			Vec2 scale;
+			GLint texId;
+			GLint isCircle;
+			Mat4 viewProj;
+		};
+		float data[FLOAT_SIZE];
+	};
+};
+
+struct Vertex2 {
+	static int constexpr FLOAT_SIZE{ 5 };
+	Vertex2() :
+		data{ 0 }
+	{}
+	union {
+		struct {
+			Vec2 texCoord;
+			Vec2 corner;		// there are 4 corners: tl,tr,br,bl / (-1,1) (1,1) (1,-1) (-1-1)
+			int modelIndex;		// there are 3 uniform arrays for the model: position[float 2], rotation[float 2], scale[float 2]
+		};
+		float data[FLOAT_SIZE];
+	};
 };
 
 struct RenderingSharedData
@@ -81,8 +86,8 @@ public:
 	{}
 
 	~RenderingWorker() {
-		free(verteciesRawBuffer);
-		free(indices);
+		free(spriteShaderVBORaw);
+		free(indicesRaw);
 	}
 
 	void operator()();
@@ -93,10 +98,11 @@ public:
 	std::shared_ptr<RenderingSharedData> data;
 private:
 	std::string readShader(std::string path_);
-	std::array<Vertex, 4> generateVertices(Drawable const& d, float texID, Mat3 const& viewProjMat, Mat3 const& pixelProjectionMatrix);
-	void drawDrawable(Drawable const& d, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix);
+	void generateVertices(Drawable const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, Vertex* bufferPtr);
+	void drawDrawable(Drawable const& d, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix);
+	void drawLayer(RenderLayer& layer, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix);
 	// returns the index after the last element that was drawn in the batch
-	size_t drawBatch(std::vector<Drawable>& drawables, Mat3 const& viewProjectionMatrix, Mat3 const& pixelProjectionMatrix, size_t startIndex);
+	size_t drawBatch(std::vector<Drawable>& drawables, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix, size_t startIndex);
 	void bindTexture(GLuint texID, int slot = 0);
 private:
 	TextureCache texCache{ "ressources/" };
@@ -105,18 +111,24 @@ private:
 
 	int maxTextureSlots{};
 
-	size_t const maxRectCount{ 1000 };	// max Rectangle Count
-	size_t const maxVertexCount{ maxRectCount * 4 };
-	size_t const maxIndicesCount{ maxRectCount * 6 };
-	uint32_t verteciesBuffer{ 0 };
-	float* verteciesRawBuffer{ nullptr };
-	uint32_t* indices{ nullptr };
+	static constexpr size_t MAX_RECT_COUNT{ 2048 };	// max Rectangle Count
+	static constexpr size_t MAX_VERTEX_COUNT{ MAX_RECT_COUNT * 4 };
+	static constexpr size_t MAX_INDEX_COUNT{ MAX_RECT_COUNT * 6 };
+	uint32_t spriteShaderVBO = -1;
+	uint32_t spriteShaderVAO = -1;	// for struct Vertex2
+	float* spriteShaderVBORaw{ nullptr };
+	uint32_t* indicesRaw{ nullptr };
 
-	unsigned int shader{};
-	unsigned int shadowShader{};
-	std::string const vertexShaderPath = "shader/Basic.vert";
-	std::string const fragmentShaderPath = "shader/Basic.frag";
-	std::string const vertexShadowShaderPath = "shader/shadow.vert";
-	std::string const fragmentShadowShaderPath = "shader/shadow.frag";
+	inline static const int MODEL_SSBO_BINDING = 2;
+	GLuint modelSSBO;
+	RenderModel* modelSSBORaw;
+	GLuint modelUniformShaderBlockIndex;
+
+
+	int nextModelIndex{ 0 };
+
+	unsigned int spriteShaderProgram;
+	std::string const SPRITE_SHADER_VERTEX_PATH = "shader/SpriteShader.vert";
+	std::string const SPRITE_SHADER_FRAGMENT_PATH = "shader/SpriteShader.frag";
 };
 
