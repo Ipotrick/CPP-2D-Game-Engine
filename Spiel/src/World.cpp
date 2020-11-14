@@ -147,11 +147,18 @@ void World::loadMap(const std::string& mapname) {
 		cmpsBox.add(Health(100));
 		spawn(box);
 
+		for (int i = 0; i < 300'000; ++i) {
+			auto ent = create();
+			addComp(ent, Transform());
+			addComp(ent, Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
+			spawn(ent);
+		}
+
 		Vec2 scale = Vec2(0.3f, 0.3f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form); 
 		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 4.5f, calcMomentOfIntertia(4.5, scale),0.9f);
-		for (int i = 0; i < 3000; i ++) {
+		for (int i = 0; i < 10000; i ++) {
 			//if (i % 2) {
 			//	form = Form::Rectangle;
 			//	scale = { 0.2f, 0.4f }; 
@@ -195,6 +202,16 @@ void World::loadMap(const std::string& mapname) {
 		suckerCmd.spawner = identify(spawner);
 		cmps3.add<SuckerComp>(suckerCmd);
 		spawn(sucker);
+	}
+
+	if (mapname == "debug") {
+		auto rect = create();
+		
+		addComp(rect, Transform{ { 0, 0 } });
+		addComp(rect, Draw{ {1.0f,0.5f,0.0f,1.0f}, {1.0f, 1.0f}, 0.0f, Form::Rectangle });
+		spawn(rect);
+
+
 	}
 }
 
