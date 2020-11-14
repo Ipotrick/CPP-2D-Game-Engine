@@ -4,6 +4,7 @@ using namespace std::literals::chrono_literals;
 
 Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_)
 {
+	std::cout << "waiter" << std::endl;
 	/*
 	* there can only be one engine instance at a time
 	*/
@@ -32,6 +33,12 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 	perfLog.submitTime("rendertime");
 	perfLog.submitTime("calcRotaVecTime");
 	deltaTimeQueue.push_back(maxDeltaTime);
+
+	uiContext.recursionDepth = 1;
+	uiContext.drawMode = RenderSpace::PixelSpace;
+	uiContext.scale = 1.0f;
+	uiContext.ulCorner = { 0.0f, static_cast<float>(window.height) };
+	uiContext.drCorner = { static_cast<float>(window.width), 0.0f };
 }
 
 Engine::~Engine()
@@ -45,7 +52,7 @@ Engine::~Engine()
 	}
 	bInstantiated = false;
 
-	renderer.end();
+	renderer.reset();
 	window.close();
 }
 
@@ -66,34 +73,6 @@ float Engine::getDeltaTime(int sampleSize)
 	}
 }
 
-std::string Engine::getPerfInfo(int detail) {
-	std::stringstream ss;
-	if (detail >= 4) ss << "Entity Max: " << world.maxEntityIndex() << "\n";
-	if (detail >= 1) ss << "Entity Count: " << world.size() << "\n";
-	if (detail >= 1) {
-		ss << "    deltaTime(s): " << getDeltaTime() << "\n"
-			<< "    Ticks/s: " << 1 / getDeltaTime() << "\n"
-			<< "    simspeed: " << getDeltaTimeSafe() / getDeltaTime() << '\n';
-	}
-	if (detail >= 2) {
-		ss << "        update(s): " << perfLog.getTime("updatetime") << "\n"
-
-			<< "        physics(s): " << perfLog.getTime("physicstime") << '\n';
-	}
-	if (detail >= 3) {
-		ss << "            collision prepare:      " << perfLog.getTime("collisionprepare") << '(' << floorf(perfLog.getTime("collisionprepare") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            collision borad phase:  " << perfLog.getTime("collisionbroad") << '(' << floorf(perfLog.getTime("collisionbroad") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            collision narrow phase: " << perfLog.getTime("collisionnarrow") << '(' << floorf(perfLog.getTime("collisionnarrow") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            collision postamble:    " << perfLog.getTime("collisionpost") << '(' << floorf(perfLog.getTime("collisionpost") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            physics prepare:        " << perfLog.getTime("physicsprepare") << '(' << floorf(perfLog.getTime("physicsprepare") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            physics impulse:        " << perfLog.getTime("physicsimpulse") << '(' << floorf(perfLog.getTime("physicsimpulse") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n"
-			<< "            physics other:        " << perfLog.getTime("physicsrest") << '(' << floorf(perfLog.getTime("physicsrest") / perfLog.getTime("physicstime") * 10000.0f) * 0.01f << "%)\n";
-	}
-	if (detail >= 1) ss << "    renderTime(s): " << perfLog.getTime("rendertime") << '\n';
-
-	return ss.str();
-}
-
 Vec2 Engine::getWindowSize() {
 	std::lock_guard<std::mutex> l(window.mut);
 	return { static_cast<float>(window.width), static_cast<float>(window.height) };
@@ -107,7 +86,7 @@ float Engine::getWindowAspectRatio() {
 void Engine::run() {
 	create();
 
-	while (running) {
+	for(iteration = 0; running; ++iteration) {
 		Timer loopTimer(new_deltaTime);
 		Waiter loopWaiter(minimunLoopTime, Waiter::Type::BUSY);
 		deltaTime = micsecToFloat(new_deltaTime);
@@ -120,50 +99,32 @@ void Engine::run() {
 		{
 			Timer mainTimer(perfLog.getInputRef("maintime"));
 
-			// game update:
-			{
-				Timer t(perfLog.getInputRef("updatetime"));
-				update(getDeltaTimeSafe());
-			}
+			update(getDeltaTimeSafe());
 
 			// update in:
 			in.engineUpdate(renderer.getCamera());
 
 			// update rendering:
 			ui.update();
-			UIContext context;
-			context.drawingPrio = 1.0f;
-			context.drawMode = RenderSpace::PixelSpace;
-			context.scale = guiScale;
-			context.ulCorner = { 0.0f, static_cast<float>(window.height) };
-			context.drCorner = { static_cast<float>(window.width), 0.0f };
-			ui.draw(context);
-			rendererUpdate(world);
+			ui.draw(uiContext);
+			renderer.waitTillFinished();
+			perfLog.submitTime("rendertime", renderer.getRenderingTime());
 		}
 		if (glfwWindowShouldClose(window.glfwWindow)) { // if window closes the program ends
 			running = false;
+			break;
 		}
-		else {
-			if (!glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
-				in.takeFocus(Focus::Out);
-				in.takeMouseFocus(Focus::Out);
-			}
-			else if (glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() == Focus::Out) {
-				in.returnFocus();
-				in.returnMouseFocus();
-			}
-			renderer.startRendering();
-			iteration++;
+		if (!glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
+			in.takeFocus(Focus::Out);
+			in.takeMouseFocus(Focus::Out);
 		}
+		else if (glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() == Focus::Out) {
+			in.returnFocus();
+			in.returnMouseFocus();
+		}
+		renderer.startRendering();
 	}
-	renderer.end();
+	renderer.reset();
+
 	destroy();
-}
-
-void Engine::rendererUpdate(World& world)
-{
-	renderer.waitTillFinished();
-	renderer.flushSubmissions();
-
-	perfLog.submitTime("rendertime",renderer.getRenderingTime());
 }

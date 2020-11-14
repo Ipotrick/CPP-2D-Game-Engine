@@ -34,9 +34,14 @@ public:
 				c.cutOffRight(c.getScaledSize().x - child->getSize().x * context.scale);
 				child->draw(buffer, c);
 
-				offset += (child->getSize().x + spacing) * context.scale;
+				offset += (child->getSize().x + this->spacing) * context.scale;
 			}
-			if (bAutoLength) this->size.x = offset / context.scale + getXPadding();
+			if (bAutoLength) {
+				if (offset > 0) {
+					offset -= spacing * context.scale;
+				}
+				this->size.x = offset / context.scale + getXPadding();
+			}
 		}
 		else {
 			if (bSpacingUniform) {
@@ -55,7 +60,12 @@ public:
 
 				offset += (child->getSize().y + spacing) * context.scale;
 			}
-			if (bAutoLength) this->size.y = offset / context.scale + getYPadding();
+			if (bAutoLength) {
+				if (offset > 0) {
+					offset -= spacing * context.scale;
+				}
+				this->size.y = offset / context.scale;// +getYPadding();
+			}
 		}
 	}
 

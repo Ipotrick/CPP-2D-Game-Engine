@@ -240,6 +240,11 @@ public:
 	{
 		return this->cos == v.cos && this->sin == v.sin;
 	}
+
+	Vec2 toVec2() const
+	{
+		return { cos, sin };
+	}
 public:
 	float sin{ 0.0f };
 	float cos{ 1.0f };

@@ -10,7 +10,7 @@ public:
 	{
 		context = this->anchor.shrinkContextToMe(this->size, context);
 
-		context.increaseDrawPrio();
+		context.recursionDepth++;
 		for (auto& el : this->children) {
 			el->draw(buffer, context);
 		}

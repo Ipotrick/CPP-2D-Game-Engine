@@ -8,12 +8,12 @@ void UIText::draw(std::vector<Drawable>& buffer, UIContext context)
 
 	// now apply letterSize and textAnchor to the context:
 	context = textAnchor.shrinkContextToMe(this->textSize, context);
-	context.increaseDrawPrio();
+	context.recursionDepth++;
 
 	int column = 0;
 	int row = 0;
 	Vec2 letterSize = context.scale * fontSize;
-	auto letter = Drawable(0, {}, context.drawingPrio, letterSize, color, Form::Rectangle, RotaVec2(0), context.drawMode);
+	auto letter = Drawable(0, {}, context.recursionDepth, letterSize, color, Form::Rectangle, RotaVec2(0), context.drawMode);
 	for (auto c : text) {
 		if (c == '\n') {
 			row += 1;

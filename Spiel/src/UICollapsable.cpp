@@ -15,7 +15,7 @@ void UICollapsable::draw(std::vector<Drawable>& buffer, UIContext context)
 	Vec2 sHeadPos = anchor.getOffset(sHeadSize, context);
 	Vec2 sBorder = this->border * context.scale;
 	drawFrame(buffer, context, sHeadPos, sHeadSize, sBorder, borderColor, fillColor);
-	context.increaseDrawPrio(); 
+	++context.recursionDepth;
 	UIContext headContext = context;
 	headContext.cutOffBottom(headContext.getScaledSize().y - sHeadSize.y);
 	headContext.cutOffBorder(sBorder);
@@ -24,11 +24,11 @@ void UICollapsable::draw(std::vector<Drawable>& buffer, UIContext context)
 	Vec2 arrowAreaSize = Vec2{ sHeadSize.y, sHeadSize.y } - sBorder * 2.0f;
 	Vec2 arrowSize = arrowAreaSize *isq2 * arrowScale;
 	Vec2 arrowPos = Vec2{ arrowAreaSize.x * 0.5f + sBorder.x + sHeadPos.x - sHeadSize.x * 0.5f, sHeadPos.y };
-	buffer.push_back(Drawable(0, arrowPos, headContext.drawingPrio, arrowSize, borderColor, Form::Rectangle, RotaVec2(45), headContext.drawMode));
-	headContext.increaseDrawPrio();
+	buffer.push_back(Drawable(0, arrowPos, headContext.recursionDepth, arrowSize, borderColor, Form::Rectangle, RotaVec2(45), headContext.drawMode));
+	++context.recursionDepth;
 	Vec2 helperPos = arrowPos + Vec2{ 0.0f, arrowAreaSize.y * 0.25f } *(bCollapsed ? 1.0f : -1.0f);
 	Vec2 helperSize = { arrowAreaSize.x, arrowAreaSize.y * 0.5f };
-	buffer.push_back(Drawable(0, helperPos, headContext.drawingPrio, helperSize, fillColor, Form::Rectangle, RotaVec2(0), headContext.drawMode));
+	buffer.push_back(Drawable(0, helperPos, headContext.recursionDepth, helperSize, fillColor, Form::Rectangle, RotaVec2(0), headContext.drawMode));
 
 	// draw title:
 	headContext.cutOffLeft(arrowAreaSize.x);
@@ -45,7 +45,7 @@ void UICollapsable::draw(std::vector<Drawable>& buffer, UIContext context)
 		Vec2 bodySize = { sHeadSize.x, bodyHeight * bodyContext.scale };
 		Vec2 bodyPos = anchor.getOffset(bodySize, bodyContext);
 		drawFrame(buffer, bodyContext, bodyPos, bodySize, sBorder, borderColor, fillColor);
-		bodyContext.increaseDrawPrio();
+		++bodyContext.recursionDepth;
 
 		if (hasChild()) {
 			auto childContext = bodyContext;

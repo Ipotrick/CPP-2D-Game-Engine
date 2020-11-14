@@ -33,6 +33,7 @@ public:
     static Mat4 rotate_y(float angle);
     // return matrix for rotation around z-axis
     static Mat4 rotate_z(float angle);
+    static Mat4 rotate_z(RotaVec2 const& rotaVec);
 private:
     float data_[16];
 };

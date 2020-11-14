@@ -8,9 +8,7 @@ class UIManager {
 public:
 	UIManager(Renderer& renderer, InputManager& in)
 		:renderer{renderer}, in{ in }
-	{
-
-	}
+	{ }
 
 	UIEntity createFrame(UIFrame frame)
 	{

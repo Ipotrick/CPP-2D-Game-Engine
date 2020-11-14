@@ -144,6 +144,22 @@ Mat4 Mat4::rotate_z(float angle)
     return m;
 }
 
+Mat4 Mat4::rotate_z(RotaVec2 const& rotaVec)
+{
+    float const ca = rotaVec.cos;
+    float const sa = rotaVec.sin;
+
+    Mat4 m;
+    m(0, 0) = ca;
+    m(0, 1) = -sa;
+    m(1, 0) = sa;
+    m(1, 1) = ca;
+    m(2, 2) = 1.0f;
+    m(3, 3) = 1.0f;
+
+    return m;
+}
+
 Mat4 Mat4::scale(float factor)
 {
     Mat4 m;
