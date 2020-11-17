@@ -336,13 +336,16 @@ void Game::gameplayUpdate(float deltaTime)
 	}
 
 	//execute scripts
-	for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(ent, comp, deltaTime);
+	{
+		LogTimer t(std::cout, "time taken for scripts: ");
+		for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(ent, comp, deltaTime);
+		for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(ent, comp, deltaTime);
+		for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(ent, comp, deltaTime);
+		for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(ent, comp, deltaTime);
+		for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(ent, comp, deltaTime);
+		for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(ent, comp, deltaTime);
+		for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(ent, comp, deltaTime);
+	}
 
 	cursorManipFunc();
 

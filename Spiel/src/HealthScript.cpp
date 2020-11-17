@@ -40,11 +40,13 @@ void createHealthUI(EntityHandle ent)
 	frame.addChild(Engine::ui.createAndGet(p));
 	frame.setUpdateFn(
 		[&, ent](UIElement* e) {
-			UIFrame* f = (UIFrame*)e;
-			Vec2 pos = Engine::renderer.convertCoordinate<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Engine::world.getComp<Transform>(ent).position);
-			float scale = Engine::renderer.getCamera().zoom * 3.5f;
-			f->anchor.setAbsPosition(pos + Vec2(0.0f, 60.0f) * scale);
-			f->setScale(scale);
+			if (e->isEnabled()) {
+				UIFrame* f = (UIFrame*)e;
+				Vec2 pos = Engine::renderer.convertCoordinate<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Engine::world.getComp<Transform>(ent).position);
+				float scale = Engine::renderer.getCamera().zoom * 3.5f;
+				f->anchor.setAbsPosition(pos + Vec2(0.0f, 60.0f) * scale);
+				f->setScale(scale);
+			}
 		}
 	);
 	frame.setDestroyIfFn(

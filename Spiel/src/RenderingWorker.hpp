@@ -26,7 +26,7 @@ struct Vertex {
 };
 
 struct RenderModel {
-	static int constexpr FLOAT_SIZE{ 24 };
+	static int constexpr FLOAT_SIZE{ 16 };
 	RenderModel() :
 		data{ 0 }
 	{
@@ -39,7 +39,10 @@ struct RenderModel {
 			Vec2 scale;
 			GLint texId;
 			GLint isCircle;
-			Mat4 viewProj;
+			GLint renderSpace;
+			uint32_t p0;
+			uint32_t p1;
+			uint32_t p2;
 		};
 		float data[FLOAT_SIZE];
 	};

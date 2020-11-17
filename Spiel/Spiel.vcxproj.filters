@@ -508,12 +508,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\SpriteShader_OLD.frag">
-      <Filter>_Engine\_Rendering\_shader</Filter>
-    </None>
-    <None Include="shader\SpriteShader_OLD.vert">
-      <Filter>_Engine\_Rendering\_shader</Filter>
-    </None>
     <None Include="shader\SpriteShader.vert">
       <Filter>_Engine\_Rendering\_shader</Filter>
     </None>

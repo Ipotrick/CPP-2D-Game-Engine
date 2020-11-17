@@ -11,6 +11,12 @@
 #include "CollisionSystem.hpp"
 #include "JobManager.hpp"
 #include "Physics.hpp"
+/*
+* NEXT TASK TODO:
+* implement fake movement
+* implement new position correction based on fake movement
+* implement settings for iteration count of force and penetratin constraints
+*/
 
 class PhysicsSystem2 {
 public:
@@ -23,7 +29,6 @@ private:
 	void eraseDeadConstraints();
 	void prepareConstraints(World& world, float deltaTime);
 	void springyPositionCorrection(World& world, float deltaTime);
-	void makeDisjointPairs(CollisionSystem& collSys, World& world);
 	void applyImpulse(World& world, CollisionConstraint& c);
 	void applyImpulses(World& world);
 	void applyImpulsesMultiThreadded(World& world);

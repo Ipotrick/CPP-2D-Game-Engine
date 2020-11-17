@@ -15,7 +15,13 @@ struct ModelUniform {
 	vec2 scale;
 	int texId;
 	int isCircle;
-	mat4 viewProj;
+	/*
+	 *	render space = 0 => world space
+	 *  render space = 1 => window space
+	 *	render space = 2 => uniform window space
+	 *	render space = 3 => pixel space
+	*/
+	int renderSpace;
 };
 
 layout(std430, binding = 2) buffer ModelData {

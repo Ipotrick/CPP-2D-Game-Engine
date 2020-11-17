@@ -105,10 +105,15 @@ void Engine::run() {
 			in.engineUpdate(renderer.getCamera());
 
 			// update rendering:
-			ui.update();
-			ui.draw(uiContext);
+			{
+				LogTimer t(std::cout, "time taken for ui update: ");
+				ui.update();
+			}
+			{
+				LogTimer t(std::cout, "time taken for ui draw: ");
+				ui.draw(uiContext);
+			}
 			renderer.waitTillFinished();
-			perfLog.submitTime("rendertime", renderer.getRenderingTime());
 		}
 		if (glfwWindowShouldClose(window.glfwWindow)) { // if window closes the program ends
 			running = false;

@@ -170,8 +170,6 @@
   <ItemGroup>
     <None Include="shader\SpriteShader.frag" />
     <None Include="shader\SpriteShader.vert" />
-    <None Include="shader\SpriteShader_OLD.frag" />
-    <None Include="shader\SpriteShader_OLD.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

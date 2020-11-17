@@ -6,7 +6,7 @@
 #include "Timing.hpp"
 
 
-Vec2 idToCorner(int id, Vec2 min, Vec2 max)
+inline constexpr Vec2 idToCorner(const int id, const Vec2 min, const Vec2 max)
 {
 	switch (id) {
 	case 0:
@@ -18,7 +18,6 @@ Vec2 idToCorner(int id, Vec2 min, Vec2 max)
 	case 3:
 		return { max.x, min.y };	// br
 	default:
-		assert(false);
 		return { 0,0 };
 	}
 }
@@ -264,47 +263,42 @@ std::string RenderingWorker::readShader(std::string path_)
 void RenderingWorker::generateVertices(Drawable const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, Vertex* bufferPtr) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
-	if (d.texRef.has_value() && texCache.isTextureLoaded(d.texRef.value())) {
+	if (d.texRef.has_value()) {
 		minTex = d.texRef.value().minPos;
 		maxTex = d.texRef.value().maxPos;
 	}
 
-	bool isCircle = d.form == Form::Circle ? 1.0f : 0.0f;
-
-	Mat4 vP = Mat4::identity();
-	switch (d.getDrawMode()) {
-	case RenderSpace::WorldSpace:
-		vP = viewProjMat;
-		break;
-	case RenderSpace::WindowSpace:
-		vP = Mat4::identity();
-		break;
-	case RenderSpace::UniformWindowSpace:
-		vP = Mat4::scale({ data->renderBuffer->camera.frustumBend.x,data->renderBuffer->camera.frustumBend.y, 1.0f });
-		break;
-	case RenderSpace::PixelSpace: 
-		vP = pixelProjectionMatrix;
-		break;
-	default:
-		assert(false);
-		break;
-	}
+	bool isCircle = static_cast<bool>(d.form);
 
 	RenderModel* model = modelSSBORaw + nextModelIndex;
-	model->color = d.color;
-	model->position = d.position;
-	model->rotation = d.rotationVec.toVec2();
-	model->scale = d.scale;
+	// model->color = d.color;
+	// model->position = d.position;
+	// model->rotation = d.rotationVec.toVec2();
+	// model->scale = d.scale;
+	std::memcpy(model, &d, sizeof(float) * 10);
 	model->texId = texID;
 	model->isCircle = isCircle;
-	model->viewProj = vP;
+	model->renderSpace = static_cast<GLint>(d.getDrawMode());
 
-	for (int i = 0; i < 4; ++i) {
-		Vertex* vertex = bufferPtr + i;
-		vertex->texCoord = idToCorner(i, minTex, maxTex);
-		vertex->corner = idToCorner(i, { -0.5f, -0.5f }, { 0.5f, 0.5f });
-		vertex->modelIndex = nextModelIndex;
-	}
+	Vertex* vertex{ nullptr };
+	
+	vertex = bufferPtr + 0;
+	vertex->texCoord = idToCorner(0, minTex, maxTex);
+	vertex->corner = idToCorner(0, { -0.5f, -0.5f }, { 0.5f, 0.5f });
+	vertex->modelIndex = nextModelIndex;
+	vertex = bufferPtr + 1;
+	vertex->texCoord = idToCorner(1, minTex, maxTex);
+	vertex->corner = idToCorner(1, { -0.5f, -0.5f }, { 0.5f, 0.5f });
+	vertex->modelIndex = nextModelIndex;
+	vertex = bufferPtr + 2;
+	vertex->texCoord = idToCorner(2, minTex, maxTex);
+	vertex->corner = idToCorner(2, { -0.5f, -0.5f }, { 0.5f, 0.5f });
+	vertex->modelIndex = nextModelIndex;
+	vertex = bufferPtr + 3;
+	vertex->texCoord = idToCorner(3, minTex, maxTex);
+	vertex->corner = idToCorner(3, { -0.5f, -0.5f }, { 0.5f, 0.5f });
+	vertex->modelIndex = nextModelIndex;
+
 	++nextModelIndex;
 }
 
@@ -365,6 +359,13 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& 
 		auto bufferPtr = (Vertex*)(spriteShaderVBORaw + drawableCount * Vertex::FLOAT_SIZE * 4);	// gets index for the next 4 vertecies in raw buffer
 		generateVertices(d, drawableSamplerSlot, viewProjectionMatrix, pixelProjectionMatrix, bufferPtr);
 	}
+	// set projection-matrix-uniforms:
+	glUniformMatrix4fv(0, 1, GL_FALSE, viewProjectionMatrix.data());
+	// the window space matrix has no uniform as it is the identity matrix
+	Mat4 uniformWindowSpaceMatrix = Mat4::scale({ data->renderBuffer->camera.frustumBend.x,data->renderBuffer->camera.frustumBend.y, 1.0f });
+	glUniformMatrix4fv(2, 1, GL_FALSE, uniformWindowSpaceMatrix.data());
+	glUniformMatrix4fv(3, 1, GL_FALSE, pixelProjectionMatrix.data());
+
 	// push vertex data to the gpu
 	glBindBuffer(GL_ARRAY_BUFFER, spriteShaderVBO);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * MAX_VERTEX_COUNT, spriteShaderVBORaw);

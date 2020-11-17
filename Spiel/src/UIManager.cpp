@@ -1,4 +1,5 @@
 #include "UIManager.hpp"
+#include "log/Log.hpp"
 
 void UIManager::destroyFrame(UIEntity index)
 {
@@ -23,7 +24,7 @@ void UIManager::destroyFrame(std::string_view name)
 		destroyFrame(index);
 	}
 	else {
-		std::cerr << "WARNING: trying to delete non existant UIEntity!\n";
+		Monke::log("WARNING: trying to delete non existant UIEntity!");
 	}
 }
 
@@ -35,7 +36,6 @@ bool UIManager::doesFrameExist(UIEntity ent)
 void UIManager::update()
 {
 	perEntityUpdate();
-	postUpdate();
 	focusUpdate();
 	clickableUpdate();
 }
@@ -207,12 +207,4 @@ void UIManager::clickableUpdate()
 			}
 		}
 	);
-}
-
-void UIManager::postUpdate()
-{
-	for (auto& uient : getElementContainer<UIFrame>()) {
-		auto& frame = getElementContainer<UIFrame>().get(uient);
-		frame.postUpdate();
-	}
 }

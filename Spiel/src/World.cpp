@@ -18,7 +18,7 @@ void World::loadMap(const std::string& mapname) {
 		};
 
 		this->physics.friction = 0.25f;
-		//this->physics.linearEffectAccel = 3.0;
+		this->physics.linearEffectAccel = 3.0;
 		this->physics.linearEffectDir = Vec2(0,-1);
 
 
@@ -147,17 +147,17 @@ void World::loadMap(const std::string& mapname) {
 		cmpsBox.add(Health(100));
 		spawn(box);
 
-		for (int i = 0; i < 300'000; ++i) {
-			auto ent = create();
-			addComp(ent, Transform());
-			addComp(ent, Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
-			spawn(ent);
-		}
+		//for (int i = 0; i < 300'000; ++i) {
+		//	auto ent = create();
+		//	addComp(ent, Transform({(rand()%10000) / 10.0f - 500.0f, (rand() % 10000) / 10.0f - 500.0f }, rand()%360));
+		//	addComp(ent, Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
+		//	spawn(ent);
+		//}
 
 		Vec2 scale = Vec2(0.3f, 0.3f);
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form); 
-		PhysicsBody trashSolidBody = PhysicsBody(0.0f, 4.5f, calcMomentOfIntertia(4.5, scale),0.9f);
+		PhysicsBody trashSolidBody = PhysicsBody(0.2f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
 		for (int i = 0; i < 10000; i ++) {
 			//if (i % 2) {
 			//	form = Form::Rectangle;
@@ -166,7 +166,6 @@ void World::loadMap(const std::string& mapname) {
 			//}
 			//else {
 				form = Form::Circle;
-				scale = { 0.1f, 0.1f }; 
 				trashCollider = Collider(scale, form);
 			//}
 			trashCollider.form = form;

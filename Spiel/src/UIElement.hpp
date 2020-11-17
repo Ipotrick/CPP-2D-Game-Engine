@@ -16,9 +16,9 @@ public:
 	{
 		bDestroyed = true;
 	}
-	virtual bool isDestroyed() const final { return bDestroyed; }
+	bool isDestroyed() const { return bDestroyed; }
 
-	virtual void update()
+	void update()
 	{
 		if (!isDestroyed()) {
 			if (hasDestroyIfFn() && destroyIfFn(this)) {
@@ -64,10 +64,6 @@ public:
 	{
 		return this->size;
 	}
-	/*
-	* This function is called recursively for all frames and their elements AFTER the update call to all frames and elements
-	*/
-	virtual void postUpdate() {}
 
 	/*
 	* the destroyIf function is called before the update function.

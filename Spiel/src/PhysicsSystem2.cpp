@@ -1,5 +1,6 @@
 #include "PhysicsSystem2.hpp"
 #include "debug.hpp"
+#include "log/Log.hpp"
 
 PhysicsSystem2::PhysicsSystem2(JobManager& jobs, PerfLogger& perf)
 	:jobManager{ jobs }, perfLog{ perf }

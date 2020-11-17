@@ -34,13 +34,6 @@ public:
 		}
 	}
 
-	virtual void postUpdate() override
-	{
-		if (hasChild()) {
-			getChild()->postUpdate();
-		}
-	}
-
 	UIFrame(UIAnchor anchor, Vec2 size)
 	{ 
 		this->size = size;
