@@ -158,15 +158,18 @@ void World::loadMap(const std::string& mapname) {
 		Form form = Form::Circle;
 		Collider trashCollider = Collider(scale, form); 
 		PhysicsBody trashSolidBody = PhysicsBody(0.2f, 0.5f, calcMomentOfIntertia(0.5, scale),0.9f);
-		for (int i = 0; i < 10000; i ++) {
+		for (int i = 0; i < 3000; i ++) {
 			//if (i % 2) {
 			//	form = Form::Rectangle;
 			//	scale = { 0.2f, 0.4f }; 
 			//	trashCollider = Collider(scale, form);
 			//}
 			//else {
-				form = Form::Circle;
-				trashCollider = Collider(scale, form);
+
+			float factor = (rand() % 1000) / 500.0f + 0.7f;
+			auto sscale = scale * factor;
+			form = Form::Circle;
+			trashCollider = Collider(sscale, form);
 			//}
 			trashCollider.form = form;
 			Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
@@ -176,7 +179,7 @@ void World::loadMap(const std::string& mapname) {
 			addComp(trash, Transform(position, RotaVec2(0)));
 			addComp(trash, Movement());
 			addComp(trash, trashCollider); 
-			addComp(trash, Draw(color, scale, 0.5f, form));
+			addComp(trash, Draw(color, sscale, 0.5f, form));
 			addComp(trash, trashSolidBody);
 			addComp(trash, Health(100));
 			addComp(trash, TextureRef2("Dir.png"));

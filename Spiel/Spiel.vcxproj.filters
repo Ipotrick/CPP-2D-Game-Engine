@@ -354,6 +354,12 @@
     <ClInclude Include="src\LayerConstants.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\RenderScript.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TestRenderScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">

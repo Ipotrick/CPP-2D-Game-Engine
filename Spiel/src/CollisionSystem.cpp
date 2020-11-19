@@ -4,10 +4,9 @@
 #include "PhysicsSystem.hpp"
 #include "CacheAABBJob.hpp"
 
-CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, uint32_t qtreeCapacity) :
+CollisionSystem::CollisionSystem(World& world, JobManager& jobManager, uint32_t qtreeCapacity) :
 	world{ world },
 	jobManager{ jobManager },
-	perfLog{ perfLog },
 	qtreeCapacity{ qtreeCapacity },
 	workerBuffers(jobManager.neededBufferNum()),
 	qtreeDynamic({ 0,0 }, { 0,0 }, qtreeCapacity, world, jobManager, Collider::DYNAMIC),
@@ -66,7 +65,6 @@ void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions,
 
 void CollisionSystem::prepare(World& world)
 {
-	Timer t1(perfLog.getInputRef("collisionprepare"));
 
 	rebuildStatic = true;
 
@@ -118,8 +116,6 @@ void CollisionSystem::prepare(World& world)
 	jobManager.waitFor(jobTagAABBStat);
 	jobManager.waitFor(jobTagAABBSensor);
 
-	t1.stop();
-	Timer t2(perfLog.getInputRef("collisionbroad"));
 	// clean quadtrees
 	qtreeParticle.resetPerMinMax(minPos, maxPos);
 	qtreeParticle.removeEmptyLeafes();
@@ -178,7 +174,6 @@ void CollisionSystem::cleanBuffers(World& world)
 
 void CollisionSystem::collisionDetection(World& world)
 {
-	Timer t3(perfLog.getInputRef("collisionnarrow"));
 
 	// the maximum job count is the size of the 4 entity vectors divided by the max job size (+1 for the rest of the division)
 	// multiplied by the number of qtrees the entitiylist checks with
@@ -229,9 +224,6 @@ void CollisionSystem::collisionDetection(World& world)
 		throw new std::exception();
 
 	jobManager.waitAndHelp(&collisionCheckJobTags);
-
-	t3.stop();
-	Timer t4(perfLog.getInputRef("collisionpost"));
 
 	// reset quadtree rebuild flags
 	rebuildStatic = false;

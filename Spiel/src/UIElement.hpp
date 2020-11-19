@@ -8,34 +8,25 @@
 
 static constexpr Vec2 standartBorder{ 1.0f, 1.0f };
 
+class UIElementPrivilage {};
+
 class UIElement {
 public:
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) = 0;
 
-	virtual void destroy()
-	{
-		bDestroyed = true;
-	}
-	bool isDestroyed() const { return bDestroyed; }
-
 	void update()
 	{
 		if (!isDestroyed()) {
-			if (hasDestroyIfFn() && destroyIfFn(this)) {
-				destroy();
+			if (hasEnableIfFn()) {
+				if (enableIfFn(this)) {
+					enable();
+				}
+				else {
+					disable();
+				}
 			}
-			else {
-				if (hasEnableIfFn()) {
-					if (enableIfFn(this)) {
-						enable();
-					}
-					else {
-						disable();
-					}
-				}
-				if (hasUpdateFn()) {
-					fn_update(this);
-				}
+			if (hasUpdateFn()) {
+				fn_update(this);
 			}
 		}
 	}
@@ -65,17 +56,6 @@ public:
 		return this->size;
 	}
 
-	/*
-	* the destroyIf function is called before the update function.
-	*/
-	void setDestroyIfFn(std::function<bool(UIElement*)> f)
-	{
-		this->destroyIfFn = f;
-	}
-	bool hasDestroyIfFn() const
-	{
-		return static_cast<bool>(destroyIfFn);
-	}
 
 	/*
 	* enables element when function returns true
@@ -91,6 +71,17 @@ public:
 
 	UIAnchor anchor;
 protected:
+	friend class UISingleParent;
+	friend class UIManager;
+	friend class UIPair;
+	template<std::size_t SIZE>
+	friend class UIMultiParent;
+	virtual void destroy()
+	{
+		bDestroyed = true;
+	}
+	bool isDestroyed() const { return bDestroyed; }
+
 	Vec2 size{ 0.0f, 0.0f };
 	std::function<void(UIElement*)> fn_update{ {} };
 	/*

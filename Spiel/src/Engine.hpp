@@ -23,8 +23,11 @@
 
 class Engine {
 public:
-	Engine(std::string windowName, uint32_t windowWidth, uint32_t windowHeight);
+	Engine();
 	~Engine();
+
+	// creates window and initializes renderer
+	void initialize(std::string windowName, uint32_t windowWidth, uint32_t windowHeight);
 
 	/* ends programm after finishing the current frame */
 	virtual void quit() final { running = false; }
@@ -55,12 +58,8 @@ public:
 
 	inline static JobManager jobManager{ std::thread::hardware_concurrency() };
 
-	// core systems
-	inline static PerfLogger perfLog;
-
 	inline static World world;
 
-	// window
 private: 
 	inline static Window window;
 public:

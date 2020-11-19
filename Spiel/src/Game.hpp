@@ -33,8 +33,8 @@ public:
 	void cursorManipFunc();
 
 	inline static CursorManipData cursorData;
-	inline static CollisionSystem collisionSystem{ world, jobManager, perfLog };
-	inline static PhysicsSystem2 physicsSystem2{ jobManager, perfLog };
+	inline static CollisionSystem collisionSystem{ world, jobManager };
+	inline static PhysicsSystem2 physicsSystem2{ jobManager };
 
 	// TEMP TODO REMOVE
 	LapTimer spawnerLapTimer{0.0001f};

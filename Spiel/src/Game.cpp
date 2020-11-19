@@ -14,18 +14,27 @@
 #include "TesterScript.hpp"
 #include "drawScript.hpp"
 #include "LayerConstants.hpp"
+#include "TestRenderScript.hpp"
 
 using namespace util;
 
 Game::Game()
-	: Engine("Spiel Fenster", 1600, 900)
 {
+	initialize("Spiel Fenster", 1600, 900);
+
 	renderer.setLayerCount(LAYER_MAX);
+
 	renderer.getLayer(LAYER_WORLD_BACKGROUND).renderMode = RenderSpace::WorldSpace;
+	renderer.getLayer(LAYER_WORLD_BACKGROUND).attachRenderScript(std::make_unique<TestRenderScript>());
+
 	renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::WorldSpace;
+
 	renderer.getLayer(LAYER_WORLD_FOREGROUND).renderMode = RenderSpace::WorldSpace;
+
 	renderer.getLayer(LAYER_FIRST_UI).renderMode = RenderSpace::PixelSpace;
+
 	renderer.getLayer(LAYER_SECOND_UI).renderMode = RenderSpace::PixelSpace;
+
 }
 
 #define UI_CREATE(parent, code, Type, name) \
@@ -258,11 +267,8 @@ void Game::gameplayUpdate(float deltaTime)
 			ui.getFrame("Statiscics").enable();
 		}
 	}
-	if (in.keyPressed(Key::PERIOD, Focus::Global) && in.keyReleased(Key::LEFT_SHIFT, Focus::Global)) {
-		in.takeFocus(Focus::UI);
-	}
-	if (in.keyPressed(Key::PERIOD, Focus::Global) && in.keyPressed(Key::LEFT_SHIFT, Focus::Global)) {
-		in.takeFocus(Focus::Standard);
+	if (in.keyPressed(Key::PERIOD, Focus::Global)) {
+		renderer.getLayer(LAYER_WORLD_BACKGROUND).detachRenderScript();
 	}
 	if (in.keyPressed(Key::I)) {
 		uiContext.scale = clamp(uiContext.scale - deltaTime, 0.1f, 10.0f);
@@ -336,16 +342,13 @@ void Game::gameplayUpdate(float deltaTime)
 	}
 
 	//execute scripts
-	{
-		LogTimer t(std::cout, "time taken for scripts: ");
-		for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(ent, comp, deltaTime);
-		for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(ent, comp, deltaTime);
-		for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(ent, comp, deltaTime);
-		for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(ent, comp, deltaTime);
-		for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(ent, comp, deltaTime);
-		for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(ent, comp, deltaTime);
-		for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(ent, comp, deltaTime);
-	}
+	for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(ent, comp, deltaTime);
 
 	cursorManipFunc();
 

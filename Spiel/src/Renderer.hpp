@@ -162,6 +162,18 @@ private:
 	std::thread workerThread;
 };
 
+#define ASSERT_IS_STATE(s)\
+	if (s != this->state) {\
+	std::cerr << "in line " << __LINE__ <<" ERROR: wait was called in wrong renderer state, state was: " << (int)this->state << ", state SHOULD be " << (int)s << std::endl;\
+	exit(-1);\
+	}
+
+#define ASSERT_IS_NOT_STATE(s)\
+	if (s == this->state) {\
+	std::cerr << "in line " << __LINE__ <<" ERROR: wait was called in wrong renderer state, state was: " << (int)this->state << ", state SHOULD NOT be " << (int)s << std::endl;\
+	exit(-1);\
+	}
+
 template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::PixelSpace,			RenderSpace::WindowSpace>(Vec2 coord)
 {
 	return { 

@@ -64,7 +64,7 @@ class CollisionSystem {
 		std::vector<CollisionInfo>& collInfos;
 	};
 public:
-	CollisionSystem(World& world, JobManager& jobManager, PerfLogger& perfLog, uint32_t qtreeCapacity = 6);
+	CollisionSystem(World& world, JobManager& jobManager, uint32_t qtreeCapacity = 6);
 	void execute(World& world, float deltaTime);
 	std::vector<CollisionInfo>& getCollisions();
 	const CollisionsView collisions_view(EntityHandle entity)
@@ -86,7 +86,6 @@ private:
 	// constants:
 	static const int MAX_ENTITIES_PER_JOB = 200;
 	uint32_t qtreeCapacity;
-	PerfLogger& perfLog;
 	bool rebuildStaticData;
 	// flags:
 	bool rebuildStatic = true;

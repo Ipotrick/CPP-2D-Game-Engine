@@ -77,8 +77,7 @@ void healthScript(EntityHandle me, Health& data, float deltaTime)
 	if (data.curHealth <= 0) {
 		world.destroy(me);
 	}
-
-	if (!data.bUISpawned) {
+	else if (data.curHealth != data.maxHealth && !data.bUISpawned) {
 		createHealthUI(me);
 		data.bUISpawned = true;
 	}

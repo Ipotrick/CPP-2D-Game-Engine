@@ -4,7 +4,7 @@
 #include "InputManager.hpp"
 #include "utils.hpp"
 
-class UIManager {
+class UIManager : public UIElementPrivilage {
 public:
 	UIManager(Renderer& renderer, InputManager& in)
 		:renderer{renderer}, in{ in }

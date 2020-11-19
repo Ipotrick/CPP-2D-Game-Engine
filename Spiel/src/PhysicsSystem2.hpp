@@ -20,7 +20,7 @@
 
 class PhysicsSystem2 {
 public:
-	PhysicsSystem2(JobManager& jobs, PerfLogger& perf);
+	PhysicsSystem2(JobManager& jobs);
 	void execute(World& world, float deltaTime, CollisionSystem& collSys);
 	const std::vector<Drawable>& getDebugDrawables() const;
 private:
@@ -42,7 +42,6 @@ private:
 	int impulseIterations = 15;
 
 	JobManager& jobManager;
-	PerfLogger& perfLog;
 
 	CollisionConstraintSet collConstraints;
 

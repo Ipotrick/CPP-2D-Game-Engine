@@ -2,20 +2,18 @@
 #include "debug.hpp"
 #include "log/Log.hpp"
 
-PhysicsSystem2::PhysicsSystem2(JobManager& jobs, PerfLogger& perf)
-	:jobManager{ jobs }, perfLog{ perf }
+PhysicsSystem2::PhysicsSystem2(JobManager& jobs)
+	:jobManager{ jobs }
 {
 	disjointPairs.reserve(MAX_LAYERS);
 }
 
 void PhysicsSystem2::execute(World& world, float deltaTime, CollisionSystem& collSys)
 {
-	Timer t(perfLog.getInputRef("physicsprepare"));
 	deltaTime = std::min(deltaTime, minDelaTime);
 	debugDrawables.clear();
 	updateCollisionConstraints(world, collSys);
 	eraseDeadConstraints();
-	t.stop();
 	if (positionCorrection) springyPositionCorrection(world, deltaTime);
 	prepareConstraints(world, deltaTime);
 	applyImpulses(world);
@@ -246,7 +244,6 @@ void PhysicsSystem2::applyImpulse(World& world, CollisionConstraint& c)
 
 void PhysicsSystem2::applyImpulses(World& world)
 {
-	Timer t3(perfLog.getInputRef("physicsimpulse"));
 	for (int i = 0; i < impulseIterations; ++i) {
 		for (auto& c : collConstraints) {
 			applyImpulse(world, c);
@@ -256,7 +253,6 @@ void PhysicsSystem2::applyImpulses(World& world)
 
 void PhysicsSystem2::applyImpulsesMultiThreadded(World& world)
 {
-	Timer t3(perfLog.getInputRef("physicsimpulse"));
 	std::vector<LambdaJob> jobs;
 	std::vector<Tag> jobTags;
 

@@ -34,6 +34,40 @@ public:
 		}
 	}
 
+	void update()
+	{
+		if (!isDestroyed()) {
+			if (hasDestroyIfFn() && destroyIfFn(this)) {
+				destroy();
+			}
+			else {
+				if (hasEnableIfFn()) {
+					if (enableIfFn(this)) {
+						enable();
+					}
+					else {
+						disable();
+					}
+				}
+				if (hasUpdateFn()) {
+					fn_update(this);
+				}
+			}
+		}
+	}
+
+	/*
+	* the destroyIf function is called before the update function.
+	*/
+	void setDestroyIfFn(std::function<bool(UIElement*)> f)
+	{
+		this->destroyIfFn = f;
+	}
+	bool hasDestroyIfFn() const
+	{
+		return static_cast<bool>(destroyIfFn);
+	}
+
 	UIFrame(UIAnchor anchor, Vec2 size)
 	{ 
 		this->size = size;

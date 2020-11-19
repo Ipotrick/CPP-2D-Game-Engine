@@ -3,10 +3,6 @@
 
 void UIManager::destroyFrame(UIEntity index)
 {
-	if (getElementContainer<UIFrame>().get(index).hasChild()) {
-		getElementContainer<UIFrame>().get(index).getChild()->destroy();
-	}
-
 	if (entityToAlias.contains(index)) {			// remove alias
 		aliasToEntity.erase(entityToAlias[index]);
 		entityToAlias.erase(index);
@@ -74,26 +70,16 @@ void UIManager::perEntityUpdate()
 	// update
 	size_t activeElements{ 0 };
 	util::tuple_for_each(uiElementTuple,
-		[&](auto& container)
-		{
+		[&](auto& container) {
 			for (auto& uient : container) {
 				auto& element = container.get(uient);
 				element.update();
 				activeElements += (size_t)element.isEnabled();
-			}
-		}
-	);
-	lastUpdateActiveElements = activeElements;
-	// destroy
-	util::tuple_for_each(uiElementTuple,
-		[](auto& container) 
-		{
-			for (auto& uient : container) {
-				auto& element = container.get(uient);
 				if (element.isDestroyed()) container.destroy(uient);
 			}
 		}
 	);
+	lastUpdateActiveElements = activeElements;
 }
 
 void UIManager::focusUpdate()

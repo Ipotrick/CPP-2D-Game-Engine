@@ -139,30 +139,6 @@ void RenderingWorker::initiate()
 	glEnableVertexAttribArray(2);
 	glVertexAttribIPointer(2, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, modelIndex));
 
-
-
-	//// positions (2 float)
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-	//// vertex color (4 float)
-	//glEnableVertexAttribArray(1);
-	//glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, color));
-	//// texture uv coordinates (2 float)
-	//glEnableVertexAttribArray(2);
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, texCoord));
-	//// corner coordiantes
-	//glEnableVertexAttribArray(5);
-	//glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, corner));
-	//// texture slot (1 int) 
-	//glEnableVertexAttribArray(3);
-	//glVertexAttribIPointer(4, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, texID));
-	//// circle rendering mode enable
-	//glEnableVertexAttribArray(4);
-	//glVertexAttribIPointer(5, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, circle));
-	//// model ssbo index
-	//glEnableVertexAttribArray(6);
-	//glVertexAttribIPointer(6, 1, GL_INT, sizeof(Vertex), (const void*)offsetof(Vertex, modelID));
-
 	modelSSBORaw = (RenderModel*)malloc(sizeof(RenderModel) * MAX_RECT_COUNT);
 	glGenBuffers(1, &modelSSBO);
 	glCheckError();
@@ -192,6 +168,10 @@ void RenderingWorker::operator()()
 			// refresh texture Refs
 
 			texCache.cacheTextures(data->renderBuffer->textureLoadingQueue);
+
+			deadScriptsOnDestroy();
+
+			newScriptsOnInitialize();
 
 			Mat4 viewProjectionMatrix = 
 				Mat4::scale(camera.zoom) *												
@@ -281,23 +261,16 @@ void RenderingWorker::generateVertices(Drawable const& d, float texID, Mat4 cons
 	model->renderSpace = static_cast<GLint>(d.getDrawMode());
 
 	Vertex* vertex{ nullptr };
+#define GEN_VERTEX(index) \
+	vertex = bufferPtr + index;\
+	vertex->texCoord = idToCorner(index, minTex, maxTex);\
+	vertex->corner = idToCorner(index, { -0.5f, -0.5f }, { 0.5f, 0.5f });\
+	vertex->modelIndex = nextModelIndex;
 	
-	vertex = bufferPtr + 0;
-	vertex->texCoord = idToCorner(0, minTex, maxTex);
-	vertex->corner = idToCorner(0, { -0.5f, -0.5f }, { 0.5f, 0.5f });
-	vertex->modelIndex = nextModelIndex;
-	vertex = bufferPtr + 1;
-	vertex->texCoord = idToCorner(1, minTex, maxTex);
-	vertex->corner = idToCorner(1, { -0.5f, -0.5f }, { 0.5f, 0.5f });
-	vertex->modelIndex = nextModelIndex;
-	vertex = bufferPtr + 2;
-	vertex->texCoord = idToCorner(2, minTex, maxTex);
-	vertex->corner = idToCorner(2, { -0.5f, -0.5f }, { 0.5f, 0.5f });
-	vertex->modelIndex = nextModelIndex;
-	vertex = bufferPtr + 3;
-	vertex->texCoord = idToCorner(3, minTex, maxTex);
-	vertex->corner = idToCorner(3, { -0.5f, -0.5f }, { 0.5f, 0.5f });
-	vertex->modelIndex = nextModelIndex;
+	GEN_VERTEX(0);
+	GEN_VERTEX(1);
+	GEN_VERTEX(2);
+	GEN_VERTEX(3);
 
 	++nextModelIndex;
 }
@@ -379,46 +352,28 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& 
 	return index;
 }
 
-// DEPRECATED
 void RenderingWorker::bindTexture(GLuint texID, int slot)
 {
-#ifdef _DEBUG
-	int maxTexCount;
-	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTexCount);
-	assert(slot < maxTexCount);
-#endif
 	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, texID);
 }
 
-void RenderingWorker::drawDrawable(Drawable const& d, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix)
+void RenderingWorker::newScriptsOnInitialize()
 {
-	int texSlot{ 0 };
-
-	Vertex vertecies[4];
-	generateVertices(d, texSlot, viewProjectionMatrix, pixelProjectionMatrix, vertecies);
-
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(Vertex) * MAX_VERTEX_COUNT, spriteShaderVBORaw);
-
-
-	if (d.texRef.has_value()) {
-		if (texCache.isTextureLoaded(d.texRef.value())) {
-			bindTexture(d.texRef.value().id, texSlot);
-		}
-		else {
-			bindTexture(TEXTURE_DEFAULT, texSlot);
+	for (auto& layer : data->renderBuffer->layers) {
+		if (layer.script && !layer.script->isInitialized()) {
+			layer.script->onInitialize(*this, layer);
+			layer.script->bInitialized = true;
 		}
 	}
-	else {
-		texSlot = -1;
+}
+
+void RenderingWorker::deadScriptsOnDestroy()
+{
+	for (auto& script : data->renderBuffer->scriptDestructQueue) {
+		script->onDestroy(*this);
 	}
-
-	// give the shader the possible texture slots
-	int texSamplers[32] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
-	glUniform1iv(50, 32, texSamplers);
-
-	glDrawArrays(GL_TRIANGLES, 0, 3);
-	glDrawArrays(GL_TRIANGLES, 1, 4);
+	data->renderBuffer->scriptDestructQueue.clear();
 }
 
 void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, Mat4 const& pixelProjectionMatrix)
@@ -438,5 +393,9 @@ void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, 
 	while (lastIndex != layer.getDrawables().size()) {
 		lastIndex = drawBatch(layer.getDrawables(), cameraViewProj, pixelProjectionMatrix, lastIndex);
 		data->drawCallCount += 1;
+	}
+
+	if (layer.script) {
+		layer.script->onUpdate(*this, layer);
 	}
 }
