@@ -192,10 +192,10 @@ private:
 	void querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, const Vec4 color, const int depth) const;
 
 	static std::tuple<bool, bool, bool, bool> isInSubtrees(const Vec2 treePos, const Vec2 treeSize, const Vec2 pos, const Vec2 size) {
-		const bool u = pos.y + size.y * 0.5f > treePos.y;
-		const auto r = pos.x + size.x * 0.5f > treePos.x;
-		const bool d = pos.y - size.y * 0.5f < treePos.y;
-		const auto l = pos.x - size.x * 0.5f < treePos.x;
+		const bool u = (pos.y + size.y * 0.5f) > treePos.y;
+		const bool r = (pos.x + size.x * 0.5f) > treePos.x;
+		const bool d = (pos.y - size.y * 0.5f) < treePos.y;
+		const bool l = (pos.x - size.x * 0.5f) < treePos.x;
 		return {
 			d & l,
 			d & r,
