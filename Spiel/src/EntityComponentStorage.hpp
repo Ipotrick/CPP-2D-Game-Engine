@@ -13,6 +13,8 @@
 #define DEBUG_COMPONENT_STORAGE
 #endif
 
+#define DEBUG_COMPONENT_STORAGE
+
 #ifdef DEBUG_COMPONENT_STORAGE
 #define csat(key) at(key)
 #define compStoreAssert(x) if (!(x)) throw new std::exception()

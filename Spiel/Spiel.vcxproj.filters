@@ -354,6 +354,12 @@
     <ClInclude Include="src\LayerConstants.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="src\RenderScript.hpp">
+      <Filter>_Engine\_Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TestRenderScript.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Game.cpp">
@@ -508,12 +514,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\SpriteShader_OLD.frag">
-      <Filter>_Engine\_Rendering\_shader</Filter>
-    </None>
-    <None Include="shader\SpriteShader_OLD.vert">
-      <Filter>_Engine\_Rendering\_shader</Filter>
-    </None>
     <None Include="shader\SpriteShader.vert">
       <Filter>_Engine\_Rendering\_shader</Filter>
     </None>

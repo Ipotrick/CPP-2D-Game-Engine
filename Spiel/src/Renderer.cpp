@@ -4,7 +4,7 @@ using namespace std::literals::chrono_literals;
 
 void Renderer::initialize(Window* wndw)
 {
-	assertIsState(RenderState::Uninitialized);
+	ASSERT_IS_STATE(RenderState::Uninitialized);
 	state = RenderState::PreWait;
 
 	window = wndw;
@@ -19,7 +19,7 @@ void Renderer::initialize(Window* wndw)
 }
 
 void Renderer::waitTillFinished() {	
-	assertIsState(RenderState::PreWait);
+	ASSERT_IS_STATE(RenderState::PreWait);
 	state = RenderState::PreStart;
 
 	Timer t(syncTime);
@@ -34,37 +34,66 @@ void Renderer::waitTillFinished() {
 	state = RenderState::PreStart;
 }
 
-void Renderer::flushSubmissions() {
+void Renderer::flushSubmissions() { 
 	auto& backBuffer = workerSharedData->renderBuffer;
 
 	backBuffer->camera = frontBuffer->camera;
+
 	backBuffer->resetTextureCache = frontBuffer->resetTextureCache;
+	frontBuffer->resetTextureCache = false;
+
 	std::swap(backBuffer->textureLoadingQueue, texRefManager.getTextureLoadingQueue());
+	texRefManager.clearTextureLoadingQueue();
+
+	// resize backbuffer layer count:
 	if (backBuffer->layers.size() != frontBuffer->layers.size()) {
+		for (int i = frontBuffer->layers.size(); i < backBuffer->layers.size(); i++) {
+			// queue scripts of layers that are destroyed in a resize to a smaller size
+			if (backBuffer->layers[i].script) {
+				backBuffer->scriptDestructQueue.push_back(std::move(backBuffer->layers[i].script));
+			}
+		}
 		backBuffer->layers.resize(frontBuffer->layers.size());
 	}
+	// for every layer:
 	for (int i = 0; i < frontBuffer->layers.size(); ++i) {
 		auto& flayer = frontBuffer->layers[i];	// f(fronbuffer)layer(at i)
+		auto& blayer = backBuffer->layers[i];
+
+		//queue scripts for deletion on bScriptDetach flag:
+		if (flayer.bScriptDetach && blayer.script) {
+			backBuffer->scriptDestructQueue.push_back(std::move(blayer.script));
+			blayer.script.release();
+			blayer.script = nullptr;
+		}
+		flayer.bScriptDetach = false;	// reset detach flag
+		// attach new scripts from frontbuffer:
+		if (flayer.script) {
+			// when there is allready a script in place for the layer in backbuffer, we destroy queue it:
+			if (blayer.script) {
+				backBuffer->scriptDestructQueue.push_back(std::move(blayer.script));
+				blayer.script.release();
+				blayer.script = nullptr;
+			}
+			// move script from front to backbuffer:
+			blayer.script = std::move(flayer.script);
+			flayer.script.release();
+			flayer.script = nullptr;
+		}
+
+
 		if (flayer.bTemporary) {
 			std::swap(backBuffer->layers[i].getDrawables(), flayer.getDrawables());
+			flayer.clear();
 		}
 		else {
 			backBuffer->layers[i].copyFrom(flayer);
 		}
 	}
-
-	/* clear frontbuffer (as it now contains the old backbuffer data):	*/
-	texRefManager.clearTextureLoadingQueue();
-	frontBuffer->resetTextureCache = false;
-	for (auto& l : frontBuffer->layers) {
-		if (l.bTemporary) {
-			l.clear();
-		}
-	}
 }
 
 void Renderer::startRendering() {
-	assertIsState(RenderState::PreStart);
+	ASSERT_IS_STATE(RenderState::PreStart);
 	state = RenderState::PreWait;
 
 	flushSubmissions();
@@ -73,14 +102,15 @@ void Renderer::startRendering() {
 
 void Renderer::reset()
 {
-	assertIsNotState(RenderState::Uninitialized);
-	state = RenderState::PreWait;
-	waitTillFinished();
-	state = RenderState::Uninitialized;
+	ASSERT_IS_NOT_STATE(RenderState::Uninitialized);
 
 	workerSharedData->ready = false; // reset ready flag
 	workerSharedData->run = false;
 	workerSharedData->cond.notify_one(); // wake up worker
+
+	state = RenderState::PreWait;
+	waitTillFinished();
+	state = RenderState::Uninitialized;
 
 	frontBuffer->layers.resize(0);
 }

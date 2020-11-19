@@ -39,16 +39,6 @@ public:
 		}
 	}
 
-	/*
-	* if this function is overriden, the Base Function (UIMultiParent::updateSize) MUST still be called
-	*/
-	virtual void postUpdate() override
-	{
-		for (auto& child : children) {
-			child->postUpdate();
-		}
-	}
-
 	void addChild(UIElement* child)
 	{
 		assert(children.size() < CAPACITY);

@@ -4,7 +4,7 @@
 #include "InputManager.hpp"
 #include "utils.hpp"
 
-class UIManager {
+class UIManager : public UIElementPrivilage {
 public:
 	UIManager(Renderer& renderer, InputManager& in)
 		:renderer{renderer}, in{ in }
@@ -111,8 +111,6 @@ private:
 	void focusUpdate();
 
 	void clickableUpdate();
-	 
-	void postUpdate();
 
 	// buffers:
 	std::vector<UIFocusable*> focusedElementCandidates;	// buffer for focused element candidates used in focusUpdate()

@@ -46,13 +46,6 @@ public:
 		}
 	}
 
-	virtual void postUpdate() override
-	{
-		if (hasChild()) {
-			getChild()->postUpdate();
-		}
-	}
-
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
 
 	void setHeadSize(const Vec2 size) { 

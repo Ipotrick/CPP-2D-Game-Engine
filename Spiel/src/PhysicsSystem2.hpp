@@ -11,10 +11,16 @@
 #include "CollisionSystem.hpp"
 #include "JobManager.hpp"
 #include "Physics.hpp"
+/*
+* NEXT TASK TODO:
+* implement fake movement
+* implement new position correction based on fake movement
+* implement settings for iteration count of force and penetratin constraints
+*/
 
 class PhysicsSystem2 {
 public:
-	PhysicsSystem2(JobManager& jobs, PerfLogger& perf);
+	PhysicsSystem2(JobManager& jobs);
 	void execute(World& world, float deltaTime, CollisionSystem& collSys);
 	const std::vector<Drawable>& getDebugDrawables() const;
 private:
@@ -23,7 +29,6 @@ private:
 	void eraseDeadConstraints();
 	void prepareConstraints(World& world, float deltaTime);
 	void springyPositionCorrection(World& world, float deltaTime);
-	void makeDisjointPairs(CollisionSystem& collSys, World& world);
 	void applyImpulse(World& world, CollisionConstraint& c);
 	void applyImpulses(World& world);
 	void applyImpulsesMultiThreadded(World& world);
@@ -37,7 +42,6 @@ private:
 	int impulseIterations = 15;
 
 	JobManager& jobManager;
-	PerfLogger& perfLog;
 
 	CollisionConstraintSet collConstraints;
 

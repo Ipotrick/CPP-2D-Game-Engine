@@ -1,11 +1,8 @@
 #include "UIManager.hpp"
+#include "log/Log.hpp"
 
 void UIManager::destroyFrame(UIEntity index)
 {
-	if (getElementContainer<UIFrame>().get(index).hasChild()) {
-		getElementContainer<UIFrame>().get(index).getChild()->destroy();
-	}
-
 	if (entityToAlias.contains(index)) {			// remove alias
 		aliasToEntity.erase(entityToAlias[index]);
 		entityToAlias.erase(index);
@@ -23,7 +20,7 @@ void UIManager::destroyFrame(std::string_view name)
 		destroyFrame(index);
 	}
 	else {
-		std::cerr << "WARNING: trying to delete non existant UIEntity!\n";
+		Monke::log("WARNING: trying to delete non existant UIEntity!");
 	}
 }
 
@@ -35,7 +32,6 @@ bool UIManager::doesFrameExist(UIEntity ent)
 void UIManager::update()
 {
 	perEntityUpdate();
-	postUpdate();
 	focusUpdate();
 	clickableUpdate();
 }
@@ -74,26 +70,16 @@ void UIManager::perEntityUpdate()
 	// update
 	size_t activeElements{ 0 };
 	util::tuple_for_each(uiElementTuple,
-		[&](auto& container)
-		{
+		[&](auto& container) {
 			for (auto& uient : container) {
 				auto& element = container.get(uient);
 				element.update();
 				activeElements += (size_t)element.isEnabled();
-			}
-		}
-	);
-	lastUpdateActiveElements = activeElements;
-	// destroy
-	util::tuple_for_each(uiElementTuple,
-		[](auto& container) 
-		{
-			for (auto& uient : container) {
-				auto& element = container.get(uient);
 				if (element.isDestroyed()) container.destroy(uient);
 			}
 		}
 	);
+	lastUpdateActiveElements = activeElements;
 }
 
 void UIManager::focusUpdate()
@@ -207,12 +193,4 @@ void UIManager::clickableUpdate()
 			}
 		}
 	);
-}
-
-void UIManager::postUpdate()
-{
-	for (auto& uient : getElementContainer<UIFrame>()) {
-		auto& frame = getElementContainer<UIFrame>().get(uient);
-		frame.postUpdate();
-	}
 }

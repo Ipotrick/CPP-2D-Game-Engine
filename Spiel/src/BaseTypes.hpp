@@ -7,8 +7,8 @@
 class Serializer {};
 
 enum class Form : uint8_t {
-	Circle = 0x00,
-	Rectangle = 0x01
+	Rectangle = 0x00,
+	Circle = 0x01
 };
 
 static inline std::string formToString(Form form)

@@ -163,7 +163,7 @@ inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
 
 class Drawable {
 public:
-	IntColor color;
+	Vec4 color;
 	Vec2 position;
 	/* in radiants 2pi = one rotation*/
 	RotaVec2 rotationVec;

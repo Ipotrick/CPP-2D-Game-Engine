@@ -243,7 +243,7 @@ public:
 
 	Vec2 toVec2() const
 	{
-		return { cos, sin };
+		return { sin, cos };
 	}
 public:
 	float sin{ 0.0f };

@@ -26,7 +26,7 @@ struct Vertex {
 };
 
 struct RenderModel {
-	static int constexpr FLOAT_SIZE{ 24 };
+	static int constexpr FLOAT_SIZE{ 16 };
 	RenderModel() :
 		data{ 0 }
 	{
@@ -39,22 +39,10 @@ struct RenderModel {
 			Vec2 scale;
 			GLint texId;
 			GLint isCircle;
-			Mat4 viewProj;
-		};
-		float data[FLOAT_SIZE];
-	};
-};
-
-struct Vertex2 {
-	static int constexpr FLOAT_SIZE{ 5 };
-	Vertex2() :
-		data{ 0 }
-	{}
-	union {
-		struct {
-			Vec2 texCoord;
-			Vec2 corner;		// there are 4 corners: tl,tr,br,bl / (-1,1) (1,1) (1,-1) (-1-1)
-			int modelIndex;		// there are 3 uniform arrays for the model: position[float 2], rotation[float 2], scale[float 2]
+			GLint renderSpace;
+			uint32_t p0;
+			uint32_t p1;
+			uint32_t p2;
 		};
 		float data[FLOAT_SIZE];
 	};
@@ -96,14 +84,15 @@ public:
 public:
 	Window* window;
 	std::shared_ptr<RenderingSharedData> data;
-private:
 	std::string readShader(std::string path_);
+private:
 	void generateVertices(Drawable const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, Vertex* bufferPtr);
-	void drawDrawable(Drawable const& d, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix);
 	void drawLayer(RenderLayer& layer, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix);
 	// returns the index after the last element that was drawn in the batch
 	size_t drawBatch(std::vector<Drawable>& drawables, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix, size_t startIndex);
 	void bindTexture(GLuint texID, int slot = 0);
+	void newScriptsOnInitialize();
+	void deadScriptsOnDestroy();
 private:
 	TextureCache texCache{ "ressources/" };
 	static constexpr int TEXTURE_WHITE = 0;

@@ -16,12 +16,6 @@ public:
 	*/
 	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
 
-	virtual void postUpdate()
-	{
-		first->postUpdate();
-		second->postUpdate();
-	}
-
 	virtual void destroy() override
 	{
 		UIElement::destroy();

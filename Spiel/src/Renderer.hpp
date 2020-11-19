@@ -12,25 +12,6 @@
 #include "RenderingWorker.hpp"
 #include "TextureRefManager.hpp"
 
-/*
-	state machiene refactor:
-	make a state machiene class specificly for the renderer.
-	the state machiene has an inner enum representing the current state.
-	every state change has a unique function.
-
-	RenderState enum values:
-	Uninitialized,
-	Reset,
-	WaitingBegin,
-	WaitingEnd,
-	WaitingStart,
-	WaitingWorker
-
-	API:
-	getState() -> RendererState
-	changeState<RenderState state>()
-*/
-
 #define RENDERER_DEBUG_0
 
 #ifdef RENDERER_DEBUG_0
@@ -181,6 +162,18 @@ private:
 	std::thread workerThread;
 };
 
+#define ASSERT_IS_STATE(s)\
+	if (s != this->state) {\
+	std::cerr << "in line " << __LINE__ <<" ERROR: wait was called in wrong renderer state, state was: " << (int)this->state << ", state SHOULD be " << (int)s << std::endl;\
+	exit(-1);\
+	}
+
+#define ASSERT_IS_NOT_STATE(s)\
+	if (s == this->state) {\
+	std::cerr << "in line " << __LINE__ <<" ERROR: wait was called in wrong renderer state, state was: " << (int)this->state << ", state SHOULD NOT be " << (int)s << std::endl;\
+	exit(-1);\
+	}
+
 template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::PixelSpace,			RenderSpace::WindowSpace>(Vec2 coord)
 {
 	return { 
@@ -190,11 +183,7 @@ template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::PixelSpace,			Re
 }
 template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WorldSpace,			RenderSpace::WindowSpace>(Vec2 coord)
 {
-	Mat3 viewProjectionMatrix = Mat3::scale(frontBuffer->camera.zoom) 
-		* Mat3::scale(frontBuffer->camera.frustumBend) 
-		* Mat3::rotate(-frontBuffer->camera.rotation) 
-		* Mat3::translate(-frontBuffer->camera.position);
-	return viewProjectionMatrix * coord;
+	return (rotate(coord - frontBuffer->camera.position, -frontBuffer->camera.rotation) * frontBuffer->camera.frustumBend * frontBuffer->camera.zoom);
 }
 template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(Vec2 coord)
 {
@@ -211,11 +200,7 @@ template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WindowSpace,		Re
 }
 template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WindowSpace,		RenderSpace::WorldSpace>(Vec2 coord)
 {
-	auto reverseMatrix = Mat3::translate(frontBuffer->camera.position) 
-		* Mat3::rotate(frontBuffer->camera.rotation) 
-		* Mat3::scale(Vec2(1 / frontBuffer->camera.frustumBend.x, 1 / frontBuffer->camera.frustumBend.y)) 
-		* Mat3::scale(1 / frontBuffer->camera.zoom);
-	return reverseMatrix * coord;
+	return rotate(coord / frontBuffer->camera.frustumBend / frontBuffer->camera.zoom, frontBuffer->camera.rotation) + frontBuffer->camera.position;
 }
 template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WindowSpace,		RenderSpace::UniformWindowSpace>(Vec2 coord)
 {

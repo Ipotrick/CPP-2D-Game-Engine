@@ -2,9 +2,8 @@
 
 using namespace std::literals::chrono_literals;
 
-Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHeight_)
+Engine::Engine()
 {
-	std::cout << "waiter" << std::endl;
 	/*
 	* there can only be one engine instance at a time
 	*/
@@ -13,32 +12,6 @@ Engine::Engine(std::string windowName_, uint32_t windowWidth_, uint32_t windowHe
 		exit(-1);
 	}
 	bInstantiated = true;
-
-	running = true;
-	iteration = 0;
-	minimunLoopTime = 1ms;	// 10000 microseconds = 10 milliseonds => 100 loops per second
-	maxDeltaTime = 0.02f;
-	deltaTime = 0.0;
-	window.open(windowName_, windowWidth_, windowHeight_);
-	renderer.initialize(&window);
-	running = true;
-
-	perfLog.submitTime("maintime");
-	perfLog.submitTime("mainwait");
-	perfLog.submitTime("updatetime");
-	perfLog.submitTime("physicstime");
-	perfLog.submitTime("physicsprepare");
-	perfLog.submitTime("physicscollide");
-	perfLog.submitTime("physicsexecute");
-	perfLog.submitTime("rendertime");
-	perfLog.submitTime("calcRotaVecTime");
-	deltaTimeQueue.push_back(maxDeltaTime);
-
-	uiContext.recursionDepth = 1;
-	uiContext.drawMode = RenderSpace::PixelSpace;
-	uiContext.scale = 1.0f;
-	uiContext.ulCorner = { 0.0f, static_cast<float>(window.height) };
-	uiContext.drCorner = { static_cast<float>(window.width), 0.0f };
 }
 
 Engine::~Engine()
@@ -51,9 +24,24 @@ Engine::~Engine()
 		exit(-1);
 	}
 	bInstantiated = false;
+}
 
-	renderer.reset();
-	window.close();
+void Engine::initialize(std::string windowName, uint32_t windowWidth, uint32_t windowHeight)
+{
+	iteration = 0;
+	minimunLoopTime = 1ms;	// 10000 microseconds = 10 milliseonds => 100 loops per second
+	maxDeltaTime = 0.02f;
+	deltaTime = 0.0;
+	window.open(windowName, windowWidth, windowHeight);
+	renderer.initialize(&window);
+	running = true;
+	deltaTimeQueue.push_back(maxDeltaTime);
+
+	uiContext.recursionDepth = 1;
+	uiContext.drawMode = RenderSpace::PixelSpace;
+	uiContext.scale = 1.0f;
+	uiContext.ulCorner = { 0.0f, static_cast<float>(window.height) };
+	uiContext.drCorner = { static_cast<float>(window.width), 0.0f };
 }
 
 float Engine::getDeltaTime(int sampleSize)
@@ -84,36 +72,29 @@ float Engine::getWindowAspectRatio() {
 }
 
 void Engine::run() {
+	running = true;
 	create();
 
 	for(iteration = 0; running; ++iteration) {
-		Timer loopTimer(new_deltaTime);
-		Waiter loopWaiter(minimunLoopTime, Waiter::Type::BUSY);
+		Timer loopTimer(new_deltaTime);							// messures time taken for frame
+		Waiter loopWaiter(minimunLoopTime, Waiter::Type::BUSY);	// makes sure the loop will take a specified minimum amount of time
+
 		deltaTime = micsecToFloat(new_deltaTime);
 		if (deltaTimeQueue.size() > 99) {
 			deltaTimeQueue.pop_back();
 		}
 		deltaTimeQueue.push_front(deltaTime);
 
-		perfLog.commitTimes();
-		{
-			Timer mainTimer(perfLog.getInputRef("maintime"));
+		update(getDeltaTimeSafe());
 
-			update(getDeltaTimeSafe());
+		// update in:
+		in.engineUpdate(renderer.getCamera());
 
-			// update in:
-			in.engineUpdate(renderer.getCamera());
+		// update rendering:
+		ui.update();
+		ui.draw(uiContext);
+		renderer.waitTillFinished();
 
-			// update rendering:
-			ui.update();
-			ui.draw(uiContext);
-			renderer.waitTillFinished();
-			perfLog.submitTime("rendertime", renderer.getRenderingTime());
-		}
-		if (glfwWindowShouldClose(window.glfwWindow)) { // if window closes the program ends
-			running = false;
-			break;
-		}
 		if (!glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
 			in.takeFocus(Focus::Out);
 			in.takeMouseFocus(Focus::Out);
@@ -122,9 +103,18 @@ void Engine::run() {
 			in.returnFocus();
 			in.returnMouseFocus();
 		}
-		renderer.startRendering();
+
+		if (glfwWindowShouldClose(window.glfwWindow)) { // if window closes the program ends
+			running = false;
+			break;
+		}
+		else {
+			renderer.startRendering();
+		}
 	}
 	renderer.reset();
+
+	window.close();
 
 	destroy();
 }
