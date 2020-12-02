@@ -1,524 +1,533 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Quelldateien">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Headerdateien">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Ressourcendateien">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="_stbi">
       <UniqueIdentifier>{41d0503f-0ab4-475c-ada3-0170b6a27b2f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_math">
-      <UniqueIdentifier>{7c1b4701-56b3-4db5-8736-770ce17348be}</UniqueIdentifier>
+    <Filter Include="engine">
+      <UniqueIdentifier>{d38b1d5a-5dd4-4c2a-99d2-4b08e9dc707f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine">
-      <UniqueIdentifier>{982f06a6-d1e0-4368-bcee-f69b45d24c20}</UniqueIdentifier>
+    <Filter Include="game">
+      <UniqueIdentifier>{c03f9369-5c3a-46cd-8948-4a84ccb71f8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_Component">
-      <UniqueIdentifier>{891a6c25-5afe-4008-8fb8-75aca9aa799f}</UniqueIdentifier>
+    <Filter Include="Headder">
+      <UniqueIdentifier>{bf17f518-82fd-4730-b2af-82625c8d26db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_Physics">
-      <UniqueIdentifier>{70648b4a-dee6-4dfa-81c0-4f69d61be49b}</UniqueIdentifier>
+    <Filter Include="Src">
+      <UniqueIdentifier>{5d41953b-9201-427d-ba9b-c67e229ac5c0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_Rendering">
-      <UniqueIdentifier>{8105babe-c711-49ff-a49d-160139bfc316}</UniqueIdentifier>
+    <Filter Include="game\hpp">
+      <UniqueIdentifier>{fd180900-ce4a-4730-9fe5-1af5a5df7528}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_UI">
-      <UniqueIdentifier>{04555f50-28a1-4672-8acd-b672ae173589}</UniqueIdentifier>
+    <Filter Include="engine\hpp">
+      <UniqueIdentifier>{69dcc228-27d6-4b4d-a5f7-7aac7b7ba3a5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_Collision">
-      <UniqueIdentifier>{af4549b1-e840-49f3-be88-0a5b9e8721f0}</UniqueIdentifier>
+    <Filter Include="game\serialization">
+      <UniqueIdentifier>{1281a756-300d-4648-9d30-7bc11d02ff92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_IO">
-      <UniqueIdentifier>{1389f8ae-44f9-42d1-8125-c1cccaef4dec}</UniqueIdentifier>
+    <Filter Include="game\collision">
+      <UniqueIdentifier>{8a9aa8bd-93eb-4e80-9d66-f335ef576c98}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_UI\Elements">
-      <UniqueIdentifier>{799c118d-0ce7-44a5-86d3-f7999f5d9fa1}</UniqueIdentifier>
+    <Filter Include="game\physics">
+      <UniqueIdentifier>{7b906e04-a3f9-48d5-b58c-52f1c6c4562e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="_Engine\_UI\BaseClasses">
-      <UniqueIdentifier>{324d3ffe-29fe-40b5-a539-5378e40a24cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Engine\_Rendering\_shader">
-      <UniqueIdentifier>{221f6693-8e62-409c-a419-b742859bb778}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Engine\_Core">
-      <UniqueIdentifier>{abeb544c-550b-40d3-a9c9-acbd97127f91}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Engine\_UI\utility">
-      <UniqueIdentifier>{a58c2ada-7193-4c83-b0ee-2dd55853a80c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="serialization">
-      <UniqueIdentifier>{9de1c8d4-f0a8-4b9e-8bd3-acf12988115d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Engine\_Entity">
-      <UniqueIdentifier>{edc83beb-3c6e-43bc-a2f7-09a24e981bec}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Engine\CoreComponents">
-      <UniqueIdentifier>{b4e5e893-b1c0-4acb-9e60-eafd8e65f5e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Engine\_Rendering\Texture">
-      <UniqueIdentifier>{759d50ef-efea-437a-9ba2-8b78cf2ec30c}</UniqueIdentifier>
+    <Filter Include="mandelbrot">
+      <UniqueIdentifier>{d52581ae-b099-40ae-9d8f-9a554a51eeda}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\CacheAABBJob.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PushoutCalcJob.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\collision_detection.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollisionCheckJob.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollisionSystem.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\QuadTree.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreSystemUniforms.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityComponentManager.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityComponentStorage.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\World.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Physics.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsSystem.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsTypes.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Camera.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\debug.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Renderer.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\RenderingWorker.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\RenderTypes.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Window.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\basic_math.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mat3.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Mat4.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\random.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vec.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vec3.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Vec4.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vector_math.hpp">
-      <Filter>_math</Filter>
-    </ClInclude>
-    <ClInclude Include="src\AgeScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BasicScripts.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BulletScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Game.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameComponents.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\GameSystemUnifroms.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\HealthScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ParticleScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PlayerScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityTypes.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\IndexSet.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ImpulseResolutionJob.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SuckerScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Qtree2.hpp">
-      <Filter>_Engine\_Collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\TesterScript.hpp">
-      <Filter>Headerdateien</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PhysicsSystem2.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CollisionConstraintSet.hpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\EntityManager.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIManager.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIFrame.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIReflect.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\InputManager.hpp">
-      <Filter>_Engine\_IO</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIAnchor.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIContext.hpp">
-      <Filter>_Engine\_UI</Filter>
-    </ClInclude>
-    <ClInclude Include="src\RenderSpace.hpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIBar.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIButton.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIField.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIList.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIText.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIPair.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIClickable.hpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIElement.hpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIMultiParent.hpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UISingleParent.hpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIFocusable.hpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\InputFocus.hpp">
-      <Filter>_Engine\_IO</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Input.hpp">
-      <Filter>_Engine\_IO</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ComponentTypes.hpp">
-      <Filter>_Engine\_Component</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Engine.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\JobManager.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\BaseTypes.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Perf.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SparseBuffer.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Timing.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UISeperator.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UICollapsable.hpp">
-      <Filter>_Engine\_UI\Elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DrawFrame.hpp">
-      <Filter>_Engine\_UI\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UIPaddingBase.hpp">
-      <Filter>_Engine\_UI\BaseClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="src\serialization\YAMLSerializer.hpp">
-      <Filter>serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="src\serialization\YAMLSerialize.hpp">
-      <Filter>serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="src\serialization\YAMLSerializeCoreComponents.hpp">
-      <Filter>serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="src\serialization\YAMLSerializeGameComponents.hpp">
-      <Filter>serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="src\utils.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\log\Log.hpp">
-      <Filter>_Engine\_Core</Filter>
-    </ClInclude>
-    <ClInclude Include="src\UUID.hpp">
-      <Filter>_Engine\_Entity</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CoreComponents.hpp">
-      <Filter>_Engine\CoreComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="src\drawScript.hpp">
-      <Filter>_Engine\CoreComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="src\transformScript.hpp">
-      <Filter>_Engine\CoreComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="src\movementScript.hpp">
-      <Filter>_Engine\CoreComponents</Filter>
-    </ClInclude>
-    <ClInclude Include="src\serialize\YAMLSerialize.hpp">
-      <Filter>serialization</Filter>
-    </ClInclude>
-    <ClInclude Include="src\serialization\YAMLECM.hpp">
-      <Filter>serialization</Filter>
-    </ClInclude>
     <ClInclude Include="..\Libraries\stb_image\stb_image.hpp">
       <Filter>_stbi</Filter>
     </ClInclude>
-    <ClInclude Include="src\TextureCache.hpp">
-      <Filter>_Engine\_Rendering\Texture</Filter>
+    <ClInclude Include="src\game\AgeScript.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\TextureRefManager.hpp">
-      <Filter>_Engine\_Rendering\Texture</Filter>
+    <ClInclude Include="src\game\BasicScripts.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\Layer.hpp">
-      <Filter>_Engine\_Rendering</Filter>
+    <ClInclude Include="src\game\BloomRScript.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\RenderBuffer.hpp">
-      <Filter>_Engine\_Rendering</Filter>
+    <ClInclude Include="src\game\BulletScript.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\LayerConstants.hpp">
-      <Filter>Headerdateien</Filter>
+    <ClInclude Include="src\game\EngineConfig.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\RenderScript.hpp">
-      <Filter>_Engine\_Rendering</Filter>
+    <ClInclude Include="src\game\Game.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\TestRenderScript.hpp">
-      <Filter>Headerdateien</Filter>
+    <ClInclude Include="src\game\GameComponents.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\GameSystemInclude.h">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\GameSystemUnifroms.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\GlowTrailRScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\HealthScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\LoadBallTestMap.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ParticleScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\PlayerScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\SuckerScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\TesterScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\BaseTypes.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\basic_math.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Camera.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\ComponentTypes.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\debug.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\DrawFrame.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EntityComponentManager.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EntityComponentStorage.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EntityManager.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EntityTypes.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\IndexSet.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Input.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\InputFocus.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\InputManager.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\JobManager.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Layer.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Log.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Mat3.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Mat4.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\OGLPassShader.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\OGLShaderUtil.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\OGLTextureRenderBuffer.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Perf.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\random.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\RenderBuffer.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Renderer.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\RenderingWorker.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\RenderScript.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\RenderSpace.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\RenderTypes.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\SparseBuffer.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\TextureCache.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\TextureRefManager.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Timing.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIAnchor.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIBar.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIButton.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIClickable.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UICollapsable.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIContext.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIElement.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIField.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIFocusable.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIFrame.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIList.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIManager.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIMultiParent.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIPaddingBase.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIPair.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIReflect.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UISeperator.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UISingleParent.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UIText.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\utils.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\UUID.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Vec.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Vec2.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Vec3.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Vec4.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\vector_math.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\Window.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\LayerConstants.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\drawScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\serialization\YAMLECM.hpp">
+      <Filter>game\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\serialization\YAMLSerialize.hpp">
+      <Filter>game\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\serialization\YAMLSerializeCoreComponents.hpp">
+      <Filter>game\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\serialization\YAMLSerializeGameComponents.hpp">
+      <Filter>game\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\serialization\YAMLSerializer.hpp">
+      <Filter>game\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\CacheAABBJob.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\collision_detection.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\CollisionSystem.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\physics\CollisionConstraintSet.hpp">
+      <Filter>game\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\physics\Physics.hpp">
+      <Filter>game\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\physics\PhysicsSystem.hpp">
+      <Filter>game\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\physics\PhysicsSystem2.hpp">
+      <Filter>game\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\physics\PhysicsTypes.hpp">
+      <Filter>game\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\physics\PushoutCalcJob.hpp">
+      <Filter>game\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\QuadTree.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EngineCore.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\movementScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\transformScript.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\CoreComponents.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\CoreSystemUniforms.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mandelbrot\EngineConfig.hpp">
+      <Filter>mandelbrot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mandelbrot\MandelbrotViewer.hpp">
+      <Filter>mandelbrot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mandelbrot\LayerConstants.hpp">
+      <Filter>mandelbrot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mandelbrot\MandelRenderScript.hpp">
+      <Filter>mandelbrot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EntityComponentManagerView.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\collision\CollisionUniform.hpp">
+      <Filter>game\collision</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\JobSystem.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\StaticVector.hpp">
+      <Filter>engine\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\World.hpp">
+      <Filter>game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Game.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Quelldateien</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Renderer.cpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Physics.cpp">
-      <Filter>_Engine\_Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\RenderingWorker.cpp">
-      <Filter>_Engine\_Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
       <Filter>_stbi</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mat4.cpp">
-      <Filter>_math</Filter>
+    <ClCompile Include="src\engine\DrawFrame.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mat3.cpp">
-      <Filter>_math</Filter>
+    <ClCompile Include="src\engine\EntityManager.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\PhysicsSystem.cpp">
-      <Filter>_Engine\_Physics</Filter>
+    <ClCompile Include="src\engine\InputManager.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\AgeScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\Mat3.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\BulletScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\Mat4.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\HealthScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\OGLPassShader.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\PlayerScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\OGLShaderUtil.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\ParticleScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\OGLTextureREnderBuffer.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\EntityComponentManager.cpp">
-      <Filter>_Engine\_Component</Filter>
+    <ClCompile Include="src\engine\Renderer.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\collision_detection.cpp">
-      <Filter>_Engine\_Collision</Filter>
+    <ClCompile Include="src\engine\RenderingWorker.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\QuadTree.cpp">
-      <Filter>_Engine\_Collision</Filter>
+    <ClCompile Include="src\engine\TextureCache.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\CollisionSystem.cpp">
-      <Filter>_Engine\_Collision</Filter>
+    <ClCompile Include="src\engine\TextureRefManager.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\Vec2.hpp">
-      <Filter>_math</Filter>
+    <ClCompile Include="src\engine\UIAnchor.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\SuckerScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\UIBar.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\Qtree2.cpp">
-      <Filter>_Engine\_Collision</Filter>
+    <ClCompile Include="src\engine\UIButton.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\CollisionCheckJob.cpp">
-      <Filter>_Engine\_Collision</Filter>
+    <ClCompile Include="src\engine\UICollapsable.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\TesterScript.cpp">
-      <Filter>Quelldateien</Filter>
+    <ClCompile Include="src\engine\UIFrame.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\PhysicsSystem2.cpp">
-      <Filter>_Engine\_Physics</Filter>
+    <ClCompile Include="src\engine\UIManager.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\CollisionConstraintSet.cpp">
-      <Filter>_Engine\_Physics</Filter>
+    <ClCompile Include="src\engine\UIPair.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\World.cpp">
-      <Filter>_Engine\_Component</Filter>
+    <ClCompile Include="src\engine\UISeperator.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\EntityManager.cpp">
-      <Filter>_Engine\_Component</Filter>
+    <ClCompile Include="src\engine\UIText.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIManager.cpp">
-      <Filter>_Engine\_UI</Filter>
+    <ClCompile Include="src\engine\UUID.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIFrame.cpp">
-      <Filter>_Engine\_UI</Filter>
+    <ClCompile Include="src\engine\Window.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\InputManager.cpp">
-      <Filter>_Engine\_IO</Filter>
+    <ClCompile Include="src\game\AgeScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIBar.cpp">
-      <Filter>_Engine\_UI\Elements</Filter>
+    <ClCompile Include="src\game\BulletScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIText.cpp">
-      <Filter>_Engine\_UI\Elements</Filter>
+    <ClCompile Include="src\game\Game.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIPair.cpp">
-      <Filter>_Engine\_UI\Elements</Filter>
+    <ClCompile Include="src\game\GlowTrailRScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine.cpp">
-      <Filter>_Engine\_Core</Filter>
+    <ClCompile Include="src\game\HealthScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\UIAnchor.cpp">
-      <Filter>_Engine\_UI</Filter>
+    <ClCompile Include="src\game\LoadBallTestMap.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\UISeperator.cpp">
-      <Filter>_Engine\_UI\Elements</Filter>
+    <ClCompile Include="src\game\ParticleScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\UICollapsable.cpp">
-      <Filter>_Engine\_UI\Elements</Filter>
+    <ClCompile Include="src\game\PlayerScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\DrawFrame.cpp">
-      <Filter>_Engine\_UI\utility</Filter>
+    <ClCompile Include="src\game\SuckerScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\serialization\YAMLSerializer.cpp">
-      <Filter>serialization</Filter>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Src</Filter>
     </ClCompile>
-    <ClCompile Include="src\serialization\YAMLSerialize.cpp">
-      <Filter>serialization</Filter>
+    <ClCompile Include="src\game\TesterScript.cpp">
+      <Filter>game\hpp</Filter>
     </ClCompile>
-    <ClCompile Include="src\serialization\YAMLSerializeCoreComponents.cpp">
-      <Filter>serialization</Filter>
+    <ClCompile Include="src\game\drawScript.cpp">
+      <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\serialization\YAMLSerializeGameComponents.cpp">
-      <Filter>serialization</Filter>
+    <ClCompile Include="src\game\serialization\YAMLECM.cpp">
+      <Filter>game\serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\Window.cpp">
-      <Filter>_Engine\_Rendering</Filter>
+    <ClCompile Include="src\game\serialization\YAMLSerialize.cpp">
+      <Filter>game\serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\UUID.cpp">
-      <Filter>_Engine\_Entity</Filter>
+    <ClCompile Include="src\game\serialization\YAMLSerializeCoreComponents.cpp">
+      <Filter>game\serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\drawScript.cpp">
-      <Filter>_Engine\CoreComponents</Filter>
+    <ClCompile Include="src\game\serialization\YAMLSerializeGameComponents.cpp">
+      <Filter>game\serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\transformScript.cpp">
-      <Filter>_Engine\CoreComponents</Filter>
+    <ClCompile Include="src\game\serialization\YAMLSerializer.cpp">
+      <Filter>game\serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\movementScript.cpp">
-      <Filter>_Engine\CoreComponents</Filter>
+    <ClCompile Include="src\game\collision\collision_detection.cpp">
+      <Filter>game\collision</Filter>
     </ClCompile>
-    <ClCompile Include="src\serialization\YAMLECM.cpp">
-      <Filter>serialization</Filter>
+    <ClCompile Include="src\game\collision\CollisionSystem.cpp">
+      <Filter>game\collision</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextureCache.cpp">
-      <Filter>_Engine\_Rendering\Texture</Filter>
+    <ClCompile Include="src\game\physics\CollisionConstraintSet.cpp">
+      <Filter>game\physics</Filter>
     </ClCompile>
-    <ClCompile Include="src\TextureRefManager.cpp">
-      <Filter>_Engine\_Rendering\Texture</Filter>
+    <ClCompile Include="src\game\physics\Physics.cpp">
+      <Filter>game\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\physics\PhysicsSystem.cpp">
+      <Filter>game\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\physics\PhysicsSystem2.cpp">
+      <Filter>game\physics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\collision\QuadTree.cpp">
+      <Filter>game\collision</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\EngineCore.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\movementScript.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\transformScript.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\JobSystem.cpp">
+      <Filter>engine\hpp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\World.cpp">
+      <Filter>game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shader\SpriteShader.vert">
-      <Filter>_Engine\_Rendering\_shader</Filter>
-    </None>
-    <None Include="shader\SpriteShader.frag">
-      <Filter>_Engine\_Rendering\_shader</Filter>
+    <None Include="src\mandelbrot\Mandel.frag">
+      <Filter>mandelbrot</Filter>
     </None>
   </ItemGroup>
 </Project>
