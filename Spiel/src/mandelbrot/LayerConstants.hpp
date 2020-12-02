@@ -1,0 +1,7 @@
+#pragma once
+
+enum LAYER_CONSTANTS {
+	LAYER_MANDELBROT,
+	LAYER_UI,
+	LAYER_COUNT
+};

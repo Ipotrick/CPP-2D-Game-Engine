@@ -1,5 +1,4 @@
-#include "Game.hpp"
-#include "log/Log.hpp"
+#include "game/Game.hpp"
 
 int main() {
 	Game game;
