@@ -1,8 +1,8 @@
 #pragma once
 
 #include "MandelbrotViewer.hpp"
-#include "../engine/RenderScript.hpp"
-#include "../engine/RenderingWorker.hpp"
+#include "../engine/rendering/RenderScript.hpp"
+#include "../engine/rendering/RenderingWorker.hpp"
 
 class MandelRenderScript : public RenderScript {
 public:

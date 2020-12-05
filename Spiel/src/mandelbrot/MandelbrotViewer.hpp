@@ -1,12 +1,11 @@
 #pragma once
 
-#include "EngineConfig.hpp"
-#include "../engine/Engine.hpp" 
+#include "../engine/EngineCore.hpp" 
 
 #include "LayerConstants.hpp"
 #include "MandelRenderScript.hpp"
 
-class MandelbrotViewer : public Engine {
+class MandelbrotViewer : public EngineCore {
 public:
 	virtual void create() override
 	{

@@ -89,6 +89,9 @@ void EngineCore::run() {
 		deltaTimeQueue.push_front(deltaTime);
 
 		update(getDeltaTimeSafe());
+		if (iteration > 0) {
+			renderer.startRendering();
+		}
 
 		// update in:
 		in.engineUpdate(renderer.getCamera());
@@ -114,9 +117,9 @@ void EngineCore::run() {
 			running = false;
 			break;
 		}
-		else {
-			renderer.startRendering();
-		}
+		//else {
+		//	renderer.startRendering();
+		//}
 
 	}
 	renderer.reset();

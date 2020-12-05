@@ -11,26 +11,28 @@
 
 class JobSystem {
 public:
+	using Tag = uint64_t;
+
 	/**
 	 * Derive a new Job from this class.
 	 */
-	class ThreadJob {
+	class Job {
 	public:
 		virtual void execute(const uint32_t threadId) = 0;
 	private:
 	};
 
 	template<typename TJob>
-	static uint64_t submit(TJob&& job)
+	static Tag submit(TJob&& job)
 	{
-		static_assert(std::is_base_of<ThreadJob, TJob>::value, "a job must be derived from the ThreadJob");
+		static_assert(std::is_base_of<Job, TJob>::value, "a job must be derived from the ThreadJob");
 		assert(state == Running);
 		std::unique_lock lock(mut);
 		uint32_t tag = nextJobTag++;
 	
 		auto newbatch = JobBatch(new TJob(std::move(job)), 1ull );
 		batches[tag] = newbatch;
-		jobQueue.push_back({ static_cast<ThreadJob*>(newbatch.memory), tag });
+		jobQueue.push_back({ static_cast<Job*>(newbatch.memory), tag });
 	
 		workerCV.notify_one();
 	
@@ -45,9 +47,9 @@ public:
 	 * \return a uint32_t tag as a ticket to wait for completion of the vector of jobs.
 	 */
 	template<typename TJob>
-	static uint64_t submitVec(std::vector<TJob>&& jobList)
+	static Tag submitVec(std::vector<TJob>&& jobList)
 	{
-		static_assert(std::is_base_of<ThreadJob, TJob>::value, "a job must be derived from the ThreadJob");
+		static_assert(std::is_base_of<Job, TJob>::value, "a job must be derived from the ThreadJob");
 		assert(state == Running);
 		std::unique_lock lock(mut);
 		uint32_t tag = nextJobTag++;
@@ -58,7 +60,7 @@ public:
 
 		std::vector<TJob>& jobsInMem = *static_cast<std::vector<TJob>*>(newbatch.memory);
 		for (auto& job : jobsInMem) {
-			jobQueue.push_back(std::pair{ static_cast<ThreadJob*>(&job), tag });
+			jobQueue.push_back(std::pair{ static_cast<Job*>(&job), tag });
 		}
 
 		workerCV.notify_all();
@@ -66,7 +68,7 @@ public:
 		return tag;
 	}
 
-	static void wait(uint64_t tag);
+	static void wait(Tag tag);
 
 	static void initialize();
 
@@ -90,14 +92,14 @@ private:
 		size_t jobsLeft{ 0 };
 	};
 
-	enum State {
+	enum class State {
 		Uninitialized,
 		Running
 	};
 
 	static void workerFunction(const uint32_t id);
 
-	inline static State state{ Uninitialized };
+	inline static State state{ State::Uninitialized };
 	inline static const size_t threadCount{ std::max(std::thread::hardware_concurrency()-1, 1u) };
 	inline static std::vector<std::thread> threads;
 
@@ -105,7 +107,7 @@ private:
 	inline static std::condition_variable workerCV;
 	inline static std::condition_variable waiterCV;
 
-	inline static uint64_t nextJobTag{ 0 };
-	inline static std::deque<std::pair<ThreadJob*, uint64_t>> jobQueue;
-	inline static std::unordered_map<uint64_t, JobBatch> batches;
+	inline static Tag nextJobTag{ 0 };
+	inline static std::deque<std::pair<Job*, Tag>> jobQueue;
+	inline static std::unordered_map<Tag, JobBatch> batches;
 };

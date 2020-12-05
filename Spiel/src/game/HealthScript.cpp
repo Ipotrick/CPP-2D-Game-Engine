@@ -1,67 +1,83 @@
 #include "HealthScript.hpp"
 #include "LayerConstants.hpp"
+#include "../engine/ui/UICreate.hpp"
 
 void createHealthUI(EntityHandle ent)
 {
-	UIBar bar;
-	bar.setSize({ 100.0f, 20.0f });
-	bar.anchor.setCenterHorizontal();
-	bar.setUpdateFn(
+	auto barUpdate =
 		[&, ent](UIElement* e) {
-			if (e->isEnabled()) {
-				UIBar* b = (UIBar*)e;
-				Health& h = Game::world.getComp<Health>(ent);
-				b->setFill((float)h.curHealth / (float)h.maxHealth);
-			}
-		}
-	);
-
-	UIText t("Health:", EngineCore::renderer.makeTexRef(TextureInfo("ConsolasLowRes.png")).makeSmall());
-	t.setSize({ 100.0f, 20.0f });
-	t.fontSize = { 17.0f / 2.0f, 17.0f };
-	t.anchor.setCenterHorizontal();
-	t.anchor.setTopAbsolute(0.0f);
-	t.textAnchor.setCenterVertical();
-	t.textAnchor.setCenterHorizontal();
-
-	UIPair p;
-	p.setSize({ 110, 50 });
-	p.setFirst(EngineCore::ui.createAndGet(t));
-	p.setSecond(EngineCore::ui.createAndGet(bar));
-
-	UIFrame frame;
-	frame.layer = LAYER_FIRST_UI;
-	frame.fillColor = { 0,0,0, 0.5 };
-	frame.setFocusable(false);
-	frame.setBorders(0);
-	frame.setSize({ 110, 50 });
-	frame.setPadding({ 5,5 });
-	frame.setDrawMode(RenderSpace::PixelSpace);
-	frame.addChild(EngineCore::ui.createAndGet(p));
-	frame.setUpdateFn(
-		[&, ent](UIElement* e) {
-			if (e->isEnabled()) {
-				UIFrame* f = (UIFrame*)e;
-				Vec2 pos = EngineCore::renderer.convertCoordinate<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Game::world.getComp<Transform>(ent).position);
-				float scale = EngineCore::renderer.getCamera().zoom * 3.5f;
-				f->anchor.setAbsPosition(pos + Vec2(0.0f, 60.0f) * scale);
-				f->setScale(scale);
-			}
-		}
-	);
-	frame.setDestroyIfFn(
-		[&, ent](UIElement* e) -> bool {
-			return !(Game::world.isHandleValid(ent) && Game::world.hasComp<Health>(ent)) || !Game::world.getComp<Health>(ent).bUISpawned;
-		}
-	);
-	frame.setEnableIfFn(
-		[&, ent](UIElement* e) -> bool {
+		if (e->isEnabled()) {
+			UIBar* b = (UIBar*)e;
 			Health& h = Game::world.getComp<Health>(ent);
-			return h.curHealth != h.maxHealth;
+			b->setFill((float)h.curHealth / (float)h.maxHealth);
 		}
-	);
+	};
+	auto frameUpdateFn =
+		[&, ent](UIElement* e) {
+		if (e->isEnabled()) {
+			UIFrame* f = (UIFrame*)e;
+			Vec2 pos = EngineCore::renderer.convertCoordinate<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Game::world.getComp<Transform>(ent).position);
+			float scale = EngineCore::renderer.getCamera().zoom * 3.5f;
+			f->anchor.setAbsPosition(pos + Vec2(0.0f, 60.0f) * scale);
+			f->setScale(scale);
+		}
+	};
+	auto frameDestroyIfFn =
+		[&, ent](UIElement* e) -> bool {
+		return !(Game::world.isHandleValid(ent) && Game::world.hasComp<Health>(ent)) || !Game::world.getComp<Health>(ent).bUISpawned;
+	};
+	auto frameEnableIfFn =
+		[&, ent](UIElement* e) -> bool {
+		Health& h = Game::world.getComp<Health>(ent);
+		return h.curHealth != h.maxHealth;
+	};
 
-	EngineCore::ui.createFrame(frame);
+	ui::frame({
+		.anchor = UIAnchor({
+			.xmode = UIAnchor::X::DirectPosition,
+			.ymode = UIAnchor::Y::DirectPosition }),
+		.size = {110,50},
+		.fn_update = frameUpdateFn,
+		.fn_enableIf = frameEnableIfFn,
+		.focusable = false,
+		.padding = 5,
+		.fillColor = {0,0,0,0.5},
+		.layer = LAYER_FIRST_UI,
+		.fn_destroyIf = frameDestroyIfFn,
+		.borders = {0,0},
+		.drawMode = RenderSpace::PixelSpace 
+	},
+	{
+		ui::pair({.size = {110,50} },
+		{
+			ui::text({
+				.anchor = {{
+					.xmode = UIAnchor::X::LeftRelativeDist,
+					.x = 0.5,
+					.ymode = UIAnchor::Y::TopAbsoluteDist,
+					.y = 0
+				}},
+				.size = {100,20},
+				.textAnchor = {{
+					.xmode = UIAnchor::X::LeftRelativeDist,
+					.x = 0.5,
+					.ymode = UIAnchor::Y::TopRelativeDist,
+					.y = 0.5 
+				}},
+				.text = "Health:",
+				.fontTexture = EngineCore::renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")),
+				.fontSize = {17.0f / 2.0f, 17.0f}
+			}),
+			ui::bar({
+				.anchor = {{
+					.xmode = UIAnchor::X::LeftRelativeDist,
+					.x = 0.5 
+				}},
+				.size = {100,20},
+				.fn_update = barUpdate 
+			})
+		})
+	});
 }
 
 void healthScript(EntityHandle me, Health& data, float deltaTime)

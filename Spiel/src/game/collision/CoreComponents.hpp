@@ -1,8 +1,8 @@
 #pragma once
-#include "../../engine/BaseTypes.hpp"
-#include "../../engine/Vec.hpp"
-#include "../../engine/EntityComponentStorage.hpp"
-#include "../../engine/Timing.hpp"
+#include "../../engine/types/BaseTypes.hpp"
+#include "../../engine/math/Vec.hpp"
+#include "../../engine/entity/EntityComponentStorage.hpp"
+#include "../../engine/types/Timing.hpp"
 
 // basis component
 

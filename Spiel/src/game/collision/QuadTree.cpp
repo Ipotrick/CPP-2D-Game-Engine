@@ -5,7 +5,7 @@ Quadtree::Quadtree(const Vec2 minPos_, const Vec2 maxPos_, const size_t capacity
 	m_size{ maxPos_ - minPos_ },
 	m_capacity{ capacity_ },
 	world{ wrld },
-	IGNORE_TAG{ TAG }
+	COLLIDER_TAG{ TAG }
 {
 	root.firstSubTree = nodes.make4Children();
 }
@@ -175,7 +175,7 @@ void Quadtree::broadInsert(
 			const auto yFactor = tuple.second;
 		
 			if (entityLists[i].size() < MAX_ENTITIES_PER_JOB && tags.size() < MAX_JOBS) {
-				class InsertJob : public JobSystem::ThreadJob {
+				class InsertJob : public JobSystem::Job {
 				public:
 					InsertJob(
 						Quadtree& qtree,
@@ -263,7 +263,7 @@ void Quadtree::broadInsert(const std::vector<EntityHandleIndex>& entities, const
 	dl.reserve(entities.size() / 3);
 	dr.reserve(entities.size() / 3);
 	for (auto ent : entities) {
-		if (!world.getComp<Collider>(ent).isIgnoredBy(IGNORE_TAG)) {
+		if (!world.getComp<Collider>(ent).isIgnoredBy(COLLIDER_TAG)) {
 			auto [isInUl, isInUr, isInDl, isInDr] = isInSubtrees(m_pos, m_size, world.getComp<Transform>(ent).position, aabbs.at(ent));
 			if (isInUl) ul.push_back(ent);
 			if (isInUr) ur.push_back(ent);

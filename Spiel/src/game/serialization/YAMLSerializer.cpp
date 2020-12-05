@@ -11,7 +11,7 @@ void YAMLWorldSerializer::serializeEntity(YAML::Emitter& out, EntityHandle entit
 
 	util::tuple_for_each(world.componentStorageTuple, 
 		[&](auto& componentStorage) {
-			using ComponentType = std::remove_reference<decltype(componentStorage.get(0))>::type;
+			using ComponentType = typename std::remove_reference<decltype(componentStorage.get(0))>::type;
 			if constexpr (isYAMLSerializable<ComponentType>()) {
 				if (world.hasComp<ComponentType>(entity)) {
 					out << YAML::Key << typeid(ComponentType).name();
@@ -32,7 +32,7 @@ bool YAMLWorldSerializer::deserializeEntity(const YAML::Node& entityNode)
 	auto entity = world.create(uuidNode.as<UUID>());
 	util::tuple_for_each(world.componentStorageTuple,
 		[&](auto& componentStorage) {
-			using ComponentType = std::remove_reference<decltype(componentStorage.get(0))>::type;
+			using ComponentType = typename std::remove_reference<decltype(componentStorage.get(0))>::type;
 			const std::string COMPONENT_NAME = typeid(ComponentType).name();
 			if constexpr (isYAMLSerializable<ComponentType>()) {
 				auto componentNode = entityNode[COMPONENT_NAME];
@@ -51,6 +51,7 @@ std::string YAMLWorldSerializer::serializeToString()
 	YAML::Emitter out;
 	out << YAML::BeginMap;
 	out << YAML::Key << "World" << YAML::Value << "";
+	out << YAML::Key << "PhysicsUniforms" << YAML::Value << world.physics;
 
 	out << YAML::Key << ENTITITES_NODE_KEY << YAML::Value << YAML::BeginSeq;
 	for (EntityHandle entity : world.entityView<Transform>()) {
@@ -69,6 +70,7 @@ bool YAMLWorldSerializer::deserializeString(std::string const& str)
 	ofs.close();
 	YAML::Node data = YAML::Load(str);
 	if (!data["World"]) return false;
+	world.physics = data["PhysicsUniforms"].as<PhysicsUniforms>();
 
 	auto entities = data[ENTITITES_NODE_KEY];
 	if (entities) {

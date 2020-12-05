@@ -1,5 +1,18 @@
 #include "YAMLSerializeGameComponents.hpp"
 
+YAML::Emitter& operator<<(YAML::Emitter& out, const PhysicsUniforms& v)
+{
+	out << YAML::BeginMap;
+
+	out << YAML::Key << "friction" << YAML::Value << v.friction;
+	out << YAML::Key << "linearEffectAccel" << YAML::Value << v.linearEffectAccel;
+	out << YAML::Key << "linearEffectDir" << YAML::Value << v.linearEffectDir;
+	out << YAML::Key << "linearEffectForce" << YAML::Value << v.linearEffectForce;
+
+	out << YAML::EndMap;
+	return out;
+}
+
 YAML::Emitter& operator<<(YAML::Emitter& out, const Player& v)
 {
 	out << YAML::BeginMap;

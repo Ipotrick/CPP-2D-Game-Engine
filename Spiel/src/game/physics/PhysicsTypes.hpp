@@ -3,8 +3,8 @@
 #include <vector>
 
 
-#include "../../engine/BaseTypes.hpp"
-#include "../../engine/RenderTypes.hpp"
+#include "../../engine/types/BaseTypes.hpp"
+#include "../../engine/rendering/RenderTypes.hpp"
 
 namespace Physics {
 	constexpr float maxMass = 1'000'000'000'000.f;

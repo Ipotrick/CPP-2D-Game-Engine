@@ -7,8 +7,8 @@
 
 #include "../../engine/EngineCore.hpp"
 #include "CollisionUniform.hpp"
-#include "../../engine/BaseTypes.hpp"
-#include "../../engine/RenderTypes.hpp"
+#include "../../engine/types/BaseTypes.hpp"
+#include "../../engine/rendering/RenderTypes.hpp"
 #include "../collision/collision_detection.hpp"
 
 struct QtreeNodeQuerry {
@@ -186,7 +186,7 @@ public:
 	inline Vec2 getPosition() const { return m_pos; }
 	inline Vec2 getSize() const { return m_size; }
 
-	const uint8_t IGNORE_TAG;
+	const uint8_t COLLIDER_TAG;
 private:
 	void insert(const uint32_t ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
 	void broadInsert(std::vector<EntityHandleIndex>&& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
@@ -213,7 +213,7 @@ private:
 	static const int MAX_DEPTH = 15;
 	static const int MAX_ENTITIES_PER_JOB = 2000;
 	static const int MAX_JOBS = 100;
-	std::vector<Tag> tags;
+	std::vector<JobSystem::Tag> tags;
 
 	Vec2 m_pos;
 	Vec2 m_size;

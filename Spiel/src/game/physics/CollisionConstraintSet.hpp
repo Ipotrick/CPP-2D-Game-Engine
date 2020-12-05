@@ -4,7 +4,7 @@
 
 #include "robin_hood.h"
 
-#include "../../engine/EntityTypes.hpp"
+#include "../../engine/entity/EntityTypes.hpp"
 #include "../collision/collision_detection.hpp"
 #include "Physics.hpp"
 

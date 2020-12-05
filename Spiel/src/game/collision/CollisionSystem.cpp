@@ -108,24 +108,35 @@ void CollisionSystem::prepare(CollisionSECM secm)
 	);
 	JobSystem::wait(tag);
 
-	// clean quadtrees
-	qtreeParticle.resetPerMinMax(minPos, maxPos);
-	qtreeParticle.removeEmptyLeafes();
+	/* rebuild qtrees: */
+
 	qtreeDynamic.resetPerMinMax(minPos, maxPos);
 	qtreeDynamic.removeEmptyLeafes();
-	//if (rebuildStatic) {
+
+	if (colliderDetectionEnableFlags & qtreeDynamic.COLLIDER_TAG) {
+		qtreeDynamic.broadInsert(dynamicSolidEntities, aabbCache);
+	}
+
 	qtreeStatic.resetPerMinMax(minPos, maxPos);
 	qtreeStatic.removeEmptyLeafes();
-	//}
+
+	if (colliderDetectionEnableFlags & qtreeStatic.COLLIDER_TAG) {
+		qtreeStatic.broadInsert(staticSolidEntities, aabbCache);
+	}
+
+	qtreeParticle.resetPerMinMax(minPos, maxPos);
+	qtreeParticle.removeEmptyLeafes();
+
+	if (colliderDetectionEnableFlags & qtreeParticle.COLLIDER_TAG) {
+		qtreeParticle.broadInsert(particleEntities, aabbCache);
+	}
+
 	qtreeSensor.resetPerMinMax(minPos, maxPos);
 	qtreeSensor.removeEmptyLeafes();
 
-	qtreeParticle.broadInsert(particleEntities, aabbCache);
-	qtreeDynamic.broadInsert(dynamicSolidEntities, aabbCache);
-	//if (rebuildStatic) {
-	qtreeStatic.broadInsert(staticSolidEntities, aabbCache);
-	//}
-	qtreeSensor.broadInsert(sensorEntities, aabbCache);
+	if (colliderDetectionEnableFlags & qtreeSensor.COLLIDER_TAG) {
+		qtreeSensor.broadInsert(sensorEntities, aabbCache);
+	}
 }
 
 void CollisionSystem::cleanBuffers(CollisionSECM secm)
@@ -166,8 +177,7 @@ void CollisionSystem::cleanBuffers(CollisionSECM secm)
 
 void CollisionSystem::collisionDetection(CollisionSECM secm)
 {
-
-	class CollJob : public JobSystem::ThreadJob {
+	class CollJob : public JobSystem::Job {
 	public:
 
 		CollJob(
@@ -207,7 +217,7 @@ void CollisionSystem::collisionDetection(CollisionSECM secm)
 				for (int j = 0; j < qtrees.size(); ++j) {
 					Quadtree const* qtree = qtrees[j];
 
-					if (!entColliderComp.isIgnoring(qtree->IGNORE_TAG)) {
+					if (!entColliderComp.isIgnoring(qtree->COLLIDER_TAG)) {
 						checkForCollisions(ent, *qtree);
 					}
 				}
@@ -228,14 +238,15 @@ void CollisionSystem::collisionDetection(CollisionSECM secm)
 	};
 
 	std::vector<CollJob> jobs;
+	jobs.reserve(200);
 
 	auto createCollisionCheckJobs = [&](const std::vector<EntityHandleIndex>& entities, const uint8_t qtreeMask) {
 
 		StaticVector<Quadtree const*, 4> qtrees;
-		if (qtreeDynamic.IGNORE_TAG & qtreeMask) { qtrees.push_back(&qtreeDynamic); }
-		if (qtreeStatic.IGNORE_TAG & qtreeMask) { qtrees.push_back(&qtreeStatic); }
-		if (qtreeParticle.IGNORE_TAG & qtreeMask) { qtrees.push_back(&qtreeParticle); }
-		if (qtreeSensor.IGNORE_TAG & qtreeMask) { qtrees.push_back(&qtreeSensor); }
+		if (qtreeDynamic.COLLIDER_TAG & qtreeMask) { qtrees.push_back(&qtreeDynamic); }
+		if (qtreeStatic.COLLIDER_TAG & qtreeMask) { qtrees.push_back(&qtreeStatic); }
+		if (qtreeParticle.COLLIDER_TAG & qtreeMask) { qtrees.push_back(&qtreeParticle); }
+		if (qtreeSensor.COLLIDER_TAG & qtreeMask) { qtrees.push_back(&qtreeSensor); }
 
 		const auto newCollJob = CollJob(
 			secm,
