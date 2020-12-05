@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../engine/Timing.hpp"
-#include "../engine/BaseTypes.hpp"
-#include "../engine/UUID.hpp"
+#include "../engine/types/Timing.hpp"
+#include "../engine/types/BaseTypes.hpp"
+#include "../engine/types/UUID.hpp"
 
-#include "../engine/EntityComponentStorage.hpp"
+#include "../engine/entity/EntityComponentStorage.hpp"
 
 struct SpawnerComp : public CompData {
 };

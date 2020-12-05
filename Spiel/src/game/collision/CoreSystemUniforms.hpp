@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../engine/Vec2.hpp"
+#include "../../engine/math/Vec2.hpp"
 
 struct PhysicsUniforms {
 	float friction{ 0 };

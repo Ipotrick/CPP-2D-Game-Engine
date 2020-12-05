@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../engine/RenderScript.hpp"
-#include "../engine/OGLTextureRenderBuffer.hpp"
-#include "../engine/OGLPassShader.hpp"
-#include "../engine/RenderingWorker.hpp"
+#include "../engine/rendering/RenderScript.hpp"
+#include "../engine/rendering/OGLTextureRenderBuffer.hpp"
+#include "../engine/rendering/OGLPassShader.hpp"
+#include "../engine/rendering/RenderingWorker.hpp"
 #include "Game.hpp"
 
 class GlowTrailRScript : public RenderScript {

@@ -2,6 +2,33 @@
 
 #include "YAMLSerialize.hpp"
 
+template<> constexpr bool isYAMLSerializable<PhysicsUniforms>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const PhysicsUniforms& v);
+namespace YAML {
+    template<>
+    struct convert<PhysicsUniforms> {
+        static Node encode(const PhysicsUniforms& rhs)
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, PhysicsUniforms& rhs)
+        {
+            if (node.size() != 4) {
+                return false;
+            }
+
+            rhs.friction = node["friction"].as<float>();
+            rhs.linearEffectAccel = node["linearEffectAccel"].as<float>();
+            rhs.linearEffectDir = node["linearEffectDir"].as<Vec2>();
+            rhs.linearEffectForce = node["linearEffectForce"].as<float>();
+
+            return true;
+        }
+    };
+}
+
 template<> constexpr bool isYAMLSerializable<Player>() { return true; }
 YAML::Emitter& operator<<(YAML::Emitter& out, const Player& v);
 namespace YAML {

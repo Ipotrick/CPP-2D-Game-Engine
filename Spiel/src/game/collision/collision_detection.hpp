@@ -3,10 +3,10 @@
 #include <array>
 #include <optional>
 
-#include "../../engine/BaseTypes.hpp"
-#include "../../engine/Vec2.hpp"
-#include "../../engine/EntityTypes.hpp"
-#include "../../engine/RenderTypes.hpp"
+#include "../../engine/types/BaseTypes.hpp"
+#include "../../engine/math/Vec2.hpp"
+#include "../../engine/entity/EntityTypes.hpp"
+#include "../../engine/rendering/RenderTypes.hpp"
 #include "CollisionUniform.hpp"
 
 struct CollPoint {

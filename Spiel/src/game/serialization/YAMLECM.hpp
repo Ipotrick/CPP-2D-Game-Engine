@@ -6,25 +6,25 @@
 
 class YAMLEntitySerializer {
 public:
-    YAMLEntitySerializer(EntityComponentManager& manager);
+    YAMLEntitySerializer(World& manager);
     void serialize(YAML::Emitter& out, EntityHandle entity);
     bool deserialize(YAML::Node entityNode);
 private:
-    EntityComponentManager& manager;
+    World& world;
 };
 
-template<> constexpr bool isYAMLSerializable<EntityComponentManager>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, EntityComponentManager& v);
+template<> constexpr bool isYAMLSerializable<World>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, World& v);
 namespace YAML {
     template<>
-    struct convert<EntityComponentManager> {
-        static Node encode(const EntityComponentManager& rhs)
+    struct convert<World> {
+        static Node encode(const World& rhs)
         {
             Node node;
             return node;
         }
 
-        static bool decode(const Node& node, EntityComponentManager& rhs)
+        static bool decode(const Node& node, World& rhs)
         {
             if (node.size() != 1) {
                 return false;

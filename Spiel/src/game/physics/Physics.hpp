@@ -6,9 +6,9 @@
 #include "robin_hood.h"
 
 #include "../EngineConfig.hpp"
-#include "../../engine/EntityComponentManager.hpp"
-#include "../../engine/BaseTypes.hpp"
-#include "../../engine/Vec2.hpp"
+#include "../../engine/entity/EntityComponentManager.hpp"
+#include "../../engine/types/BaseTypes.hpp"
+#include "../../engine/math/Vec2.hpp"
 #include "PhysicsTypes.hpp"
 #include "../collision/collision_detection.hpp"
 

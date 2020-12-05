@@ -7,19 +7,19 @@
 #include "GLFW/glfw3.h"
 #include "robin_hood.h"
 
-#include "utils.hpp"
-#include "Timing.hpp"
-#include "Perf.hpp"
-#include "BaseTypes.hpp"
-#include "RenderTypes.hpp"
-#include "Window.hpp"
-#include "Camera.hpp"
-#include "InputManager.hpp"
-#include "UIManager.hpp"
-#include "Renderer.hpp"
+#include "util/utils.hpp"
+#include "types/Timing.hpp"
+#include "util/Perf.hpp"
+#include "types/BaseTypes.hpp"
+#include "rendering/RenderTypes.hpp"
+#include "rendering/Window.hpp"
+#include "rendering/Camera.hpp"
+#include "io/InputManager.hpp"
+#include "ui/UIManager.hpp"
+#include "rendering/Renderer.hpp"
 #include "JobManager.hpp"	// TODO REMOVE
 #include "JobSystem.hpp"
-#include "EntityComponentManagerView.hpp"
+#include "entity/EntityComponentManagerView.hpp"
 
 class EngineCore {
 public:

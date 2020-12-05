@@ -2,7 +2,7 @@
 
 #include <iomanip>
 
-#include "../engine/Log.hpp"
+#include "../engine/util/Log.hpp"
 #include "GameComponents.hpp"
 #include "serialization/YAMLSerializer.hpp"
 
@@ -14,6 +14,7 @@
 #include "ParticleScript.hpp"
 #include "SuckerScript.hpp"
 #include "TesterScript.hpp"
+#include "../engine/ui/UICreate.hpp"
 
 #include "GlowTrailRScript.hpp"
 #include "BloomRScript.hpp"
@@ -46,6 +47,7 @@ Game::Game()
 
 	renderer.getLayer(LAYER_SECOND_UI).renderMode = RenderSpace::PixelSpace;
 
+	collisionSystem.disableColliderDetection(Collider::PARTICLE);
 }
 
 #define UI_CREATE(parent, code, Type, name) \
@@ -71,7 +73,15 @@ void Game::create() {
 	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
 	const auto font = renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png"));
 
-	loadBallTestMap();
+	//loadBallTestMap();
+
+	std::ifstream ifstream("world.yaml");
+	if (ifstream.good()) {
+		YAMLWorldSerializer s(world);
+		std::string str;
+		std::getline(ifstream, str, '\0');
+		s.deserializeString(str);
+	}
 
 	auto makeRenderStatsUI = [&](auto& parent) {
 		UICollapsable c("Rendering Statics:", font);
@@ -148,13 +158,20 @@ void Game::create() {
 			list.setSizeModeX(SizeMode::FillUp);
 			list.setSizeModeY(SizeMode::FillMin);
 			list.setSpacing(5.0f);
-			UI_TEXT(list,
-				me.text = "Statistics:";
-				me.fontTexture = font;
-				me.setSize(textFieldSize);
-				me.textAnchor.setCenterHorizontal();
-				me.anchor.setCenterHorizontal();
-			)
+			list.addChild(ui::text(UIText::Parameters{
+				.anchor = UIAnchor({
+						.xmode = UIAnchor::X::LeftRelativeDist,
+						.x = 0.5
+					}),
+				.size = textFieldSize,
+				.textAnchor = UIAnchor({
+						.xmode = UIAnchor::X::LeftRelativeDist,
+						.x = 0.5
+					}),
+				.text = "Statistics:",
+				.fontTexture = font
+				}
+			));
 			UI_SEPERATOR(list, me.setHorizontal();)
 			{
 				UIPair entCountPair;
@@ -191,69 +208,6 @@ void Game::create() {
 		}
 		ui.createFrame(frame, "Statiscics");
 	}
-
-	// render test ui:
-//	TextureInfo fontInfo1("ConsolasAtlas.png");
-//	TextureInfo fontInfo2("ConsolasAtlas2.png");
-//	{
-//		std::string testerString = "abcdefghij*//.-\"";
-//		UIFrame frame;
-//		frame.setSize({ 1000, 700 });
-//		frame.anchor.setLeftAbsolute(220);
-//		frame.anchor.setTopAbsolute(10);
-//		frame.setPadding({ 5,5 });
-//		{
-//
-//#define TEST_TEXT_MAKRO(LIST, FONT_SIZE_X, FONT_SIZE_Y, fontTexInfo) \
-//			{\
-//				UIText t(testerString, renderer.makeSmallTexRef(fontTexInfo));\
-//				t.anchor.setCenterHorizontal();\
-//				t.fontSize = {FONT_SIZE_X, FONT_SIZE_Y};\
-//				LIST.addChild(ui.createAndGet(t));\
-//			}
-//
-//			// t.setSize({ (float)(FONT_SIZE_X * testerString.size()+1), FONT_SIZE_Y}); 
-//			UIList8 columns;
-//			columns.setHorizontal();
-//			columns.setSpacingUniform();
-//
-//			{
-//				UIList64 l;
-//				l.setSize({ 400,0 });
-//				l.setSizeModeX(SizeMode::FillMin);
-//				l.setSpacing(5);
-//
-//				TEST_TEXT_MAKRO(l, 5, 10, fontInfo1)
-//				TEST_TEXT_MAKRO(l, 7, 14, fontInfo1)
-//				TEST_TEXT_MAKRO(l, 10, 20, fontInfo1)
-//				TEST_TEXT_MAKRO(l, 12, 24, fontInfo1)
-//				TEST_TEXT_MAKRO(l, 15, 30, fontInfo1)
-//				TEST_TEXT_MAKRO(l, 18, 36, fontInfo1)
-//				TEST_TEXT_MAKRO(l, 20, 40, fontInfo1)
-//
-//				columns.addChild(ui.createAndGet(l));
-//			}
-//			{
-//				UIList64 l;
-//				l.setSize({ 400,0 });
-//				l.setSizeModeX(SizeMode::FillMin);
-//				l.setSpacing(5);
-//
-//				TEST_TEXT_MAKRO(l, 5, 10, fontInfo2)
-//				TEST_TEXT_MAKRO(l, 7, 14, fontInfo2)
-//				TEST_TEXT_MAKRO(l, 10, 20, fontInfo2)
-//				TEST_TEXT_MAKRO(l, 12, 24, fontInfo2)
-//				TEST_TEXT_MAKRO(l, 15, 30, fontInfo2)
-//				TEST_TEXT_MAKRO(l, 18, 36, fontInfo2)
-//				TEST_TEXT_MAKRO(l, 20, 40, fontInfo2)
-//
-//				columns.addChild(ui.createAndGet(l));
-//			}
-//
-//			frame.addChild(ui.createAndGet(columns));
-//		}
-//		ui.createFrame(frame, "textTestUi");
-//	}
 
 }
 
@@ -369,7 +323,7 @@ void Game::gameplayUpdate(float deltaTime)
 			[w](int id) mutable {
 				Monke::log("Start saving...");
 
-				std::ofstream of("dump.yaml");
+				std::ofstream of("world.yaml");
 				if (of.good()) {
 					YAMLWorldSerializer s(w);
 					of << s.serializeToString();
@@ -392,7 +346,7 @@ void Game::gameplayUpdate(float deltaTime)
 			{
 				Monke::log("Start loading...");
 				loadedWorld = new World();
-				std::ifstream ifstream("dump.yaml");
+				std::ifstream ifstream("world.yaml");
 				if (ifstream.good()) {
 					YAMLWorldSerializer s(*loadedWorld);
 					std::string str;

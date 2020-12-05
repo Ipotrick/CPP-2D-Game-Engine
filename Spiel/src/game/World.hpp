@@ -1,14 +1,13 @@
 #pragma once
 
 #include "EngineConfig.hpp"
-#include "../engine/EntityComponentManager.hpp"
+#include "../engine/entity/EntityComponentManager.hpp"
 #include "collision/CoreSystemUniforms.hpp"
 
-class World : public EntityComponentManager {
+class World : public EntityComponentManager<ENGINE_COMPONENT_LIST> {
+	friend class YAMLEntitySerializer;
+	friend class YAMLWorldSerializer;
 public:
-	using EntityComponentManager::EntityComponentManager;
-
-	// Core System Uniform Data
 	PhysicsUniforms physics;
 private:
 };

@@ -4,9 +4,9 @@
 
 #include "collision/CoreComponents.hpp"
 #include "GameComponents.hpp"
-#include "../engine/EntityComponentStorage.hpp"
-#include "../engine/BaseTypes.hpp"
-#include "../engine/RenderTypes.hpp"
+#include "../engine/entity/EntityComponentStorage.hpp"
+#include "../engine/types/BaseTypes.hpp"
+#include "../engine/rendering/RenderTypes.hpp"
 
 #define ENGINE_COMPONENT_LIST \
 	ComponentStoragePagedIndexing<Transform>,\

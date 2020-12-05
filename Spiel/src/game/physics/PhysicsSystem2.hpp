@@ -1,16 +1,16 @@
 #pragma once
 
 #include "../World.hpp"
-#include "../../engine/vector_math.hpp"
+#include "../../engine/math/vector_math.hpp"
 #include "../collision/collision_detection.hpp"
 #include "Physics.hpp"
-#include "../../engine/Perf.hpp"
+#include "../../engine/util/Perf.hpp"
 #include "CollisionConstraintSet.hpp"
 #include "../collision/CollisionSystem.hpp"
 #include "../../engine/JobManager.hpp"
 #include "Physics.hpp"
-#include "../../engine/debug.hpp"
-#include "../../engine/Log.hpp"
+#include "../../engine/util/debug.hpp"
+#include "../../engine/util/Log.hpp"
 
 /**
 * NEXT TASK TODO:

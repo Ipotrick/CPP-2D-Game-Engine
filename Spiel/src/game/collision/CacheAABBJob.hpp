@@ -2,11 +2,11 @@
 
 #include "CollisionUniform.hpp"
 #include "../../engine/JobSystem.hpp"
-#include "../../engine/EntityComponentStorage.hpp"
-#include "../../engine/EntityComponentManagerView.hpp"
-#include "../../engine/Vec2.hpp"
+#include "../../engine/entity/EntityComponentStorage.hpp"
+#include "../../engine/entity/EntityComponentManagerView.hpp"
+#include "../../engine/math/Vec2.hpp"
 
-class CacheAABBJob : public JobSystem::ThreadJob {
+class CacheAABBJob : public JobSystem::Job {
 public:
 	CacheAABBJob(std::vector<EntityHandleIndex>& entities_to_cache, CollisionSECM manager, std::vector<Vec2>& aabbs)
 		:entities_to_cache{ entities_to_cache }, manager{ manager }, aabbs{ aabbs } 

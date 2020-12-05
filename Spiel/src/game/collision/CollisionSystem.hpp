@@ -6,12 +6,12 @@
 #include <robin_hood.h>
 
 #include "CollisionUniform.hpp"
-#include "../../engine/EntityComponentManagerView.hpp"
-#include "../../engine/vector_math.hpp"
+#include "../../engine/entity/EntityComponentManagerView.hpp"
+#include "../../engine/math/vector_math.hpp"
 #include "../collision/collision_detection.hpp"
 #include "QuadTree.hpp"
 #include "CacheAABBJob.hpp"
-#include "../../engine/StaticVector.hpp"
+#include "../../engine/types/StaticVector.hpp"
 
 #define DEBUG_QTREE_FINDPLAYER
 
@@ -77,6 +77,16 @@ public:
 	const CollisionsView collisions_view(EntityHandleIndex entity);
 	const std::vector<Drawable>& getDebugDrawables() const;
 	void checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Transform const& b, Collider const& c) const;
+
+	void disableColliderDetection(uint8_t qtreeIgnoreFlags)
+	{
+		colliderDetectionEnableFlags &= ~qtreeIgnoreFlags;
+	}
+
+	void enableColliderDetection(uint8_t qtreeEnableFrags)
+	{
+		colliderDetectionEnableFlags |= qtreeEnableFrags;
+	}
 private:
 	void prepare(CollisionSECM secm);
 	void cleanBuffers(CollisionSECM secm);
@@ -96,6 +106,7 @@ private:
 	Quadtree qtreeStatic;
 	Quadtree qtreeParticle;
 	Quadtree qtreeSensor;
+	uint8_t colliderDetectionEnableFlags{ 0xFF };
 
 	std::vector<Vec2> aabbCache;
 
