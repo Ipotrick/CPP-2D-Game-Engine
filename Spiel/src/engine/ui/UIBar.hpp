@@ -32,7 +32,7 @@ public:
 	UIBar(Vec4 empty, Vec4 fill)
 		:emptyColor{ empty }, fillColor{ fill }
 	{ }
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override;
 
 	void setFill(const float fill) { this->fill = clamp(fill, 0.0f, 1.0f); }
 	float getFill() const { return this->fill; }

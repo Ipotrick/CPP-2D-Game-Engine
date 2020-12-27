@@ -7,7 +7,42 @@ class EntityComponentManager : public EntityManager {
 	using CompStoreTupleType = std::tuple<TComponentStorage...>;
 public:
 
-	/* per entity component access */
+	/**
+	 * Adds a callback specific to this ECM, that is called directly after a Component is added to an entity.
+	 * 
+	 * \param callback function that is called directly after a component was added to an entity.
+	 */
+	template<typename CompType> void setOnAddCallback(ComponentCallback<CompType> callback)
+	{
+		storage<CompType>().setCallbackOnInsert(callback);
+	}
+
+	/**
+	 * adds a callback specific to this ECM, that is called directly before a component is removed from an entity.
+	 * 
+	 * \param callback function that is called directly before a component is removed from an entity.
+	 */
+	template<typename CompType> void setOnRemCallback(ComponentCallback<CompType> callback)
+	{
+		storage<CompType>().setCallbackOnRemove(callback);
+	}
+
+	/**
+	 * removes onAddCallback for component, for this ECM.
+	 */
+	template<typename CompType> void removeOnAddCallback()
+	{
+		storage<CompType>().removeCallBackOnInsert();
+	}
+
+	/**
+	 * removes onAddCallback for component, for this ECM.
+	 */
+	template<typename CompType> void removeCallBackOnRemove()
+	{
+		storage<CompType>().setCallbackOnRemove();
+	}
+
 	template<typename CompType>		CompType& getComp(EntityHandleIndex index)
 	{
 		return storage<CompType>().get(index);
@@ -116,7 +151,7 @@ public:
 	template<typename ... CompType>
 	auto submodule()
 	{
-		return SubEntityComponentManager(*static_cast<EntityManager*>(this), storage<CompType>() ...);
+		return EntityComponentManagerView(*static_cast<EntityManager*>(this), storage<CompType>() ...);
 	}
 
 	/* general entity and storage access */

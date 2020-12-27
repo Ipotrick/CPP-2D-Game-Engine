@@ -1,6 +1,6 @@
 #include "UIButton.hpp"
 
-inline void UIButton::draw(std::vector<Drawable>& buffer, UIContext context)
+inline void UIButton::draw(std::vector<Sprite>& buffer, UIContext context)
 {
 	// cap borders so that they never escape the button
 	border = std::min(border, this->size.x * 0.5f);
@@ -12,9 +12,9 @@ inline void UIButton::draw(std::vector<Drawable>& buffer, UIContext context)
 	Vec2 position = anchor.getOffset(size, context);
 	float border = this->border * context.scale;
 
-	buffer.push_back(Drawable(0, position, context.recursionDepth, size, borderColor, Form::Rectangle, RotaVec2(0), context.drawMode));
+	buffer.push_back(makeSprite(0, position, 0, size, borderColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 	++context.recursionDepth;
-	buffer.push_back(Drawable(0, position, context.recursionDepth, size - Vec2(border, border) * 2.0f, innerColor, Form::Rectangle, RotaVec2(0), context.drawMode));
+	buffer.push_back(makeSprite(0, position, 0, size - Vec2(border, border) * 2.0f, innerColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 
 	lastDrawArea = context;
 	lastDrawArea.ulCorner = position - Vec2(1, -1) * size * 0.5f;

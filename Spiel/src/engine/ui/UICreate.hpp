@@ -10,7 +10,7 @@ namespace ui {
 	{
 		static_assert(std::is_base_of_v<UIElement, T>);
 
-		return EngineCore::ui.createAndGet(uient);
+		return EngineCore::ui.createAndGetPtr(uient);
 	}
 
 	template<class T>
@@ -22,7 +22,7 @@ namespace ui {
 			uient.addChild(child);
 		}
 
-		return EngineCore::ui.createAndGet(uient);
+		return EngineCore::ui.createAndGetPtr(uient);
 	}
 
 	template<>
@@ -32,11 +32,12 @@ namespace ui {
 		uient.setFirst(*(children.begin() + 0));
 		uient.setSecond(*(children.begin() + 1));
 
-		return EngineCore::ui.createAndGet(uient);
+		return EngineCore::ui.createAndGetPtr(uient);
 	}
 
 	UIElement* pair(UIPair::Parameters param, std::initializer_list<UIElement*> children);
-	UIElement* frame(UIFrame::Parameters param, std::initializer_list<UIElement*> children);
+	UIEntityHandle frame(UIFrame::Parameters param, std::initializer_list<UIElement*> children);
+	UIEntityHandle frame(const char*, UIFrame::Parameters param, std::initializer_list<UIElement*> children);
 	UIElement* bar(UIBar::Parameters param);
 	UIElement* text(UIText::Parameters param);
 }

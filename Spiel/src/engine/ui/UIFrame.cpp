@@ -1,7 +1,7 @@
 #include "UIFrame.hpp"
 #include "DrawFrame.hpp"
 
-void UIFrame::draw(std::vector<Drawable>& buffer, UIContext context)
+void UIFrame::draw(std::vector<Sprite>& buffer, UIContext context)
 {
 	context.layer = layer;
 	context.scale *=	this->scale;
@@ -16,7 +16,7 @@ void UIFrame::draw(std::vector<Drawable>& buffer, UIContext context)
 	lastDrawArea = anchor.shrinkContextToMe(this->size, context);
 }
 
-void UIFrame::drawChildren(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders)
+void UIFrame::drawChildren(std::vector<Sprite>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders)
 {
 	if (hasChild()) {
 		context = anchor.shrinkContextToMe(this->size, context);

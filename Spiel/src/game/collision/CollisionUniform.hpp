@@ -10,7 +10,7 @@
 	PhysicsBody, \
 	CollisionsToken
 
-using CollisionSECM = SubEntityComponentManager<
+using CollisionSECM = EntityComponentManagerView <
 	ComponentStoragePagedIndexing<Transform>,
 	ComponentStoragePagedIndexing<Movement>,
 	ComponentStoragePagedIndexing<Collider>,

@@ -6,7 +6,7 @@
 template<std::size_t CAPACITY>
 class UIField : public UIMultiParent<CAPACITY> {
 public:
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override
 	{
 		context = this->anchor.shrinkContextToMe(this->size, context);
 

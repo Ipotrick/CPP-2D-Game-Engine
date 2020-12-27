@@ -1,6 +1,6 @@
 #include "UIText.hpp"
 
-void UIText::draw(std::vector<Drawable>& buffer, UIContext context)
+void UIText::draw(std::vector<Sprite>& buffer, UIContext context)
 {
 	calculateTextSize();
 	if (bAutoSize) {
@@ -16,7 +16,7 @@ void UIText::draw(std::vector<Drawable>& buffer, UIContext context)
 	int column = 0;
 	int row = 0;
 	Vec2 letterSize = context.scale * fontSize;
-	auto letter = Drawable(0, {}, context.recursionDepth, letterSize, color, Form::Rectangle, RotaVec2(0), context.drawMode);
+	auto letter = makeSprite(0, {}, 0, letterSize, color, Form::Rectangle, RotaVec2(0), context.drawMode);
 	for (auto c : text) {
 		if (c == '\n') {
 			row += 1;

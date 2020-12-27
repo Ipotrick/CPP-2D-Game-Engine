@@ -15,7 +15,7 @@ namespace Physics {
 	constexpr float pressureFalloff = 1.00f;
 	constexpr bool accumInmpulses = true;
 
-	inline std::vector<Drawable> debugDrawables;
+	inline std::vector<Sprite> debugSprites;
 }
 
 template<typename T>

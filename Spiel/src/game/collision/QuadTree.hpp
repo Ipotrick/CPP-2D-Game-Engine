@@ -5,11 +5,12 @@
 #include <array>
 #include <mutex>
 
-#include "../../engine/EngineCore.hpp"
-#include "CollisionUniform.hpp"
 #include "../../engine/types/BaseTypes.hpp"
 #include "../../engine/rendering/RenderTypes.hpp"
+
 #include "../collision/collision_detection.hpp"
+
+#include "CollisionUniform.hpp"
 
 struct QtreeNodeQuerry {
 	uint32_t nodeId;
@@ -20,8 +21,7 @@ struct QtreeNodeQuerry {
 struct QuadtreeNode {
 	static const uint32_t INVALID_ID{ 0 };
 
-
-	inline bool hasSubTrees() const 
+	bool hasSubTrees() const 
 	{
 		return (firstSubTree > 0);
 	}
@@ -33,12 +33,12 @@ struct QuadtreeNode {
 class NodeStorage {
 public:
 
-	inline QuadtreeNode& get(uint32_t index)  
+	QuadtreeNode& get(uint32_t index)  
 	{
 		return pages.at(page(index))->nodes.at(offset(index));
 	}
 
-	inline const QuadtreeNode& get(uint32_t index) const
+	const QuadtreeNode& get(uint32_t index) const
 	{
 		return pages.at(page(index))->nodes.at(offset(index));
 	}
@@ -150,10 +150,10 @@ public:
 
 	void querry(std::vector<EntityHandleIndex>& rVec, std::vector<QtreeNodeQuerry>& buffer, const Vec2 qryPos, const Vec2 qrySize) const;
 
-	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, std::vector<Drawable>& draw) const {
+	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, std::vector<Sprite>& draw) const {
 		querryDebug(qryPos, qrySize, 0, m_pos, m_size, draw, 0);
 	}
-	void querryDebugAll(std::vector<Drawable>& draw, const Vec4 color) const {
+	void querryDebugAll(std::vector<Sprite>& draw, const Vec4 color) const {
 		querryDebugAll(0, m_pos, m_size, draw, color, 0);
 	}
 
@@ -178,21 +178,22 @@ public:
 		removeEmptyLeafes(3);
 	}
 
-	inline void setPosSize(const Vec2 pos, const Vec2 size) {
+	void setPosSize(const Vec2 pos, const Vec2 size) {
 		m_pos = pos;
 		m_size = size;
 	}
 
-	inline Vec2 getPosition() const { return m_pos; }
-	inline Vec2 getSize() const { return m_size; }
+	Vec2 getPosition() const { return m_pos; }
+	Vec2 getSize() const { return m_size; }
 
 	const uint8_t COLLIDER_TAG;
 private:
+
 	void insert(const uint32_t ent, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
-	void broadInsert(std::vector<EntityHandleIndex>&& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
+	void broadInsert(std::vector<uint32_t>&& entities, const std::vector<Vec2>& aabbs, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, const int depth);
 	void querry(std::vector<EntityHandleIndex>& rVec, const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize) const;
-	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, int depth) const;
-	void querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, const Vec4 color, const int depth) const;
+	void querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Sprite>& draw, int depth) const;
+	void querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Sprite>& draw, const Vec4 color, const int depth) const;
 
 	static std::tuple<bool, bool, bool, bool> isInSubtrees(const Vec2 treePos, const Vec2 treeSize, const Vec2 pos, const Vec2 size) {
 		const bool u = (pos.y + size.y * 0.5f) > treePos.y;

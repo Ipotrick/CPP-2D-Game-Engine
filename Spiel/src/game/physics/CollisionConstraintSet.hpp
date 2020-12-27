@@ -16,6 +16,11 @@
 #define constraintset_assert(x, y)
 #endif
 
+inline uint64_t makeConstraintKey(EntityHandleIndex a, EntityHandleIndex b)
+{
+	constraintset_assert(a < b, "error: id's must be in order!");
+	return (uint64_t)a << 32 | (uint64_t)b;
+}
 
 inline uint64_t makeConstraintKey(EntityHandle a, EntityHandle b)
 {

@@ -26,20 +26,60 @@
 struct CompData { };
 
 template<typename CompType>
+using ComponentCallback = std::function<void(EntityHandleIndex, CompType&)>;
+
+/**
+ * This is an abstract class/ Interface for the component storage classes.
+ * It defines an Interface, every comp store class must implement.
+ */
+template<typename CompType>
 class ComponentStorageBase {
 public:
 	// meta:
-	void updateMaxEntNum(size_t newEntNum) { static_assert(false); };
-	size_t memoryConsumtion() { static_assert(false); };
-	size_t size() const { static_assert(false); };
+	void updateMaxEntNum(size_t newEntNum) { assertNoPolyNoBase(); }
+	size_t memoryConsumtion() { assertNoPolyNoBase(); }
+	size_t size() const { assertNoPolyNoBase(); }
 
 	// access:
-	void insert(EntityHandleIndex entity, CompType const& comp) { static_assert(false); };
-	void remove(EntityHandleIndex entity) { static_assert(false); };
-	bool contains(EntityHandleIndex entity) const { static_assert(false); };
-	CompType& get(EntityHandleIndex entity) { static_assert(false); };
-	const CompType& get(EntityHandleIndex entity) const { static_assert(false); };
+	void insert(EntityHandleIndex entity, CompType const& comp) { assertNoPolyNoBase(); }
+	void remove(EntityHandleIndex entity) { assertNoPolyNoBase(); }
+	void setCallbackOnInsert(ComponentCallback<CompType> callback)
+	{
+		this->onInsertCallback = callback;
+	}
+	void setCallbackOnRemove(ComponentCallback<CompType> callback)
+	{
+		this->onRemoveCallback = callback;
+	}
+	void removeCallBackOnInsert()
+	{
+		this->onInsertCallback = {};
+	}
+	void removeCallBackOnRemove()
+	{
+		this->onRemoveCallback = {};
+	}
+	bool contains(EntityHandleIndex entity) const { assertNoPolyNoBase(); };
+	CompType& get(EntityHandleIndex entity) { assertNoPolyNoBase(); };
+	const CompType& get(EntityHandleIndex entity) const { assertNoPolyNoBase(); };
+protected:
+	ComponentCallback<CompType> onInsertCallback;
+	ComponentCallback<CompType> onRemoveCallback;
+private:
+	/**
+	 * This Function asserts that:
+	 * this class is not instantiated.
+	 * a deriving class overrides every function wich's body contains assertNoPolyNoBase().
+	 * there are no polymorph calls on this class.
+	 */
+	static constexpr void assertNoPolyNoBase()
+	{
+		static_assert(false, "error: dont instantiate ComponentStorageBase, dont call polymorphic on ComponentStorageBase derivates");
+	}
 };
+
+template<typename T, typename CompType>
+concept CComponentStorageType = std::is_base_of_v<ComponentStorageBase<CompType>, T>;
 
 /*----------------------------------------------------------------------------------*/
 /*---------------------------------Direct-Indexing----------------------------------*/
@@ -48,6 +88,19 @@ public:
 template<typename CompType>
 class ComponentStorageDirectIndexing : public ComponentStorageBase<CompType> {
 public:
+	~ComponentStorageDirectIndexing()
+	{
+		onRemoveCallbackOnEverything();
+	}
+
+	ComponentStorageDirectIndexing<CompType>& operator=(ComponentStorageDirectIndexing<CompType> const& rhs)
+	{
+		onRemoveCallbackOnEverything();
+		this->storage = rhs.storage;
+		this->containsVec = rhs.containsVec;
+		return *this;
+	}
+
 	// meta:
 	void updateMaxEntNum(size_t newEntNum)
 	{
@@ -76,10 +129,19 @@ public:
 			storage.resize(entity + 1, CompType());
 			storage[entity] = comp;
 		}
+
+		if (this->onInsertCallback) {
+			this->onInsertCallback(entity, storage[entity]);
+		}
 	}
 	void remove(EntityHandleIndex entity)
 	{
-		compStoreAssert(contains(entity));
+		compStoreAssert(contains(entity)); 
+		
+		if (this->onRemoveCallback) {
+			this->onRemoveCallback(entity, get(entity));
+		}
+
 		containsVec[entity] = false;
 	}
 	bool contains(EntityHandleIndex entity) const
@@ -98,11 +160,12 @@ public:
 	template<typename CompType>
 	class iterator {
 	public:
-		typedef iterator self_type;
-		typedef EntityHandleIndex value_type;
-		typedef EntityHandleIndex& reference;
-		typedef EntityHandleIndex* pointer;
-		typedef std::forward_iterator_tag iterator_category;
+		using self_type = iterator;
+		using value_type = EntityHandleIndex;
+		using reference = EntityHandleIndex&;
+		using pointer = EntityHandleIndex*;
+		using iterator_category = std::forward_iterator_tag;
+
 		iterator(EntityHandleIndex entity_, ComponentStorageDirectIndexing<CompType>& compStore)
 			: entity{ entity_ }, compStore{ compStore }, end{ (EntityHandleIndex)compStore.size() } {}
 		self_type operator++()
@@ -130,11 +193,11 @@ public:
 			compStoreAssert(entity < end);
 			return &entity;
 		}
-		bool operator==(self_type const& rhs)
+		bool operator==(self_type const& rhs) const
 		{
 			return entity == rhs.entity;
 		}
-		bool operator!=(self_type const& rhs)
+		bool operator!=(self_type const& rhs) const
 		{
 			return entity != rhs.entity;
 		}
@@ -156,6 +219,15 @@ public:
 	}
 	iterator<CompType> end() { return iterator<CompType>(storage.size(), *this); }
 private:
+
+	void onRemoveCallbackOnEverything()
+	{
+		if (this->onRemoveCallback) {
+			for (auto iter = begin(); iter != end(); ++iter) {
+				this->onRemoveCallback(*iter, iter.data());
+			}
+		}
+	}
 	std::vector<CompType> storage;
 	std::vector<bool> containsVec;
 };
@@ -172,6 +244,10 @@ public:
 	{
 		operator=(rhs);
 	}
+	~ComponentStoragePagedIndexing()
+	{
+		onRemoveCallbackOnEverything();
+	}
 
 	// meta:
 	void updateMaxEntNum(size_t newEntNum)
@@ -179,8 +255,8 @@ public:
 		if (newEntNum > containsVec.size()) {
 			containsVec.resize(newEntNum, false);
 		}
-		if (page(newEntNum - 1) + 1 > pages.size()) {
-			pages.resize(page(newEntNum - 1) + 1);
+		if (page(static_cast<EntityHandleIndex>(newEntNum - 1ull)) + 1 > pages.size()) {
+			pages.resize(page(static_cast<EntityHandleIndex>(newEntNum - 1ull)) + 1);
 		}
 	}
 	size_t memoryConsumtion()
@@ -194,6 +270,7 @@ public:
 	};
 	void operator=(const ComponentStoragePagedIndexing<CompType>& rhs)
 	{
+		onRemoveCallbackOnEverything();
 		this->containsVec = rhs.containsVec;
 
 		this->pages.resize(rhs.pages.size());
@@ -222,12 +299,20 @@ public:
 
 		pages[page(entity)]->data[offset(entity)] = comp;
 		pages[page(entity)]->usedCount += 1;
-		++m_size;
+		++m_size; 
+		
+		if (this->onInsertCallback) {
+			this->onInsertCallback(entity, pages[page(entity)]->data[offset(entity)]);
+		}
 	}
 	void remove(EntityHandleIndex entity)
 	{
 		compStoreAssert(contains(entity));
-		containsVec[entity] = false;
+		containsVec[entity] = false; 
+		
+		if (this->onRemoveCallback) {
+			this->onRemoveCallback(entity, get(entity));
+		}
 
 		pages[page(entity)]->usedCount -= 1;
 		if constexpr (DELETE_EMPTY_PAGES) {
@@ -239,7 +324,6 @@ public:
 	}
 	bool contains(EntityHandleIndex entity) const
 	{
-		//compStoreAssert(entity < containsVec.size());
 		return entity < containsVec.size() && containsVec[entity];
 	}
 	CompType& get(EntityHandleIndex entity)
@@ -253,11 +337,12 @@ public:
 	template<typename CompType>
 	class iterator {
 	public:
-		typedef iterator self_type;
-		typedef EntityHandleIndex value_type;
-		typedef EntityHandleIndex& reference;
-		typedef EntityHandleIndex* pointer;
-		typedef std::forward_iterator_tag iterator_category;
+		using self_type = iterator;
+		using value_type = EntityHandleIndex;
+		using reference = EntityHandleIndex&;
+		using pointer = EntityHandleIndex*;
+		using iterator_category = std::forward_iterator_tag;
+
 		iterator(EntityHandleIndex entity_, ComponentStoragePagedIndexing<CompType>& compStore)
 			: entity{ entity_ }, compStore{ compStore }, end{ (EntityHandleIndex)compStore.containsVec.size() } {}
 		self_type operator++()
@@ -293,11 +378,11 @@ public:
 		{
 			return &entity;
 		}
-		bool operator==(self_type const& rhs)
+		bool operator==(self_type const& rhs) const
 		{
 			return entity == rhs.entity;
 		}
-		bool operator!=(self_type const& rhs)
+		bool operator!=(self_type const& rhs) const
 		{
 			return entity != rhs.entity;
 		}
@@ -326,10 +411,10 @@ public:
 			}
 		}
 		if (entity > containsVec.size())
-			entity = containsVec.size();
+			entity = static_cast<EntityHandleIndex>(containsVec.size());
 		return iterator<CompType>(entity, *this);
 	}
-	iterator<CompType> end() { return iterator<CompType>(containsVec.size(), *this); }
+	iterator<CompType> end() { return iterator<CompType>(static_cast<EntityHandleIndex>(containsVec.size()), *this); }
 
 private:
 	static const int PAGE_BITS{ 7 };
@@ -350,6 +435,15 @@ private:
 		std::array<CompType, PAGE_SIZE> data;
 	};
 
+	void onRemoveCallbackOnEverything()
+	{
+		if (this->onRemoveCallback) {
+			for (auto iter = begin(); iter != end(); ++iter) {
+				this->onRemoveCallback(*iter, iter.data());
+			}
+		}
+	}
+
 	size_t usedPages{ 0 };
 	size_t m_size{ 0 };
 	std::vector<std::unique_ptr<Page>> pages;
@@ -367,6 +461,10 @@ public:
 	ComponentStoragePagedSet(ComponentStoragePagedSet<CompType> const& rhs)
 	{
 		operator=(rhs);
+	}
+	~ComponentStoragePagedSet()
+	{
+		onRemoveCallbackOnEverything();
 	}
 	// meta:
 	void updateMaxEntNum(EntityHandleIndex newEntNum)
@@ -391,6 +489,7 @@ public:
 	}
 	void operator=(const ComponentStoragePagedSet<CompType>& rhs)
 	{
+		onRemoveCallbackOnEverything();
 		this->denseTable = rhs.denseTable;
 		this->storage = rhs.storage;
 
@@ -417,11 +516,20 @@ public:
 			pages[page(entity)] = std::make_unique<Page>();
 		}
 		sparseTable(entity) = (uint32_t)denseTable.size() - 1;
-		pages[page(entity)]->usedCount++;
+		pages[page(entity)]->usedCount++; 
+		
+		if (this->onInsertCallback) {
+			this->onInsertCallback(entity, storage.back());
+		}
 	}
 	void remove(EntityHandleIndex entity)
 	{
 		compStoreAssert(contains(entity));
+
+		if (this->onRemoveCallback) {
+			this->onRemoveCallback(entity, get(entity));
+		}
+
 		if (entity == denseTable.back()) {
 			sparseTable(entity) = 0xFFFFFFFF;
 			pages[page(entity)]->usedCount--;
@@ -462,11 +570,12 @@ public:
 	template<typename CompType>
 	class iterator {
 	public:
-		typedef iterator self_type;
-		typedef EntityHandleIndex value_type;
-		typedef EntityHandleIndex& reference;
-		typedef EntityHandleIndex* pointer;
-		typedef std::forward_iterator_tag iterator_category;
+		using self_type = iterator ;
+		using value_type = EntityHandleIndex;
+		using reference = EntityHandleIndex&;
+		using pointer = EntityHandleIndex*;
+
+		using iterator_category = std::forward_iterator_tag;
 		iterator(EntityHandleIndex denseTableIndex, ComponentStoragePagedSet<CompType>& compStore)
 			: denseTableIndex{ denseTableIndex }, compStore{ compStore } {}
 		self_type operator++()
@@ -489,11 +598,11 @@ public:
 		{
 			return &compStore.denseTable[denseTableIndex];
 		}
-		bool operator==(self_type const& rhs)
+		bool operator==(self_type const& rhs) const
 		{
 			return denseTableIndex == denseTableIndex;
 		}
-		bool operator!=(self_type const& rhs)
+		bool operator!=(self_type const& rhs) const
 		{
 			return denseTableIndex != rhs.denseTableIndex;
 		}
@@ -506,7 +615,7 @@ public:
 		ComponentStoragePagedSet<CompType>& compStore;
 	};
 	iterator<CompType> begin() { return iterator<CompType>(0, *this); }
-	iterator<CompType> end() { return iterator<CompType>(denseTable.size(), *this); }
+	iterator<CompType> end() { return iterator<CompType>(static_cast<EntityHandleIndex>(denseTable.size()), *this); }
 private:
 	static const int PAGE_BITS{ 7 };
 	static const int PAGE_SIZE{ 1 << PAGE_BITS };
@@ -538,6 +647,15 @@ private:
 	const uint32_t& sparseTable(EntityHandleIndex ent) const
 	{
 		return pages.csat(page(ent))->data.csat(offset(ent));
+	}
+
+	void onRemoveCallbackOnEverything()
+	{
+		if (this->onRemoveCallback) {
+			for (auto iter = begin(); iter != end(); ++iter) {
+				this->onRemoveCallback(*iter, iter.data());
+			}
+		}
 	}
 	std::vector<std::unique_ptr<Page>> pages;
 	std::vector<EntityHandleIndex> denseTable;

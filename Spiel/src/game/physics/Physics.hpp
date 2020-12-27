@@ -6,7 +6,6 @@
 #include "robin_hood.h"
 
 #include "../EngineConfig.hpp"
-#include "../../engine/entity/EntityComponentManager.hpp"
 #include "../../engine/types/BaseTypes.hpp"
 #include "../../engine/math/Vec2.hpp"
 #include "PhysicsTypes.hpp"

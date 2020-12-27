@@ -7,7 +7,7 @@
 
 class MandelbrotViewer : public EngineCore {
 public:
-	virtual void create() override
+	void create() override
 	{
 		renderer.setLayerCount(LAYER_COUNT);
 
@@ -15,6 +15,7 @@ public:
 		renderer.getLayer(LAYER_MANDELBROT).attachRenderScript(std::make_unique<MandelRenderScript>());
 
 		renderer.getLayer(LAYER_UI).renderMode = RenderSpace::PixelSpace;
+
 
 		UIFrame frame;
 		frame.setWidth(220);
@@ -36,7 +37,7 @@ public:
 					me->text = std::string("zoom: ") + std::to_string(renderer.getCamera().zoom);
 				}
 			);
-			list.addChild(ui.createAndGet(zoomText));
+			list.addChild(ui.createAndGetPtr(zoomText));
 		}
 		{
 			UIText coordText("", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")));
@@ -52,7 +53,7 @@ public:
 						std::to_string(renderer.getCamera().position.y);
 				}
 			);
-			list.addChild(ui.createAndGet(coordText));
+			list.addChild(ui.createAndGetPtr(coordText));
 		}
 		{
 			UIText fpsText("", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")));
@@ -64,39 +65,40 @@ public:
 					me->text = std::string("fps: ") + std::to_string(1.0 / getDeltaTime(100));
 				}
 			);
-			list.addChild(ui.createAndGet(fpsText));
+			list.addChild(ui.createAndGetPtr(fpsText));
 
 		}
 
-		frame.addChild(ui.createAndGet(list));
+		frame.addChild(ui.createAndGetPtr(list));
 		ui.createFrame(frame);
 	}
 
-	virtual void update(float deltaTime) override
+	void update(float deltaTime) override
 	{
 		auto& cam = renderer.getCamera();
 		const float cameraMoveSpeed = 1.0f;
 		if (in.keyPressed(Key::W)) {
-			renderer.getCamera().position.y += cameraMoveSpeed * deltaTime * 1/cam.zoom;
+			cam.position.y += cameraMoveSpeed * deltaTime * 1 / cam.zoom;
 		}
 		if (in.keyPressed(Key::A)) {
-			renderer.getCamera().position.x -= cameraMoveSpeed * deltaTime * 1 / cam.zoom;
+			cam.position.x -= cameraMoveSpeed * deltaTime * 1 / cam.zoom;
 		}
 		if (in.keyPressed(Key::S)) {
-			renderer.getCamera().position.y -= cameraMoveSpeed * deltaTime * 1 / cam.zoom;
+			cam.position.y -= cameraMoveSpeed * deltaTime * 1 / cam.zoom;
 		}
 		if (in.keyPressed(Key::D)) {
-			renderer.getCamera().position.x += cameraMoveSpeed * deltaTime * 1 / cam.zoom;
+			cam.position.x += cameraMoveSpeed * deltaTime * 1 / cam.zoom;
 		}
 		if (in.keyPressed(Key::LEFT_SHIFT)) {
-			renderer.getCamera().zoom *= 1.0f + deltaTime;
+			cam.zoom *= 1.0f + deltaTime;
 		}
 		if (in.keyPressed(Key::LEFT_CONTROL)) {
-			renderer.getCamera().zoom *= 1.0f - deltaTime;
+			cam.zoom *= 1.0f - deltaTime;
 		}
+		cam.frustumBend = { (float)window.height / (float)window.width, 1 };
 	}
 
-	virtual void destroy() override
+	void destroy() override
 	{
 
 	}

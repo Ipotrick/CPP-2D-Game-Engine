@@ -7,8 +7,6 @@ layout(location = 12) uniform int kernelWidth;
 
 in vec2 v_uv;
 
-layout(location = 0) out vec4 o_color;
-
 float turboGauss(float x) {
 	return 1.0f - min(x*x*16,sqrt(x));
 }
@@ -45,5 +43,5 @@ void main()
 	average /= float(kernelHalfWidth);
 	average *= strength * 1.5;
 
-	o_color = vec4(average.xyz, 1.0f);
+	gl_FragColor = vec4(average.xyz, 1.0f);
 }

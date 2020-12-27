@@ -13,7 +13,7 @@ template<std::size_t CAPACITY>
 class UIList : public UIMultiParent<CAPACITY>, public UIPaddingBase {
 public:
 
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override
 	{
 		UIContext const origContext = context;
 		context = this->anchor.shrinkContextToMe(this->size, context);

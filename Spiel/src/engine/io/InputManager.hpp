@@ -7,28 +7,7 @@
 #include "Input.hpp"
 #include "../rendering/Window.hpp"
 #include "../math/Vec2.hpp"
-#include "../rendering/RenderSpace.hpp"
 #include "InputFocus.hpp"
-#include "../rendering/Camera.hpp"
-
-static inline std::string focusToString(Focus focus)
-{
-	switch (focus) {
-	case Focus::Out:
-		return "Out";
-	case Focus::Global:
-		return "Gloabal";
-	case Focus::Standard:
-		return "Standard";
-	case Focus::WriteText:
-		return "WriteText";
-	case Focus::UI:
-		return "Menu";
-	default:
-		assert(false);
-		return "";
-	}
-}
 
 class InputManager {
 public:
@@ -57,40 +36,76 @@ public:
 	bool buttonJustReleased(const Button but, Focus focus = Focus::Standard) const;
 
 
-	Vec2 getMousePosition(RenderSpace renderSpace = RenderSpace::WindowSpace) const;
-	Vec2 getPrevMousePosition(RenderSpace renderSpace = RenderSpace::WindowSpace) const;
+	/**
+	 * \return vector with x,y position of the mouse in windowspace
+	 */
+	Vec2 getMousePosition() const;
 
+	/**
+	 * \return vector with x,y position of the mouse in windowspace, of the previous input update (most likely last frame)
+	 */
+	Vec2 getPrevMousePosition() const;
+
+	/**
+	 * Sets the current focus of the keyboard input system.
+	 * The set focus sits on a stack so it remembers what state it was in before.
+	 * calling returnFocus will pop revert the focus to the previous focus.
+	 * 
+	 * \param focus that the keyboard input is set to.
+	 */
 	void takeFocus(Focus focus)
 	{
 		this->keyFocusStack.push_back(focus);
 	}
+
+	/**
+	 * \return current input focus of the keyboard
+	 */
 	Focus getFocus() const
 	{
 		return keyFocusStack.back();
 	}
+
+	/**
+	 * reverts focus of keyboard input to the focus it was before taking focus.
+	 */
 	void returnFocus()
 	{
 		keyFocusStack.pop_back();
 	}
 
+	/**
+	 * Sets the current focus of the mouse input system.
+	 * The set focus sits on a stack so it remembers what state it was in before.
+	 * calling returnFocus will pop revert the focus to the previous focus.
+	 *
+	 * \param focus that the mouse input is set to.
+	 */
 	void takeMouseFocus(Focus focus)
 	{
 		this->mouseFocusStack.push_back(focus);
 	}
+
+	/**
+	 * \return current input focus of the mouse
+	 */
 	Focus getMouseFocus() const
 	{
 		return mouseFocusStack.back();
 	}
+	/**
+	 * reverts focus of mouse input to the focus it was before taking focus.
+	 */
 	void returnMouseFocus()
 	{
 		this->mouseFocusStack.pop_back();
 	}
 
-	/*
-	* you can call this function ONCE per frame to update the keystates.
-	* If you do not call this function the engine will update the keystates itself after each frame.
-	*/
-	void manualUpdate(const Camera& cam);
+	/**
+	 * You can call this function ONCE per frame to update the keystates.
+	 * If you do not call this function the engine will update the keystates itself after each frame.
+	 */
+	void manualUpdate();
 private:
 	bool keyFocusGuard(const Focus focus) const
 	{
@@ -103,9 +118,9 @@ private:
 	}
 
 	friend class EngineCore;
-	void engineUpdate(const Camera& cam);	// this function is ment to be called by the engine once a frame	
+	void engineUpdate();	// this function is ment to be called by the engine once a frame	
 
-	void inputUpdate(const Camera& cam);
+	void inputUpdate();
 
 	Window& window;
 	bool bManuallyUpdated{ false };
@@ -116,11 +131,5 @@ private:
 	std::array<char, 8> oldButtonStates;
 	std::array<char, 8> newButtonStates;
 	Vec2 mousePositionWindowSpace{ 0.0f, 0.0f };
-	Vec2 mousePositionUniformWindowSpace{ 0.0f, 0.0f };
-	Vec2 mousePositionPixelSpace{ 0.0f, 0.0f };
-	Vec2 mousePositionWorldSpace{ 0.0f, 0.0f };
 	Vec2 prevMousePositionWindowSpace{ 0.0f, 0.0f };
-	Vec2 prevMousePositionUniformWindowSpace{ 0.0f, 0.0f };
-	Vec2 prevMousePositionPixelSpace{ 0.0f, 0.0f };
-	Vec2 prevMousePositionWorldSpace{ 0.0f, 0.0f };
 };

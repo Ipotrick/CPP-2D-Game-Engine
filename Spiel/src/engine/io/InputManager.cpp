@@ -13,10 +13,10 @@ InputManager::InputManager(Window& window)
 	mouseFocusStack.push_back(Focus::Standard);
 }
 
-void InputManager::manualUpdate(const Camera& cam)
+void InputManager::manualUpdate()
 {
 	if (!bManuallyUpdated) {
-		inputUpdate(cam);
+		inputUpdate();
 		bManuallyUpdated = true;
 	}
 	else {
@@ -24,23 +24,20 @@ void InputManager::manualUpdate(const Camera& cam)
 	}
 }
 
-void InputManager::engineUpdate(const Camera& cam)
+void InputManager::engineUpdate()
 {
 	if (!bManuallyUpdated) {
-		inputUpdate(cam);
+		inputUpdate();
 	}
 	bManuallyUpdated = false;
 }
 
-void InputManager::inputUpdate(const Camera& cam)
+void InputManager::inputUpdate()
 {
 	std::unique_lock lock(window.mut);
 	oldKeyStates = newKeyStates;
 	oldButtonStates = newButtonStates;
-	prevMousePositionPixelSpace = mousePositionPixelSpace;
-	prevMousePositionUniformWindowSpace = mousePositionUniformWindowSpace;
 	prevMousePositionWindowSpace = mousePositionWindowSpace;
-	prevMousePositionWorldSpace = mousePositionWorldSpace;
 	glfwPollEvents();	// update key and button states
 
 	// when the focus is Out, the keys are getting set to released
@@ -60,13 +57,10 @@ void InputManager::inputUpdate(const Camera& cam)
 		for (int button = 0; button < 8; ++button) {
 			newButtonStates[button] = glfwGetMouseButton(window.glfwWindow, button);
 		}
-		Vec2 size = { static_cast<float>(window.width), static_cast<float>(window.height) };
+		Vec2 size = { static_cast<float>(window.getWidth()), static_cast<float>(window.getHeight()) };
 		double xPos, yPos;
 		glfwGetCursorPos(window.glfwWindow, &xPos, &yPos);
 		mousePositionWindowSpace = { (float)xPos / size.x * 2.0f - 1.f, -(float)yPos / size.y * 2.0f + 1.f };
-		mousePositionUniformWindowSpace = { mousePositionWindowSpace.x * size.x / size.y, mousePositionWindowSpace.y };
-		mousePositionPixelSpace = { (float)xPos, (float)window.height - (float)yPos };
-		mousePositionWorldSpace = cam.windowToWorld(mousePositionWindowSpace);
 	}
 	else {
 		for (int button = 0; button < 8; ++button) {
@@ -155,36 +149,12 @@ bool InputManager::buttonJustReleased(const Button but, Focus focus) const
 	}
 }
 
-Vec2 InputManager::getMousePosition(const RenderSpace renderSpace) const
+Vec2 InputManager::getMousePosition() const
 {
-	switch (renderSpace) {
-	case RenderSpace::PixelSpace:
-		return mousePositionPixelSpace;
-	case RenderSpace::WindowSpace:
-		return mousePositionWindowSpace;
-	case RenderSpace::UniformWindowSpace:
-		return mousePositionWindowSpace;
-	case RenderSpace::WorldSpace:
-		return mousePositionWorldSpace;
-	default:
-		assert(false); // when this assert fails, you did not update this function for altered RenderSpace enum types >:(
-		return { 0.0f, 0.0f };
-	}
+	return mousePositionWindowSpace;
 }
 
-Vec2 InputManager::getPrevMousePosition(RenderSpace renderSpace) const
+Vec2 InputManager::getPrevMousePosition() const
 {
-	switch (renderSpace) {
-	case RenderSpace::PixelSpace:
-		return prevMousePositionPixelSpace;
-	case RenderSpace::WindowSpace:
-		return prevMousePositionWindowSpace;
-	case RenderSpace::UniformWindowSpace:
-		return prevMousePositionWindowSpace;
-	case RenderSpace::WorldSpace:
-		return prevMousePositionWorldSpace;
-	default:
-		assert(false); // when this assert fails, you did not update this function for altered RenderSpace enum types >:(
-		return { 0.0f, 0.0f };
-	}
+	return prevMousePositionWindowSpace;
 }

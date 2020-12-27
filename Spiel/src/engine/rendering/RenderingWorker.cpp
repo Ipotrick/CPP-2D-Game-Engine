@@ -7,32 +7,25 @@
 
 void RenderingWorker::initiate()
 {
-	{
-		std::lock_guard<std::mutex> l(window->mut);
-		glfwMakeContextCurrent(window->glfwWindow);
-	}
-
-	if (glewInit() != GLEW_OK) {
-		glfwTerminate();
-	}
+	std::lock_guard<std::mutex> l(window->renderingContextMut); 
+	window->makeContextCurrent();
 
 	// opengl configuration:
-	glEnable(GL_BLEND);
+	glEnable(GL_BLEND); 
 	glBlendFunc(BLEND_SFACTOR, BLEND_DFACTOR);
-	//glEnable(GL_MULTISAMPLE);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
 
 	// querry driver and hardware info:
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
 
 	//initializeFBOs();
 	mainTFBO.initialize();
-	prevRenderedLayerTFBO.initialize();
-	lastRenderedLayerTFBO.initialize();
 	initializeSpriteShader(); 
 	passShader.initialize(PASS_SHADER_FRAGMENT_PATH);
 	texCache.initialize();
 
-	std::unique_lock<std::mutex> switch_lock(data->mut);
+	std::unique_lock switch_lock(data->mut);
 	data->run = true;
 	data->state = SharedRenderData::State::waitForFrontEnd;
 }
@@ -44,10 +37,8 @@ void RenderingWorker::operator()()
 	while (waitForFrontend()) {
 		{	// process render side events
 			std::lock_guard l(window->mut);
-			int width, height;
-			glfwGetWindowSize(window->glfwWindow, &width, &height);
-			window->width = width;
-			window->height = height;
+			window->updateSize();
+			auto [width, height] = window->getSize();
 
 			if (width != lastWindowWidth or height != lastWindowHeight) {
 				lastWindowWidth = width;
@@ -58,15 +49,15 @@ void RenderingWorker::operator()()
 
 				// resize main fbo texture:
 				mainTFBO.resize(ssWidth, ssHeight);
-				prevRenderedLayerTFBO.resize(ssWidth, ssHeight);
-				lastRenderedLayerTFBO.resize(ssWidth, ssHeight);
 			}
 			else {
 				bWindowSizeChanged = false;
 			}
 		}
 		{	// render frame
+			std::lock_guard renderContextLock(window->renderingContextMut);		// when we have two renderers we have to make sure that only one is calling opengl functions on the window's context
 			Timer t(data->new_renderTime);
+			// takeRenderingContext();											// this is only needed when multiple renderers are rendering to a window
 
 			if (data->renderBuffer->resetTextureCache) {
 				texCache.reset();
@@ -81,29 +72,26 @@ void RenderingWorker::operator()()
 			data->drawCallCount = 0;
 
 			auto& camera = data->renderBuffer->camera;
-			Mat4 viewProjectionMatrix = 
+			Mat4 worldViewProjMat = 
 				Mat4::scale(camera.zoom) *												
 				Mat4::scale({ camera.frustumBend.x, camera.frustumBend.y, 1.0f }) *
 				Mat4::rotate_z(-camera.rotation) *
 				Mat4::translate({ -camera.position.x, -camera.position.y, 0.0f });
-			Mat4 pixelProjectionMatrix = 
+			Mat4 pixelViewProjMatrix = 
 				Mat4::translate(Vec3(-1, -1, 0)) * 
-				Mat4::scale(Vec3(1.0f / (window->width), 1.0f / (window->height), 1.0f)) *
+				Mat4::scale(Vec3(1.0f / (window->getWidth()), 1.0f / (window->getHeight()), 1.0f)) *
 				Mat4::scale(Vec3(2.0f, 2.0f, 1.0f));
 
-			clearFBO(0);
+			clearMainFBO();
 			mainTFBO.clear();
 
 			for (auto& layer : data->renderBuffer->layers) {
-				drawLayer(layer, viewProjectionMatrix, pixelProjectionMatrix);
+				drawLayer(layer, worldViewProjMat, pixelViewProjMatrix);
 			}
 
-			passShader.renderTexToFBO(mainTFBO.getTex(), 0, window->width, window->height);
+			passShader.renderTexToFBO(mainTFBO.getTex(), 0, window->getWidth(), window->getHeight());
 
-			{	// push rendered image into image buffer
-				std::lock_guard<std::mutex> l(window->mut);
-				glfwSwapBuffers(window->glfwWindow);
-			}
+			window->swapBuffers();
 		}
 	}
 
@@ -118,8 +106,6 @@ void RenderingWorker::reset() {
 	free(modelSSBORaw);
 
 	mainTFBO.reset();
-	prevRenderedLayerTFBO.reset();
-	lastRenderedLayerTFBO.reset();
 
 	std::unique_lock<std::mutex> switch_lock(data->mut);
 	data->run = false;
@@ -130,30 +116,23 @@ void RenderingWorker::reset() {
 void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, Mat4 const& pixelProjectionMatrix)
 {
 	if (layer.bSortForDepth) {
-		if (layer.bStableSort) {
-			std::stable_sort(layer.getDrawables().begin(), layer.getDrawables().end());
-		}
-		else {
-			std::sort(layer.getDrawables().begin(), layer.getDrawables().end());
-		}
+		std::stable_sort(layer.getSprites().begin(), layer.getSprites().end());
 	}
 
-	lastRenderedLayerTFBO.clear();
-	glBindFramebuffer(GL_FRAMEBUFFER, lastRenderedLayerTFBO.getBuffer());		// render sprites to main fbo
+	// set current render target to the main texture frame buffer object
+	glBindFramebuffer(GL_FRAMEBUFFER, mainTFBO.getBuffer());
+
+	// set layer depth test:
+	glDepthFunc(static_cast<GLuint>(layer.depthTest));
+
 	// batch render sprites:
-	for (int lastIndex = 0; lastIndex < layer.getDrawables().size(); data->drawCallCount += 1) {
-		lastIndex = drawBatch(layer.getDrawables(), cameraViewProj, pixelProjectionMatrix, lastIndex);
+	for (int lastIndex = 0; lastIndex < layer.getSprites().size(); data->drawCallCount += 1) {
+		lastIndex = drawBatch(layer.getSprites(), cameraViewProj, pixelProjectionMatrix, lastIndex);
 	}
 
-	
 	if (layer.script) {
 		layer.script->onUpdate(*this, layer);
 	}
-	passShader.renderTexToFBO(lastRenderedLayerTFBO.getTex(), mainTFBO);
-
-	// copy layer fbo data to prevRenderPassFBO:
-	prevRenderedLayerTFBO.clear();
-	passShader.renderTexToFBO(lastRenderedLayerTFBO.getTex(), prevRenderedLayerTFBO);
 }
 
 bool RenderingWorker::waitForFrontend()
@@ -166,7 +145,7 @@ bool RenderingWorker::waitForFrontend()
 	return data->run;
 }
 
-size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix, size_t startIndex)
+size_t RenderingWorker::drawBatch(std::vector<Sprite>& drawables, Mat4 const& worldVPMat, Mat4 const& pixelVPMat, size_t startIndex)
 {
 	nextModelIndex = 0;
 	glUseProgram(spriteShaderProgram);
@@ -179,22 +158,22 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& 
 	bindTexture(TEXTURE_DEFAULT, 0);
 
 	uint32_t nextTextureSamplerSlot{ 1 }; // when there are no texture slots left, the batch is full and will be rendered.
-	robin_hood::unordered_map<TextureId, uint32_t> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
+	robin_hood::unordered_map<TextureId, GLuint> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
 	// fill batch with vertices
-	size_t index{ startIndex };
 	int spriteCount{ 0 };
-	for (; index < drawables.size() && spriteCount < MAX_RECT_COUNT; index++, spriteCount++) {
-		Drawable const& d = drawables[index];
-		int drawableSamplerSlot{ 0 };
+	size_t index{ startIndex };
+	for (; (index < drawables.size()) & (spriteCount < MAX_RECT_COUNT); index++, spriteCount++) {
+		Sprite const& thisSprite = drawables[index];
+		int thisSpriteTexSampler{ 0 };
 
 		// check if drawable has texture
-		if (d.texRef.has_value()) {
-			auto& texRef = d.texRef.value();
+		if (thisSprite.texRef.has_value()) {
+			auto& texRef = thisSprite.texRef.value();
 			if (texCache.isTextureLoaded(texRef) && texCache.getTexture(texRef).good) {
 				// is texture allready in the usedSamplerMap?
 				if (usedTexturesSamplerSlots.contains(texRef.id)) {
 					// then just use the allready sloted texture sampler:
-					drawableSamplerSlot = usedTexturesSamplerSlots[texRef.id];
+					thisSpriteTexSampler = usedTexturesSamplerSlots[texRef.id];
 				}
 				else {
 					// if all texture sampler slots are used flush the batch
@@ -205,29 +184,29 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& 
 					usedTexturesSamplerSlots.insert({ texRef.id , nextTextureSamplerSlot });
 					// bind texture to sampler slot
 					bindTexture(texCache.getTexture(texRef).openglTexID, nextTextureSamplerSlot);
-					drawableSamplerSlot = nextTextureSamplerSlot;
+					thisSpriteTexSampler = nextTextureSamplerSlot;
 					nextTextureSamplerSlot++;
 				}
 			}
 			else {
 				// drawable gets the error texture
-				drawableSamplerSlot = 0;
+				thisSpriteTexSampler = 0;
 			}
 		}
 		else {
 			// drawable has no texture so it gets sampler slot -1 (white texture)
-			drawableSamplerSlot = -1;
+			thisSpriteTexSampler = -1;
 		}
 
 		auto bufferPtr = (SpriteShaderVertex*)(spriteShaderVBORaw + spriteCount * SpriteShaderVertex::FLOAT_SIZE * 4);	// gets index for the next 4 vertecies in raw buffer
-		generateVertices(d, drawableSamplerSlot, viewProjectionMatrix, pixelProjectionMatrix, bufferPtr);
+		generateVertices(thisSprite, thisSpriteTexSampler, worldVPMat, pixelVPMat, bufferPtr);
 	}
 	// set projection-matrix-uniforms:
-	glUniformMatrix4fv(0, 1, GL_FALSE, viewProjectionMatrix.data());
+	glUniformMatrix4fv(0, 1, GL_FALSE, worldVPMat.data());
 	// the window space matrix has no uniform as it is the identity matrix
 	Mat4 uniformWindowSpaceMatrix = Mat4::scale({ data->renderBuffer->camera.frustumBend.x,data->renderBuffer->camera.frustumBend.y, 1.0f });
 	glUniformMatrix4fv(2, 1, GL_FALSE, uniformWindowSpaceMatrix.data());
-	glUniformMatrix4fv(3, 1, GL_FALSE, pixelProjectionMatrix.data());
+	glUniformMatrix4fv(3, 1, GL_FALSE, pixelVPMat.data());
 
 	// push vertex data to the gpu
 	glBindBuffer(GL_ARRAY_BUFFER, spriteShaderVBO);
@@ -238,12 +217,12 @@ size_t RenderingWorker::drawBatch(std::vector<Drawable>& drawables, Mat4 const& 
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(SpriteShaderModel) * spriteCount, modelSSBORaw);
 
 	// render drawableCount amount of drawables with glDrawElements
-	glViewport(0, 0, window->width * supersamplingFactor, window->height * supersamplingFactor);
+	glViewport(0, 0, window->getWidth() * supersamplingFactor, window->getHeight() * supersamplingFactor);
 	glDrawElements(GL_TRIANGLES, spriteCount * 6, GL_UNSIGNED_INT, indicesRaw);
 	return index;
 }
 
-void RenderingWorker::generateVertices(Drawable const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, SpriteShaderVertex* bufferPtr) {
+void RenderingWorker::generateVertices(Sprite const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, SpriteShaderVertex* bufferPtr) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
 	if (d.texRef.has_value()) {
@@ -254,14 +233,13 @@ void RenderingWorker::generateVertices(Drawable const& d, float texID, Mat4 cons
 	bool isCircle = static_cast<bool>(d.form);
 
 	SpriteShaderModel* model = modelSSBORaw + nextModelIndex;
-	// model->color = d.color;
-	// model->position = d.position;
-	// model->rotation = d.rotationVec.toVec2();
-	// model->scale = d.scale;
-	std::memcpy(model, &d, sizeof(float) * 10);
+	model->color = d.color;
+	model->position = { d.position.x, d.position.y, -d.position.z, 0};
+	model->rotation = d.rotationVec.toVec2();
+	model->scale = d.scale;
 	model->texId = texID;
 	model->isCircle = isCircle;
-	model->renderSpace = static_cast<GLint>(d.getDrawMode());
+	model->renderSpace = static_cast<GLint>(d.drawMode);
 
 	SpriteShaderVertex* vertex{ nullptr };
 #define GEN_VERTEX(index) \
@@ -343,9 +321,7 @@ void RenderingWorker::initializeSpriteShader()
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, MODEL_SSBO_BINDING, modelSSBO);
 }
 
-void RenderingWorker::clearFBO(GLuint fbo)
+void RenderingWorker::clearMainFBO()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	GLuint clearColor[4] = { 0, 0, 0, 0 };
-	glClearBufferuiv(GL_COLOR, 0, clearColor);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

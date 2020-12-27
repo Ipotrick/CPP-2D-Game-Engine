@@ -5,7 +5,7 @@
 
 class UIButton : public UIClickable {
 public:
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override;
 
 	virtual void onEnter() override
 	{

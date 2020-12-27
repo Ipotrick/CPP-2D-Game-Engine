@@ -16,28 +16,13 @@
 #include "Window.hpp"
 #include "RenderSpace.hpp"
 
-struct IntColor {
-	uint8_t r{ 0 }, g{ 0 }, b{ 0 }, a{ 0 };
-	IntColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
-		:r{r},g{g},b{b},a{a} {}
-	IntColor(Vec4 color)
-		:r{(uint8_t)(color.r*255.0f)}, g{ (uint8_t)(color.g * 255.0f) },b{ (uint8_t)(color.b * 255.0f) },a{ (uint8_t)(color.a * 255.0f) } {}
-	operator Vec4() const {
-		return  { r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f };
-	}
-};
-
 using TextureString = boost::static_string<32>;
-
 
 using TextureId = int;
 
 class TextureInfo {
 public:
 	TextureInfo() = default;
-	//TextureInfo(std::string_view const& name, GLint minFilter = GL_NEAREST, GLint magFilter = GL_NEAREST)
-	//	:name{ name.data(), name.size() }
-	//{ }
 
 	TextureInfo(const TextureString& name, GLint minFilter = GL_NEAREST, GLint magFilter = GL_NEAREST)
 		:name{ name }, minFilter{ minFilter }, magFilter{ magFilter }
@@ -92,7 +77,7 @@ struct SmallTextureRef {
 *	one can not create a texture ref, you can copy an existing texref or request one from the renderer.
 *	one can not change the filename or the settings of a texture ref.
 *	If differenct filename or setting is desired, request a new texture ref from the renderer.
-*	The min and max pos can be modified freely.
+*	The min and max pos can be modified.
 */
 class TextureRef2 : private SmallTextureRef {
 public:
@@ -161,72 +146,58 @@ inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
 	return texRef;
 }
 
-class Drawable {
-public:
-	Vec4 color;
-	Vec2 position;
+/**
+ * A Sprite is a colored Rectangle or a Circle, that can optinaly be textured.
+ */
+struct Sprite {
+	Vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
+	Vec3 position;
 	/* in radiants 2pi = one rotation*/
 	RotaVec2 rotationVec;
-	Vec2 scale;
-	float drawingPrio;
-	uint32_t id;
-	Form form;
+	Vec2 scale{ 1.0f, 1.0f };
 	std::optional<SmallTextureRef> texRef;
+	Form form{ Form::Rectangle };
+	RenderSpace drawMode{ RenderSpace::WindowSpace };
 
-	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, RenderSpace drawMode = RenderSpace::WorldSpace) :
-		position{ position_ },
-		rotationVec{ rotation_ },
-		drawingPrio{ drawingPrio_ },
-		scale{ scale_ },
-		color{ color_ },
-		id{ id_ },
-		drawMode{ drawMode },
-		form{ form_ },
-		texRef{ std::nullopt }
+	bool operator<(Sprite const& rhs) const
 	{
+		return this->position.z < rhs.position.z;
 	}
-
-	Drawable(uint32_t id_, Vec2 position_, float drawingPrio_, Vec2 scale_, Vec4 color_, Form form_, RotaVec2 rotation_, RenderSpace drawMode, SmallTextureRef texRef) 
-		:Drawable(id_, position_, drawingPrio_, scale_, color_, form_, rotation_, drawMode) 
-	{
-		/*
-		* never create a Drawable with a texref THAT WAS NOT CREATED BY THE RENDERER
-		*/
-		assert(texRef.id != -1);
-		this->texRef = texRef;
-	}
-
-	bool operator<(Drawable const& rhs) const
-	{
-		return this->drawingPrio < rhs.drawingPrio;
-	}
-
-	inline RenderSpace getDrawMode() const { return drawMode; }
-private:
-	RenderSpace drawMode;
 };
+
+inline Sprite makeSprite(uint32_t id, Vec2 position, float drawingPrio, Vec2 scale, Vec4 color, Form form, RotaVec2 rotation, RenderSpace drawMode, SmallTextureRef texRef)
+{
+	assert(texRef.id != -1);
+	return Sprite{
+		.color = color,
+		.position = {position.x, position.y, drawingPrio},
+		.rotationVec = rotation,
+		.scale = scale,
+		.texRef = texRef,
+		.form = form,
+		.drawMode = drawMode
+	};
+}
+
+inline Sprite makeSprite(uint32_t id, Vec2 position, float drawingPrio, Vec2 scale, Vec4 color, Form form, RotaVec2 rotation, RenderSpace drawMode = RenderSpace::WorldSpace)
+{
+	auto squishDrawingPrio = [](float f) {
+		float s = f < 0.0f ? -1.0f : 1.0f;
+		return 0.5f * s * 1.0f - (1.0f / (std::fabs(f) + 1.0f)) + 0.5f;
+	};
+
+	return Sprite{
+		.color = color,
+		.position = {position.x, position.y, squishDrawingPrio(drawingPrio)},
+		.rotationVec = rotation,
+		.scale = scale,
+		.form = form,
+		.drawMode = drawMode
+	};
+}
 
 struct Light {
-	Light(Vec2 pos, float rad, uint32_t id_, Vec4 col) : position{ pos }, radius{ rad }, id{ id_ }, color{ col } {}
+	Vec4 color;
 	Vec2 position;
 	float radius;
-	uint32_t id;
-	Vec4 color;
-};
-
-class TextDrawable {
-public:
-	enum class Alignment {
-		Left,
-		Center,
-		Right
-	};
-private:
-	std::string str;
-	const Drawable& drawable;
-	Alignment alignment;
-public:
-	TextDrawable(std::string str, const Drawable& drawable, Alignment align)
-		:str{ std::move(str) }, drawable{ drawable }, alignment{ align } {}
-
 };

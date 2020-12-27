@@ -38,6 +38,27 @@ public:
         return *this;
     }
 
+    Vec3& operator*=(Vec2 const& vec)
+    {
+        x *= vec.x;
+        y *= vec.y;
+        return *this;
+    }
+
+    Vec3& operator-=(Vec2 const& vec)
+    {
+        x -= vec.x;
+        y -= vec.y;
+        return *this;
+    }
+
+    Vec3& operator+=(Vec2 const& vec)
+    {
+        x += vec.x;
+        y += vec.y;
+        return *this;
+    }
+
     Vec3& operator*=(Vec3 const& vec) {
         x *= vec.x;
         y *= vec.y;
@@ -58,6 +79,14 @@ public:
         z += vec.z;
         return *this;
     }
+
+    Vec3& operator=(Vec2 const& vec)
+    {
+        x = vec.x;
+        y = vec.y;
+        return *this;
+    }
+
 public:
     union
     {
@@ -76,6 +105,33 @@ public:
         };
     };
 };
+
+//
+//
+//
+
+inline Vec3 const operator*(Vec3 const& vecA, Vec2 const& vecB)
+{
+    return { vecA.x * vecB.x, vecA.y * vecB.y, vecA.z };
+}
+
+inline Vec3 const operator+(Vec3 const& vecA, Vec2 const& vecB)
+{
+    return { vecA.x + vecB.x,
+                vecA.y + vecB.y,
+                vecA.z };
+}
+
+inline Vec3 const operator-(Vec3 const& vecA, Vec2 const& vecB)
+{
+    return { vecA.x - vecB.x,
+                vecA.y - vecB.y,
+                vecA.z };
+}
+
+//
+//
+//
 
 inline Vec3 const operator-(Vec3 const& vec) {
     return Vec3(-vec.x, -vec.y, -vec.z);

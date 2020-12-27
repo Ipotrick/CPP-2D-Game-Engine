@@ -1,3 +1,4 @@
+//#define MANDELBROT
 #define BALLS2
 
 #ifdef BALLS2
@@ -9,8 +10,10 @@ int main()
 	Game game;
 	game.run();
 }
+#endif
 
-#else
+#ifdef ifdef MANDELBROT
+
 #include "mandelbrot/MandelbrotViewer.hpp"
 
 int main()
@@ -19,5 +22,4 @@ int main()
 	mv.initialize("Mandelbrot Viewer", 800ull, 800ull);
 	mv.run();
 }
-
 #endif

@@ -6,11 +6,9 @@ in vec2 v_texCoord;
 in vec2 v_circleCoord;
 flat in int v_modelID;
 
-layout (location = 0) out vec4 color;
-
 struct ModelUniform {
 	vec4 color;
-	vec2 position;
+	vec4 position;
 	vec2 rotation;
 	vec2 scale;
 	int texId;
@@ -37,23 +35,23 @@ void main()
 		if (relativeRadiusToCenter < 1.0f) {
 			//inner part of circle
 			if (model.texId >= 0) {
-				color = model.color * texture2D(texSampler[model.texId], v_texCoord);
+				gl_FragColor = model.color * texture2D(texSampler[model.texId], v_texCoord);
 			}
 			else {
-				color = model.color;
+				gl_FragColor = model.color;
 			}
 		}
 		else{
 			// corner/outer part of circle
-			color = vec4(0,0,0,0);
+			gl_FragColor = vec4(0,0,0,0);
 		}
 	}
 	else{
 		if (model.texId >= 0) {
-			color = model.color * texture2D(texSampler[model.texId], v_texCoord);
+			gl_FragColor = model.color * texture2D(texSampler[model.texId], v_texCoord);
 		}
 		else { 
-			color = model.color;
+			gl_FragColor = model.color;
 		}
 	}
 }

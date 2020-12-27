@@ -16,14 +16,12 @@
 #include "TesterScript.hpp"
 #include "../engine/ui/UICreate.hpp"
 
-#include "GlowTrailRScript.hpp"
 #include "BloomRScript.hpp"
 
 #include "LoadBallTestMap.hpp"
+#include "LoadRenderTestMap.hpp"
 
 using namespace util;
-
-inline static uint64_t acc = 0;
 
 Game::Game()
 {
@@ -33,8 +31,8 @@ Game::Game()
 
 	renderer.getLayer(LAYER_WORLD_BACKGROUND).bClearEveryFrame = true;
 
-	renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::WorldSpace;
-	renderer.getLayer(LAYER_WORLD_MIDGROUND).attachRenderScript(std::make_unique<GlowTrailRScript>());
+	renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::WorldSpace; 
+	renderer.getLayer(LAYER_WORLD_MIDGROUND).depthTest = DepthTest::Less;
 
 	renderer.getLayer(LAYER_WORLD_PARTICLE).renderMode = RenderSpace::WorldSpace;
 
@@ -42,6 +40,8 @@ Game::Game()
 
 	renderer.getLayer(LAYER_WORLD_POSTPROCESS).renderMode = RenderSpace::WorldSpace;
 	renderer.getLayer(LAYER_WORLD_POSTPROCESS).attachRenderScript(std::make_unique<BloomRScript>());
+
+	renderer.getLayer(LAYER_DEBUG_UI).renderMode = RenderSpace::WorldSpace;
 
 	renderer.getLayer(LAYER_FIRST_UI).renderMode = RenderSpace::PixelSpace;
 
@@ -54,7 +54,7 @@ Game::Game()
 { \
 	Type name; \
 	code \
-	parent.addChild(EngineCore::ui.createAndGet(name)); \
+	parent.addChild(EngineCore::ui.createAndGetPtr(name)); \
 }
 
 #define UI_TEXT(parent, code)		UI_CREATE(parent, code, UIText, me)
@@ -65,6 +65,10 @@ Game::Game()
 me.setUpdateFn([&](UIElement* e){ UIText& me = *((UIText*)e); code });
 
 void Game::create() {
+
+
+	world.setOnRemCallback<Health>(onHealthRemCallback);
+
 	auto size = getWindowSize();
 	renderer.getCamera().frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
 	renderer.getCamera().zoom = 1 / 3.5f;
@@ -97,7 +101,7 @@ void Game::create() {
 				{
 					UIText uiCountText("ui count:", font);
 					uiCountText.setSize(textFieldSize);
-					uicountPair.setFirst(ui.createAndGet(uiCountText));
+					uicountPair.setFirst(ui.createAndGetPtr(uiCountText));
 				}
 				{
 					UIText uiCountText2("", font, [&](UIElement* e) {
@@ -105,9 +109,9 @@ void Game::create() {
 						}
 					);
 					uiCountText2.setSize(textFieldSize);
-					uicountPair.setSecond(ui.createAndGet(uiCountText2));
+					uicountPair.setSecond(ui.createAndGetPtr(uiCountText2));
 				}
-				l.addChild(ui.createAndGet(uicountPair));
+				l.addChild(ui.createAndGetPtr(uicountPair));
 			}
 			{
 				UIPair uidcountPair;
@@ -115,14 +119,14 @@ void Game::create() {
 				{
 					UIText uidCountText("ui draw:", font);
 					uidCountText.setSize(textFieldSize);
-					uidcountPair.setFirst(ui.createAndGet(uidCountText));
+					uidcountPair.setFirst(ui.createAndGetPtr(uidCountText));
 				}
 				{
 					UIText uidCountText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(ui.drawCount()); });
 					uidCountText2.setSize(textFieldSize);
-					uidcountPair.setSecond(ui.createAndGet(uidCountText2));
+					uidcountPair.setSecond(ui.createAndGetPtr(uidCountText2));
 				}
-				l.addChild(ui.createAndGet(uidcountPair));
+				l.addChild(ui.createAndGetPtr(uidcountPair));
 			}
 			{
 				UIPair drawCallPair;
@@ -130,19 +134,19 @@ void Game::create() {
 				{
 					UIText drawcallText("Drawcalls:", font);
 					drawcallText.setSize(textFieldSize);
-					drawCallPair.setFirst(ui.createAndGet(drawcallText));
+					drawCallPair.setFirst(ui.createAndGetPtr(drawcallText));
 				}
 				{
 					UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCalls()); });
 					drawcallText2.setSize(textFieldSize);
-					drawCallPair.setSecond(ui.createAndGet(drawcallText2));
+					drawCallPair.setSecond(ui.createAndGetPtr(drawcallText2));
 				}
-				l.addChild(ui.createAndGet(drawCallPair));
+				l.addChild(ui.createAndGetPtr(drawCallPair));
 			}
 
-			c.addChild(ui.createAndGet(l));
+			c.addChild(ui.createAndGetPtr(l));
 		}
-		parent.addChild(ui.createAndGet(c));
+		parent.addChild(ui.createAndGetPtr(c));
 	};
 
 	// ui render stats ui:
@@ -158,7 +162,8 @@ void Game::create() {
 			list.setSizeModeX(SizeMode::FillUp);
 			list.setSizeModeY(SizeMode::FillMin);
 			list.setSpacing(5.0f);
-			list.addChild(ui::text(UIText::Parameters{
+			list.addChild(
+				ui::text({
 				.anchor = UIAnchor({
 						.xmode = UIAnchor::X::LeftRelativeDist,
 						.x = 0.5
@@ -179,14 +184,14 @@ void Game::create() {
 				{
 					UIText entitiesText("Entities:", font);
 					entitiesText.setSize(textFieldSize);
-					entCountPair.setFirst(ui.createAndGet(entitiesText));
+					entCountPair.setFirst(ui.createAndGetPtr(entitiesText));
 				}
 				{
 					UIText entitiesText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(world.size()); });
 					entitiesText2.setSize(textFieldSize);
-					entCountPair.setSecond(ui.createAndGet(entitiesText2));
+					entCountPair.setSecond(ui.createAndGetPtr(entitiesText2));
 				}
-				list.addChild(ui.createAndGet(entCountPair));
+				list.addChild(ui.createAndGetPtr(entCountPair));
 			}
 			makeRenderStatsUI(list);
 			{
@@ -195,53 +200,81 @@ void Game::create() {
 				{
 					UIText ticksText("Ticks/s:", font);
 					ticksText.setSize(textFieldSize);
-					ticksPair.setFirst(ui.createAndGet(ticksText));
+					ticksPair.setFirst(ui.createAndGetPtr(ticksText));
 				}
 				{
 					UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(100)); });
 					ticksText2.setSize(textFieldSize);
-					ticksPair.setSecond(ui.createAndGet(ticksText2));
+					ticksPair.setSecond(ui.createAndGetPtr(ticksText2));
 				}
-				list.addChild(ui.createAndGet(ticksPair));
+				list.addChild(ui.createAndGetPtr(ticksPair));
 			}
-			frame.addChild(ui.createAndGet(list));
+			frame.addChild(ui.createAndGetPtr(list));
 		}
 		ui.createFrame(frame, "Statiscics");
 	}
-
 }
 
 void Game::update(float deltaTime) {
-
 	if (bLoading) {
-		if (jobManager.finished(loadingWorkerTag)) {
-			jobManager.clear(loadingWorkerTag);
+		if (JobSystem::finished(loadingWorkerTag)) {
+			Monke::log("job with tag {0} finished clientside", (uint32_t)loadingWorkerTag);
 			bLoading = false;
 			in.returnFocus();
 			in.returnMouseFocus();
-			world = *loadedWorld;
-			delete loadedWorld;
-			if (ui.exists("loadingtext")) {
+			world = loadedWorld;
+			if (ui.doesFrameExist("loadingtext")) {
 				ui.destroyFrame("loadingtext");
 			}
 			ui.update();
 		}
 	}
 	else {
-		renderer.submit(Drawable(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace), LAYER_WORLD_BACKGROUND);
+		renderer.submit(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace), LAYER_WORLD_BACKGROUND);
 		{
 			collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
-			for (auto& d : collisionSystem.getDebugDrawables()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
-			physicsSystem2.execute(world, deltaTime, collisionSystem);
-			for (auto& d : physicsSystem2.getDebugDrawables()) renderer.submit(d,LAYER_WORLD_FOREGROUND);
+			for (auto& d : collisionSystem.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
+			physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
+			for (auto& d : physicsSystem2.getDebugSprites()) renderer.submit(d,LAYER_WORLD_FOREGROUND);
 
-			for (auto [ent, t] : world.entityComponentView<Transform>()) {
-				transformScript(ent, t);
-				if (world.hasComp<Movement>(ent)) movementScript(ent, t, world.getComp<Movement>(ent), deltaTime);
-			}
+			struct LJob : public IJob {
+				std::function<void(uint32_t)> function;
+				LJob(std::function<void(uint32_t)> f):
+					function{ f }
+				{ }
+
+				void execute(uint32_t thread) override { function(thread); }
+			};
+
+			/* UNSAFE BEGIN */
+
+			std::vector<LJob> jobList;
+			jobList.push_back(LJob{
+				[&](uint32_t thread) {
+					for(auto [ent, t] : world.entityComponentView<Transform>())
+					{
+						transformScript(ent, t);
+					}
+				} 
+			});
+			jobList.push_back(LJob{
+				[&, deltaTime](uint32_t thread) {
+					for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) {
+						movementScript(ent, t, m, deltaTime);
+					}
+				}
+			});
+			JobSystem::wait(JobSystem::submitVec(std::move(jobList)));
+
+			/* UNSAFE END */
+
+			//for (auto [ent, t] : world.entityComponentView<Transform>()) {
+			//	transformScript(ent, t);
+			//	if (world.hasComp<Movement>(ent)) movementScript(ent, t, world.getComp<Movement>(ent), deltaTime);
+			//}
 		}
 
-		in.manualUpdate(renderer.getCamera());
+		in.manualUpdate();
 
 		gameplayUpdate(deltaTime);
 
@@ -253,11 +286,29 @@ void Game::update(float deltaTime) {
 
 void Game::gameplayUpdate(float deltaTime)
 {
+	if (in.keyPressed(Key::NP_6, Focus::Global)) {
+		world.physics.linearEffectDir = { 1, 0 };
+		renderer.getCamera().rotation = 90;
+	}
+	if (in.keyPressed(Key::NP_8, Focus::Global)) {
+		world.physics.linearEffectDir = { 0, 1 };
+		renderer.getCamera().rotation = 180;
+	}
 	if (in.keyPressed(Key::LEFT_ALT, Focus::Global) && in.keyPressed(Key::F4, Focus::Global)) {
 		EngineCore::quit();
 	}
 	if (in.keyPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
+	}
+	if (in.keyJustPressed(Key::P) && !in.keyPressed(Key::LEFT_SHIFT)) {
+		renderer.getCamera().position = { 0,0 };
+		world = World();
+		loadRenderTestMap(0.5f);
+	}
+	if (in.keyJustPressed(Key::P) && in.keyPressed(Key::LEFT_SHIFT)) {
+		renderer.getCamera().position = { 0,0 };
+		world = World();
+		loadRenderTestMap(0.3f);
 	}
 	if (in.keyPressed(Key::H)) {
 		world.physics.linearEffectAccel -= 8 * deltaTime;
@@ -294,12 +345,12 @@ void Game::gameplayUpdate(float deltaTime)
 		uiContext.scale = 1.0f;
 	}
 	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
-		if (ui.exists("Statiscics")) {
+		if (ui.doesFrameExist("Statiscics")) {
 			ui.getFrame("Statiscics").disable();
 		}
 	}
 	if (in.keyJustPressed(Key::B) && in.keyPressed(Key::LEFT_SHIFT)) {
-		if (ui.exists("Statiscics")) {
+		if (ui.doesFrameExist("Statiscics")) {
 			ui.getFrame("Statiscics").enable();
 		}
 	}
@@ -318,9 +369,14 @@ void Game::gameplayUpdate(float deltaTime)
 		ui.update();
 	}
 	if (in.keyJustPressed(Key::K)) {
-		World w = world;
-		auto job = LambdaJob(
-			[w](int id) mutable {
+
+		class SaveJob : public IJob {
+		public:
+			SaveJob(World w):
+				w{ std::move(w) }
+			{ }
+			virtual void execute(const uint32_t thread) override
+			{
 				Monke::log("Start saving...");
 
 				std::ofstream of("world.yaml");
@@ -331,50 +387,65 @@ void Game::gameplayUpdate(float deltaTime)
 				}
 				Monke::log("Finished saving!");
 			}
-		);
-		job.bEnableWaiting = false;
-		job.bSelfDestruct = true;
-		jobManager.addJob(new LambdaJob(job));
+		private:
+			World w;
+		};
+
+		auto tag = JobSystem::submit(SaveJob(world));
+		JobSystem::orphan(tag);
 	}
 	if (in.keyJustPressed(Key::L)) {
 		bLoading = true;
 		in.takeFocus(Focus::UI);
 		in.takeMouseFocus(Focus::UI);
 
-		auto* job =  new LambdaJob(
-			[&](int id) 
+		class LoadJob : public IJob {
+		public:
+			LoadJob(World& loadedWorld): loadedWorld{ loadedWorld } {}
+
+			virtual void execute(uint32_t const thread) override
 			{
 				Monke::log("Start loading...");
-				loadedWorld = new World();
+				loadedWorld = World();
 				std::ifstream ifstream("world.yaml");
 				if (ifstream.good()) {
-					YAMLWorldSerializer s(*loadedWorld);
+					YAMLWorldSerializer s(loadedWorld);
 					std::string str;
 					std::getline(ifstream, str, '\0');
 					s.deserializeString(str);
 				}
 				Monke::log("Finished loading!");
 			}
+		private:
+			World& loadedWorld;
+		};
+
+		loadingWorkerTag = JobSystem::submit(LoadJob(loadedWorld));
+
+		ui::frame("loadingtext",
+			UIFrame::Parameters{
+			.anchor = UIAnchor(UIAnchor::Parameters{
+				.xmode = UIAnchor::X::LeftRelativeDist,
+				.x = 0.5,
+				.ymode = UIAnchor::Y::TopRelativeDist,
+				.y = 0.5,}),
+			.size = {1000, 300},
+			.layer = LAYER_FIRST_UI,
+			.borders = {10,10}},
+		{
+			ui::text({
+				.size = {1000, 300},
+				.textAnchor = UIAnchor(UIAnchor::Parameters{
+					.xmode = UIAnchor::X::LeftRelativeDist,
+					.x = 0.5,
+					.ymode = UIAnchor::Y::TopRelativeDist,
+					.y = 0.5,}),
+				.text = "Loading ...",
+				.fontTexture = renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas.png")),
+				.fontSize = {30,100}
+			})
+		}
 		);
-		job->bSelfDestruct = true;
-
-		loadingWorkerTag = jobManager.addJob(job);
-
-		UIFrame f;
-		f.setSize({ 1000, 200 });
-		f.setBorders(5);
-		f.anchor.setCenterHorizontal();
-		f.anchor.setCenterVertical();
-
-		UIText text("Loading..", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas.png")));
-		text.setSize({ 1000, 200 });
-		text.textAnchor.setCenterHorizontal();
-		text.textAnchor.setCenterVertical();
-		text.fontSize = { 30, 100 };
-
-		f.addChild(ui.createAndGet(text));
-
-		ui.createFrame(f, "loadingtext");
 	}
 
 	//execute scripts
@@ -388,24 +459,24 @@ void Game::gameplayUpdate(float deltaTime)
 
 	cursorManipFunc();
 
-	for (auto ent : world.entityView<SpawnerComp>()) {
-		const Transform base = world.getComp<Transform>(ent);
-		int laps = spawnerLapTimer.getLaps(deltaTime);
-		for (int i = 1; i < laps; i++) {
-			float rotation = (float)(rand() % 360);
-			auto particle = world.create();
-			Vec2 movement = rotate(Vec2(5,0), rotation);
-			world.addComp<Transform>(particle, Transform(base.position));
-			auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
-			float gray = (rand() % 1000 / 1000.0f);
-			world.addComp<Draw>(particle, Draw(Vec4(gray, gray, gray, 0.3), size, rand() % 1000 / 1000.0f, Form::Circle));
-			world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
-			//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
-			//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
-			world.addComp<Age>(particle, Age(rand()%1000/2000.0f*3));
-			world.spawn(particle);
-		}
-	}
+	//for (auto ent : world.entityView<SpawnerComp>()) {
+	//	const Transform base = world.getComp<Transform>(ent);
+	//	int laps = spawnerLapTimer.getLaps(deltaTime);
+	//	for (int i = 1; i < laps; i++) {
+	//		float rotation = (float)(rand() % 360);
+	//		auto particle = world.create();
+	//		Vec2 movement = rotate(Vec2(5,0), rotation);
+	//		world.addComp<Transform>(particle, Transform(base.position));
+	//		auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
+	//		float gray = (rand() % 1000 / 1000.0f);
+	//		world.addComp<Draw>(particle, Draw(Vec4(gray, gray, gray, 0.3), size, rand() % 1000 / 1000.0f, Form::Circle));
+	//		world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
+	//		//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
+	//		//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
+	//		world.addComp<Age>(particle, Age(rand()%1000/2000.0f*3));
+	//		world.spawn(particle);
+	//	}
+	//}
 
 	for (auto ent : world.entityView<Movement, Transform>()) {
 		auto pos = world.getComp<Transform>(ent).position;
@@ -430,7 +501,7 @@ void Game::cursorManipFunc()
 	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
 	//renderer.submit(
-	//	Drawable(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
+	//	Sprite(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
 	//	LAYER_FIRST_UI
 	//);
 	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {

@@ -1,30 +1,48 @@
 #include "UIManager.hpp"
 #include "../util/Log.hpp"
 
-void UIManager::destroyFrame(UIEntity index)
+UIFrame& UIManager::getFrame(UIEntityHandle entity)
 {
-	if (entityToAlias.contains(index)) {			// remove alias
-		aliasToEntity.erase(entityToAlias[index]);
-		entityToAlias.erase(index);
+	if (getElementContainer<UIFrame>().contains(entity)) {
+		return getElementContainer<UIFrame>().get(entity.index);
+	}
+	else {
+		throw new std::exception("invalid access");
+	}
+}
+
+UIFrame& UIManager::getFrame(std::string_view name)
+{
+	auto iter = aliasToEntity.find(name);
+	if (iter != aliasToEntity.end()) {
+		auto uiindex = iter->second;
+		return getFrame(UIEntityHandle{ uiindex, getElementContainer<UIFrame>().getVersion(uiindex) });
+	}
+	else {
+		throw new std::exception("invalid alias");
+	}
+}
+
+void UIManager::destroyFrame(UIEntityHandle entity)
+{
+	if (entityToAlias.contains(entity.index)) {			// remove alias
+		aliasToEntity.erase(entityToAlias[entity.index]);
+		entityToAlias.erase(entity.index);
 	}
 
-	getElementContainer<UIFrame>().destroy(index);
+	getElementContainer<UIFrame>().get(entity).destroy();
 }
 
 void UIManager::destroyFrame(std::string_view name)
 {
-	if (aliasToEntity.contains(name)) {
-		int index = aliasToEntity[name];
-		entityToAlias.erase(aliasToEntity[name]);	// remove alias
-		aliasToEntity.erase(name);
-		destroyFrame(index);
-	}
-	else {
-		Monke::log("WARNING: trying to delete non existant UIEntity!");
-	}
+	assert(aliasToEntity.contains(name));
+	auto index = aliasToEntity[name];
+	entityToAlias.erase(aliasToEntity[name]);	// remove alias
+	aliasToEntity.erase(name);
+	getElementContainer<UIFrame>().get(index).destroy();
 }
 
-bool UIManager::doesFrameExist(UIEntity ent)
+bool UIManager::doesFrameExist(UIEntityHandle ent)
 {
 	return getElementContainer<UIFrame>().contains(ent);
 }
@@ -38,7 +56,7 @@ void UIManager::update()
 
 void UIManager::draw(UIContext context)
 {
-	std::vector<Drawable> buffer;
+	std::vector<Sprite> buffer;
 	++context.recursionDepth;
 	lastUpdateDrwawbleCount = 0;
 	for (auto& ent : getElementContainer<UIFrame>()) {
@@ -52,6 +70,7 @@ void UIManager::draw(UIContext context)
 		}
 		lastUpdateDrwawbleCount += buffer.size();
 	}
+	clearImmediates();
 }
 
 size_t UIManager::elementCount() const
@@ -73,8 +92,10 @@ void UIManager::perEntityUpdate()
 		[&](auto& container) {
 			for (auto& uient : container) {
 				auto& element = container.get(uient);
-				element.update();
-				activeElements += (size_t)element.isEnabled();
+				if (!element.isDestroyed()) {
+					element.update();
+					activeElements += (size_t)element.isEnabled();
+				}
 				if (element.isDestroyed()) container.destroy(uient);
 			}
 		}
@@ -95,7 +116,7 @@ void UIManager::focusUpdate()
 					if (felement->isEnabled() && felement->isFocusable()) {
 						const auto& area = felement->getFocusArea();
 
-						Vec2 cursorPos = in.getMousePosition(area.drawMode);
+						Vec2 cursorPos = renderer.convertCoordSys(in.getMousePosition(), RenderSpace::WindowSpace, area.drawMode);
 
 						// is cursor in area:
 						if (	cursorPos.x <= area.drCorner.x
@@ -190,6 +211,24 @@ void UIManager::clickableUpdate()
 						celement->bPressed = false;
 					}
 				}
+			}
+		}
+	);
+}
+
+void UIManager::clearImmediates()
+{
+	for (UIEntityIndex uient : getElementContainer<UIFrame>()) {
+		auto& frame = getElement<UIFrame>(uient);
+		if (frame.bImmediate) {
+			frame.destroy();
+		}
+	}
+	util::tuple_for_each(uiElementTuple,
+		[&](auto& container) {
+			for (auto& uient : container) {
+				auto& element = container.get(uient);
+				if (element.isDestroyed()) container.destroy(uient);
 			}
 		}
 	);

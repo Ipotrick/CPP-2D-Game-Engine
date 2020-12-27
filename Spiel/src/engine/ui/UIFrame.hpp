@@ -36,6 +36,7 @@ public:
 		RenderSpace drawMode{ RenderSpace::PixelSpace };
 		bool bBorderScalable{ true };
 		bool bAutoLength{ true };
+		bool bImmediate{ false };		// if frame is immediate it will be destroyed after one tick
 	};
 
 	UIFrame(Parameters param = Parameters())
@@ -78,6 +79,7 @@ public:
 		this->drawMode = param.drawMode;
 		this->bBorderScalable = param.bBorderScalable;
 		this->bAutoLength = param.bAutoLength;
+		this->bImmediate = param.bImmediate;
 	}
 
 	virtual void enable() override
@@ -161,7 +163,7 @@ public:
 		return borders;
 	}
 
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override;
 
 	void setBorderScalable(const bool b) { this->bBorderScalable = b; }
 	bool isBorderScalable() const { return this->bBorderScalable; }
@@ -227,7 +229,7 @@ public:
 
 	int layer{ 1 };
 private:
-	void drawChildren(std::vector<Drawable>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
+	void drawChildren(std::vector<Sprite>& buffer, UIContext context, const Vec2 position, const Vec2 size, const Vec2 borders);
 
 	/**
 	* destroyIf function is called before the update function.
@@ -241,4 +243,5 @@ private:
 	RenderSpace drawMode{ RenderSpace::PixelSpace };
 	bool bBorderScalable{ true };
 	bool bAutoLength{ true };
+	bool bImmediate{ false };
 };
