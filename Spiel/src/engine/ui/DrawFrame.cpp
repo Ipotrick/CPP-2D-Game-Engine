@@ -1,22 +1,22 @@
 #include "DrawFrame.hpp"
 
-void drawFrame(std::vector<Drawable>& buffer, UIContext context)
+void drawFrame(std::vector<Sprite>& buffer, UIContext context)
 {
 
 }
 
-void drawFrame(std::vector<Drawable>& buffer, UIContext context, Vec2 pos, Vec2 size, Vec2 border, Vec4 borderColor, Vec4 fillColor)
+void drawFrame(std::vector<Sprite>& buffer, UIContext context, Vec2 pos, Vec2 size, Vec2 border, Vec4 borderColor, Vec4 fillColor)
 {
 	// fill:
 	buffer.push_back(
-		Drawable(0, pos, context.recursionDepth, size - border * 2.0f, fillColor, Form::Rectangle, RotaVec2(0), context.drawMode)
+		makeSprite(0, pos, 0, size - border * 2.0f, fillColor, Form::Rectangle, RotaVec2(0), context.drawMode)
 	);
 	
 	// borders:
 	Vec2 bPos{ 0.0f, 0.0f };
 	Vec2 bSize{ 0.0f, 0.0f };
 	auto drawBorder = [&]() {
-		buffer.push_back(Drawable(0, bPos, context.recursionDepth, bSize, borderColor, Form::Rectangle, RotaVec2(0), context.drawMode));
+		buffer.push_back(makeSprite(0, bPos, 0, bSize, borderColor, Form::Rectangle, RotaVec2(0), context.drawMode));
 	};
 	// left:
 	bSize = Vec2{ border.x, size.y };

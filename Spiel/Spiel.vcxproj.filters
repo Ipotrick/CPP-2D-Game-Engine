@@ -52,6 +52,12 @@
     <Filter Include="engine\io">
       <UniqueIdentifier>{064cbdd2-3602-4248-b819-e0b37f455353}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\allocator">
+      <UniqueIdentifier>{86d00b75-230f-4a50-af09-8462ec66eb1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\rendering\shader">
+      <UniqueIdentifier>{070efa69-5c28-441c-aca1-beebe6b44ebc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.hpp">
@@ -375,14 +381,26 @@
     <ClInclude Include="src\engine\EngineCore.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\JobManager.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="Test.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\ui\UICreate.hpp">
       <Filter>engine\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\types\ShortNames.hpp">
+      <Filter>engine\types</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\allocator\ArenaAllocator.hpp">
+      <Filter>engine\allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\allocator\ArenaAllocatorPerThread.hpp">
+      <Filter>engine\allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\types\Spinlock.hpp">
+      <Filter>engine\types</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\types\TempVector.hpp">
+      <Filter>engine\types</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\LoadRenderTestMap.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -479,9 +497,6 @@
     <ClCompile Include="src\engine\rendering\OGLShaderUtil.cpp">
       <Filter>engine\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\rendering\OGLTextureREnderBuffer.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\rendering\Renderer.cpp">
       <Filter>engine\rendering</Filter>
     </ClCompile>
@@ -548,10 +563,43 @@
     <ClCompile Include="src\engine\ui\UICreate.cpp">
       <Filter>engine\ui</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\types\Spinlock.cpp">
+      <Filter>engine\types</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OGLTextureRenderBuffer.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\LoadRenderTestMap.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\mandelbrot\Mandel.frag">
-      <Filter>mandelbrot</Filter>
+    <None Include="shader\BloomFinderShader.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\BloomShader.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\FilterPassShader.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\Mandel.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\PassShader.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\PassShader.vert">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\SpriteShader.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\SpriteShader.vert">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\TrailShader.frag">
+      <Filter>engine\rendering\shader</Filter>
     </None>
   </ItemGroup>
 </Project>

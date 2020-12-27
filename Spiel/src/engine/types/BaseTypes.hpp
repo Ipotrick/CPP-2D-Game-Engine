@@ -4,9 +4,9 @@
 #include <ostream>
 #include <string>
 
-class Serializer {};
+#include "ShortNames.hpp"
 
-enum class Form : uint8_t {
+enum class Form : u8 {
 	Rectangle = 0x00,
 	Circle = 0x01
 };

@@ -3,17 +3,17 @@
 void JobSystem::wait(Tag tag)
 {
 	std::unique_lock lock(mut);
-	assert(state == Running);
+	assert(state == State::Running);
+	assert(batches.contains(tag));				// can not wait for non existant job
+	assert(!batches[tag].bOrphaned);			// can not wait for orphaned job
+	batches[tag].bWaitedFor = true;
 
-	waiterCV.wait(lock,
+	clientCV.wait(lock,
 		[&]() -> bool {
 			return batches[tag].jobsLeft == 0;
 		}
 	);
-
-	//delete batches[tag].memory;
-
-	batches.erase(tag);
+	deleteJobBatch(tag);
 }
 
 void JobSystem::initialize()
@@ -39,6 +39,35 @@ void JobSystem::reset()
 	threads.clear();
 }
 
+void JobSystem::orphan(Tag tag)
+{
+	assert(state == State::Running);
+	std::unique_lock lock(mut);
+	if (batches.contains(tag)) {
+		batches[tag].bOrphaned = true;
+	}
+}
+
+bool JobSystem::finished(Tag tag)
+{
+	assert(state == State::Running);
+	std::unique_lock lock(mut);
+	assert(batches.contains(tag));
+
+	if (batches[tag].jobsLeft == 0) {
+		deleteJobBatch(tag);
+		return true;
+	}
+	return false;
+}
+
+inline void JobSystem::deleteJobBatch(Tag tag)
+{
+	batches[tag].destructor(batches[tag].memory);
+	delete batches[tag].memory;
+	batches.erase(tag);
+}
+
 void JobSystem::workerFunction(const uint32_t id)
 {
 	std::unique_lock lock(mut);
@@ -50,7 +79,7 @@ void JobSystem::workerFunction(const uint32_t id)
 		);
 		if (state == State::Uninitialized) return;
 
-		auto [job, tag] = jobQueue.back();
+		auto [tag, job] = jobQueue.back();
 		jobQueue.pop_back();
 
 		lock.unlock();
@@ -60,7 +89,12 @@ void JobSystem::workerFunction(const uint32_t id)
 		auto& batch = batches[tag];
 		batch.jobsLeft -= 1;
 		if (batch.jobsLeft == 0) {
-			waiterCV.notify_one();
+			if (batch.bOrphaned) {
+				deleteJobBatch(tag);
+			}
+			else if (batch.bWaitedFor) {
+				clientCV.notify_one();
+			}
 		}
 	}
 }

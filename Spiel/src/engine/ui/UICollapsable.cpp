@@ -1,6 +1,6 @@
 #include "UICollapsable.hpp"
 
-void UICollapsable::draw(std::vector<Drawable>& buffer, UIContext context)
+void UICollapsable::draw(std::vector<Sprite>& buffer, UIContext context)
 {
 	const float sq2{ sqrtf(2.0f) };
 	const float isq2{ 1.0f / sqrtf(2.0f) };
@@ -24,11 +24,11 @@ void UICollapsable::draw(std::vector<Drawable>& buffer, UIContext context)
 	Vec2 arrowAreaSize = Vec2{ sHeadSize.y, sHeadSize.y } - sBorder * 2.0f;
 	Vec2 arrowSize = arrowAreaSize *isq2 * arrowScale;
 	Vec2 arrowPos = Vec2{ arrowAreaSize.x * 0.5f + sBorder.x + sHeadPos.x - sHeadSize.x * 0.5f, sHeadPos.y };
-	buffer.push_back(Drawable(0, arrowPos, headContext.recursionDepth, arrowSize, borderColor, Form::Rectangle, RotaVec2(45), headContext.drawMode));
+	buffer.push_back(makeSprite(0, arrowPos, 0, arrowSize, borderColor, Form::Rectangle, RotaVec2(45), headContext.drawMode));
 	++context.recursionDepth;
 	Vec2 helperPos = arrowPos + Vec2{ 0.0f, arrowAreaSize.y * 0.25f } *(bCollapsed ? 1.0f : -1.0f);
 	Vec2 helperSize = { arrowAreaSize.x, arrowAreaSize.y * 0.5f };
-	buffer.push_back(Drawable(0, helperPos, headContext.recursionDepth, helperSize, fillColor, Form::Rectangle, RotaVec2(0), headContext.drawMode));
+	buffer.push_back(makeSprite(0, helperPos, 0, helperSize, fillColor, Form::Rectangle, RotaVec2(0), headContext.drawMode));
 
 	// draw title:
 	headContext.cutOffLeft(arrowAreaSize.x);

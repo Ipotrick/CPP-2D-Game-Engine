@@ -3,9 +3,6 @@
 #include "../rendering/RenderTypes.hpp"
 
 struct UIContext {
-	UIContext(): 
-		sortKey{ 0 }
-	{ }
 	Vec2 ulCorner{ 0.0f, 0.0f };
 	Vec2 drCorner{ 0.0f, 0.0f };
 	float scale{ 1.0f };
@@ -14,17 +11,17 @@ struct UIContext {
 			int32_t layer;
 			int32_t recursionDepth;
 		};
-		int64_t sortKey;
+		int64_t sortKey{ 0 };
 
 	};
 	RenderSpace drawMode{ RenderSpace::PixelSpace };
 
-	void debugDraw(std::vector<Drawable>& buffer)
+	void debugDraw(std::vector<Sprite>& buffer)
 	{
 		Vec2 position = (ulCorner + drCorner) * 0.5f;
 		Vec2 size = abs(ulCorner - drCorner);
 		Vec4 color{ 1,0,1,0.5 };
-		buffer.push_back(Drawable(0, position, recursionDepth, size, color, Form::Rectangle, RotaVec2(0), drawMode));
+		buffer.push_back(makeSprite(0, position, 0, size, color, Form::Rectangle, RotaVec2(0), drawMode));
 		++recursionDepth;
 	}
 

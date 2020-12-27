@@ -145,18 +145,19 @@ void loadBallTestMap()
 	cmpsBox.add(Health(100));
 	world.spawn(box);
 
-	//for (int i = 0; i < 300'000; ++i) {
-	//	auto ent = create();
-	//	addComp(ent, Transform({(rand()%10000) / 10.0f - 500.0f, (rand() % 10000) / 10.0f - 500.0f }, rand()%360));
-	//	addComp(ent, Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
-	//	spawn(ent);
+	//for (int i = 0; i < 100'000; ++i) {
+	//	auto ent = world.create();
+	//	world.addComp(ent, Transform({(rand()%10000) / 10.0f - 500.0f, (rand() % 10000) / 10.0f - 500.0f }, rand()%360));
+	//	world.addComp(ent, Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
+	//	world.addComp(ent, Game::renderer.makeTexRef({ "Dir.png" }));
+	//	world.spawn(ent);
 	//}
 
-	Vec2 scale = Vec2(0.3f, 0.3f);
+	Vec2 scale = Vec2(0.2f, 0.2f);
 	Form form = Form::Circle;
 	Collider trashCollider = Collider(scale, form);
 	PhysicsBody trashSolidBody = PhysicsBody(0.2f, 0.5f, calcMomentOfIntertia(0.5, scale), 0.9f);
-	for (int i = 0; i < 2000; i++) {
+	for (int i = 0; i < 4000; i++) {
 		//if (i % 2) {
 		//	form = Form::Rectangle;
 		//	scale = { 0.2f, 0.4f }; 
@@ -177,8 +178,8 @@ void loadBallTestMap()
 		world.addComp(trash, Transform(position, RotaVec2(0)));
 		world.addComp(trash, Movement());
 		world.addComp(trash, trashCollider);
-		world.addComp(trash, Draw(color, sscale, 0.5f, form));
 		world.addComp(trash, trashSolidBody);
+		world.addComp(trash, Draw(color, sscale, 0.5f, form));
 		world.addComp(trash, Health(100));
 		world.addComp(trash, TextureRef2("Dir.png"));
 		world.spawn(trash);

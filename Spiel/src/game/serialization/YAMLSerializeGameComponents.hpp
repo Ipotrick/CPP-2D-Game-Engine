@@ -96,13 +96,9 @@ namespace YAML {
 
         static bool decode(const Node& node, Health& rhs)
         {
-            if (node.size() != 2) {
-                return false;
-            }
 
             rhs.maxHealth = node["maxHealth"].as<int>();
             rhs.curHealth = node["curHealth"].as<int>();
-            rhs.bUISpawned = false;
 
             return true;
         }

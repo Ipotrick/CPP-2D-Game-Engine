@@ -77,27 +77,47 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 
 	}
 
-	if (EngineCore::in.keyPressed(Key::F)) {
-		auto const& baseEnt = cmps.get<Transform>();
-		auto movEnt = cmps.get<Move>();
-		auto collEnt = cmps.get<Coll>();
+	auto const& baseEnt = cmps.get<Transform>();
+	auto movEnt = cmps.get<Move>();
+	auto collEnt = cmps.get<Coll>();
 
-		Vec2 scale(0.4, 0.4);
-		float bulletVel = 20.0f;
+	auto spawnBullet = [&](Vec2 vel, Vec2 offset, float size) {
+		Vec2 scale = Vec2{ 1,1 } * size;
+		Collider bulletCollider = Collider(scale, Form::Circle, true);
+		Draw bulletDraw = Draw(Vec4(0.3f, 1.5f, 0.3f, 1), scale, 0.4f, Form::Circle);
+		auto bullet = world.create();
+		world.addComp<Transform>(bullet, Transform(baseEnt.position + offset));
+		world.addComp<Movement>(bullet, Movement(vel, 0));
+		world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1, 0));
+		world.addComp<Draw>(bullet, bulletDraw);
+		world.addComp<Collider>(bullet, bulletCollider);
+		world.addComp<Bullet>(bullet, Bullet(1, 3));
+		world.addComp<Age>(bullet, Age(2));
+		world.spawn(bullet);
+	};
+
+	if (EngineCore::in.keyJustPressed(Key::C)) {
+		constexpr int BULLET_COUNT{ 300 };
+		constexpr float BULLET_VEL = 10.0f;
+		for (int i = 0; i < BULLET_COUNT; ++i) {
+			float angle = float(i) / float(BULLET_COUNT) * 360;
+			Vec2 bullCollVel = movEnt.velocity + BULLET_VEL * rotate(Vec2(0, 1), angle);
+			Vec2 offset = Vec2(1, 1) * rotate(Vec2(0, 1), angle);
+			const float size = 1;
+			spawnBullet(bullCollVel, offset, size);
+		}
+	}
+
+	if (EngineCore::in.keyPressed(Key::F)) {
+		constexpr float BULLET_VEL = 20.0f;
+		float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
+		const float size = 0.4f;
+
 		uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime) * data.power;
 		for (uint64_t i = 0; i < bullets; i++) {
-			float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-			Vec2 bullCollVel = movEnt.velocity + (bulletVel + (rand() % 1000 / 1000.0f)) * rotate(Vec2(0, 1), baseEnt.rotation + velOffsetRota);
-			Collider bulletCollider = Collider(scale, Form::Circle, true);
-			Draw bulletDraw = Draw(Vec4(0.3f, 1.5f, 0.3f, 1), scale, 0.4f, Form::Circle);
-			auto bullet = world.create();
-			world.addComp<Transform>(bullet, Transform(baseEnt.position + rotate(Vec2(-collEnt.size.y, 0.0f) * 1.3f, baseEnt.rotation + 270)));
-			world.addComp<Movement>(bullet, Movement(bullCollVel, 0));
-			world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1, 0));
-			world.addComp<Draw>(bullet, bulletDraw);
-			world.addComp<Collider>(bullet, bulletCollider);
-			world.addComp<Bullet>(bullet, Bullet(1, 3));
-			world.spawn(bullet);
+			Vec2 bullCollVel = movEnt.velocity + (BULLET_VEL + (rand() % 1000 / 1000.0f)) * rotate(Vec2(0, 1), baseEnt.rotation + velOffsetRota);
+			Vec2 offset = rotate(Vec2(-collEnt.size.y, 0.0f) * 1.3f, baseEnt.rotation + 270);
+			spawnBullet(bullCollVel, offset, size);
 		}
 	}
 }

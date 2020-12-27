@@ -40,12 +40,12 @@ public:
 
 	inline static CursorManipData cursorData;
 	inline static CollisionSystem collisionSystem{ world.submodule<COLLISION_SECM_COMPONENTS>() };
-	inline static PhysicsSystem2 physicsSystem2{ jobManager };
+	inline static PhysicsSystem2 physicsSystem2;
 
 	// TEMP TODO REMOVE
 	LapTimer spawnerLapTimer{0.0001f};
 
 	bool bLoading{ false };
-	Tag loadingWorkerTag{ Tag() };
-	World* loadedWorld{ nullptr };
+	JobSystem::Tag loadingWorkerTag{ JobSystem::Tag() };
+	World loadedWorld;
 };

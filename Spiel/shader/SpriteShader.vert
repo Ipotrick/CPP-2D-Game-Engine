@@ -1,16 +1,19 @@
 #version 460 core
 
-void rotate_vec2(inout vec2 vec, in vec2 rota) {
+vec4 rotate_vec4_z_axis(vec4 vec, in vec2 rota) {
 	// rota.x = sin, rota.y = cos
-	vec2 old = vec;
-	vec[0] = old.x * rota.y - old.y * rota.x;
-	vec[1] = old.x * rota.x + old.y * rota.y;
+	vec4 r;
+	r[0] = vec.x * rota.y - vec.y * rota.x;
+	r[1] = vec.x * rota.x + vec.y * rota.y;
+	r[2] = vec[2];
+	r[3] = vec[3];
+	return r;
 }
 
 // buffer defines:
 struct ModelUniform {
 	vec4 color;
-	vec2 position;
+	vec4 position;
 	vec2 rotation;
 	vec2 scale;
 	int texId;
@@ -50,28 +53,21 @@ layout (location = 3) uniform mat4 pixelSpaceVP;
 
 void main() 
 {
-	v_texCoord = texCoord;
-	v_modelID = modelID;
-
-	ModelUniform model = models[modelID];
-
-	vec2 pos2 = corner;
-	rotate_vec2(pos2, model.rotation);
-
-	vec3 pos3;
-	pos3.xy = (pos2 * model.scale) + model.position;
-	pos3.z = 0.0f;
-
+	// THIS IS UGLY AS HELL, replace it with one uniform that contains all renderspaces:
 	mat4 projectionViewMatrices[4];
 	projectionViewMatrices[0] = worldSpaceVP;
 	projectionViewMatrices[1] = mat4(1.0f);
 	projectionViewMatrices[2] = uniformWindowSpaceVP;
 	projectionViewMatrices[3] = pixelSpaceVP;
 
-	vec4 pos4;
-	pos4.xyz = pos3.xyz;
-	pos4.w = 1.0f;
-	pos4 = projectionViewMatrices[model.renderSpace] * pos4;
+	ModelUniform model = models[modelID];
 
-	gl_Position = pos4;
+	vec4 corner_coord = vec4(corner, 0, 1);
+	vec4 scaled_corner_coord = corner_coord * vec4(model.scale.xy, 1, 1);
+	vec4 rotated_corner_coord = rotate_vec4_z_axis(scaled_corner_coord, model.rotation);
+	vec4 translated_corner_coord = rotated_corner_coord + vec4(model.position.xyz, 0);
+	
+	v_texCoord = texCoord;
+	v_modelID = modelID;
+	gl_Position = projectionViewMatrices[model.renderSpace] * translated_corner_coord;
 }

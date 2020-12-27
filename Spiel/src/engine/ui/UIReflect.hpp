@@ -16,29 +16,54 @@
 #include "UISeperator.hpp"
 #include "UICollapsable.hpp"
 
-using UIEntity = uint32_t;
+using UIEntityIndex = EntityHandleIndex;
+
+using UIEntityHandle = EntityHandle;
 
 template<typename T>
 class UIContainer {
 public:
-	static_assert(std::is_base_of<UIElement, T>::value);
+	static_assert(std::is_base_of<UIElement, T>::value, "UIContainer can only hold UIElement derived classes/structs!");
 
-	UIEntity create(const T& element)
+	UIEntityIndex create(const T& element)
 	{
 		if (freeElements.empty()) {
-			UIEntity index = (UIEntity)elements.size();
-			elements.updateMaxEntNum(index + 1);
+			UIEntityIndex index = (UIEntityIndex)elements.size();
+			elements.updateMaxEntNum(static_cast<size_t>(index + 1));
 			elements.insert(index, element);
 			return index;
 		}
 		else {
-			UIEntity index = freeElements.back();
+			UIEntityIndex index = freeElements.back();
 			freeElements.pop_back();
 			elements.insert(index, element);
 			return index;
 		}
 	}
-	void destroy(UIEntity index)
+
+	UIEntityHandle createAsHandle(const T& element)
+	{
+		UIEntityIndex rindex;
+		if (freeElements.empty()) {
+			UIEntityIndex index = (UIEntityIndex)elements.size();
+			elements.updateMaxEntNum(static_cast<size_t>(index + 1));
+			elements.insert(index, element);
+			rindex =  index;
+		}
+		else {
+			UIEntityIndex index = freeElements.back();
+			freeElements.pop_back();
+			elements.insert(index, element);
+			rindex = index;
+		}
+		if (rindex >= indexToVersion.size()) {
+			indexToVersion.resize(size_t(rindex + 1), 0);
+		}
+		indexToVersion[rindex] += 1;
+		return UIEntityHandle{ rindex, indexToVersion[rindex] };
+	}
+
+	void destroy(UIEntityIndex index)
 	{
 		if (elements.contains(index)) {
 			elements.remove(index);
@@ -46,18 +71,53 @@ public:
 		}
 	}
 
-	T& get(const UIEntity index)
+	void destroy(UIEntityHandle entity)
+	{
+		assert(contains(entity));
+		if (elements.contains(entity.index)) {
+			elements.remove(entity.index);
+			freeElements.push_back(entity.index);
+		}
+	}
+
+	T& get(const UIEntityIndex index)
 	{
 		return elements.get(index);
 	}
-	const T& get(const UIEntity index) const
+	const T& get(const UIEntityIndex index) const
 	{
 		return elements.get(index);
 	}
 
-	bool contains(UIEntity index) const
+	T& get(const UIEntityHandle entity)
+	{
+		assert(contains(entity));
+		return elements.get(entity.index);
+	}
+	const T& get(const UIEntityHandle entity) const
+	{
+		assert(contains(entity));
+		return elements.get(entity.index);
+	}
+
+	bool contains(UIEntityIndex index) const
 	{
 		return elements.contains(index);
+	}
+
+	bool contains(UIEntityHandle entity) const
+	{
+		const bool versionValid = isHandleValid(entity);
+		return versionValid && elements.contains(entity.index);
+	}
+
+	EntityHandleVersion getVersion(UIEntityIndex index) const
+	{
+		return indexToVersion.at(index);
+	}
+
+	bool isHandleValid(UIEntityHandle entity) const {
+		return entity.index < indexToVersion.size() && entity.version == indexToVersion[entity.index];
 	}
 
 	size_t size() const
@@ -69,7 +129,8 @@ public:
 	auto end() { return elements.end(); }
 private:
 	ComponentStoragePagedIndexing<T> elements;
-	std::vector<UIEntity> freeElements;
+	std::vector<UIEntityIndex> freeElements;
+	std::vector<EntityHandleVersion> indexToVersion;
 };
 
 using UIElementTuple = std::tuple< 
@@ -102,10 +163,4 @@ constexpr size_t index_in_ui_storagetuple_fn()
 	else {
 		return index_in_ui_storagetuple_fn<I + 1, T, Tuple_t>();
 	}
-}
-
-template<typename T>
-constexpr size_t getUIElementTypeIndex()
-{
-	return index_in_ui_storagetuple_fn<0, T, UIElementTuple>();
 }

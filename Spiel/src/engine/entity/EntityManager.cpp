@@ -4,14 +4,17 @@ EntityHandle EntityManager::create(UUID uuid)
 {
 	EntityHandle ent;
 	if (!freeIndexQueue.empty()) {
+		// reuse an old slot of a dead entity
 		ent.index = freeIndexQueue.front();
 		freeIndexQueue.pop_front();
 		auto& slot = entitySlots[ent.index];
 		slot.valid = true;
 		slot.spawned = false;
+		slot.queuedForDestr = false;
 		ent.version = ++slot.version;
 	}
 	else {
+		// create a new slot
 		entitySlots.emplace_back(EntitySlot(true));
 		ent.index = static_cast<EntityHandleIndex>(entitySlots.size() - 1);
 		ent.version = ++entitySlots[ent.index].version;
@@ -26,7 +29,8 @@ EntityHandle EntityManager::create(UUID uuid)
 
 void EntityManager::destroy(EntityHandle entity)
 {
-	if (isHandleValid(entity)) {
+	if (isHandleValid(entity) && !entitySlots[entity.index].queuedForDestr) {
+		entitySlots[entity.index].queuedForDestr = true;
 		destroyQueue.push_back(entity.index);
 	}
 }
@@ -61,6 +65,7 @@ void EntityManager::executeDestroys()
 		auto& entityData = entitySlots[entSlotIndex];
 		entityData.valid = false;
 		entityData.spawned = false;
+		entityData.queuedForDestr = false;
 		if (entityData.uuid.isValid()) {
 			uuidToEntityIndex.erase(entityData.uuid);
 		}

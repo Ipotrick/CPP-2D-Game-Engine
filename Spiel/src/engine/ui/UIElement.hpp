@@ -12,7 +12,7 @@ class UIElementPrivilage {};
 
 class UIElement {
 public:
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) = 0;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) = 0;
 
 	struct Parameters {
 		// UIElement:

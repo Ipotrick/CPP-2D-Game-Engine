@@ -6,17 +6,16 @@
 #include "../rendering/RenderTypes.hpp"
 #include "../math/Vec2.hpp"
 
-inline std::array<Drawable, 3> makeArrow(Vec2 vec, Vec2 origin) {
-	float const width = 0.03f;
-	Vec4 const color = Vec4(1, 0, 0, 1);
-	float len = length(vec);
-	float angle = getRotation(vec);
-	RotaVec2 rotaVec = RotaVec2(angle);
-	RotaVec2 rotaVecTip = RotaVec2(angle + 45);
-	auto centerPos = origin + vec * 0.5f;
+inline std::array<Sprite, 3> makeArrow(Vec2 vec, Vec2 origin, Vec4 color = { 1, 0, 0, 1 })
+{
+	Vec2 size = { 0.04f, 0.04f };
+
+	Vec2 end = origin + vec;
+	Vec2 middle = origin + 0.5f * vec;
+
 	return {
-		Drawable(0, centerPos, 0.95f, Vec2(len, width), color, Form::Rectangle, rotaVec),
-		Drawable(0, origin, 0.95f, Vec2(width, width) , color, Form::Circle, rotaVec),
-		Drawable(0, origin + vec, 0.95f, Vec2(width, width) / sqrt(2), color, Form::Rectangle, rotaVecTip)
+		makeSprite(0, origin, 1, size, color, Form::Circle, RotaVec2(), RenderSpace::WorldSpace),
+		makeSprite(0, end, 1, size, color, Form::Circle, RotaVec2(), RenderSpace::WorldSpace),
+		makeSprite(0, middle, 1, {vec.length(), size.y }, color, Form::Rectangle, RotaVec2{ getRotation(vec) }, RenderSpace::WorldSpace),
 	};
 }

@@ -47,7 +47,7 @@ void Renderer::waitTillFinished() {
 	state = RenderState::PreStart;
 }
 
-void Renderer::flushSubmissions() { 
+void Renderer::flushSubmissions() {
 	auto& backBuffer = workerSharedData->renderBuffer;
 
 	backBuffer->camera = frontBuffer->camera;
@@ -101,12 +101,14 @@ void Renderer::flushSubmissions() {
 			flayer.script = nullptr;
 		}
 
+		blayer.copySettings(flayer);
+
 		if (flayer.bClearEveryFrame) {
-			std::swap(backBuffer->layers[i].getDrawables(), flayer.getDrawables());
-			flayer.clear();
+			std::swap(backBuffer->layers[i].getSprites(), flayer.getSprites());
+			flayer.clearSprites();
 		}
 		else {
-			backBuffer->layers[i].copyFrom(flayer);
+			backBuffer->layers[i].setSprites(flayer.getSprites());
 		}
 	}
 }
@@ -131,4 +133,151 @@ void Renderer::reset()
 	state = RenderState::Uninitialized;
 
 	frontBuffer->layers.resize(0);
+}
+
+Vec2 Renderer::convertCoordSys(Vec2 coord, RenderSpace from, RenderSpace to)
+{
+	switch (from) {
+	case RenderSpace::PixelSpace:
+		switch (to) {
+		case RenderSpace::PixelSpace:
+			return coord;
+			break;
+		case RenderSpace::UniformWindowSpace:
+			return convertCoordSys<RenderSpace::PixelSpace, RenderSpace::UniformWindowSpace>(coord);
+			break;
+		case RenderSpace::WindowSpace:
+			return convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord);
+			break;
+		case RenderSpace::WorldSpace:
+			return convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WorldSpace>(coord);
+			break;
+		}
+		break;
+	case RenderSpace::UniformWindowSpace:
+		switch (to) {
+		case RenderSpace::PixelSpace:
+			return convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::PixelSpace>(coord);
+			break;
+		case RenderSpace::UniformWindowSpace:
+			return coord;
+			break;
+		case RenderSpace::WindowSpace:
+			return convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord);
+			break;
+		case RenderSpace::WorldSpace:
+			return convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WorldSpace>(coord);
+			break;
+		}
+		break;
+	case RenderSpace::WindowSpace:
+		switch (to) {
+		case RenderSpace::PixelSpace:
+			return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(coord);
+			break;
+		case RenderSpace::UniformWindowSpace:
+			return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(coord);
+			break;
+		case RenderSpace::WindowSpace:
+			return coord;
+			break;
+		case RenderSpace::WorldSpace:
+			return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(coord);
+			break;
+		}
+		break;
+	case RenderSpace::WorldSpace:
+		switch (to) {
+		case RenderSpace::PixelSpace:
+			return convertCoordSys<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(coord);
+			break;
+		case RenderSpace::UniformWindowSpace:
+			return convertCoordSys<RenderSpace::WorldSpace, RenderSpace::UniformWindowSpace>(coord);
+			break;
+		case RenderSpace::WindowSpace:
+			return convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord);
+			break;
+		case RenderSpace::WorldSpace:
+			return coord;
+			break;
+		}
+		break;
+	}
+	return { 0, 0 };	// makes the compiler happy
+}
+
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(Vec2 coord)
+{
+	return {
+		coord.x / window->getWidth() * 2.0f - 1.0f,
+		coord.y / window->getHeight() * 2.0f - 1.0f
+	};
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(Vec2 coord)
+{
+	return (rotate(coord - frontBuffer->camera.position, -frontBuffer->camera.rotation) * frontBuffer->camera.frustumBend * frontBuffer->camera.zoom);
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(Vec2 coord)
+{
+	const float xScale = (float)window->getWidth() / (float)window->getHeight();
+	coord.x /= xScale;
+	return coord;
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(Vec2 coord)
+{
+	return {
+		(coord.x + 1.0f) / 2.0f * window->getWidth(),
+		(coord.y + 1.0f) / 2.0f * window->getHeight()
+	};
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(Vec2 coord)
+{
+	return rotate(coord / frontBuffer->camera.frustumBend / frontBuffer->camera.zoom, frontBuffer->camera.rotation) + frontBuffer->camera.position;
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(Vec2 coord)
+{
+	const float xScale = (float)window->getWidth() / (float)window->getHeight();
+	coord.x *= xScale;
+	return coord;
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Vec2 coord)
+{
+	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(
+		convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord));
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WorldSpace>(Vec2 coord)
+{
+	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(
+		convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord));
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::PixelSpace>(Vec2 coord)
+{
+	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(
+		convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord));
+}
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::UniformWindowSpace>(Vec2 coord)
+{
+	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(
+		convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord));
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WorldSpace>(Vec2 coord)
+{
+	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(
+		convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord));
+}
+
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::UniformWindowSpace>(Vec2 coord)
+{
+	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(
+		convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord));
 }

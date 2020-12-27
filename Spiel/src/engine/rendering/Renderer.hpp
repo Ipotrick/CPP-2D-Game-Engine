@@ -74,19 +74,19 @@ public:
 		return frontBuffer->layers.rd_at(index).bClearEveryFrame;
 	}
 
-	void submit(Drawable const& d, int layer = 0)
+	void submit(Sprite const& d, int layer = 0)
 	{
 		assert(d.texRef.has_value() ? d.texRef.value().id != -1 : true);
 		assert(frontBuffer->layers.size() > layer);
 		frontBuffer->layers.rd_at(layer).push(d);
 	}
-	void submit(Drawable&& d, int layer = 0)
+	void submit(Sprite&& d, int layer = 0)
 	{
 		assert(d.texRef.has_value() ? d.texRef.value().id != -1 : true);
 		assert(frontBuffer->layers.size() > layer);
 		frontBuffer->layers.rd_at(layer).push(d);
 	}
-	void submit(std::vector<Drawable> const& in, int layer = 0)
+	void submit(std::vector<Sprite> const& in, int layer = 0)
 	{
 #ifdef _DEBUG
 		for (auto const& d : in) {
@@ -136,11 +136,26 @@ public:
 	*/
 	void validateTextureRef(TextureRef2& ref) { texRefManager.validate(ref); }
 
-	/*
-	* converts a position/ vector from one coordinate system (RenderSpace) to an other
-	*/
+	/**
+	 * compile time convertion of coordinate system of vector.
+	 * 
+	 * \param From RenderSpace the coord is in
+	 * \param To RenderSpace the corrd should be converted to
+	 * \param vec vector to convert
+	 * \return converted vector
+	 */
 	template<RenderSpace From, RenderSpace To>
-	Vec2 convertCoordinate(Vec2 coord) { static_assert(false, "This convertion is not supported");  return coord; }
+	Vec2 convertCoordSys(Vec2 vec);
+
+	/**
+	 * run time convertion of coordinate system of vector.
+	 * 
+	 * \param vec vector to convert
+	 * \param from RenderSpace the coord is in
+	 * \param to RenderSpace the corrd should be converted to
+	 * \return converted vector
+	 */
+	Vec2 convertCoordSys(Vec2 vec, RenderSpace from, RenderSpace to);
 
 	Camera& getCamera() { return frontBuffer->camera; }
 private:
@@ -163,8 +178,8 @@ private:
 	}
 
 	RenderState state{ RenderState::Uninitialized };
-	std::chrono::microseconds renderingTime;
-	std::chrono::microseconds syncTime;
+	std::chrono::microseconds renderingTime{ 0 };
+	std::chrono::microseconds syncTime{ 0 };
 	int drawCallCount{ 0 };
 	TextureRefManager texRefManager;						// TODO refactor, remove loading queue, use frontbuffer loading queue
 	// concurrent data:
@@ -174,67 +189,15 @@ private:
 	std::thread workerThread;
 };
 
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::PixelSpace,			RenderSpace::WindowSpace>(Vec2 coord)
-{
-	return { 
-		coord.x / window->width * 2.0f - 1.0f, 
-		coord.y / window->height * 2.0f - 1.0f
-	};
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WorldSpace,			RenderSpace::WindowSpace>(Vec2 coord)
-{
-	return (rotate(coord - frontBuffer->camera.position, -frontBuffer->camera.rotation) * frontBuffer->camera.frustumBend * frontBuffer->camera.zoom);
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(Vec2 coord)
-{
-	const float xScale = (float)window->width / (float)window->height;
-	coord.x /= xScale;
-	return coord;
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WindowSpace,		RenderSpace::PixelSpace>(Vec2 coord)
-{
-	return {
-		(coord.x + 1.0f) / 2.0f * window->width,
-		(coord.y + 1.0f) /2.0f * window->height
-	};
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WindowSpace,		RenderSpace::WorldSpace>(Vec2 coord)
-{
-	return rotate(coord / frontBuffer->camera.frustumBend / frontBuffer->camera.zoom, frontBuffer->camera.rotation) + frontBuffer->camera.position;
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WindowSpace,		RenderSpace::UniformWindowSpace>(Vec2 coord)
-{
-	const float xScale = (float)window->width / (float)window->height;
-	coord.x *= xScale;
-	return coord;
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WorldSpace,			RenderSpace::PixelSpace>(Vec2 coord)
-{
-	return convertCoordinate<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(
-		convertCoordinate<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord));
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::PixelSpace,			RenderSpace::WorldSpace>(Vec2 coord)
-{
-	return convertCoordinate<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(
-		convertCoordinate<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord));
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::UniformWindowSpace, RenderSpace::PixelSpace>(Vec2 coord)
-{
-	return convertCoordinate<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(
-		convertCoordinate<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord));
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::PixelSpace,			RenderSpace::UniformWindowSpace>(Vec2 coord)
-{
-	return convertCoordinate<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(
-		convertCoordinate<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord));
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::UniformWindowSpace, RenderSpace::WorldSpace>(Vec2 coord)
-{
-	return convertCoordinate<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(
-		convertCoordinate<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord));
-}
-template<> inline Vec2 Renderer::convertCoordinate<RenderSpace::WorldSpace,			RenderSpace::UniformWindowSpace>(Vec2 coord)
-{
-	return convertCoordinate<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(
-		convertCoordinate<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord));
-}
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WorldSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::PixelSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::UniformWindowSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WorldSpace>(Vec2 coord);
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::UniformWindowSpace>(Vec2 coord);

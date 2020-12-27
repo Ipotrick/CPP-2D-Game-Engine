@@ -9,7 +9,7 @@ public:
 		anchor.setCenterHorizontal();
 		anchor.setCenterVertical();
 	}
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override;
 
 	void setHorizontal(const bool b = true) { this->bHorizontal = b; }
 	bool isHorizontal() const { return bHorizontal; }

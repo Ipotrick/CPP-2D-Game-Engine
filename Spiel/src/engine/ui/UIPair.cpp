@@ -2,7 +2,7 @@
 
 #include "UIPair.hpp"
 
-void UIPair::draw(std::vector<Drawable>& buffer, UIContext context)
+void UIPair::draw(std::vector<Sprite>& buffer, UIContext context)
 {
 	assert(first);
 	assert(second);

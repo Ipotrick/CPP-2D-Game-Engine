@@ -35,7 +35,7 @@ public:
 	* the first element is either drawn on the left or on top depending on the horizontal setting
 	* per default the horizontal setting is set to false
 	*/
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override;
 
 	virtual void destroy() override
 	{

@@ -32,18 +32,22 @@ void EngineCore::initialize(std::string windowName, uint32_t windowWidth, uint32
 	minimunLoopTime = 0ms;	// 10000 microseconds = 10 milliseonds => 100 loops per second
 	maxDeltaTime = 0.02f;
 	deltaTime = 0.0;
-	window.open(windowName, windowWidth, windowHeight);
-	std::this_thread::sleep_for(std::chrono::seconds(1));
+	if (!window.open(windowName, windowWidth, windowHeight)) {
+		std::cerr << "errror: could not open window!" << std::endl;
+		exit(-1);
+	}
 	renderer.initialize(&window);
 	running = true;
 	deltaTimeQueue.push_back(maxDeltaTime);
 	JobSystem::initialize();
 
-	uiContext.recursionDepth = 1;
-	uiContext.drawMode = RenderSpace::PixelSpace;
-	uiContext.scale = 1.0f;
-	uiContext.ulCorner = { 0.0f, static_cast<float>(window.height) };
-	uiContext.drCorner = { static_cast<float>(window.width), 0.0f };
+	uiContext = {
+		.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) },
+		.drCorner = { static_cast<float>(window.getWidth()), 0.0f },
+		.scale = 1.0f,
+		.recursionDepth = 1,
+		.drawMode = RenderSpace::PixelSpace
+	};
 }
 
 float EngineCore::getDeltaTime(int sampleSize)
@@ -65,12 +69,12 @@ float EngineCore::getDeltaTime(int sampleSize)
 
 Vec2 EngineCore::getWindowSize() {
 	std::lock_guard<std::mutex> l(window.mut);
-	return { static_cast<float>(window.width), static_cast<float>(window.height) };
+	return { static_cast<float>(window.getWidth()), static_cast<float>(window.getHeight()) };
 }
 
 float EngineCore::getWindowAspectRatio() {
 	std::lock_guard<std::mutex> l(window.mut);
-	return static_cast<float>(window.width)/ static_cast<float>(window.height);
+	return static_cast<float>(window.getWidth())/ static_cast<float>(window.getHeight());
 }
 
 void EngineCore::run() {
@@ -89,37 +93,34 @@ void EngineCore::run() {
 		deltaTimeQueue.push_front(deltaTime);
 
 		update(getDeltaTimeSafe());
-		if (iteration > 0) {
-			renderer.startRendering();
-		}
 
 		// update in:
-		in.engineUpdate(renderer.getCamera());
+		in.engineUpdate();
 
 		// update rendering:
 		ui.update();
 		ui.draw(uiContext);
 		renderer.waitTillFinished();
 
-		if (!glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() != Focus::Out) {
+		if (!window.isFocused() && in.getFocus() != Focus::Out) {
 			in.takeFocus(Focus::Out);
 			in.takeMouseFocus(Focus::Out);
 		}
-		else if (glfwGetWindowAttrib(window.glfwWindow, GLFW_FOCUSED) && in.getFocus() == Focus::Out) {
+		else if (window.isFocused() && in.getFocus() == Focus::Out) {
 			in.returnFocus();
 			in.returnMouseFocus();
 		}
 		// update the uiContext while window acces is mutex free:
-		uiContext.ulCorner = { 0.0f, static_cast<float>(window.height) };
-		uiContext.drCorner = { static_cast<float>(window.width), 0.0f };
+		uiContext.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) };
+		uiContext.drCorner = { static_cast<float>(window.getWidth()), 0.0f };
 
-		if (glfwWindowShouldClose(window.glfwWindow)) { // if window closes the program ends
+		if (window.shouldClose()) { // if window closes the program ends
 			running = false;
 			break;
 		}
-		//else {
-		//	renderer.startRendering();
-		//}
+		else {
+			renderer.startRendering();
+		}
 
 	}
 	renderer.reset();

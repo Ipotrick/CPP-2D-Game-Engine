@@ -9,7 +9,6 @@
 #include <array>
 
 #include "EntityComponentStorage.hpp"
-#include "../util/utils.hpp"
 #include "EntityManager.hpp"
 
 template<size_t I, typename T, typename TTuple>
@@ -65,25 +64,26 @@ static constexpr void assertTypeTupleInStorageTuple()
 
 template<typename SubManager, typename FirstComp, typename ... RestComps>
 class EntityComponentView; 
-template<typename Manager, typename FirstComp, typename ... RestComps>
+template<typename ECMView, typename FirstComp, typename ... RestComps>
 class EntityView; 
 
 template<typename ... CompStoreType>
-class SubEntityComponentManager {
+class EntityComponentManagerView {
 	template<typename SubManager, typename FirstComp, typename ... RestComps>
 	friend class EntityComponentView;
-	template<typename Manager, typename FirstComp, typename ... RestComps>
+	template<typename ECMView, typename FirstComp, typename ... RestComps>
 	friend class EntityView;
 public:
-	SubEntityComponentManager(EntityManager& em, CompStoreType&... comp):
+	EntityComponentManagerView(EntityManager& em, CompStoreType&... comp):
 		entManager{&em}, compStorePtrTuple{&comp ...}
 	{ }
 
-	SubEntityComponentManager(SubEntityComponentManager<CompStoreType...> const& rhs) :
+	EntityComponentManagerView(EntityComponentManagerView<CompStoreType...> const& rhs) :
 		entManager{ rhs.entManager }, compStorePtrTuple{ rhs.compStorePtrTuple }
 	{ }
 
 	/* EntityManager api */
+
 	EntityHandle create(UUID uuid = UUID())
 	{
 		return entManager->create(uuid);
@@ -235,7 +235,7 @@ public:
 	[[nodiscard]]
 	auto entityView()
 	{
-		return EntityView<SubEntityComponentManager<CompStoreType...>, FirstComp, RestComps...>(*this);
+		return EntityView<EntityComponentManagerView<CompStoreType...>, FirstComp, RestComps...>(*this);
 	}
 
 	template<typename FirstComp, typename ... RestComps>
@@ -243,7 +243,7 @@ public:
 	auto entityComponentView()
 	{
 		assertTypeTupleInStorageTuple<0, std::tuple<FirstComp, RestComps...>, std::tuple<CompStoreType...>>();
-		return EntityComponentView<SubEntityComponentManager<CompStoreType...>, FirstComp, RestComps...>(*this);
+		return EntityComponentView<EntityComponentManagerView<CompStoreType...>, FirstComp, RestComps...>(*this);
 	}
 private:
 
@@ -260,123 +260,132 @@ private:
 	template<typename CompType>
 	constexpr auto& storage()
 	{
-		constexpr int index = findIndexInTuple<0, CompType, std::tuple<CompStoreType...>>();
-		return *std::  get<index>(compStorePtrTuple);
+		return *std::get<findIndexInTuple<0, CompType, std::tuple<CompStoreType...>>()>(compStorePtrTuple);
 	}
 
 	EntityManager* entManager;
 	std::tuple<CompStoreType*...> compStorePtrTuple;
 };
 
-template<typename SubManager, typename FirstComp, typename ... RestComps>
+/*----------------------------------------------------------------------------------*/
+/*-------------------------------EntityComponentView--------------------------------*/
+/*----------------------------------------------------------------------------------*/
+
+template<typename ECMView, typename FirstComp, typename ... RestComp>
 class EntityComponentView {
 public:
-	EntityComponentView(SubManager manager)
+	EntityComponentView(ECMView manager)
 		: manager{ manager }, compStore{ manager.storage<FirstComp>() }, iterEnd{ compStore.end() }
 	{ }
-	template<typename MainIterT, typename FirstCompType, typename ... RestCompTypes>
+
+	template<typename MainIterT>
 	class iterator {
 	public:
-		typedef iterator<MainIterT, FirstCompType, RestCompTypes...> self_type;
-		typedef std::tuple<EntityHandle, FirstCompType&, RestCompTypes&...> value_type;
-		typedef EntityHandle& reference;
-		typedef EntityHandle* pointer;
-		typedef std::forward_iterator_tag iterator_category;
+		using self_type				= iterator<MainIterT>;
+		using value_type			= std::tuple<EntityHandle, FirstComp&, RestComp&...>;
+		using reference				= EntityHandle&;
+		using pointer				= EntityHandle*;
+		using iterator_category		= std::forward_iterator_tag;
 
-		iterator(const MainIterT iter, EntityComponentView<SubManager, FirstComp, RestComps...>& vw)
+		iterator(const MainIterT iter, EntityComponentView<ECMView, FirstComp, RestComp...>& vw)
 			: iter{ iter }, view{ vw }
 		{ }
-		inline self_type operator++(int junk)
+		self_type operator++()
 		{
 			do {
 				++iter;
-			} while (iter != view.iterEnd && (!view.manager.hasComps<RestCompTypes...>(*iter) || !view.manager.isSpawned(*iter)));
+			} while (iter != view.iterEnd && (!view.manager.hasComps<RestComp...>(*iter) || !view.manager.isSpawned(*iter)));
 			return *this;
 		}
-		inline self_type operator++()
+		self_type operator++(int junk)
 		{
 			auto oldme = *this;
 			operator++(0);
 			return oldme;
 		}
-		inline value_type operator*()
+		value_type operator*()
 		{
 			return std::tuple_cat(
-				std::tuple<EntityHandle, FirstCompType&>(EntityHandle{ *iter, view.manager.getVersion(*iter) }, iter.data()),
-				view.manager.getComps<RestCompTypes...>(*iter)
+				std::tuple<EntityHandle, FirstComp&>(EntityHandle{ *iter, view.manager.getVersion(*iter) }, iter.data()),
+				view.manager.getComps<RestComp...>(*iter)
 			);
 		}
-		inline bool operator==(const self_type& rhs)
+		bool operator==(const self_type& rhs) const
 		{
 			return iter == rhs.iter;
 		}
-		inline bool operator!=(const self_type& rhs)
+		bool operator!=(const self_type& rhs) const
 		{
 			return iter != rhs.iter;
 		}
 	private:
 		MainIterT iter;
-		EntityComponentView<SubManager, FirstComp, RestComps...>& view;
+		EntityComponentView<ECMView, FirstComp, RestComp...>& view;
 	};
-	inline auto begin()
+
+	auto begin()
 	{
 		auto iter = compStore.begin();
-		while (iter != iterEnd && (!manager.hasComps<RestComps...>(*iter) || !manager.isSpawned(*iter))) {
+		while (iter != iterEnd && (!manager.hasComps<RestComp...>(*iter) || !manager.isSpawned(*iter))) {
 			++iter;
 		}
-		return iterator<decltype(compStore.begin()), FirstComp, RestComps...>(iter, *this);
+		return iterator(iter, *this);
 	}
-	inline auto end()
+
+	auto end()
 	{
-		return iterator<decltype(compStore.begin()), FirstComp, RestComps...>(iterEnd, *this);
+		return iterator(iterEnd, *this);
 	}
-private:
-	SubManager manager;
+protected:
+	ECMView manager;
 	decltype(manager.storage<FirstComp>())& compStore;
 	const decltype(compStore.end()) iterEnd;
 };
 
+/*----------------------------------------------------------------------------------*/
+/*------------------------------------EntityView------------------------------------*/
+/*----------------------------------------------------------------------------------*/
 
-template<typename Manager, typename FirstComp, typename ... RestComps>
+template<typename ECMView, typename FirstComp, typename ... RestComp>
 class EntityView {
 public:
-	EntityView(Manager manager)
+	EntityView(ECMView manager)
 		: manager{ manager }, compStore{ manager.storage<FirstComp>() }, iterEnd{ compStore.end() }
 	{ }
-	template<typename MainIterT, typename FirstCompType, typename ... RestCompTypes>
+	template<typename MainIterT>
 	class iterator {
 	public:
-		typedef iterator<MainIterT, FirstCompType, RestCompTypes...> self_type;
-		typedef EntityHandle value_type;
-		typedef EntityHandle& reference;
-		typedef EntityHandle* pointer;
-		typedef std::forward_iterator_tag iterator_category;
+		using self_type = iterator<MainIterT>;
+		using value_type = EntityHandle;
+		using reference = EntityHandle&;
+		using pointer = EntityHandle*;
+		using iterator_category = std::forward_iterator_tag;
 
 		iterator(const MainIterT iter, EntityView& vw)
 			: iter{ iter }, view{ vw }
 		{ }
-		inline self_type operator++(int junk)
+		self_type operator++()
 		{
 			do {
 				++iter;
-			} while (iter != view.iterEnd && (!view.manager.hasComps<RestCompTypes...>(*iter) || !view.manager.isSpawned(*iter)));
+			} while (iter != view.iterEnd && (!view.manager.hasComps<RestComp...>(*iter) || !view.manager.isSpawned(*iter)));
 			return *this;
 		}
-		inline self_type operator++()
+		self_type operator++(int junk)
 		{
 			auto oldme = *this;
 			operator++(0);
 			return oldme;
 		}
-		inline value_type operator*()
+		value_type operator*()
 		{
 			return EntityHandle{ *iter, view.manager.getVersion(*iter) };
 		}
-		inline bool operator==(const self_type& rhs)
+		bool operator==(const self_type& rhs) const
 		{
 			return iter == rhs.iter;
 		}
-		inline bool operator!=(const self_type& rhs)
+		bool operator!=(const self_type& rhs) const
 		{
 			return iter != rhs.iter;
 		}
@@ -384,20 +393,20 @@ public:
 		MainIterT iter;
 		EntityView& view;
 	};
-	inline auto begin()
+	auto begin()
 	{
 		auto iter = compStore.begin();
-		while (iter != iterEnd && (!manager.hasComps<RestComps...>(*iter) || !manager.isSpawned(*iter))) {
+		while (iter != iterEnd && (!manager.hasComps<RestComp...>(*iter) || !manager.isSpawned(*iter))) {
 			++iter;
 		}
-		return iterator<decltype(compStore.begin()), FirstComp, RestComps...>(iter, *this);
+		return iterator(iter, *this);
 	}
-	inline auto end()
+	auto end()
 	{
-		return iterator<decltype(compStore.begin()), FirstComp, RestComps...>(iterEnd, *this);
+		return iterator(iterEnd, *this);
 	}
 private:
-	Manager manager;
+	ECMView manager;
 	decltype(manager.storage<FirstComp>())& compStore;
 	const decltype(compStore.end()) iterEnd;
 };

@@ -5,6 +5,7 @@
 #include "../engine/types/UUID.hpp"
 
 #include "../engine/entity/EntityComponentStorage.hpp"
+#include "../engine/EngineCore.hpp"
 
 struct SpawnerComp : public CompData {
 };
@@ -40,10 +41,11 @@ struct Health : public CompData {
 		curHealth{ maxHealth_ }
 	{}
 
-	Health() : maxHealth{0}, curHealth{0} {}
+	Health() : maxHealth{ 0 }, curHealth{ 0 } {}
+
 	int maxHealth;
 	int curHealth;
-	bool bUISpawned{ false };
+	UIEntityHandle healthBar = {};
 };
 
 // age component

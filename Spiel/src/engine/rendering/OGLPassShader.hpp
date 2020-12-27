@@ -21,7 +21,7 @@ struct PassShaderVertex {
 	};
 };
 
-inline constexpr GLuint PASS_SHADER_INDICES[6] = { 0,1,2,1,2,3 };
+inline constexpr GLuint PASS_SHADER_INDICES[6] = { 0, 1, 2, 1, 2, 3 };
 
 inline constexpr PassShaderVertex PASS_SHADER_VERTECIES[4] = {
 	PassShaderVertex{ idToCorner(0, { -1,-1 }, { 1,1 }), idToCorner(0, { 0, 0 }, { 1,1 }) },
@@ -45,23 +45,26 @@ public:
 	 * After calling this, the shader will become unusable.
 	 */
 	void reset();
+	void renderTexToFBO(GLuint textureGLID, GLuint fboGLID, uint32_t fboWidth, uint32_t fboHeight);
+	/**
+	 * renderes texture to the set fbo.
+	 *
+	 * \param textureGLID texture id that can be used as sampling data in fragment shader
+	 * \param fbo is the tbo to render to
+	 */
+	void renderTexToFBO(GLuint textureGLID, OGLTexFrameBuffer& fbo);
 	/**
 	 * renderes to the set fbo.
 	 *
-	 * \param textureGLID texture id that can be used as sampling data in fragment shader
-	 * \param fboGLID framebuffer object openGL identificator
-	 * \param fboWidth width of framebuffer
-	 * \param fboHeight height of framebuffer
+	 * \param fbo is the tbo to render to
 	 */
-	void renderTexToFBO(GLuint textureGLID, GLuint fboGLID, uint32_t fboWidth, uint32_t fboHeight);
-	void renderTexToFBO(GLuint textureGLID, OGLTexFrameBuffer& fbo);
 	void renderToFBO(OGLTexFrameBuffer& fbo);
 
 	void setViewPortOffset(Vec2 offset);
 
 	void bind();
 private:
-	Vec2 viewPortOffset{ 0,0 };
+	Vec2 viewPortOffset{ 0, 0 };
 
 	bool bInitialized{ false };
 	GLuint vao = -1;

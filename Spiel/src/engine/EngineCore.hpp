@@ -17,7 +17,6 @@
 #include "io/InputManager.hpp"
 #include "ui/UIManager.hpp"
 #include "rendering/Renderer.hpp"
-#include "JobManager.hpp"	// TODO REMOVE
 #include "JobSystem.hpp"
 #include "entity/EntityComponentManagerView.hpp"
 
@@ -37,47 +36,58 @@ public:
 
 	/* specify what happenes once for initialisation */
 	virtual void create() = 0;
-	/* specify what happenes every update tick */
+	/* specify what happenes once every update */
 	virtual void update(float deltaTime) = 0;
 	/* specify what happenes once for destruction */
 	virtual void destroy() = 0;
 
-	/*-- general statistics utility --*/
-/* returns time difference to last physics dispatch, O(1)*/
+	/**
+	 * returns a smoothed delta time per frame in seconds.
+	 * 
+	 * \param sampleSize of past frames to calculate an average of elapsed time per frame
+	 * \return deltatime elapsed time per frame, averaged over [sampleSize] samples
+	 */
 	static float getDeltaTime(int sampleSize = 1);
-	static float getTotalDeltaTime() { return totalDeltaTime; }
-	/* returns deltatime or the lowest allowed sim time difference, O(1)*/
+	/**
+	 * returns a smoothed delta time per frame in seconds.
+	 * The deltatime has a maximal value, that is never overstepped.
+	 * This is usefull for update loops that are sensitife to large time steps like physics.
+	 * 
+	 * \param sampleSize of past frames to calculate an average of elapsed time per frame
+	 * \return deltatime elapsed time per frame, averaged over [sampleSize] samples
+	 */
 	static float getDeltaTimeSafe(int sampleSize = 1) { return std::min(getDeltaTime(sampleSize), maxDeltaTime); }
-	/* returns the number of past iterations , O(1)*/
+	/**
+	 * \return runtime of application in seconds.
+	 */
+	static float getTotalDeltaTime() { return totalDeltaTime; }
+	/**
+	 * \return iteration of updates the applicatiuon is currently in.
+	 */
 	static uint32_t getIteration() { return iteration; }
 
-	/*-- window utility --*/
-/* returns size of window in pixel of your desktop resolution, O(1)*/
-	static Vec2 getWindowSize();
-	/* returns aspect ration width/height of the window, O(1)*/
-	static float getWindowAspectRatio();
+	// TODO REPLACE WINDOWING AND CAMERA UTILITY:
+	static Vec2 getWindowSize();											// TODO REPLACE
+	static float getWindowAspectRatio();									// TODO REPLACE
+	inline static Window window;											// TODO REPLACE OR ENHANCE
 
-	inline static JobManager jobManager{ std::thread::hardware_concurrency() };
-
-
-private:
-	inline static Window window;
-public:
-
-	/*
+	/**
 	* singleton class used for rendering in the whole program
 	*/
 	inline static Renderer renderer;
 
-	// Input
+	/**
+	* singleton class used for all user input in the application
+	*/
 	inline static InputManager in{ window };
 
-	// UI
+	/**
+	* singleton class used for all graphical user interface
+	*/
 	inline static UIContext uiContext;
 	inline static UIManager ui{ renderer, in };
 
 private:
-
 	// meta
 	inline static bool bInstantiated{ false }; // there can only be one active instance of the Engine as it is a singleton
 
@@ -92,5 +102,4 @@ private:
 	inline static float deltaTime;
 	inline static float maxDeltaTime;
 	inline static std::deque<float> deltaTimeQueue;
-
 };

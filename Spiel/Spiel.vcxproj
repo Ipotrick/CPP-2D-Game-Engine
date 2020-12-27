@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.hpp" />
+    <ClInclude Include="src\engine\allocator\ArenaAllocator.hpp" />
+    <ClInclude Include="src\engine\allocator\ArenaAllocatorPerThread.hpp" />
     <ClInclude Include="src\engine\EngineCore.hpp" />
     <ClInclude Include="src\engine\entity\EntityComponentManager.hpp" />
     <ClInclude Include="src\engine\entity\EntityComponentManagerView.hpp" />
@@ -29,7 +31,6 @@
     <ClInclude Include="src\engine\io\Input.hpp" />
     <ClInclude Include="src\engine\io\InputFocus.hpp" />
     <ClInclude Include="src\engine\io\InputManager.hpp" />
-    <ClInclude Include="src\engine\JobManager.hpp" />
     <ClInclude Include="src\engine\JobSystem.hpp" />
     <ClInclude Include="src\engine\math\basic_math.hpp" />
     <ClInclude Include="src\engine\math\Mat3.hpp" />
@@ -55,8 +56,11 @@
     <ClInclude Include="src\engine\rendering\Window.hpp" />
     <ClInclude Include="src\engine\types\BaseTypes.hpp" />
     <ClInclude Include="src\engine\types\IndexSet.hpp" />
+    <ClInclude Include="src\engine\types\ShortNames.hpp" />
     <ClInclude Include="src\engine\types\SparseBuffer.hpp" />
+    <ClInclude Include="src\engine\types\Spinlock.hpp" />
     <ClInclude Include="src\engine\types\StaticVector.hpp" />
+    <ClInclude Include="src\engine\types\TempVector.hpp" />
     <ClInclude Include="src\engine\types\Timing.hpp" />
     <ClInclude Include="src\engine\types\UUID.hpp" />
     <ClInclude Include="src\engine\ui\DrawFrame.hpp" />
@@ -106,6 +110,7 @@
     <ClInclude Include="src\game\HealthScript.hpp" />
     <ClInclude Include="src\game\LayerConstants.hpp" />
     <ClInclude Include="src\game\LoadBallTestMap.hpp" />
+    <ClInclude Include="src\game\LoadRenderTestMap.hpp" />
     <ClInclude Include="src\game\movementScript.hpp" />
     <ClInclude Include="src\game\ParticleScript.hpp" />
     <ClInclude Include="src\game\physics\CollisionConstraintSet.hpp" />
@@ -128,7 +133,6 @@
     <ClInclude Include="src\mandelbrot\LayerConstants.hpp" />
     <ClInclude Include="src\mandelbrot\MandelbrotViewer.hpp" />
     <ClInclude Include="src\mandelbrot\MandelRenderScript.hpp" />
-    <ClInclude Include="Test.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp" />
@@ -140,12 +144,13 @@
     <ClCompile Include="src\engine\math\Mat4.cpp" />
     <ClCompile Include="src\engine\rendering\OGLPassShader.cpp" />
     <ClCompile Include="src\engine\rendering\OGLShaderUtil.cpp" />
-    <ClCompile Include="src\engine\rendering\OGLTextureREnderBuffer.cpp" />
+    <ClCompile Include="src\engine\rendering\OGLTextureRenderBuffer.cpp" />
     <ClCompile Include="src\engine\rendering\Renderer.cpp" />
     <ClCompile Include="src\engine\rendering\RenderingWorker.cpp" />
     <ClCompile Include="src\engine\rendering\TextureCache.cpp" />
     <ClCompile Include="src\engine\rendering\TextureRefManager.cpp" />
     <ClCompile Include="src\engine\rendering\Window.cpp" />
+    <ClCompile Include="src\engine\types\Spinlock.cpp" />
     <ClCompile Include="src\engine\types\UUID.cpp" />
     <ClCompile Include="src\engine\ui\DrawFrame.cpp" />
     <ClCompile Include="src\engine\ui\UIAnchor.cpp" />
@@ -168,6 +173,7 @@
     <ClCompile Include="src\game\GlowTrailRScript.cpp" />
     <ClCompile Include="src\game\HealthScript.cpp" />
     <ClCompile Include="src\game\LoadBallTestMap.cpp" />
+    <ClCompile Include="src\game\LoadRenderTestMap.cpp" />
     <ClCompile Include="src\game\movementScript.cpp" />
     <ClCompile Include="src\game\ParticleScript.cpp" />
     <ClCompile Include="src\game\physics\CollisionConstraintSet.cpp" />
@@ -187,7 +193,15 @@
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="src\mandelbrot\Mandel.frag" />
+    <None Include="shader\BloomFinderShader.frag" />
+    <None Include="shader\BloomShader.frag" />
+    <None Include="shader\FilterPassShader.frag" />
+    <None Include="shader\Mandel.frag" />
+    <None Include="shader\PassShader.frag" />
+    <None Include="shader\PassShader.vert" />
+    <None Include="shader\SpriteShader.frag" />
+    <None Include="shader\SpriteShader.vert" />
+    <None Include="shader\TrailShader.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -287,7 +301,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)\Libraries\stb_image;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableParallelCodeGeneration>false</EnableParallelCodeGeneration>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>

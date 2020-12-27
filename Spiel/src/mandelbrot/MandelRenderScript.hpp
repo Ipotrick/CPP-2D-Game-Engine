@@ -16,7 +16,7 @@ public:
 		auto cam = render.getCamera();
 		Mat4 vp =
 			Mat4::translate({ cam.position.x, cam.position.y, 0.0f }) *
-			Mat4::scale({ 1 / cam.frustumBend.x, 1 / cam.frustumBend.y, 1.0f }) *
+			Mat4::scale({ 1.0f / cam.frustumBend.x, 1.0f / cam.frustumBend.y, 1.0f }) *
 			Mat4::scale(1 / cam.zoom);
 
 		mandelShader.bind();

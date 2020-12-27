@@ -57,10 +57,11 @@ public:
 	}
 
 	/** 
-	* !!WARNING EXPENSIVE OPERATION!!
-	* if the entity does not have a uuid, a new one is generated and asigned
-	* \return uuid for the entity.
-	*/
+	 * !!WARNING EXPENSIVE OPERATION!!
+	 * 
+	 * if the entity does not have a uuid, a new one is generated and asigned
+	 * \return uuid for the entity.
+	 */
 	UUID identify(EntityHandle entity)
 	{
 		assertEntityManager(isHandleValid(entity));
@@ -105,7 +106,7 @@ public:
 
 protected:
 	template<typename ... T>
-	friend class SubEntityComponentManager;
+	friend class EntityComponentManagerView;
 
 	bool isIndexValid(EntityHandleIndex index) const
 	{
@@ -122,19 +123,16 @@ protected:
 	void executeDelayedSpawns();
 	void executeDestroys();
 	EntityHandleIndex findBiggestValidEntityIndex();
-	class EntitySlot {
-	public:
-		EntitySlot(bool entityExists = false)
-		{
-			valid = entityExists;
-			spawned = false;
-		}
+	struct EntitySlot {
+		EntitySlot(bool entityExists = false):
+			valid{ entityExists }
+		{ }
 
-		UUID uuid;
-		EntityHandleVersion version{ 0 };
-		bool valid{ false };
-		bool spawned{ false };
-	private:
+		UUID uuid;								// universal unique identifier
+		EntityHandleVersion version{ 0 };		// is used to make slot uniquely identifiable when reused
+		bool valid{ false };					// notes that the slot is not containing an entity
+		bool spawned{ false };					// used to temporarily disable entity from updates
+		bool queuedForDestr{ false };			// this is to prevent queueing an entity twice for destruction
 	};
 
 	std::vector<EntitySlot> entitySlots;

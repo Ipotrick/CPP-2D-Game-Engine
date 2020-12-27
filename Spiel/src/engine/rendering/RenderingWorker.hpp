@@ -36,15 +36,15 @@ struct SpriteShaderModel {
 	union {
 		struct {
 			Vec4 color;
-			Vec2 position;
+			Vec4 position;
 			Vec2 rotation;
 			Vec2 scale;
 			GLint texId;
 			GLint isCircle;
 			GLint renderSpace;
-			uint32_t p0;
-			uint32_t p1;
-			uint32_t p2;
+			uint32_t p0;		// padding for 16 byte alignment
+			//uint32_t p1;		// padding for 16 byte alignment
+			//uint32_t p2;		// padding for 16 byte alignment
 		};
 		float data[FLOAT_SIZE];
 	};
@@ -87,24 +87,12 @@ public:
 	 * The following functions are the api for RenderingScripts:
 	 */
 
-	OGLTexFrameBuffer& getPrevLayerTFBO()
-	{
-		return prevRenderedLayerTFBO;
-	}
-
-	OGLTexFrameBuffer& getThisLayerTFBO()
-	{
-		return lastRenderedLayerTFBO;
-	}
-
 	OGLTexFrameBuffer& getMainTFBO()
 	{
 		return mainTFBO;
 	}
 
 	Camera getCamera() { return data->renderBuffer->camera; }
-
-	void clearFBO(GLuint fbo);
 
 	float getSuperSamplingFactor() const { return this->supersamplingFactor; }
 
@@ -123,12 +111,10 @@ private:
 	bool waitForFrontend();
 
 	// sprite rendering functions:
-	size_t drawBatch(std::vector<Drawable>& drawables, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix, size_t startIndex);
+	size_t drawBatch(std::vector<Sprite>& drawables, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix, size_t startIndex);
 	void drawLayer(RenderLayer& layer, Mat4 const& viewProjectionMatrix, Mat4 const& pixelProjectionMatrix);
-	void generateVertices(Drawable const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, SpriteShaderVertex* bufferPtr);
+	void generateVertices(Sprite const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, SpriteShaderVertex* bufferPtr);
 	void bindTexture(GLuint texID, int slot = 0);
-
-	void initializeFBOs();
 
 	// script managemenet functions:
 	void newScriptsOnInitialize();
@@ -136,6 +122,8 @@ private:
 
 	// initialisation code:
 	void initializeSpriteShader();
+
+	void clearMainFBO();
 private:
 
 	uint32_t lastWindowWidth{ 0 };
@@ -156,19 +144,9 @@ private:
 
 	// [T]exture based [F]rame [B]uffer [O]bject s:
 	OGLTexFrameBuffer mainTFBO;
-	/**
-	 * Every layer draw is rendered to this tfbo.
-	 * When the layer has a render script it will be available in the script,
-	 * otherwise it will be rendered into the main tfbo
-	 */
-	OGLTexFrameBuffer lastRenderedLayerTFBO;
-	/**
-	 * The tfbo of the layer that was rendered before the current/last one.
-	 */
-	OGLTexFrameBuffer prevRenderedLayerTFBO; 
 
 	// sprite shader:
-	static constexpr size_t MAX_RECT_COUNT{ 2048 };	// max Rectangle Count
+	static constexpr size_t MAX_RECT_COUNT{ 1024 };	// max Rectangle Count
 	static constexpr size_t MAX_VERTEX_COUNT{ MAX_RECT_COUNT * 4 };
 	static constexpr size_t MAX_INDEX_COUNT{ MAX_RECT_COUNT * 6 };
 	GLuint spriteShaderVBO = -1;
@@ -176,9 +154,9 @@ private:
 	float* spriteShaderVBORaw{ nullptr };
 	uint32_t* indicesRaw{ nullptr };
 	inline static const int MODEL_SSBO_BINDING = 2;
-	GLuint modelSSBO;
+	GLuint modelSSBO = -1;
 	SpriteShaderModel* modelSSBORaw;
-	GLuint modelUniformShaderBlockIndex;
+	GLuint modelUniformShaderBlockIndex = -1;
 	int nextModelIndex{ 0 };
 	GLuint spriteShaderProgram;
 	std::string const SPRITE_SHADER_VERTEX_PATH = "shader/SpriteShader.vert";

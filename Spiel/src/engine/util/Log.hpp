@@ -3,8 +3,11 @@
 #include <chrono>
 #include <iostream>
 #include <iomanip>
+#include <concepts>
 
 #include <sstream>
+
+#include "../types/Timing.hpp"
 
 namespace Monke {
 	inline static const std::chrono::time_point STARTING_TIME_POINT{ std::chrono::high_resolution_clock::now() };
@@ -45,7 +48,7 @@ namespace Monke {
 		auto str = ss.str();
 
 		std::vector<std::string> paramStr;
-		(paramStr.push_back(std::to_string(args)), ...);
+		(paramStr.push_back( std::to_string(args) ), ...);
 
 
 		while (true) {

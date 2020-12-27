@@ -120,7 +120,7 @@ constexpr std::pair<float, float> iToFactor(int i)
 }
 
 void Quadtree::broadInsert(
-	std::vector<EntityHandleIndex>&& entities, 
+	std::vector<uint32_t>&& entities,
 	const std::vector<Vec2>& aabbs, 
 	const uint32_t thisID, 
 	const Vec2 thisPos, 
@@ -140,16 +140,16 @@ void Quadtree::broadInsert(
 		}
 
 		std::array entityLists{
-			std::vector<EntityHandleIndex>(),
-			std::vector<EntityHandleIndex>(),
-			std::vector<EntityHandleIndex>(),
-			std::vector<EntityHandleIndex>()
+			std::vector<uint32_t>(),
+			std::vector<uint32_t>(),
+			std::vector<uint32_t>(),
+			std::vector<uint32_t>()
 		};
 		auto& ul = entityLists[0];
 		auto& ur = entityLists[1];
 		auto& dl = entityLists[2];
 		auto& dr = entityLists[3];
-		size_t thirdSize = entities.size() / 3;
+		size_t thirdSize = entities.size() / 2;
 		ul.reserve(thirdSize);
 		ur.reserve(thirdSize);
 		dl.reserve(thirdSize);
@@ -175,13 +175,13 @@ void Quadtree::broadInsert(
 			const auto yFactor = tuple.second;
 		
 			if (entityLists[i].size() < MAX_ENTITIES_PER_JOB && tags.size() < MAX_JOBS) {
-				class InsertJob : public JobSystem::Job {
+				class InsertJob : public IJob {
 				public:
 					InsertJob(
 						Quadtree& qtree,
 						std::vector<Vec2> const& aabbs,
 						uint32_t thisID,
-						std::vector<EntityHandleIndex>&& entities,
+						std::vector<uint32_t>&& entities,
 						int i,
 						float xFactor,
 						float yFactor,
@@ -218,7 +218,7 @@ void Quadtree::broadInsert(
 					Quadtree& qtree;
 					std::vector<Vec2> const& aabbs;
 					uint32_t thisID;
-					std::vector<EntityHandleIndex> entities;
+					std::vector<uint32_t> entities;
 					int i;
 					float xFactor;
 					float yFactor;
@@ -257,7 +257,7 @@ void Quadtree::broadInsert(
 
 void Quadtree::broadInsert(const std::vector<EntityHandleIndex>& entities, const std::vector<Vec2>& aabbs)
 {
-	std::vector<EntityHandleIndex> ul, ur, dl, dr;
+	std::vector<uint32_t> ul, ur, dl, dr;
 	ul.reserve(entities.size() / 3);
 	ur.reserve(entities.size() / 3);
 	dl.reserve(entities.size() / 3);
@@ -370,7 +370,7 @@ void Quadtree::querry(std::vector<EntityHandleIndex>& rVec, std::vector<QtreeNod
 	//}
 }
 
-void Quadtree::querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Drawable>& draw, const int depth) const 
+void Quadtree::querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t thisID, const Vec2 thisPos, const Vec2 thisSize, std::vector<Sprite>& draw, const int depth) const 
 {
 	auto& node = nodes.get(thisID);
 	if (node.hasSubTrees())
@@ -391,12 +391,12 @@ void Quadtree::querryDebug(const Vec2 qryPos, const Vec2 qrySize, const uint32_t
 		}
 	}
 	else {
-		draw.push_back(Drawable(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0)));
-		draw.push_back(Drawable(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0)));
+		draw.push_back(makeSprite(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0)));
+		draw.push_back(makeSprite(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), Vec4(1, 1, 1, 1), Form::Rectangle, RotaVec2(0)));
 	}
 }
 
-void Quadtree::querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const  Vec2 thisSize, std::vector<Drawable>& draw, const Vec4 color, const int depth) const 
+void Quadtree::querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const  Vec2 thisSize, std::vector<Sprite>& draw, const Vec4 color, const int depth) const 
 {
 	auto& node = nodes.get(thisID);
 	if (node.hasSubTrees()) {
@@ -406,8 +406,8 @@ void Quadtree::querryDebugAll(const uint32_t thisID, const Vec2 thisPos, const  
 		querryDebugAll(node.firstSubTree + 3, thisPos + Vec2(thisSize.x, thisSize.y) * 0.25f, thisSize * 0.5f, draw, color, depth + 1);
 	}
 	else {
-		draw.push_back(Drawable(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0)));
-		draw.push_back(Drawable(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), color, Form::Rectangle, RotaVec2(0)));
+		draw.push_back(makeSprite(0, thisPos, 0.1f + 0.01f * depth, thisSize, Vec4(0, 0, 0, 1), Form::Rectangle, RotaVec2(0)));
+		draw.push_back(makeSprite(0, thisPos, 0.11f + 0.01f * depth, thisSize - Vec2(0.02f, 0.02f), color, Form::Rectangle, RotaVec2(0)));
 	}
 }
 

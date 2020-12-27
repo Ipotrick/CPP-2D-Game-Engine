@@ -1,5 +1,6 @@
 #include "CollisionSystem.hpp"
 
+#include "../../engine/types/TempVector.hpp"
 
 CollisionSystem::CollisionSystem(CollisionSECM secm, uint32_t qtreeCapacity) :
 	secm{ secm },
@@ -37,9 +38,9 @@ const CollisionSystem::CollisionsView CollisionSystem::collisions_view(EntityHan
 	}
 }
 
-const std::vector<Drawable>& CollisionSystem::getDebugDrawables() const
+const std::vector<Sprite>& CollisionSystem::getDebugSprites() const
 {
-	return debugDrawables;
+	return debugSprites;
 }
 
 void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Transform const& b, Collider const& c) const
@@ -147,7 +148,7 @@ void CollisionSystem::cleanBuffers(CollisionSECM secm)
 		}
 		vector.clear();
 	};
-	cleanAndShrink(debugDrawables);
+	cleanAndShrink(debugSprites);
 	cleanAndShrink(particleEntities);
 	cleanAndShrink(sensorEntities);
 	cleanAndShrink(dynamicSolidEntities);
@@ -177,7 +178,7 @@ void CollisionSystem::cleanBuffers(CollisionSECM secm)
 
 void CollisionSystem::collisionDetection(CollisionSECM secm)
 {
-	class CollJob : public JobSystem::Job {
+	class CollJob : public IJob {
 	public:
 
 		CollJob(

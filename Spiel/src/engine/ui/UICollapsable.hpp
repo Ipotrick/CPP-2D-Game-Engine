@@ -46,7 +46,7 @@ public:
 		}
 	}
 
-	virtual void draw(std::vector<Drawable>& buffer, UIContext context) override;
+	virtual void draw(std::vector<Sprite>& buffer, UIContext context) override;
 
 	void setHeadSize(const Vec2 size) { 
 		this->headSize = size;

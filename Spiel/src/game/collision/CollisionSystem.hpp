@@ -13,8 +13,6 @@
 #include "CacheAABBJob.hpp"
 #include "../../engine/types/StaticVector.hpp"
 
-#define DEBUG_QTREE_FINDPLAYER
-
 class CollisionSystem {
 	friend class PhysicsSystem;
 	friend class PhysicsSystem2;
@@ -75,24 +73,24 @@ public:
 		return collisions_view(entity.index);
 	}
 	const CollisionsView collisions_view(EntityHandleIndex entity);
-	const std::vector<Drawable>& getDebugDrawables() const;
+	const std::vector<Sprite>& getDebugSprites() const;
 	void checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Transform const& b, Collider const& c) const;
 
-	void disableColliderDetection(uint8_t qtreeIgnoreFlags)
+	void disableColliderDetection(uint8_t colliderFlags)
 	{
-		colliderDetectionEnableFlags &= ~qtreeIgnoreFlags;
+		colliderDetectionEnableFlags &= ~colliderFlags;
 	}
 
-	void enableColliderDetection(uint8_t qtreeEnableFrags)
+	void enableColliderDetection(uint8_t colliderFlags)
 	{
-		colliderDetectionEnableFlags |= qtreeEnableFrags;
+		colliderDetectionEnableFlags |= colliderFlags;
 	}
 private:
 	void prepare(CollisionSECM secm);
 	void cleanBuffers(CollisionSECM secm);
 	void collisionDetection(CollisionSECM secm);
 
-	std::vector<Drawable> debugDrawables;
+	std::vector<Sprite> debugSprites;
 
 	CollisionSECM secm;
 	// constants:

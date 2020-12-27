@@ -27,15 +27,17 @@ public:
 
 	virtual void onUpdate(RenderingWorker& render, RenderLayer& layer) override
 	{
-
-		auto mainTFBO = render.getMainTFBO();
-		auto layerTFBO = render.getThisLayerTFBO();
+		auto& mainTFBO = render.getMainTFBO();
 		float ssf = render.getSuperSamplingFactor();
 
-		float wWidth = render.window->width * ssf;
-		float wHeight = render.window->height * ssf;
-		float bWidth =  render.window->width * bloomBufferSizeFactor;
-		float bHeight = render.window->height * bloomBufferSizeFactor;
+		auto [winWidth, winHeight] = render.window->getSize();
+
+		float wWidth = winWidth * ssf;
+		float wHeight = winHeight * ssf;
+		float bWidth = winWidth * bloomBufferSizeFactor;
+		float bHeight = winHeight * bloomBufferSizeFactor;
+
+		glDepthFunc((GLuint)DepthTest::Ignore);
 
 		if (render.didWindowSizeChange()) {
 			bloomFBO1.clear();

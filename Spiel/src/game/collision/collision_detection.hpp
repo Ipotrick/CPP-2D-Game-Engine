@@ -187,7 +187,7 @@ inline void generateCollisionInfos2(
 						for (auto& cc : colliderColl.extraColliders) {
 							const CollidableAdapter collAdapter = CollidableAdapter(baseColl.position + rotate(cc.relativePos, baseColl.rotaVec), cc.size, cc.form, baseColl.rotaVec * cc.relativeRota);
 							testForCollision(collAdapter, otherAdapter);
-							for (auto oc : colliderOther.extraColliders) {
+							for (auto& oc : colliderOther.extraColliders) {
 								CollidableAdapter otherAdapter(baseOther.position + rotate(oc.relativePos, baseOther.rotaVec), oc.size, oc.form, baseOther.rotaVec * oc.relativeRota);
 								testForCollision(collAdapter, otherAdapter);
 							}
