@@ -1,14 +1,13 @@
 #pragma once
 
-#include "OGLShaderUtil.hpp"
-#include "OGLTextureRenderBuffer.hpp"
+#include "OpenGLShaderUtil.hpp"
+#include "OpenGLTextureRenderBuffer.hpp"
 
 struct PassShaderVertex {
 	static int constexpr FLOAT_SIZE{ 4 };
 	constexpr PassShaderVertex() :
 		data{ 0 }
-	{
-	}
+	{ }
 	constexpr PassShaderVertex(Vec2 corner, Vec2 uv) :
 		cornerPos{ corner }, samplerCoord{ uv }
 	{ }
@@ -30,7 +29,7 @@ inline constexpr PassShaderVertex PASS_SHADER_VERTECIES[4] = {
 	PassShaderVertex{ idToCorner(3, { -1,-1 }, { 1,1 }), idToCorner(3, { 0, 0 }, { 1,1 }) },
 };
 
-class OGLPassShader {
+class OpenGLPassShader {
 public:
 	/**
 	 * creates needed openGL ressources.
@@ -52,13 +51,13 @@ public:
 	 * \param textureGLID texture id that can be used as sampling data in fragment shader
 	 * \param fbo is the tbo to render to
 	 */
-	void renderTexToFBO(GLuint textureGLID, OGLTexFrameBuffer& fbo);
+	void renderTexToFBO(GLuint textureGLID, OpenGLFrameBuffer& fbo);
 	/**
 	 * renderes to the set fbo.
 	 *
 	 * \param fbo is the tbo to render to
 	 */
-	void renderToFBO(OGLTexFrameBuffer& fbo);
+	void renderToFBO(OpenGLFrameBuffer& fbo);
 
 	void setViewPortOffset(Vec2 offset);
 

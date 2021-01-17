@@ -2,6 +2,7 @@
 
 #include <string>
 #include <mutex>
+#include <cassert>
 
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -9,73 +10,100 @@
 
 class Window {
 public:
-
 	~Window();
+
+	bool operator=(const Window& window) const = delete;
 
 	bool open(std::string name = "Default", u32 width = 1, u32 height = 1);
 
 	void close();
 
-	bool isOpen() const { return static_cast<bool>(glfwWindow); }
-
-	/**
-	 * fetches real size of the window from os.
-	 */
-	void updateSize()
-	{
-		glfwGetWindowSize(glfwWindow, (int*)&width, (int*)&height);
+	bool isOpen() const {
+		std::unique_lock l(mut);
+		return static_cast<bool>(glfwWindow);
 	}
+
+	void update();
 	
 	std::pair<u32, u32> getSize() const
 	{
+		std::unique_lock l(mut);
 		return { width, height };
 	}
 
-	u32 getWidth() const { return width; }
+	u32 getWidth() const {
+		std::unique_lock l(mut);
+		return width;
+	}
 
-	u32 getHeight() const { return height; }
+	u32 getHeight() const {
+		std::unique_lock l(mut);
+		return height;
+	}
 
 	void setSize(u32 width, u32 height)
 	{
+		std::unique_lock l(mut);
+		this->bSetSize = true;
 		this->width = width;
 		this->height = height;
 	}
 
 	void setWidth(u32 width)
 	{
+		std::unique_lock l(mut);
+		this->bSetSize = true;
 		this->width = width;
 	}
 
 	void setHeight(u32 height)
 	{
+		std::unique_lock l(mut);
+		this->bSetSize = true;
 		this->height = height;
 	}
 
 	std::string const& getName() const
 	{
+		std::unique_lock l(mut);
 		return name;
 	}
 
 	void setName(std::string name)
 	{
+		std::unique_lock l(mut);
 		this->name = std::move(name);
 		glfwSetWindowTitle(glfwWindow, name.c_str());
 	}
 
-	/**
-	 * makes the rendering context current on the calling thread.
-	 * should be guarded by a lock of the renderingContextMut.
-	 */
-	void makeContextCurrent()
+	void takeRenderingContext()
 	{
-		glfwMakeContextCurrent(glfwWindow);							// when we have two renderers we have to make sure that we actually have the context of the window
+		std::unique_lock lock(mut);
+		assert(!bRenderContextLocked);
+		glfwMakeContextCurrent(glfwWindow);
 		if (glewInit() != GLEW_OK) {
 			glfwTerminate();
 		}
+		bRenderContextLocked = true;
+	}
+
+	void releaseRenderingContext()
+	{
+		std::unique_lock l(mut);
+		assert(bRenderContextLocked);
+		glfwMakeContextCurrent(nullptr);
+		bRenderContextLocked = false;
+	}
+	
+	bool isRenderContextLocked() const
+	{
+		std::unique_lock l(mut);
+		return bRenderContextLocked; // i don't think this is threadsave to use to lock the render context:/
 	}
 
 	bool isFocused() const
 	{
+		std::unique_lock l(mut);
 		return glfwGetWindowAttrib(glfwWindow, GLFW_FOCUSED);
 	}
 
@@ -84,6 +112,7 @@ public:
 	 */
 	bool shouldClose() const
 	{
+		std::unique_lock l(mut);
 		return glfwWindowShouldClose(glfwWindow);
 	}
 
@@ -95,11 +124,14 @@ public:
 		glfwSwapBuffers(glfwWindow);
 	}
 
-	std::mutex mut{};
-	std::mutex renderingContextMut{};
+	GLFWwindow* getNativeHandle() { return glfwWindow; }
+
 private:
+	mutable std::mutex mut{};
 	friend class InputManager;
 
+	bool bRenderContextLocked{ false };
+	bool bSetSize{ false };
 	u32 height{ 100 };
 	u32 width{ 100 };
 	std::string name;

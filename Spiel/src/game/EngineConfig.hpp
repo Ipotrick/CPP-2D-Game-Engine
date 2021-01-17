@@ -15,7 +15,7 @@
 	ComponentStoragePagedIndexing<CollisionsToken>,\
 	ComponentStoragePagedIndexing<Movement>,\
 	ComponentStoragePagedIndexing<PhysicsBody>,\
-	ComponentStoragePagedSet<TextureRef2>,\
+	ComponentStoragePagedSet<BigTextureRef>,\
 	ComponentStoragePagedSet<LinearEffector>,\
 	ComponentStoragePagedSet<FrictionEffector>,\
 	ComponentStoragePagedSet<Health>,\

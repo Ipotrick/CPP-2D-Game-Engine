@@ -4,7 +4,7 @@
 #include "Layer.hpp"
 
 struct RenderBuffer {
-	std::vector<TextureRef2> textureLoadingQueue;
+	std::vector<BigTextureRef> textureLoadingQueue;
 	std::vector<std::unique_ptr<RenderScript>> scriptDestructQueue;
 	bool resetTextureCache{ false };
 	Camera camera;

@@ -334,9 +334,5 @@ void PhysicsSystem2::execute(CollisionSECM world, PhysicsUniforms const& uniform
 	prepareConstraints(world, deltaTime);
 	applyImpulses(world);
 	applyForcefields(world, uniform, deltaTime);
-	//{
-	//	LogTimer t(std::cout, "search islands: ");
-	//	findIslands(world, collSys);
-	//}
-	drawAllCollisionConstraints();
+	//drawAllCollisionConstraints();
 }

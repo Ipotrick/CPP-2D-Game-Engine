@@ -231,23 +231,34 @@ public:
 	RotaVec2(float sin, float cos) : sin{ sin }, cos{ cos } {}
 	explicit RotaVec2(float angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
 
-	inline RotaVec2 operator -()
+	RotaVec2 operator -()
 	{
-		return RotaVec2(-sin, cos);
+		return RotaVec2(cos , -sin);
 	}
 
-	inline bool operator==(RotaVec2 v)
+	bool operator==(RotaVec2 v)
 	{
 		return this->cos == v.cos && this->sin == v.sin;
 	}
 
-	Vec2 toVec2() const
+	/**
+	 * \return unit length vector that is rotated by the rotavec, where y=1 up is the 0 rotation
+	 */
+	Vec2 toUnitX0() const
 	{
-		return { sin, cos };
+		return { cos, sin };
+	}
+
+	/**
+	 * \return unit length vector that is rotated by the rotavec, where x=1 up is the 0 rotation
+	 */
+	Vec2 toUnitY0() const
+	{
+		return { -sin, cos };
 	}
 public:
-	float sin{ 0.0f };
 	float cos{ 1.0f };
+	float sin{ 0.0f };
 };
 
 inline RotaVec2 operator*(RotaVec2 a, RotaVec2 b)

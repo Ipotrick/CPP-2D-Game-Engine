@@ -16,6 +16,7 @@
 class CollisionSystem {
 	friend class PhysicsSystem;
 	friend class PhysicsSystem2;
+public:
 	class CollisionsView {
 	public:
 		explicit CollisionsView(const size_t begin, const size_t end, std::vector<CollisionInfo>& collInfos)
@@ -46,7 +47,7 @@ class CollisionSystem {
 				throw new std::exception("error: index out of bounds");
 			}
 		}
-		const CollisionInfo& at(size_t index) const 
+		const CollisionInfo& at(size_t index) const
 		{
 			if (index >= beginIndex && index < endIndex) {
 				return collInfos.at(beginIndex + index);
@@ -64,16 +65,22 @@ class CollisionSystem {
 		const size_t endIndex;
 		std::vector<CollisionInfo>& collInfos;
 	};
-public:
+
 	CollisionSystem(CollisionSECM secm, uint32_t qtreeCapacity = 6);
+
 	void execute(CollisionSECM secm, float deltaTime);
+
 	std::vector<CollisionInfo>& getCollisions();
+
 	const CollisionsView collisions_view(EntityHandle entity)
 	{
 		return collisions_view(entity.index);
 	}
+
 	const CollisionsView collisions_view(EntityHandleIndex entity);
+
 	const std::vector<Sprite>& getDebugSprites() const;
+
 	void checkForCollisions(std::vector<CollisionInfo>& collisions, uint8_t colliderType, Transform const& b, Collider const& c) const;
 
 	void disableColliderDetection(uint8_t colliderFlags)
@@ -84,6 +91,11 @@ public:
 	void enableColliderDetection(uint8_t colliderFlags)
 	{
 		colliderDetectionEnableFlags |= colliderFlags;
+	}
+
+	size_t collisionCount() const
+	{
+		return collisionInfos.size();
 	}
 private:
 	void prepare(CollisionSECM secm);

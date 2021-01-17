@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -28,6 +28,16 @@
     <ClInclude Include="src\engine\entity\EntityComponentStorage.hpp" />
     <ClInclude Include="src\engine\entity\EntityManager.hpp" />
     <ClInclude Include="src\engine\entity\EntityTypes.hpp" />
+    <ClInclude Include="src\engine\gui\base\GUIDestroyElements.hpp" />
+    <ClInclude Include="src\engine\gui\base\GUIDrawContext.hpp" />
+    <ClInclude Include="src\engine\gui\base\GUIDrawElements.hpp" />
+    <ClInclude Include="src\engine\gui\base\GUIDrawUtil.hpp" />
+    <ClInclude Include="src\engine\gui\base\GUIElement.hpp" />
+    <ClInclude Include="src\engine\gui\base\GUIRootElement.hpp" />
+    <ClInclude Include="src\engine\gui\components\GUIBox.hpp" />
+    <ClInclude Include="src\engine\gui\components\GUIColumn.hpp" />
+    <ClInclude Include="src\engine\gui\components\GUIContainerElement.hpp" />
+    <ClInclude Include="src\engine\gui\GUIManager.hpp" />
     <ClInclude Include="src\engine\io\Input.hpp" />
     <ClInclude Include="src\engine\io\InputFocus.hpp" />
     <ClInclude Include="src\engine\io\InputManager.hpp" />
@@ -42,17 +52,22 @@
     <ClInclude Include="src\engine\math\vector_math.hpp" />
     <ClInclude Include="src\engine\rendering\Camera.hpp" />
     <ClInclude Include="src\engine\rendering\Layer.hpp" />
-    <ClInclude Include="src\engine\rendering\OGLPassShader.hpp" />
-    <ClInclude Include="src\engine\rendering\OGLShaderUtil.hpp" />
-    <ClInclude Include="src\engine\rendering\OGLTextureRenderBuffer.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLPassShader.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLShader.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLShaderStorage.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLShaderUtil.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLTexture.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLTextureRenderBuffer.hpp" />
     <ClInclude Include="src\engine\rendering\RenderBuffer.hpp" />
     <ClInclude Include="src\engine\rendering\Renderer.hpp" />
     <ClInclude Include="src\engine\rendering\RenderingWorker.hpp" />
     <ClInclude Include="src\engine\rendering\RenderScript.hpp" />
     <ClInclude Include="src\engine\rendering\RenderSpace.hpp" />
     <ClInclude Include="src\engine\rendering\RenderTypes.hpp" />
+    <ClInclude Include="src\engine\rendering\SpriteShader.hpp" />
     <ClInclude Include="src\engine\rendering\TextureCache.hpp" />
     <ClInclude Include="src\engine\rendering\TextureRefManager.hpp" />
+    <ClInclude Include="src\engine\rendering\TextureSamplerManager.hpp" />
     <ClInclude Include="src\engine\rendering\Window.hpp" />
     <ClInclude Include="src\engine\types\BaseTypes.hpp" />
     <ClInclude Include="src\engine\types\IndexSet.hpp" />
@@ -106,7 +121,6 @@
     <ClInclude Include="src\game\GameComponents.hpp" />
     <ClInclude Include="src\game\GameSystemInclude.h" />
     <ClInclude Include="src\game\GameSystemUnifroms.hpp" />
-    <ClInclude Include="src\game\GlowTrailRScript.hpp" />
     <ClInclude Include="src\game\HealthScript.hpp" />
     <ClInclude Include="src\game\LayerConstants.hpp" />
     <ClInclude Include="src\game\LoadBallTestMap.hpp" />
@@ -127,8 +141,8 @@
     <ClInclude Include="src\game\serialization\YAMLSerializer.hpp" />
     <ClInclude Include="src\game\SuckerScript.hpp" />
     <ClInclude Include="src\game\TesterScript.hpp" />
-    <ClInclude Include="src\game\transformScript.hpp" />
     <ClInclude Include="src\game\World.hpp" />
+    <ClInclude Include="src\guitest\GUITest.hpp" />
     <ClInclude Include="src\mandelbrot\EngineConfig.hpp" />
     <ClInclude Include="src\mandelbrot\LayerConstants.hpp" />
     <ClInclude Include="src\mandelbrot\MandelbrotViewer.hpp" />
@@ -138,17 +152,21 @@
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp" />
     <ClCompile Include="src\engine\EngineCore.cpp" />
     <ClCompile Include="src\engine\entity\EntityManager.cpp" />
+    <ClCompile Include="src\engine\gui\GUIManager.cpp" />
     <ClCompile Include="src\engine\io\InputManager.cpp" />
     <ClCompile Include="src\engine\JobSystem.cpp" />
     <ClCompile Include="src\engine\math\Mat3.cpp" />
     <ClCompile Include="src\engine\math\Mat4.cpp" />
-    <ClCompile Include="src\engine\rendering\OGLPassShader.cpp" />
-    <ClCompile Include="src\engine\rendering\OGLShaderUtil.cpp" />
-    <ClCompile Include="src\engine\rendering\OGLTextureRenderBuffer.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLPassShader.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLShader.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLShaderUtil.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLTexture.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLTextureRenderBuffer.cpp" />
     <ClCompile Include="src\engine\rendering\Renderer.cpp" />
     <ClCompile Include="src\engine\rendering\RenderingWorker.cpp" />
     <ClCompile Include="src\engine\rendering\TextureCache.cpp" />
     <ClCompile Include="src\engine\rendering\TextureRefManager.cpp" />
+    <ClCompile Include="src\engine\rendering\TextureSamplerManager.cpp" />
     <ClCompile Include="src\engine\rendering\Window.cpp" />
     <ClCompile Include="src\engine\types\Spinlock.cpp" />
     <ClCompile Include="src\engine\types\UUID.cpp" />
@@ -170,7 +188,6 @@
     <ClCompile Include="src\game\collision\QuadTree.cpp" />
     <ClCompile Include="src\game\drawScript.cpp" />
     <ClCompile Include="src\game\Game.cpp" />
-    <ClCompile Include="src\game\GlowTrailRScript.cpp" />
     <ClCompile Include="src\game\HealthScript.cpp" />
     <ClCompile Include="src\game\LoadBallTestMap.cpp" />
     <ClCompile Include="src\game\LoadRenderTestMap.cpp" />
@@ -188,7 +205,6 @@
     <ClCompile Include="src\game\serialization\YAMLSerializer.cpp" />
     <ClCompile Include="src\game\SuckerScript.cpp" />
     <ClCompile Include="src\game\TesterScript.cpp" />
-    <ClCompile Include="src\game\transformScript.cpp" />
     <ClCompile Include="src\game\World.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>

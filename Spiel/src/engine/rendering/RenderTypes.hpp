@@ -20,15 +20,14 @@ using TextureString = boost::static_string<32>;
 
 using TextureId = int;
 
-class TextureInfo {
-public:
-	TextureInfo() = default;
+struct TextureDiscriptor {
+	TextureDiscriptor() = default;
 
-	TextureInfo(const TextureString& name, GLint minFilter = GL_NEAREST, GLint magFilter = GL_NEAREST)
+	TextureDiscriptor(const TextureString& name, GLint minFilter = GL_NEAREST, GLint magFilter = GL_NEAREST)
 		:name{ name }, minFilter{ minFilter }, magFilter{ magFilter }
 	{ }
 
-	bool operator==(const TextureInfo& other) const
+	bool operator==(const TextureDiscriptor& other) const
 	{
 		return this->name == other.name 
 			&& this->minFilter == other.minFilter
@@ -38,34 +37,17 @@ public:
 	TextureString name;
 	GLint minFilter{ GL_NEAREST };
 	GLint magFilter{ GL_NEAREST };
-private:
 };
 
-struct Texture {
-	Texture() = default;
-	Texture(GLuint id, int width_, int height_, int bitsPerPixel_, TextureInfo info)
-		:openglTexID{ id },
-		width{ width_ },
-		height{ height_ },
-		channelPerPixel{ bitsPerPixel_ },
-		info{ info }
-	{}
-
-	GLuint openglTexID{ 0 };
-	int width{ -1 };
-	int height{ -1 };
-	int channelPerPixel{ -1 };
-	bool good{ true };
-	TextureInfo info;
-};
-
-struct SmallTextureRef {
-	SmallTextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
+struct TextureRef {
+	TextureRef(int textureId = -1, Vec2 minPos_ = Vec2{ 0.001f, 0.001f }, Vec2 maxPos_ = Vec2{ 0.999f, 0.999f }) :
 		minPos{ minPos_ },
 		maxPos{ maxPos_ },
 		id{ textureId }
 	{
 	}
+
+	bool valid() const { return id != -1; }
 
 	Vec2 minPos{ 0.0f, 0.0f };
 	Vec2 maxPos{ 1.0f, 1.0f };
@@ -79,13 +61,13 @@ struct SmallTextureRef {
 *	If differenct filename or setting is desired, request a new texture ref from the renderer.
 *	The min and max pos can be modified.
 */
-class TextureRef2 : private SmallTextureRef {
+class BigTextureRef : private TextureRef {
 public:
 	const TextureString& getFilename() const
 	{
 		return info.name;
 	}
-	const TextureInfo& getInfo() const
+	const TextureDiscriptor& getInfo() const
 	{
 		return info;
 	}
@@ -93,39 +75,39 @@ public:
 	{
 		return this->id;
 	}
-	using SmallTextureRef::minPos;
-	using SmallTextureRef::maxPos;
+	using TextureRef::minPos;
+	using TextureRef::maxPos;
 
-	TextureRef2()
-		:info{"default"}, SmallTextureRef{}
+	BigTextureRef()
+		:info{"default"}, TextureRef{}
 	{}
 
-	TextureRef2(const TextureString& filename, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
-		:info{ filename }, SmallTextureRef{ -1, minPos, maxPos }
+	BigTextureRef(const TextureString& filename, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
+		:info{ filename }, TextureRef{ -1, minPos, maxPos }
 	{}
 
-	TextureRef2(TextureInfo info, SmallTextureRef ref)
-		:info{ info }, SmallTextureRef{ ref }
+	BigTextureRef(TextureDiscriptor info, TextureRef ref)
+		:info{ info }, TextureRef{ ref }
 	{}
 
 	bool good() const { return id != -1;  }
 
-	SmallTextureRef makeSmall() const
+	TextureRef makeSmall() const
 	{
-		return SmallTextureRef{ id, minPos, maxPos };
+		return TextureRef{ id, minPos, maxPos };
 	}
 protected:
 	friend class TextureRefManager;
-	TextureRef2(const TextureString& filename, TextureId id, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
-		:info{ filename }, SmallTextureRef{id, minPos, maxPos}
+	BigTextureRef(const TextureString& filename, TextureId id, Vec2 minPos = { 0.0f, 0.0f }, Vec2 maxPos = { 1.0f, 1.0f })
+		:info{ filename }, TextureRef{id, minPos, maxPos}
 	{}
 
-	TextureInfo info;
+	TextureDiscriptor info;
 };
 
-inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
+inline TextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
 {
-	SmallTextureRef texRef;
+	TextureRef texRef;
 	texRef.id = atlasId;
 	texRef.minPos = startAtlasCell / atlasGridSize;
 	if (endAtlasCell == Vec2{ 0,0 }) {
@@ -137,9 +119,9 @@ inline SmallTextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const
 	return texRef;
 }
 
-inline SmallTextureRef makeAsciiRef(int atlasTextureId, char c)
+inline TextureRef makeAsciiRef(int atlasTextureId, char c)
 {
-	SmallTextureRef texRef;
+	TextureRef texRef;
 	c -= 0x20;
 	Vec2 atlasCoord{ float(c % 8), float(15 - c / 8) };
 	texRef = makeAtlasRef(atlasTextureId, Vec2(8, 16), atlasCoord);
@@ -155,7 +137,7 @@ struct Sprite {
 	/* in radiants 2pi = one rotation*/
 	RotaVec2 rotationVec;
 	Vec2 scale{ 1.0f, 1.0f };
-	std::optional<SmallTextureRef> texRef;
+	std::optional<TextureRef> texRef;
 	Form form{ Form::Rectangle };
 	RenderSpace drawMode{ RenderSpace::WindowSpace };
 
@@ -165,7 +147,17 @@ struct Sprite {
 	}
 };
 
-inline Sprite makeSprite(uint32_t id, Vec2 position, float drawingPrio, Vec2 scale, Vec4 color, Form form, RotaVec2 rotation, RenderSpace drawMode, SmallTextureRef texRef)
+inline static std::ostream& operator<<(std::ostream& os, const Sprite& sprite)
+{
+	os << "color: " << sprite.color <<
+		", position:" << sprite.position <<
+		", rotation: " << sprite.rotationVec.toUnitX0() <<
+		", scale: " << sprite.scale <<
+		", form: " << sprite.form;
+	return os;
+}
+
+inline Sprite makeSprite(uint32_t id, Vec2 position, float drawingPrio, Vec2 scale, Vec4 color, Form form, RotaVec2 rotation, RenderSpace drawMode, TextureRef texRef)
 {
 	assert(texRef.id != -1);
 	return Sprite{

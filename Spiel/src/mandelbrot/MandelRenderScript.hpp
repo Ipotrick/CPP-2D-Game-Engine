@@ -28,5 +28,5 @@ public:
 		mandelShader.reset();
 	}
 private:
-	OGLPassShader mandelShader;
+	OpenGLPassShader mandelShader;
 };

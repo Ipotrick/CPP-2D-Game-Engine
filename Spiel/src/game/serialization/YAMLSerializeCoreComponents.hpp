@@ -20,7 +20,7 @@ namespace YAML {
             }
 
             rhs.position = node["Position"].as<Vec2>();
-            rhs.rotation = node["Rotation"].as<float>();
+            rhs.rotaVec = node["RotaVec"].as<RotaVec2>();
             return true;
         }
     };
@@ -221,18 +221,18 @@ namespace YAML {
     };
 }
 
-template<> constexpr bool isYAMLSerializable<TextureInfo>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureInfo& b);
+template<> constexpr bool isYAMLSerializable<TextureDiscriptor>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureDiscriptor& b);
 namespace YAML {
     template<>
-    struct convert<TextureInfo> {
-        static Node encode(const TextureInfo& rhs)
+    struct convert<TextureDiscriptor> {
+        static Node encode(const TextureDiscriptor& rhs)
         {
             Node node;
             return node;
         }
 
-        static bool decode(const Node& node, TextureInfo& rhs)
+        static bool decode(const Node& node, TextureDiscriptor& rhs)
         {
             if (node.size() != 1) {
                 return false;
@@ -245,18 +245,18 @@ namespace YAML {
     };
 }
 
-template<> constexpr bool isYAMLSerializable<SmallTextureRef>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const SmallTextureRef& b);
+template<> constexpr bool isYAMLSerializable<TextureRef>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureRef& b);
 namespace YAML {
     template<>
-    struct convert<SmallTextureRef> {
-        static Node encode(const SmallTextureRef& rhs)
+    struct convert<TextureRef> {
+        static Node encode(const TextureRef& rhs)
         {
             Node node;
             return node;
         }
 
-        static bool decode(const Node& node, SmallTextureRef& rhs)
+        static bool decode(const Node& node, TextureRef& rhs)
         {
             if (node.size() != 2) {
                 return false;
@@ -270,26 +270,26 @@ namespace YAML {
     };
 }
 
-template<> constexpr bool isYAMLSerializable<TextureRef2>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureRef2& b);
+template<> constexpr bool isYAMLSerializable<BigTextureRef>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const BigTextureRef& b);
 namespace YAML {
     template<>
-    struct convert<TextureRef2> {
-        static Node encode(const TextureRef2& rhs)
+    struct convert<BigTextureRef> {
+        static Node encode(const BigTextureRef& rhs)
         {
             Node node;
             return node;
         }
 
-        static bool decode(const Node& node, TextureRef2& rhs)
+        static bool decode(const Node& node, BigTextureRef& rhs)
         {
             if (node.size() != 2) {
                 return false;
             }
 
-            auto info = node["info"].as<TextureInfo>();
-            auto ref = node["ref"].as<SmallTextureRef>();
-            rhs = TextureRef2(info, ref);
+            auto info = node["info"].as<TextureDiscriptor>();
+            auto ref = node["ref"].as<TextureRef>();
+            rhs = BigTextureRef(info, ref);
 
             return true;
         }

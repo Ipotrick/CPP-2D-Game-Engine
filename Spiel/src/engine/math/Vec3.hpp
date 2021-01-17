@@ -10,6 +10,8 @@ public:
     Vec3(float scalar) : x{ scalar }, y{ scalar }, z{ scalar } {}
     Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
 
+    Vec3(Vec2 xy, float z = 0.0f) : x{xy.x}, y{xy.y}, z{z} {}
+
     // openGL access func
     float const* data() const { return &x; }
 

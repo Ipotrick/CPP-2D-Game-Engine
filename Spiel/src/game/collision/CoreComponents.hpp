@@ -4,36 +4,28 @@
 #include "../../engine/entity/EntityComponentStorage.hpp"
 #include "../../engine/types/Timing.hpp"
 
-// basis component
-
-struct Transform : public CompData {
+struct Transform {
 	Transform(Vec2 pos = Vec2{ 0,0 }) :
 		position{ pos },
-		rotation{ 0 },
 		rotaVec{ 1,0 }
 	{}
 
 	Transform(Vec2 pos, float rota) :
 		position{ pos },
-		rotation{ rota },
-		rotaVec{ sinf(rotation / RAD),
-			cosf(rotation / RAD) }
+		rotaVec{ sinf(rota / RAD),
+			cosf(rota / RAD) }
 	{}
 
 	Transform(Vec2 pos, RotaVec2 rota) :
 		position{ pos },
-		rotation{ 0 },
 		rotaVec{ rota }
 	{}
 
 	Vec2 position;
 	RotaVec2 rotaVec;
-	float rotation;
 };
 
-// movement component
-
-struct Movement : public CompData {
+struct Movement {
 	Movement(Vec2 vel = { 0,0 }, float anglVel = 0.0f) :
 		velocity{ vel },
 		angleVelocity{ anglVel } 
@@ -43,10 +35,8 @@ struct Movement : public CompData {
 	float angleVelocity;
 };
 
-
 using CollisionMask = uint16_t;
 
-// collider component
 template<int Group>
 struct CollisionGroup {
 	static_assert(Group >= 0 && Group < 16);
@@ -69,7 +59,7 @@ struct CompountCollider {
 	Form form{Form::Rectangle};
 };
 
-struct Collider : public CompData {
+struct Collider {
 	Collider(Vec2 size = { 1,1 }, Form form = Form::Circle, bool particle = false) :
 		size{ size },
 		form{ form },
@@ -131,9 +121,7 @@ private:
 	uint32_t end{ 0 };
 };
 
-// solidBody component
-
-struct PhysicsBody : public CompData {
+struct PhysicsBody {
 	PhysicsBody(float elasticity, float mass, float mOI, float friction) :
 		elasticity{ elasticity },
 		mass{ mass },
@@ -154,25 +142,23 @@ struct PhysicsBody : public CompData {
 	float friction;
 };
 
-// draw component
-
-struct Draw : public CompData {
-	Draw(Vec4 color = Vec4(1, 1, 1, 1), Vec2 scale = Vec2(1, 1), float drawingPrio = 0.5f, Form form = Form::Rectangle) :
+struct Draw {
+	Draw(Vec4 color = Vec4(1, 1, 1, 1), Vec2 scale = Vec2(1, 1), float drawingPrio = 0.5f, Form form = Form::Rectangle, bool bParticleLayer = false) :
 		color{ color },
 		scale{ scale },
 		drawingPrio{ drawingPrio },
-		form{ form }
+		form{ form },
+		bParticleLayer{ bParticleLayer }
 	{}
 	 
 	Vec4 color;
 	Vec2 scale;
 	float drawingPrio;
+	bool bParticleLayer;
 	Form form;
 };
 
-// effector components
-
-struct LinearEffector : public CompData {
+struct LinearEffector {
 	LinearEffector(Vec2 const& mvdr = { 1,0 }, float frc = 0.0f, float accel = 0.0f) :
 		direction{ mvdr },
 		force{ frc },
@@ -183,7 +169,8 @@ struct LinearEffector : public CompData {
 	float force;
 	float acceleration;
 };
-struct FrictionEffector : public CompData {
+
+struct FrictionEffector {
 	FrictionEffector(float frctn = 0, float rotaFrctn = 0) :
 		friction{ frctn },
 		rotationalFriction{ rotaFrctn }

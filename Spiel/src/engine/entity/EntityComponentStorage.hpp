@@ -23,8 +23,6 @@
 #define compStoreAssert(x)
 #endif
 
-struct CompData { };
-
 template<typename CompType>
 using ComponentCallback = std::function<void(EntityHandleIndex, CompType&)>;
 

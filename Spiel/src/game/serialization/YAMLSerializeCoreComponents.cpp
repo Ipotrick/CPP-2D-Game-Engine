@@ -5,7 +5,7 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const Transform& b)
 	out << YAML::BeginMap;
 
 	out << YAML::Key << "Position" << YAML::Value << b.position;
-	out << YAML::Key << "Rotation" << YAML::Value << b.rotation;
+	out << YAML::Key << "RotaVec" << YAML::Value << b.rotaVec;
 
 	out << YAML::EndMap;
 	return out;
@@ -115,7 +115,7 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const FrictionEffector& b)
 	return out;
 }
 
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureInfo& b)
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureDiscriptor& b)
 {
 	out << YAML::BeginMap;	
 
@@ -125,7 +125,7 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const TextureInfo& b)
 	return out;
 }
 
-YAML::Emitter& operator<<(YAML::Emitter& out, const SmallTextureRef& b)
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureRef& b)
 {
 	out << YAML::BeginMap;	
 
@@ -136,7 +136,7 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const SmallTextureRef& b)
 	return out;
 }
 
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureRef2& b)
+YAML::Emitter& operator<<(YAML::Emitter& out, const BigTextureRef& b)
 {
 	out << YAML::BeginMap;
 

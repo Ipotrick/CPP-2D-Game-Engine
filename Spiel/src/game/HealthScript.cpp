@@ -60,7 +60,7 @@ UIEntityHandle createHealthUI(EntityHandle ent)
 					.y = 0.5 
 				}},
 				.text = "Health:",
-				.fontTexture = EngineCore::renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")),
+				.fontTexture = EngineCore::renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png")),
 				.fontSize = { 17.0f / 2.0f, 17.0f }
 			}),
 			ui::bar({

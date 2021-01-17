@@ -58,6 +58,18 @@
     <Filter Include="engine\rendering\shader">
       <UniqueIdentifier>{070efa69-5c28-441c-aca1-beebe6b44ebc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine\gui">
+      <UniqueIdentifier>{b43a3fe1-039b-4f1c-99c1-3d7ed7fd64cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="guitest">
+      <UniqueIdentifier>{58fffb78-f4c5-4330-a80a-694a80d01871}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\gui\elements">
+      <UniqueIdentifier>{1710c6b1-f3b0-4b41-b3a8-4f50997e3d7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\gui\base">
+      <UniqueIdentifier>{7873256f-c4ff-4cec-b09c-3095132abda2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\stb_image\stb_image.hpp">
@@ -88,9 +100,6 @@
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\GameSystemUnifroms.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\GlowTrailRScript.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\HealthScript.hpp">
@@ -165,9 +174,6 @@
     <ClInclude Include="src\game\movementScript.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\transformScript.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\collision\CoreComponents.hpp">
       <Filter>game\collision</Filter>
     </ClInclude>
@@ -193,15 +199,6 @@
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\Camera.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OGLPassShader.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OGLShaderUtil.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OGLTextureRenderBuffer.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\RenderBuffer.hpp">
@@ -402,6 +399,63 @@
     <ClInclude Include="src\game\LoadRenderTestMap.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLPassShader.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLShaderUtil.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLTextureRenderBuffer.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLShader.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\SpriteShader.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLShaderStorage.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLTexture.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\TextureSamplerManager.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIDrawContext.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\GUIManager.hpp">
+      <Filter>engine\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\guitest\GUITest.hpp">
+      <Filter>guitest</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIContainerElement.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIElement.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIRootElement.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIDrawUtil.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIBox.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIDrawElements.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIDestroyElements.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIColumn.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
@@ -414,9 +468,6 @@
       <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\Game.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\GlowTrailRScript.cpp">
       <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\HealthScript.cpp">
@@ -485,17 +536,8 @@
     <ClCompile Include="src\game\movementScript.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\transformScript.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
     <ClCompile Include="src\game\World.cpp">
       <Filter>game</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\OGLPassShader.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\OGLShaderUtil.cpp">
-      <Filter>engine\rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\rendering\Renderer.cpp">
       <Filter>engine\rendering</Filter>
@@ -566,11 +608,29 @@
     <ClCompile Include="src\engine\types\Spinlock.cpp">
       <Filter>engine\types</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\rendering\OGLTextureRenderBuffer.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\game\LoadRenderTestMap.cpp">
       <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLPassShader.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLShaderUtil.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLTextureRenderBuffer.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLShader.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLTexture.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\TextureSamplerManager.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\gui\GUIManager.cpp">
+      <Filter>engine\gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,12 +2,12 @@
 
 TextureRefManager::TextureRefManager()
 {
-	cacheTextureInfo(TextureInfo("white"));
-	cacheTextureInfo(TextureInfo("default"));
+	cacheTextureInfo(TextureDiscriptor("white"));
+	cacheTextureInfo(TextureDiscriptor("default"));
 	textureLoadingQueue.clear();
 }
 
-TextureRef2 TextureRefManager::makeRef(const TextureInfo& texInfo, const Vec2 minPos, const Vec2 maxPos)
+BigTextureRef TextureRefManager::makeRef(const TextureDiscriptor& texInfo, const Vec2 minPos, const Vec2 maxPos)
 {
 	auto refOpt = getCachedTextureRef(texInfo);
 	auto ref =  
@@ -19,7 +19,7 @@ TextureRef2 TextureRefManager::makeRef(const TextureInfo& texInfo, const Vec2 mi
 	return ref;
 }
 
-void TextureRefManager::validate(TextureRef2& ref)
+void TextureRefManager::validate(BigTextureRef& ref)
 {
 	auto refOpt = getCachedTextureRef(ref.getInfo());
 	auto validRef =
@@ -29,23 +29,23 @@ void TextureRefManager::validate(TextureRef2& ref)
 	ref.id = validRef.id;
 }
 
-TextureRef2 TextureRefManager::cacheTextureInfo(const TextureInfo& texInfo)
+BigTextureRef TextureRefManager::cacheTextureInfo(const TextureDiscriptor& texInfo)
 {
-	auto ref = TextureRef2(texInfo, nextIndex++);
+	auto ref = BigTextureRef(texInfo, nextIndex++);
 	texRefs[texInfo.name].push_back(ref);
 	textureLoadingQueue.push_back(ref);
 	return ref;
 }
 
-TextureRef2 TextureRefManager::cacheTextureInfo(TextureInfo&& texInfo)
+BigTextureRef TextureRefManager::cacheTextureInfo(TextureDiscriptor&& texInfo)
 {
-	auto ref = TextureRef2(texInfo.name, nextIndex++);
+	auto ref = BigTextureRef(texInfo.name, nextIndex++);
 	texRefs[texInfo.name].push_back(ref);
 	textureLoadingQueue.push_back(ref);
 	return ref;
 }
 
-std::optional<TextureRef2> TextureRefManager::getCachedTextureRef(const TextureInfo& texInfo)
+std::optional<BigTextureRef> TextureRefManager::getCachedTextureRef(const TextureDiscriptor& texInfo)
 {
 	auto& texName = texInfo.name;
 	// serach for texture ref:

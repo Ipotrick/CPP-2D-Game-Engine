@@ -1,5 +1,6 @@
 //#define MANDELBROT
-#define BALLS2
+//#define BALLS2
+#define GUITEST
 
 #ifdef BALLS2
 
@@ -12,7 +13,7 @@ int main()
 }
 #endif
 
-#ifdef ifdef MANDELBROT
+#ifdef MANDELBROT
 
 #include "mandelbrot/MandelbrotViewer.hpp"
 
@@ -22,4 +23,16 @@ int main()
 	mv.initialize("Mandelbrot Viewer", 800ull, 800ull);
 	mv.run();
 }
+#endif
+
+#ifdef GUITEST
+
+#include "guitest/GUITest.hpp"
+
+int main()
+{
+	GUIApp app;
+	app.run();
+}
+
 #endif

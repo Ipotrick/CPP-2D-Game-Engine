@@ -28,13 +28,13 @@ void InputManager::engineUpdate()
 {
 	if (!bManuallyUpdated) {
 		inputUpdate();
+		window.update();
 	}
 	bManuallyUpdated = false;
 }
 
 void InputManager::inputUpdate()
 {
-	std::unique_lock lock(window.mut);
 	oldKeyStates = newKeyStates;
 	oldButtonStates = newButtonStates;
 	prevMousePositionWindowSpace = mousePositionWindowSpace;

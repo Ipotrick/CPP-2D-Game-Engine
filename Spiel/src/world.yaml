@@ -1,0 +1,8 @@
+World: ""
+PhysicsUniforms:
+  friction: 0
+  linearEffectAccel: 0
+  linearEffectDir: [0, 0]
+  linearEffectForce: 0
+Entities:
+  []

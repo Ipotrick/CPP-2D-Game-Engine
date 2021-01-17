@@ -13,76 +13,50 @@ void checkGLError()
 void TextureCache::reset()
 {
 	for (const auto& el : textures) {
-		glDeleteTextures(1, &el.openglTexID);
+		glDeleteTextures(1, &el.openGLId);
 	}
 	textures.clear();
 	loaded.clear();
-	initialize();
 }
 
 void TextureCache::initialize()
 {
-	{
-		uint8_t* whitePoint = (uint8_t*)malloc(sizeof(uint8_t) * 4);
-		whitePoint[0] = 255;
-		whitePoint[1] = 255;
-		whitePoint[2] = 255;
-		whitePoint[3] = 255;
-
-		Texture tex;
-		tex.width = 1; tex.height = 1;
-		glGenTextures(1, &tex.openglTexID);
-		glBindTexture(GL_TEXTURE_2D, tex.openglTexID);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePoint);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		textures.push_back(tex);
-		loaded.push_back(true);
-		free(whitePoint);
-	}
-	{
-		uint8_t* defaultTex = (uint8_t*)malloc(sizeof(uint8_t) * 4 * 8 * 8);
-		for (int i = 0; i < 8; i++) {
-			for (int j = 0; j < 8; j++) {
-				if ((i % 2) ^ (j % 2)) {
-					defaultTex[i * 8 * 4 + j * 4 + 0] = 255;
-					defaultTex[i * 8 * 4 + j * 4 + 1] = 0;
-					defaultTex[i * 8 * 4 + j * 4 + 2] = 255;
-					defaultTex[i * 8 * 4 + j * 4 + 3] = 255;
-				}
-				else {
-					defaultTex[i * 8 * 4 + j * 4 + 0] = 0;
-					defaultTex[i * 8 * 4 + j * 4 + 1] = 0;
-					defaultTex[i * 8 * 4 + j * 4 + 2] = 0;
-					defaultTex[i * 8 * 4 + j * 4 + 3] = 255;
-				}
+	uint8_t* defaultTex = new uint8_t[4*8*8];
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if ((i % 2) ^ (j % 2)) {
+				defaultTex[i * 8 * 4 + j * 4 + 0] = 255;
+				defaultTex[i * 8 * 4 + j * 4 + 1] = 0;
+				defaultTex[i * 8 * 4 + j * 4 + 2] = 255;
+				defaultTex[i * 8 * 4 + j * 4 + 3] = 255;
+			}
+			else {
+				defaultTex[i * 8 * 4 + j * 4 + 0] = 0;
+				defaultTex[i * 8 * 4 + j * 4 + 1] = 0;
+				defaultTex[i * 8 * 4 + j * 4 + 2] = 0;
+				defaultTex[i * 8 * 4 + j * 4 + 3] = 255;
 			}
 		}
-
-		Texture tex;
-		tex.width = 8; tex.height = 8;
-		glGenTextures(1, &tex.openglTexID);
-		glBindTexture(GL_TEXTURE_2D, tex.openglTexID);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, defaultTex);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		textures.push_back(tex);
-		loaded.push_back(true);
-		free(defaultTex);
 	}
+
+	OpenGLTexture tex;
+	tex.width = 8; tex.height = 8;
+	glGenTextures(1, &tex.openGLId);
+	glBindTexture(GL_TEXTURE_2D, tex.openGLId);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, tex.width, tex.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, defaultTex);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	textures.push_back(tex);
+	loaded.push_back(true);
+	delete[] defaultTex;
 }
 
-bool TextureCache::loadTexture(const TextureRef2& ref)
+bool TextureCache::loadTexture(const BigTextureRef& ref)
 {
 	bool success{ false };
 	std::cout << "isTextureLoaded(" << ref.getId() << ");\n";
@@ -90,7 +64,7 @@ bool TextureCache::loadTexture(const TextureRef2& ref)
 		printf("texid %i\n", ref.getId());
 		std::cout << "load texture with id: " << ref.getId() << " and name: \"" << ref.getFilename() << "\"" << std::endl;
 
-		Texture tex;
+		OpenGLTexture tex;
 		tex.info = ref.getInfo();
 		GLint minFilter = tex.info.minFilter;
 		GLint magFilter = tex.info.magFilter;
@@ -128,8 +102,8 @@ bool TextureCache::loadTexture(const TextureRef2& ref)
 			= stbi_load(path.c_str(), &tex.width, &tex.height, &tex.channelPerPixel, 4/*rgba*/);	// generate cpu texture data
 
 		if (localBuffer != nullptr) {	// did loading the file work?
-			glGenTextures(1, &tex.openglTexID);
-			glBindTexture(GL_TEXTURE_2D, tex.openglTexID);
+			glGenTextures(1, &tex.openGLId);
+			glBindTexture(GL_TEXTURE_2D, tex.openGLId);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
@@ -147,6 +121,7 @@ bool TextureCache::loadTexture(const TextureRef2& ref)
 			//stbi_image_free(localBuffer);	// free cpu texture data
 			success = true;
 			textures[ref.getId()] = tex;
+			delete localBuffer;
 		}
 		else {
 			std::cerr << "error: texture with path: \"" << path << "\" could not be loaded!" << std::endl;
@@ -162,17 +137,17 @@ bool TextureCache::loadTexture(const TextureRef2& ref)
 	return success;
 }
 
-bool TextureCache::isTextureLoaded(const SmallTextureRef& ref)
+bool TextureCache::isTextureLoaded(const TextureRef& ref)
 {
 	return isTextureLoaded(ref.id);
 }
 
-bool TextureCache::isTextureLoaded(const TextureRef2& texRef)
+bool TextureCache::isTextureLoaded(const BigTextureRef& texRef)
 {
 	return isTextureLoaded(texRef.getId());
 }
 
-Texture& TextureCache::getTexture(TextureId texId)
+OpenGLTexture& TextureCache::getTexture(TextureId texId)
 {
 	if (!isTextureLoaded(texId)) {
 		std::cerr << "error: tried to use texture with invalid id!";
@@ -181,18 +156,18 @@ Texture& TextureCache::getTexture(TextureId texId)
 	return textures[texId];
 }
 
-Texture& TextureCache::getTexture(const SmallTextureRef& ref)
+OpenGLTexture& TextureCache::getTexture(const TextureRef& ref)
 {
 	return getTexture(ref.id);
 }
 
-void TextureCache::cacheTextures(const std::vector<TextureRef2>& loadingQueue)
+void TextureCache::cacheTextures(const std::vector<BigTextureRef>& loadingQueue)
 {
 	for (auto const& ref : loadingQueue) {
 		assert(!isTextureLoaded(ref));
 		if (ref.getId() >= loaded.size()) {
 			loaded.resize(ref.getId() + 1, false);
-			textures.resize(ref.getId() + 1, Texture());
+			textures.resize(ref.getId() + 1, OpenGLTexture());
 		}
 		loadTexture(ref);
 	}

@@ -6,7 +6,6 @@
 #include "GameComponents.hpp"
 #include "serialization/YAMLSerializer.hpp"
 
-#include "transformScript.hpp"
 #include "movementScript.hpp"
 #include "drawScript.hpp"
 #include "LayerConstants.hpp"
@@ -21,6 +20,12 @@
 #include "LoadBallTestMap.hpp"
 #include "LoadRenderTestMap.hpp"
 
+static int makeID()
+{
+	static int nextID = 0;
+	return nextID++;
+}
+
 using namespace util;
 
 Game::Game()
@@ -30,9 +35,10 @@ Game::Game()
 	renderer.setLayerCount(LAYER_MAX);
 
 	renderer.getLayer(LAYER_WORLD_BACKGROUND).bClearEveryFrame = true;
+	renderer.getLayer(LAYER_WORLD_BACKGROUND).renderMode = RenderSpace::WorldSpace;
 
 	renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::WorldSpace; 
-	renderer.getLayer(LAYER_WORLD_MIDGROUND).depthTest = DepthTest::Less;
+	renderer.getLayer(LAYER_WORLD_MIDGROUND).depthTest = DepthTest::LessOrEqual;
 
 	renderer.getLayer(LAYER_WORLD_PARTICLE).renderMode = RenderSpace::WorldSpace;
 
@@ -65,8 +71,6 @@ Game::Game()
 me.setUpdateFn([&](UIElement* e){ UIText& me = *((UIText*)e); code });
 
 void Game::create() {
-
-
 	world.setOnRemCallback<Health>(onHealthRemCallback);
 
 	auto size = getWindowSize();
@@ -75,10 +79,11 @@ void Game::create() {
 
 	const float firstRowWidth = 90.0f;
 	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
-	const auto font = renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png"));
+	const auto font = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png"));
 
-	//loadBallTestMap();
-
+#ifdef _DEBUG
+	loadBallTestMap();
+#else
 	std::ifstream ifstream("world.yaml");
 	if (ifstream.good()) {
 		YAMLWorldSerializer s(world);
@@ -86,6 +91,7 @@ void Game::create() {
 		std::getline(ifstream, str, '\0');
 		s.deserializeString(str);
 	}
+#endif
 
 	auto makeRenderStatsUI = [&](auto& parent) {
 		UICollapsable c("Rendering Statics:", font);
@@ -137,7 +143,7 @@ void Game::create() {
 					drawCallPair.setFirst(ui.createAndGetPtr(drawcallText));
 				}
 				{
-					UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCalls()); });
+					UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCallsLastFrame()); });
 					drawcallText2.setSize(textFieldSize);
 					drawCallPair.setSecond(ui.createAndGetPtr(drawcallText2));
 				}
@@ -203,7 +209,7 @@ void Game::create() {
 					ticksPair.setFirst(ui.createAndGetPtr(ticksText));
 				}
 				{
-					UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(100)); });
+					UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(10)); });
 					ticksText2.setSize(textFieldSize);
 					ticksPair.setSecond(ui.createAndGetPtr(ticksText2));
 				}
@@ -215,7 +221,8 @@ void Game::create() {
 	}
 }
 
-void Game::update(float deltaTime) {
+void Game::update(float deltaTime) 
+{
 	if (bLoading) {
 		if (JobSystem::finished(loadingWorkerTag)) {
 			Monke::log("job with tag {0} finished clientside", (uint32_t)loadingWorkerTag);
@@ -230,56 +237,18 @@ void Game::update(float deltaTime) {
 		}
 	}
 	else {
+		std::cout << "sprites last frame: " << renderer.getSpriteCountLastFrame() << std::endl;
+
 		renderer.submit(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace), LAYER_WORLD_BACKGROUND);
-		{
-			collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
-			for (auto& d : collisionSystem.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
-			physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
-			for (auto& d : physicsSystem2.getDebugSprites()) renderer.submit(d,LAYER_WORLD_FOREGROUND);
 
-			struct LJob : public IJob {
-				std::function<void(uint32_t)> function;
-				LJob(std::function<void(uint32_t)> f):
-					function{ f }
-				{ }
-
-				void execute(uint32_t thread) override { function(thread); }
-			};
-
-			/* UNSAFE BEGIN */
-
-			std::vector<LJob> jobList;
-			jobList.push_back(LJob{
-				[&](uint32_t thread) {
-					for(auto [ent, t] : world.entityComponentView<Transform>())
-					{
-						transformScript(ent, t);
-					}
-				} 
-			});
-			jobList.push_back(LJob{
-				[&, deltaTime](uint32_t thread) {
-					for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) {
-						movementScript(ent, t, m, deltaTime);
-					}
-				}
-			});
-			JobSystem::wait(JobSystem::submitVec(std::move(jobList)));
-
-			/* UNSAFE END */
-
-			//for (auto [ent, t] : world.entityComponentView<Transform>()) {
-			//	transformScript(ent, t);
-			//	if (world.hasComp<Movement>(ent)) movementScript(ent, t, world.getComp<Movement>(ent), deltaTime);
-			//}
-		}
-
+		collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
+		physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
+		for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) movementScript(ent, t, m, deltaTime);
 		in.manualUpdate();
-
 		gameplayUpdate(deltaTime);
-
+		for (auto& d : collisionSystem.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
+		for (auto& d : physicsSystem2.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
 		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) drawScript(ent, t, d);
-
 		world.update();
 	}
 }
@@ -441,7 +410,7 @@ void Game::gameplayUpdate(float deltaTime)
 					.ymode = UIAnchor::Y::TopRelativeDist,
 					.y = 0.5,}),
 				.text = "Loading ...",
-				.fontTexture = renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas.png")),
+				.fontTexture = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas.png")),
 				.fontSize = {30,100}
 			})
 		}

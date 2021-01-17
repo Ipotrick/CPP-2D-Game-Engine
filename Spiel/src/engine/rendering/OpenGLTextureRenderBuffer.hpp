@@ -8,12 +8,12 @@
 
 #include "../math/Vec2.hpp"
 
-class OGLTexFrameBuffer {
+class OpenGLFrameBuffer {
 public:
 	void initialize(uint32_t width = 1, uint32_t height = 1);
 	void reset();
-
 	void clear();
+	void bind();
 
 	void resize(uint32_t width, uint32_t height);
 	std::pair<uint32_t, uint32_t> getSize() const { return { width, height }; }
@@ -22,7 +22,7 @@ public:
 
 	GLuint getTex() { return tex; }
 	GLuint getBuffer() { return fbo; }
-private:
+protected:
 	uint32_t width = 1;
 	uint32_t height = 1;
 	GLuint tex = -1;

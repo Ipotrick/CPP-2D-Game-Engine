@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../engine/rendering/RenderScript.hpp"
-#include "../engine/rendering/OGLPassShader.hpp"
-#include "../engine/rendering/OGLTextureRenderBuffer.hpp"
+#include "../engine/rendering/OpenGLPassShader.hpp"
+#include "../engine/rendering/OpenGLTextureRenderBuffer.hpp"
 #include "../engine/rendering/RenderingWorker.hpp"
 
 class BloomRScript : public RenderScript {
@@ -27,10 +27,10 @@ public:
 
 	virtual void onUpdate(RenderingWorker& render, RenderLayer& layer) override
 	{
-		auto& mainTFBO = render.getMainTFBO();
+		auto& mainTFBO = render.getMainFramebuffer();
 		float ssf = render.getSuperSamplingFactor();
 
-		auto [winWidth, winHeight] = render.window->getSize();
+		auto [winWidth, winHeight] = render.getWindowSize();
 
 		float wWidth = winWidth * ssf;
 		float wHeight = winHeight * ssf;
@@ -89,10 +89,10 @@ private:
 	// kernelWidth controlles how many texels are used for the blurr in one dimension
 	int kernelWidth = 30;
 
-	OGLPassShader bloomFinderShader;
-	OGLPassShader bloomShader;
-	OGLPassShader passShader;
+	OpenGLPassShader bloomFinderShader;
+	OpenGLPassShader bloomShader;
+	OpenGLPassShader passShader;
 
-	OGLTexFrameBuffer bloomFBO1;
-	OGLTexFrameBuffer bloomFBO2;
+	OpenGLFrameBuffer bloomFBO1;
+	OpenGLFrameBuffer bloomFBO2;
 };
