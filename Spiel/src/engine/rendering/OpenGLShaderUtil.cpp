@@ -3,7 +3,7 @@
 #include <optional>
 #include <cassert>
 
-#include "OGLShaderUtil.hpp"
+#include "OpenGLShaderUtil.hpp"
 
 std::string readShader(std::string const& path)
 {

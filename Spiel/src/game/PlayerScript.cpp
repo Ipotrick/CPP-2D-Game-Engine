@@ -21,7 +21,7 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 			mov.velocity.x += (rand() % 1000 / 400.0f - 1.25f)*4;
 			mov.velocity.y += (rand() % 1000 / 400.0f - 1.25f)*4;
 			mov.velocity += dir * vel * 1.8;
-			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), rand() % 1000 * 0.00052f + 0.04f, Form::Circle));
+			world.addComp<Draw>(particle, Draw(Vec4(0,0,0,0), Vec2(0,0), 0.6f, Form::Circle, true));
 			if (rand() % 4 == 0) {
 				world.addComp<Age>(particle, Age(1.2f));
 				world.addComp<ParticleScriptComp>(particle, ParticleScriptComp(Vec2(0.1f, 0.1f), Vec2(10, 10),
@@ -42,7 +42,7 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
-			world.addComp(particle, EngineCore::renderer.makeTexRef(TextureInfo("Cloud.png")));
+			world.addComp(particle, EngineCore::renderer.makeTexRef(TextureDiscriptor("Cloud.png")));
 			world.spawn(particle);
 			world.getComp<Age>(particle).curAge += rando * 0.02f;
 			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass*100000 / world.getComp<PhysicsBody>(me).mass*10;
@@ -55,11 +55,9 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 
 	if (EngineCore::in.keyPressed(Key::LEFT_SHIFT)) {
 		data.power = std::min(data.power + deltaTime * powerAdjust, maxPower);
-		printf("new player power: %f\n", data.power);
 	}
 	if (EngineCore::in.keyPressed(Key::LEFT_CONTROL)) {
 		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
-		printf("new player power: %f\n", data.power);
 	}
 	data.flameSpawnTimer.setLapTime(0.008 * (1 / data.power));
 
@@ -73,20 +71,20 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 
 	if (EngineCore::in.keyPressed(Key::SPACE)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
-		spawnParticles(num, rotate(Vec2(-1, 0), cmps.get<Transform>().rotation + 90), 20, rotate(Vec2(-1, 0), cmps.get<Transform>().rotation + 90) * (0.4f) );
+		spawnParticles(num, rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90), 20, rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90) * (0.4f) );
 
 	}
 
-	auto const& baseEnt = cmps.get<Transform>();
-	auto movEnt = cmps.get<Move>();
-	auto collEnt = cmps.get<Coll>();
+	auto const& playerTransform = cmps.get<Transform>();
+	auto playerMovement = cmps.get<Move>();
+	auto playerCollider = cmps.get<Coll>();
 
 	auto spawnBullet = [&](Vec2 vel, Vec2 offset, float size) {
 		Vec2 scale = Vec2{ 1,1 } * size;
 		Collider bulletCollider = Collider(scale, Form::Circle, true);
 		Draw bulletDraw = Draw(Vec4(0.3f, 1.5f, 0.3f, 1), scale, 0.4f, Form::Circle);
 		auto bullet = world.create();
-		world.addComp<Transform>(bullet, Transform(baseEnt.position + offset));
+		world.addComp<Transform>(bullet, Transform(playerTransform.position + offset));
 		world.addComp<Movement>(bullet, Movement(vel, 0));
 		world.addComp<PhysicsBody>(bullet, PhysicsBody(0.9f, 0.01f, 1, 0));
 		world.addComp<Draw>(bullet, bulletDraw);
@@ -101,7 +99,7 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 		constexpr float BULLET_VEL = 10.0f;
 		for (int i = 0; i < BULLET_COUNT; ++i) {
 			float angle = float(i) / float(BULLET_COUNT) * 360;
-			Vec2 bullCollVel = movEnt.velocity + BULLET_VEL * rotate(Vec2(0, 1), angle);
+			Vec2 bullCollVel = playerMovement.velocity + BULLET_VEL * rotate(Vec2(0, 1), angle);
 			Vec2 offset = Vec2(1, 1) * rotate(Vec2(0, 1), angle);
 			const float size = 1;
 			spawnBullet(bullCollVel, offset, size);
@@ -109,15 +107,20 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 	}
 
 	if (EngineCore::in.keyPressed(Key::F)) {
-		constexpr float BULLET_VEL = 20.0f;
-		float velOffsetRota = rand() % 20000 / 1000.0f - 10.0f;
-		const float size = 0.4f;
+		constexpr float BULLET_VEL = 40.0f;
+		constexpr float SIZE = 0.4f;
+		constexpr float SPREAD_ANGLE = 40.0f;
 
-		uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime) * data.power;
+		std::random_device rd;
+		std::mt19937 rand_generator(rd());
+		std::uniform_real_distribution rotation_distr(-SPREAD_ANGLE / 2.0f, SPREAD_ANGLE / 2.0f);
+
+		uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 		for (uint64_t i = 0; i < bullets; i++) {
-			Vec2 bullCollVel = movEnt.velocity + (BULLET_VEL + (rand() % 1000 / 1000.0f)) * rotate(Vec2(0, 1), baseEnt.rotation + velOffsetRota);
-			Vec2 offset = rotate(Vec2(-collEnt.size.y, 0.0f) * 1.3f, baseEnt.rotation + 270);
-			spawnBullet(bullCollVel, offset, size);
+			Vec2 bullDir = rotate(playerTransform.rotaVec.toUnitY0(), rotation_distr(rand_generator));
+			Vec2 bulletVelocity = playerMovement.velocity + bullDir * BULLET_VEL;
+			Vec2 offset = bullDir;
+			spawnBullet(bulletVelocity, offset, SIZE);
 		}
 	}
 }

@@ -5,112 +5,192 @@
 
 #include "../types/Timing.hpp"
 
-void RenderingWorker::initiate()
+#include "OpenGLShader.hpp"
+
+
+void openGLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
+	GLenum severity, GLsizei length,
+	const GLchar* msg, const void* data)
 {
-	std::lock_guard<std::mutex> l(window->renderingContextMut); 
-	window->makeContextCurrent();
+	const char* _source;
+	const char* _type;
+	const char* _severity;
+
+	switch (source) {
+	case GL_DEBUG_SOURCE_API:
+		_source = "API"; break;
+	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+		_source = "WINDOW SYSTEM"; break;
+	case GL_DEBUG_SOURCE_SHADER_COMPILER:
+		_source = "SHADER COMPILER"; break;
+	case GL_DEBUG_SOURCE_THIRD_PARTY:
+		_source = "THIRD PARTY"; break;
+	case GL_DEBUG_SOURCE_APPLICATION:
+		_source = "APPLICATION"; break;
+	case GL_DEBUG_SOURCE_OTHER:
+		_source = "UNKNOWN"; break;
+	default:
+		_source = "UNKNOWN"; break;
+	}
+
+	switch (type) {
+	case GL_DEBUG_TYPE_ERROR:
+		_type = "ERROR"; break;
+	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+		_type = "DEPRECATED BEHAVIOR"; break;
+	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+		_type = "UDEFINED BEHAVIOR"; break;
+	case GL_DEBUG_TYPE_PORTABILITY:
+		_type = "PORTABILITY"; break;
+	case GL_DEBUG_TYPE_PERFORMANCE:
+		_type = "PERFORMANCE"; break;
+	case GL_DEBUG_TYPE_OTHER:
+		_type = "OTHER"; break;
+	case GL_DEBUG_TYPE_MARKER:
+		_type = "MARKER"; break;
+	default:
+		_type = "UNKNOWN"; break;
+	}
+
+	switch (severity) {
+	case GL_DEBUG_SEVERITY_HIGH:
+		_severity = "HIGH"; break;
+	case GL_DEBUG_SEVERITY_MEDIUM:
+		_severity = "MEDIUM"; break;
+	case GL_DEBUG_SEVERITY_LOW:
+		_severity = "LOW"; break;
+	case GL_DEBUG_SEVERITY_NOTIFICATION:
+		_severity = "NOTIFICATION"; break;
+	default:
+		_severity = "UNKNOWN"; break;
+	}
+
+	if (std::strcmp(_severity,"NOTIFICATION")) {
+		printf("OpenGL error [%d]: %s of %s severity, raised from %s: %s\n",
+			id, _type, _severity, _source, msg);
+		__debugbreak();
+	}
+}
+
+void RenderingWorker::initialize(Window* window)
+{
+	assert(!bInitialized);
+	bInitialized = true;
+	window->takeRenderingContext();
 
 	// opengl configuration:
 	glEnable(GL_BLEND); 
 	glBlendFunc(BLEND_SFACTOR, BLEND_DFACTOR);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
+
+#if _DEBUG
+	glEnable(GL_DEBUG_OUTPUT);
+	glDebugMessageCallback(openGLDebugMessageCallback, 0);
+#endif
 
 	// querry driver and hardware info:
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureSlots);
 
-	//initializeFBOs();
-	mainTFBO.initialize();
-	initializeSpriteShader(); 
+	initializeSpriteShader();
+
+	mainFramebuffer.initialize();
 	passShader.initialize(PASS_SHADER_FRAGMENT_PATH);
 	texCache.initialize();
 
 	std::unique_lock switch_lock(data->mut);
 	data->run = true;
 	data->state = SharedRenderData::State::waitForFrontEnd;
+
+}
+
+void RenderingWorker::update(Window* window)
+{
+	/**
+	 * TODO
+	 * The reset function is bugged.
+	 * when resetting things like texture cache are not reset correctly:
+	 * a texcache reset should invalidate all textures (all opengl ressources), so that they are loaded newly.
+	 */
+
+	//if (windowOfLastFrame != window) /* when the window changes, we need to reset and initialize new with the rendering context of the new window */
+	//{
+	//	if (windowOfLastFrame != nullptr) {
+	//		reset(windowOfLastFrame);
+	//	}
+	//	initialize(window);
+	//}
+
+	// update framebuffer sizes to window size:
+	auto [width, height] = window->getSize();
+	if (width != lastWindowWidth or height != lastWindowHeight) {
+		lastWindowWidth = width;
+		lastWindowHeight = height;
+		bWindowSizeChanged = true;
+		uint32_t ssWidth = supersamplingFactor * lastWindowWidth;
+		uint32_t ssHeight = supersamplingFactor * lastWindowHeight;
+		mainFramebuffer.resize(ssWidth, ssHeight);
+	}
+	else {
+		bWindowSizeChanged = false;
+	}
+
+	// Render current frame:
+	Timer t(data->new_renderTime);
+
+	if (data->renderBuffer->resetTextureCache) {
+		texCache.reset();
+	}
+
+	texCache.cacheTextures(data->renderBuffer->textureLoadingQueue);
+
+	deadScriptsOnDestroy();
+	newScriptsOnInitialize();
+
+	data->drawCallCount = 0;
+	data->spriteCount = 0;
+	mainFramebuffer.clear();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	auto& camera = data->renderBuffer->camera;
+	Mat4 worldViewProjMat = Mat4::scale(camera.zoom) * Mat4::scale({ camera.frustumBend.x, camera.frustumBend.y, 1.0f }) * Mat4::rotate_z(-camera.rotation) * Mat4::translate({ -camera.position.x, -camera.position.y, 0.0f });
+	Mat4 pixelViewProjMatrix = Mat4::translate(Vec3(-1, -1, 0)) * Mat4::scale(Vec3(1.0f / (lastWindowWidth), 1.0f / (lastWindowHeight), 1.0f)) * Mat4::scale(Vec3(2.0f, 2.0f, 1.0f));
+
+	for (auto& layer : data->renderBuffer->layers) {
+		drawLayer(layer, worldViewProjMat, pixelViewProjMatrix);
+	}
+
+	passShader.renderTexToFBO(mainFramebuffer.getTex(), 0, lastWindowWidth, lastWindowHeight);
+
+	window->swapBuffers();
 }
 
 void RenderingWorker::operator()()
 {
-	initiate();
+	initialize(data->window);
 	
 	while (waitForFrontend()) {
-		{	// process render side events
-			std::lock_guard l(window->mut);
-			window->updateSize();
-			auto [width, height] = window->getSize();
-
-			if (width != lastWindowWidth or height != lastWindowHeight) {
-				lastWindowWidth = width;
-				lastWindowHeight = height;
-				bWindowSizeChanged = true;
-				uint32_t ssWidth = supersamplingFactor * width;
-				uint32_t ssHeight = supersamplingFactor * height;
-
-				// resize main fbo texture:
-				mainTFBO.resize(ssWidth, ssHeight);
-			}
-			else {
-				bWindowSizeChanged = false;
-			}
-		}
-		{	// render frame
-			std::lock_guard renderContextLock(window->renderingContextMut);		// when we have two renderers we have to make sure that only one is calling opengl functions on the window's context
-			Timer t(data->new_renderTime);
-			// takeRenderingContext();											// this is only needed when multiple renderers are rendering to a window
-
-			if (data->renderBuffer->resetTextureCache) {
-				texCache.reset();
-			}
-
-			texCache.cacheTextures(data->renderBuffer->textureLoadingQueue);
-
-			deadScriptsOnDestroy();
-
-			newScriptsOnInitialize();
-
-			data->drawCallCount = 0;
-
-			auto& camera = data->renderBuffer->camera;
-			Mat4 worldViewProjMat = 
-				Mat4::scale(camera.zoom) *												
-				Mat4::scale({ camera.frustumBend.x, camera.frustumBend.y, 1.0f }) *
-				Mat4::rotate_z(-camera.rotation) *
-				Mat4::translate({ -camera.position.x, -camera.position.y, 0.0f });
-			Mat4 pixelViewProjMatrix = 
-				Mat4::translate(Vec3(-1, -1, 0)) * 
-				Mat4::scale(Vec3(1.0f / (window->getWidth()), 1.0f / (window->getHeight()), 1.0f)) *
-				Mat4::scale(Vec3(2.0f, 2.0f, 1.0f));
-
-			clearMainFBO();
-			mainTFBO.clear();
-
-			for (auto& layer : data->renderBuffer->layers) {
-				drawLayer(layer, worldViewProjMat, pixelViewProjMatrix);
-			}
-
-			passShader.renderTexToFBO(mainTFBO.getTex(), 0, window->getWidth(), window->getHeight());
-
-			window->swapBuffers();
-		}
+		update(data->window);
 	}
 
-	reset();
+	reset(data->window);
 }
 
-void RenderingWorker::reset() {
+void RenderingWorker::reset(Window* window)
+{
+	assert(bInitialized);
+	bInitialized = false;
+	mainFramebuffer.reset();
+	spriteShaderModelSSBO.reset();
 	passShader.reset();
-
-	free(spriteShaderVBORaw);
-	free(indicesRaw);
-	free(modelSSBORaw);
-
-	mainTFBO.reset();
+	windowOfLastFrame = nullptr;
+	texCache.reset();
 
 	std::unique_lock<std::mutex> switch_lock(data->mut);
 	data->run = false;
 	data->state = SharedRenderData::State::reset;
 	data->cond.notify_one();
+	window->releaseRenderingContext();
 }
 
 void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, Mat4 const& pixelProjectionMatrix)
@@ -119,15 +199,12 @@ void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, 
 		std::stable_sort(layer.getSprites().begin(), layer.getSprites().end());
 	}
 
-	// set current render target to the main texture frame buffer object
-	glBindFramebuffer(GL_FRAMEBUFFER, mainTFBO.getBuffer());
-
 	// set layer depth test:
 	glDepthFunc(static_cast<GLuint>(layer.depthTest));
 
 	// batch render sprites:
 	for (int lastIndex = 0; lastIndex < layer.getSprites().size(); data->drawCallCount += 1) {
-		lastIndex = drawBatch(layer.getSprites(), cameraViewProj, pixelProjectionMatrix, lastIndex);
+		lastIndex = drawBatch(layer.getSprites(), cameraViewProj, pixelProjectionMatrix, lastIndex, mainFramebuffer);
 	}
 
 	if (layer.script) {
@@ -145,84 +222,43 @@ bool RenderingWorker::waitForFrontend()
 	return data->run;
 }
 
-size_t RenderingWorker::drawBatch(std::vector<Sprite>& drawables, Mat4 const& worldVPMat, Mat4 const& pixelVPMat, size_t startIndex)
+size_t RenderingWorker::drawBatch(std::vector<Sprite>& sprites, Mat4 const& worldVPMat, Mat4 const& pixelVPMat, size_t index, OpenGLFrameBuffer& framebuffer)
 {
-	nextModelIndex = 0;
-	glUseProgram(spriteShaderProgram);
-	glBindVertexArray(spriteShaderVAO);
+	spriteShaderCPUModelBuffer.clear();
+	spriteShaderCPUVertexBuffer.clear();
+	spriteShader.use();
 
 	// give the shader the possible texture slots
-	int texSamplers[32] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
-	glUniform1iv(50, 32, texSamplers);
+	constexpr std::array<int,32> texSamplers = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 };
+	spriteShader.setUniform(50, reinterpret_cast<int const*>(&texSamplers), 32);
 
-	bindTexture(TEXTURE_DEFAULT, 0);
+	texCache.getTexture(TextureCache::DEFAULT_TEXTURE_ID).bindToSampler(0);
 
-	uint32_t nextTextureSamplerSlot{ 1 }; // when there are no texture slots left, the batch is full and will be rendered.
-	robin_hood::unordered_map<TextureId, GLuint> usedTexturesSamplerSlots;	// when a texture is used it will get a slot 
-	// fill batch with vertices
+	TextureSamplerManager samplerManager{ texCache, 32 };
 	int spriteCount{ 0 };
-	size_t index{ startIndex };
-	for (; (index < drawables.size()) & (spriteCount < MAX_RECT_COUNT); index++, spriteCount++) {
-		Sprite const& thisSprite = drawables[index];
-		int thisSpriteTexSampler{ 0 };
-
-		// check if drawable has texture
-		if (thisSprite.texRef.has_value()) {
-			auto& texRef = thisSprite.texRef.value();
-			if (texCache.isTextureLoaded(texRef) && texCache.getTexture(texRef).good) {
-				// is texture allready in the usedSamplerMap?
-				if (usedTexturesSamplerSlots.contains(texRef.id)) {
-					// then just use the allready sloted texture sampler:
-					thisSpriteTexSampler = usedTexturesSamplerSlots[texRef.id];
-				}
-				else {
-					// if all texture sampler slots are used flush the batch
-					if (nextTextureSamplerSlot >= maxTextureSlots) break;
-
-					// there is a free texture sampler slot
-					// add texture to usedSamplerSlotMap:
-					usedTexturesSamplerSlots.insert({ texRef.id , nextTextureSamplerSlot });
-					// bind texture to sampler slot
-					bindTexture(texCache.getTexture(texRef).openglTexID, nextTextureSamplerSlot);
-					thisSpriteTexSampler = nextTextureSamplerSlot;
-					nextTextureSamplerSlot++;
-				}
-			}
-			else {
-				// drawable gets the error texture
-				thisSpriteTexSampler = 0;
-			}
+	for (; (index < sprites.size()) & (spriteCount < MAX_RECT_COUNT); index++, spriteCount++) {
+		int thisSpriteTexSampler{ -1 };
+		if (sprites[index].texRef.has_value()) {
+			auto sampler = samplerManager.getSampler(sprites[index].texRef.value());
+			if (sampler.has_value())
+				thisSpriteTexSampler = sampler.value();
+			else
+				break;	/* there are no samplers left and we need another one, so we can not draw this sprite in this batch */
 		}
-		else {
-			// drawable has no texture so it gets sampler slot -1 (white texture)
-			thisSpriteTexSampler = -1;
-		}
-
-		auto bufferPtr = (SpriteShaderVertex*)(spriteShaderVBORaw + spriteCount * SpriteShaderVertex::FLOAT_SIZE * 4);	// gets index for the next 4 vertecies in raw buffer
-		generateVertices(thisSprite, thisSpriteTexSampler, worldVPMat, pixelVPMat, bufferPtr);
+		generateVertices(sprites[index], thisSpriteTexSampler, worldVPMat, pixelVPMat, spriteShaderCPUVertexBuffer);
 	}
-	// set projection-matrix-uniforms:
-	glUniformMatrix4fv(0, 1, GL_FALSE, worldVPMat.data());
-	// the window space matrix has no uniform as it is the identity matrix
+	spriteShader.setUniform(0, &worldVPMat);
 	Mat4 uniformWindowSpaceMatrix = Mat4::scale({ data->renderBuffer->camera.frustumBend.x,data->renderBuffer->camera.frustumBend.y, 1.0f });
-	glUniformMatrix4fv(2, 1, GL_FALSE, uniformWindowSpaceMatrix.data());
-	glUniformMatrix4fv(3, 1, GL_FALSE, pixelVPMat.data());
-
-	// push vertex data to the gpu
-	glBindBuffer(GL_ARRAY_BUFFER, spriteShaderVBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(SpriteShaderVertex) * spriteCount * 4, spriteShaderVBORaw);
-
-	// push model data to gpu
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelSSBO);
-	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(SpriteShaderModel) * spriteCount, modelSSBORaw);
-
-	// render drawableCount amount of drawables with glDrawElements
-	glViewport(0, 0, window->getWidth() * supersamplingFactor, window->getHeight() * supersamplingFactor);
-	glDrawElements(GL_TRIANGLES, spriteCount * 6, GL_UNSIGNED_INT, indicesRaw);
+	spriteShader.setUniform(2, &uniformWindowSpaceMatrix);
+	spriteShader.setUniform(3, &pixelVPMat);
+	spriteShader.bufferVertices(spriteShaderCPUVertexBuffer.size(), spriteShaderCPUVertexBuffer.data());
+	spriteShaderModelSSBO.buffer(spriteCount, spriteShaderCPUModelBuffer.data());
+	spriteShader.renderTo((size_t)spriteCount * (size_t)6, spriteShaderIndices.data(), framebuffer);
+	data->spriteCount += spriteCount;
 	return index;
 }
 
-void RenderingWorker::generateVertices(Sprite const& d, float texID, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, SpriteShaderVertex* bufferPtr) {
+void RenderingWorker::generateVertices(Sprite const& d, int samplerSlot, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, std::vector<SpriteShaderVertex>& vertexBuffer) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
 	if (d.texRef.has_value()) {
@@ -230,36 +266,23 @@ void RenderingWorker::generateVertices(Sprite const& d, float texID, Mat4 const&
 		maxTex = d.texRef.value().maxPos;
 	}
 
-	bool isCircle = static_cast<bool>(d.form);
+	spriteShaderCPUModelBuffer.push_back({});
+	auto& model = spriteShaderCPUModelBuffer.back();
+	model.color = d.color;
+	model.position = { d.position.x, d.position.y, -d.position.z, 0};
+	model.rotation = d.rotationVec.toUnitX0();
+	model.scale = d.scale;
+	model.texMin = minTex;
+	model.texMax = maxTex;
+	model.texSampler = samplerSlot;
+	model.isCircle = static_cast<GLint>(d.form);
+	model.renderSpace = static_cast<GLint>(d.drawMode);
 
-	SpriteShaderModel* model = modelSSBORaw + nextModelIndex;
-	model->color = d.color;
-	model->position = { d.position.x, d.position.y, -d.position.z, 0};
-	model->rotation = d.rotationVec.toVec2();
-	model->scale = d.scale;
-	model->texId = texID;
-	model->isCircle = isCircle;
-	model->renderSpace = static_cast<GLint>(d.drawMode);
+	int32_t modelIndex = (uint32_t)spriteShaderCPUModelBuffer.size() - 1;
 
-	SpriteShaderVertex* vertex{ nullptr };
-#define GEN_VERTEX(index) \
-	vertex = bufferPtr + index;\
-	vertex->texCoord = idToCorner(index, minTex, maxTex);\
-	vertex->corner = idToCorner(index, { -0.5f, -0.5f }, { 0.5f, 0.5f });\
-	vertex->modelIndex = nextModelIndex;
-	
-	GEN_VERTEX(0);
-	GEN_VERTEX(1);
-	GEN_VERTEX(2);
-	GEN_VERTEX(3);
-
-	++nextModelIndex;
-}
-
-void RenderingWorker::bindTexture(GLuint texID, int slot)
-{
-	glActiveTexture(GL_TEXTURE0 + slot);
-	glBindTexture(GL_TEXTURE_2D, texID);
+	for (int i = 0; i < 4; i++) {
+		vertexBuffer.emplace_back(SpriteShaderVertex{ i, modelIndex });
+	}
 }
 
 void RenderingWorker::newScriptsOnInitialize()
@@ -282,46 +305,15 @@ void RenderingWorker::deadScriptsOnDestroy()
 
 void RenderingWorker::initializeSpriteShader()
 {
-	auto spriteShaderVertex = readShader(SPRITE_SHADER_VERTEX_PATH);
-	auto spriteShaderFragment = readShader(SPRITE_SHADER_FRAGMENT_PATH);
-	spriteShaderProgram = createOGLShaderProgram(spriteShaderVertex, spriteShaderFragment);
-
-	indicesRaw = (uint32_t*)malloc(sizeof(uint32_t) * MAX_INDEX_COUNT);
-	int quadCount = 0;
-	for (int i = 0; i < MAX_INDEX_COUNT; i += 6) {
-		indicesRaw[i + 0] = 0 + quadCount * 4; indicesRaw[i + 1] = 1 + quadCount * 4; indicesRaw[i + 2] = 2 + quadCount * 4;
-		indicesRaw[i + 3] = 1 + quadCount * 4; indicesRaw[i + 4] = 2 + quadCount * 4; indicesRaw[i + 5] = 3 + quadCount * 4;
-		quadCount++;
+	for (int sprite = 0; sprite < MAX_RECT_COUNT; sprite++) {
+		for (int triangle = 0; triangle < 2; triangle++) {
+			for (int j = 0 + triangle; j < (3 + triangle); j++) {
+				spriteShaderIndices.push_back(j + sprite * 4);
+			}
+		}
 	}
 
-	spriteShaderVBORaw = (float*)malloc(sizeof(SpriteShaderVertex) * MAX_VERTEX_COUNT);
-	glGenBuffers(1, &spriteShaderVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, spriteShaderVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(SpriteShaderVertex) * MAX_VERTEX_COUNT, nullptr, GL_DYNAMIC_DRAW);
-
-	// configure vertex attributes
-	glGenVertexArrays(1, &spriteShaderVAO);
-	glBindVertexArray(spriteShaderVAO);
-	// corner coordinates (-0.5, 0,5), (0.5, 0.5), ...
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(SpriteShaderVertex), 0);
-	// texture coordinates
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(SpriteShaderVertex), (const void*)offsetof(SpriteShaderVertex, texCoord));
-	// model index / id
-	glEnableVertexAttribArray(2);
-	glVertexAttribIPointer(2, 1, GL_INT, sizeof(SpriteShaderVertex), (const void*)offsetof(SpriteShaderVertex, modelIndex));
-
-	// initialize model shader storage object
-	modelSSBORaw = (SpriteShaderModel*)malloc(sizeof(SpriteShaderModel) * MAX_RECT_COUNT);
-	glGenBuffers(1, &modelSSBO);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, modelSSBO);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(SpriteShaderModel) * MAX_RECT_COUNT, modelSSBORaw, GL_DYNAMIC_COPY);
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, MODEL_SSBO_BINDING, modelSSBO);
-}
-
-void RenderingWorker::clearMainFBO()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	spriteShader.initialize(readShader(SPRITE_SHADER_VERTEX_PATH), readShader(SPRITE_SHADER_FRAGMENT_PATH));
+	spriteShader.setVertexAttributes< int, int >(MAX_VERTEX_COUNT);
+	spriteShaderModelSSBO.initialize(MAX_RECT_COUNT, spriteShader, SPRITE_SHADER_MODEL_SSBO_BINDING);
 }

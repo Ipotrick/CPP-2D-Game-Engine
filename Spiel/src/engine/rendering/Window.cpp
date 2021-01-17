@@ -28,9 +28,22 @@ bool Window::open(std::string name, uint32_t width, uint32_t height)
 void Window::close()
 {
 	std::unique_lock l(mut);
-	std::unique_lock renderContextLock(renderingContextMut);
+	assert(!bRenderContextLocked);
 	glfwDestroyWindow(glfwWindow);
 	glfwWindow = nullptr;
+}
+
+void Window::update()
+{
+	std::unique_lock l(mut);
+	// glfwPollEvents();
+	if (bSetSize) {
+		glfwSetWindowSize(glfwWindow, width, height);
+		bSetSize = false;
+	}
+	else {
+		glfwGetWindowSize(glfwWindow, (int*)&width, (int*)&height);
+	}
 }
 
 bool Window::staticInit()

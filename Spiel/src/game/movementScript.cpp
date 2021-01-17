@@ -5,7 +5,7 @@ void movementScript(EntityHandle entity, Transform& t, Movement& m, float deltaT
 	if (fabs(m.velocity.x) + fabs(m.velocity.y) < 0.000001) m.velocity = Vec2(0, 0);
 	if (fabs(m.angleVelocity) < 0.000001) m.angleVelocity = 0;
 	t.position += m.velocity * deltaTime;
-	t.rotation += m.angleVelocity * RAD * deltaTime;
+	t.rotaVec = t.rotaVec * RotaVec2(m.angleVelocity * RAD * deltaTime);
 }
 
 void movementScriptNarrow(EntityHandle entity)
@@ -16,5 +16,5 @@ void movementScriptNarrow(EntityHandle entity)
 	if (fabs(m.velocity.x) + fabs(m.velocity.y) < 0.000001) m.velocity = Vec2(0, 0);
 	if (fabs(m.angleVelocity) < 0.000001) m.angleVelocity = 0;
 	t.position += m.velocity * deltaTime;
-	t.rotation += m.angleVelocity * RAD * deltaTime;
+	t.rotaVec = t.rotaVec * RotaVec2(m.angleVelocity * RAD * deltaTime);
 }

@@ -19,6 +19,7 @@ void JobSystem::wait(Tag tag)
 void JobSystem::initialize()
 {
 	std::unique_lock lock(mut);
+	assert(state == State::Uninitialized);
 	state = State::Running;
 
 	threads.reserve(threadCount);
@@ -33,6 +34,7 @@ void JobSystem::initialize()
 void JobSystem::reset()
 {
 	std::unique_lock lock(mut);
+	assert(state == State::Uninitialized);
 	state = State::Uninitialized;
 	workerCV.notify_all();
 
@@ -41,8 +43,8 @@ void JobSystem::reset()
 
 void JobSystem::orphan(Tag tag)
 {
-	assert(state == State::Running);
 	std::unique_lock lock(mut);
+	assert(state == State::Running);
 	if (batches.contains(tag)) {
 		batches[tag].bOrphaned = true;
 	}
@@ -50,8 +52,8 @@ void JobSystem::orphan(Tag tag)
 
 bool JobSystem::finished(Tag tag)
 {
-	assert(state == State::Running);
 	std::unique_lock lock(mut);
+	assert(state == State::Running);
 	assert(batches.contains(tag));
 
 	if (batches[tag].jobsLeft == 0) {
@@ -61,7 +63,7 @@ bool JobSystem::finished(Tag tag)
 	return false;
 }
 
-inline void JobSystem::deleteJobBatch(Tag tag)
+void JobSystem::deleteJobBatch(Tag tag)
 {
 	batches[tag].destructor(batches[tag].memory);
 	delete batches[tag].memory;
@@ -74,7 +76,7 @@ void JobSystem::workerFunction(const uint32_t id)
 	for (;;) {
 		workerCV.wait(lock,
 			[&]() {
-				return !jobQueue.empty() || state == State::Uninitialized;
+				return !jobQueue.empty() || state == State::Uninitialized /* State::Unititialized is also used to notify all running workers to stop */;
 			}
 		);
 		if (state == State::Uninitialized) return;
@@ -88,7 +90,7 @@ void JobSystem::workerFunction(const uint32_t id)
 
 		auto& batch = batches[tag];
 		batch.jobsLeft -= 1;
-		if (batch.jobsLeft == 0) {
+		if (batch.jobsLeft == 0) /* if there are no jobs left in a batch the job batch is completed */ {
 			if (batch.bOrphaned) {
 				deleteJobBatch(tag);
 			}

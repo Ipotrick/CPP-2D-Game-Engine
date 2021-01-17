@@ -14,7 +14,7 @@ public:
 		textElement.textAnchor.setCenterVertical();
 	}
 
-	UICollapsable(const char* title, SmallTextureRef font, Vec2 headerSize = Vec2{100,20})
+	UICollapsable(const char* title, TextureRef font, Vec2 headerSize = Vec2{100,20})
 		:textElement{ title, font }, headSize{ headerSize }
 	{
 		setSize(headerSize);

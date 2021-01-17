@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../engine/rendering/RenderScript.hpp"
-#include "../engine/rendering/OGLTextureRenderBuffer.hpp"
-#include "../engine/rendering/OGLPassShader.hpp"
+#include "../engine/rendering/OpenGLTextureRenderBuffer.hpp"
+#include "../engine/rendering/OpenGLPassShader.hpp"
 #include "../engine/rendering/RenderingWorker.hpp"
 #include "Game.hpp"
 

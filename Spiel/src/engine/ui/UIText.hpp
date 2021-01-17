@@ -13,7 +13,7 @@ public:
 		// UIText:
 		UIAnchor textAnchor;
 		std::string text{ "" };
-		SmallTextureRef fontTexture;
+		TextureRef fontTexture;
 		Vec2 fontSize{ 17.0f / 2.0f, 17.0f };
 		Vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
 	};
@@ -33,7 +33,7 @@ public:
 		this->color = param.color;
 	}
 
-	UIText(const char* str, SmallTextureRef texRef, std::function<void(UIElement*)>&& updateFn = {})
+	UIText(const char* str, TextureRef texRef, std::function<void(UIElement*)>&& updateFn = {})
 		:text{ str }, fontTexture{ texRef }
 	{
 		setUpdateFn(updateFn);
@@ -51,7 +51,7 @@ public:
 	bool isAutoSized() const { return bAutoSize; }
 
 	std::string text{ "" };
-	SmallTextureRef fontTexture;
+	TextureRef fontTexture;
 	Vec2 fontSize{ 17.0f / 2.0f, 17.0f };
 	Vec4 color{ 1.0f, 1.0f, 1.0f, 1.0f };
 	UIAnchor textAnchor;

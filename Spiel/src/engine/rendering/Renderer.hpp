@@ -11,6 +11,7 @@
 #include "RenderBuffer.hpp"
 #include "RenderingWorker.hpp"
 #include "TextureRefManager.hpp"
+#include "../JobSystem.hpp"
 
 #define RENDERER_DEBUG_0
 
@@ -39,6 +40,13 @@ public:
 	* waits for the rendering worker to finish
 	*/
 	void waitTillFinished();
+
+	bool finished()
+	{
+		std::unique_lock lock(workerSharedData.mut);
+		return workerSharedData.state == SharedRenderData::State::waitForFrontEnd ||
+			workerSharedData.state == SharedRenderData::State::reset;
+	}
 
 	/*
 	* returns how many layers got added/ deleted
@@ -102,7 +110,7 @@ public:
 	/*
 	* writes frontbuffer data to the backbuffer and starts the rendering worker
 	*/
-	void startRendering();
+	void render();
 
 	void resetTextureCache() { frontBuffer->resetTextureCache = true; }
 
@@ -113,18 +121,20 @@ public:
 	/*
 	* returns the amount of drawcalls the last rendererd frame
 	*/
-	int getDrawCalls() const { return drawCallCount; }
+	size_t getDrawCallsLastFrame() const { return drawCallCount; }
 
-	TextureRef2 makeTexRef(
-		const TextureInfo& texInfo, 
+	size_t getSpriteCountLastFrame() const { return spriteCountLastFrame; }
+
+	BigTextureRef makeTexRef(
+		const TextureDiscriptor& texInfo, 
 		const Vec2& min = { 0.0f, 0.0f }, 
 		const Vec2& max = { 1.0f, 1.0f }) 
 	{ 
 		return texRefManager.makeRef(texInfo, min, max);
 	}
 
-	SmallTextureRef makeSmallTexRef(	// TODO REMOVE
-		const TextureInfo& texInfo, 
+	TextureRef makeSmallTexRef(	// TODO REMOVE
+		const TextureDiscriptor& texInfo, 
 		const Vec2& min = { 0.0f, 0.0f }, 
 		const Vec2& max = { 1.0f, 1.0f }) 
 	{ 
@@ -134,7 +144,7 @@ public:
 	/*
 	* validaes/ repairs a Texture Ref
 	*/
-	void validateTextureRef(TextureRef2& ref) { texRefManager.validate(ref); }
+	void validateTextureRef(BigTextureRef& ref) { texRefManager.validate(ref); }
 
 	/**
 	 * compile time convertion of coordinate system of vector.
@@ -180,11 +190,12 @@ private:
 	RenderState state{ RenderState::Uninitialized };
 	std::chrono::microseconds renderingTime{ 0 };
 	std::chrono::microseconds syncTime{ 0 };
-	int drawCallCount{ 0 };
+	size_t drawCallCount{ 0 };
+	size_t spriteCountLastFrame{ 0 };
 	TextureRefManager texRefManager;						// TODO refactor, remove loading queue, use frontbuffer loading queue
 	// concurrent data:
 	std::shared_ptr<RenderBuffer> frontBuffer;				// TODO change to unique_ptr
-	std::shared_ptr<SharedRenderData> workerSharedData;	// TODO change to unique_ptr
+	SharedRenderData workerSharedData;	
 	Window* window{ nullptr };
 	std::thread workerThread;
 };

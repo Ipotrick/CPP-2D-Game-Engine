@@ -28,7 +28,7 @@ public:
 		list.setSizeModeY(SizeMode::FillMin);
 
 		{
-			UIText zoomText("", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")));
+			UIText zoomText("", renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png")));
 			zoomText.setAutoSize(true);
 			zoomText.fontSize = { 10,20 };
 			zoomText.setUpdateFn(
@@ -40,7 +40,7 @@ public:
 			list.addChild(ui.createAndGetPtr(zoomText));
 		}
 		{
-			UIText coordText("", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")));
+			UIText coordText("", renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png")));
 			coordText.setAutoSize(true);
 			coordText.fontSize = { 10,20 };
 			coordText.setUpdateFn(
@@ -56,7 +56,7 @@ public:
 			list.addChild(ui.createAndGetPtr(coordText));
 		}
 		{
-			UIText fpsText("", renderer.makeSmallTexRef(TextureInfo("ConsolasAtlas2.png")));
+			UIText fpsText("", renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png")));
 			fpsText.setAutoSize(true);
 			fpsText.fontSize = { 10,20 };
 			fpsText.setUpdateFn(

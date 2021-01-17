@@ -310,7 +310,6 @@ void CollisionSystem::collisionDetection(CollisionSECM secm)
 	for (EntityHandle ent : secm.entityView<Movement, Collider>()) {
 		Movement& mov = secm.getComp<Movement>(ent);
 		if (mov.velocity.length() < 0.00001f) {
-			mov.velocity = Vec2(0, 0);
 			secm.getComp<Collider>(ent).sleeping = true;
 		}
 		else {

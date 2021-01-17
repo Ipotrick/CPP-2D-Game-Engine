@@ -1,6 +1,6 @@
-#include "OGLTextureRenderBuffer.hpp"
+#include "OpenGLTextureRenderBuffer.hpp"
 
-void OGLTexFrameBuffer::initialize(uint32_t width, uint32_t height)
+void OpenGLFrameBuffer::initialize(uint32_t width, uint32_t height)
 {
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -27,28 +27,37 @@ void OGLTexFrameBuffer::initialize(uint32_t width, uint32_t height)
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 }
 
-void OGLTexFrameBuffer::reset()
+void OpenGLFrameBuffer::reset()
 {
 	if (fbo != -1) {
-		glDeleteBuffers(1, &fbo);
-		fbo = -1;
 		glDeleteBuffers(1, &depthBuffer);
 		depthBuffer = -1;
 		glDeleteTextures(1, &tex);
 		tex = -1;
+		glDeleteBuffers(1, &fbo);
+		fbo = -1;
 	}
 }
 
-void OGLTexFrameBuffer::clear()
+void OpenGLFrameBuffer::clear()
 {
 	GLuint clearColor[4] = { 0, 0, 0, 0 };
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glClearBufferuiv(GL_COLOR, 0, clearColor);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
 	glClearBufferuiv(GL_COLOR, 0, clearColor);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
-void OGLTexFrameBuffer::resize(uint32_t width, uint32_t height)
+void OpenGLFrameBuffer::bind()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, getBuffer());
+	GLenum buffers[1] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers(1, buffers);
+}
+
+void OpenGLFrameBuffer::resize(uint32_t width, uint32_t height)
 {
 	assert(fbo != -1);
 	this->width = width;
@@ -59,14 +68,14 @@ void OGLTexFrameBuffer::resize(uint32_t width, uint32_t height)
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 }
 
-void OGLTexFrameBuffer::setMinOp(GLuint op)
+void OpenGLFrameBuffer::setMinOp(GLuint op)
 {
 	assert(fbo != -1);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, op);
 }
 
-void OGLTexFrameBuffer::setMagOp(GLuint op)
+void OpenGLFrameBuffer::setMagOp(GLuint op)
 {
 	assert(fbo != -1);
 	glBindTexture(GL_TEXTURE_2D, tex);

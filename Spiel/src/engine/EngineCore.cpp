@@ -68,12 +68,10 @@ float EngineCore::getDeltaTime(int sampleSize)
 }
 
 Vec2 EngineCore::getWindowSize() {
-	std::lock_guard<std::mutex> l(window.mut);
 	return { static_cast<float>(window.getWidth()), static_cast<float>(window.getHeight()) };
 }
 
 float EngineCore::getWindowAspectRatio() {
-	std::lock_guard<std::mutex> l(window.mut);
 	return static_cast<float>(window.getWidth())/ static_cast<float>(window.getHeight());
 }
 
@@ -119,7 +117,7 @@ void EngineCore::run() {
 			break;
 		}
 		else {
-			renderer.startRendering();
+			renderer.render();
 		}
 
 	}

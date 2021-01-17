@@ -7,14 +7,14 @@
 #include "../engine/entity/EntityComponentStorage.hpp"
 #include "../engine/EngineCore.hpp"
 
-struct SpawnerComp : public CompData {
+struct SpawnerComp {
 };
 
-struct SuckerComp : public CompData {
+struct SuckerComp {
 	UUID spawner;
 };
 
-struct ParticleScriptComp : public CompData {
+struct ParticleScriptComp {
 	ParticleScriptComp() = default;
 	ParticleScriptComp(Vec2 startSize, Vec2 endSize, Vec4 startColor, Vec4 endColor) : startSize{ startSize }, endSize{ endSize }, startColor{ startColor }, endColor{ endColor } {}
 	Vec2 startSize;
@@ -26,16 +26,15 @@ struct ParticleScriptComp : public CompData {
 
 // player component
 
-struct Player : public CompData {
-	Player() : bulletShotLapTimer{ 0.01f }, flameSpawnTimer{ 0.008f } {}
-	LapTimer bulletShotLapTimer;
-	LapTimer flameSpawnTimer;
+struct Player {
+	LapTimer bulletShotLapTimer{ 0.005f };
+	LapTimer flameSpawnTimer{ 0.008f };
 	float power{ 1.0f };
 };
 
 // health component
 
-struct Health : public CompData {
+struct Health {
 	Health(int maxHealth_) :
 		maxHealth{ maxHealth_ },
 		curHealth{ maxHealth_ }
@@ -50,7 +49,7 @@ struct Health : public CompData {
 
 // age component
 
-struct Age : public CompData {
+struct Age {
 	Age(float maxAge_) :
 		maxAge{ maxAge_ },
 		curAge{ 0.0f }
@@ -62,7 +61,7 @@ struct Age : public CompData {
 
 // bullet component
 
-struct Bullet : public CompData {
+struct Bullet {
 	Bullet(int damage_, int hitPoints) :damage{ damage_ }, hitPoints{ hitPoints } {}
 	Bullet() : damage{ 0 } , hitPoints{1} {}
 	int damage;
@@ -71,7 +70,7 @@ struct Bullet : public CompData {
 
 // loading and event trigger component
 
-struct Trigger : public CompData {
+struct Trigger {
 	Trigger(int type_, std::string mapname_) :
 		type{ type_ },
 		mapname{mapname_}
@@ -83,14 +82,14 @@ struct Trigger : public CompData {
 
 // enemy component
 
-struct Enemy : public CompData {
+struct Enemy {
 	Enemy(EntityHandle tar_ = EntityHandle()) : target{ tar_} {}
 	EntityHandle target;
 };
 
 // dummy component
 
-struct Dummy : public CompData {
+struct Dummy {
 	Dummy(EntityHandle player_id_ = EntityHandle()) : player_id{ player_id_} {}
 	EntityHandle player_id;
 };
