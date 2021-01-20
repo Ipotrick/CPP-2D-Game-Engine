@@ -1,8 +1,8 @@
 #include "ParticleScript.hpp"
 
-void particleScript(EntityHandle me, ParticleScriptComp& data, float deltaTime)
+void particleScript(Game& game, EntityHandle me, ParticleScriptComp& data, float deltaTime)
 {
-	auto& world = Game::world;
+	auto& world = game.world;
 	//auto[age, draw, mov] = world.getComps<Age, Draw, Movement>(me);
 	auto& age = world.getComp<Age>(me);
 	auto& draw = world.getComp<Draw>(me);
@@ -11,18 +11,18 @@ void particleScript(EntityHandle me, ParticleScriptComp& data, float deltaTime)
 	float relativeAge = age.curAge / age.maxAge;
 
 	auto linearInterpolation = [relativeAge](auto start, auto end) {
-		return start * (1 - relativeAge) + end * relativeAge;
+		return start * (1.0f - relativeAge) + end * relativeAge;
 	};
 
 	auto quadraticInterpolation = [relativeAge](auto start, auto end) {
 		auto qAge = relativeAge * relativeAge;
-		return start * (1 - qAge) + end * qAge;
+		return start * (1.0f - qAge) + end * qAge;
 	};
 	int str = 2;
 	auto logInterpolation = [relativeAge, str](auto start, auto end) {
-		auto logAge = log(1.71 * relativeAge + 1);
+		float logAge = logf(1.71f * relativeAge + 1.0f);
 		for (int i = 1; i < str; i++)
-			logAge = log(1.71 * logAge + 1);
+			logAge = logf(1.71f * logAge + 1.0f);
 		return start * (1 - logAge) + end * logAge;
 	};
 
@@ -34,7 +34,7 @@ void particleScript(EntityHandle me, ParticleScriptComp& data, float deltaTime)
 	if (world.hasComp<Collider>(me)) {
 		auto& collider = world.getComp<Collider>(me);
 		bool coll = false;
-		for (const auto collision : Game::collisionSystem.collisions_view(me)) {
+		for (const auto collision : game.collisionSystem.collisions_view(me)) {
 			if (world.hasComps<Collider, PhysicsBody>(collision.indexB)) {
 				coll = true;
 			}

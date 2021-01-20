@@ -2,4 +2,4 @@
 
 #include "Game.hpp"
 
-void particleScript(EntityHandle me, ParticleScriptComp& data, float deltaTime);
+void particleScript(Game& game, EntityHandle me, ParticleScriptComp& data, float deltaTime);

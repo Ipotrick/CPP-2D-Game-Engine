@@ -8,6 +8,7 @@
 
 int main() 
 {
+	globalInitialize();
 	Game game;
 	game.run();
 }
@@ -19,6 +20,7 @@ int main()
 
 int main()
 {
+	globalInitialize();
 	MandelbrotViewer mv;
 	mv.initialize("Mandelbrot Viewer", 800ull, 800ull);
 	mv.run();
@@ -31,6 +33,8 @@ int main()
 
 int main()
 {
+	globalInitialize();
+	std::cout << cast<int>(3.2) << std::endl;
 	GUIApp app;
 	app.run();
 }

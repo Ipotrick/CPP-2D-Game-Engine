@@ -253,8 +253,8 @@ public:
 		if (newEntNum > containsVec.size()) {
 			containsVec.resize(newEntNum, false);
 		}
-		if (page(static_cast<EntityHandleIndex>(newEntNum - 1ull)) + 1 > pages.size()) {
-			pages.resize(page(static_cast<EntityHandleIndex>(newEntNum - 1ull)) + 1);
+		if (page(EntityHandleIndex(newEntNum - 1)) + 1 > pages.size()) {
+			pages.resize(page(EntityHandleIndex(newEntNum - 1)) + 1);
 		}
 	}
 	size_t memoryConsumtion()

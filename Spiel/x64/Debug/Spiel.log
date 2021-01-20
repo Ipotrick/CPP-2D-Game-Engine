@@ -46,7 +46,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = 930BC128
+ServiceHubLogSessionKey = 866223F7
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -69,19 +69,77 @@ windir = C:\WINDOWS
 
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  stb_image.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  EngineCore.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  EntityManager.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
   GUIManager.cpp
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  InputManager.cpp
+cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
+  JobSystem.cpp
+  Mat3.cpp
+  Mat4.cpp
+  OpenGLPassShader.cpp
+S:\repos\SpielMappe\Spiel\src\engine\entity\EntityManager.cpp(56,2): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "int", Datenverlust möglich
+  OpenGLShader.cpp
+  OpenGLShaderUtil.cpp
+S:\repos\SpielMappe\Spiel\src\engine\EngineCore.cpp(42,60): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "int", Datenverlust möglich
+  OpenGLTexture.cpp
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLPassShader.cpp(62,45): warning C4244: "Argument": Konvertierung von "float" in "GLint", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLPassShader.cpp(62,27): warning C4244: "Argument": Konvertierung von "float" in "GLint", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLPassShader.cpp(81,45): warning C4244: "Argument": Konvertierung von "float" in "GLint", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLPassShader.cpp(81,27): warning C4244: "Argument": Konvertierung von "float" in "GLint", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLPassShader.cpp(94,45): warning C4244: "Argument": Konvertierung von "float" in "GLint", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLPassShader.cpp(94,27): warning C4244: "Argument": Konvertierung von "float" in "GLint", möglicher Datenverlust
+  OpenGLTextureRenderBuffer.cpp
+  Renderer.cpp
+  RenderingWorker.cpp
+S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShaderUtil.cpp(24,63): warning C4114: Der gleiche Typqualifizierer wurde mehrmals verwendet
+  TextureCache.cpp
+  TextureRefManager.cpp
+  TextureSamplerManager.cpp
+  Window.cpp
+S:\repos\SpielMappe\Spiel\src\engine\rendering\RenderingWorker.cpp(130,20): warning C4244: "Initialisierung": Konvertierung von "float" in "uint32_t", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\RenderingWorker.cpp(131,21): warning C4244: "Initialisierung": Konvertierung von "float" in "uint32_t", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\engine\rendering\RenderingWorker.cpp(207,111): warning C4267: "=": Konvertierung von "size_t" nach "int", Datenverlust möglich
+S:\repos\SpielMappe\Spiel\src\engine\rendering\RenderingWorker.cpp(254,100): warning C4267: "Argument": Konvertierung von "size_t" nach "uint32_t", Datenverlust möglich
+  Spinlock.cpp
+  UUID.cpp
+  DrawFrame.cpp
+  UIAnchor.cpp
+  UIBar.cpp
+  UIButton.cpp
+  UICollapsable.cpp
+  UIFrame.cpp
+  UIManager.cpp
+  UIPair.cpp
+  UISeperator.cpp
+  UIText.cpp
+  CollisionSystem.cpp
+  collision_detection.cpp
+  QuadTree.cpp
+  Game.cpp
+  HealthScript.cpp
+  LoadBallTestMap.cpp
+  LoadRenderTestMap.cpp
+  movementScript.cpp
+  ParticleScript.cpp
+  CollisionConstraintSet.cpp
+  Physics.cpp
+  PhysicsSystem.cpp
+  PhysicsSystem2.cpp
+  PlayerScript.cpp
+  Scripts.cpp
+  YAMLECM.cpp
+  YAMLSerialize.cpp
+  YAMLSerializeCoreComponents.cpp
+  YAMLSerializeGameComponents.cpp
+  YAMLSerializer.cpp
+  SuckerScript.cpp
+  TesterScript.cpp
+  World.cpp
   main.cpp
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(71,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLsizei", Datenverlust möglich (Quelldatei wird kompiliert src\engine\gui\GUIManager.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(71,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLuint", Datenverlust möglich (Quelldatei wird kompiliert src\engine\gui\GUIManager.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(75,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLsizei", Datenverlust möglich (Quelldatei wird kompiliert src\engine\gui\GUIManager.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(75,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLuint", Datenverlust möglich (Quelldatei wird kompiliert src\engine\gui\GUIManager.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(79,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLsizei", Datenverlust möglich (Quelldatei wird kompiliert src\engine\gui\GUIManager.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(79,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLuint", Datenverlust möglich (Quelldatei wird kompiliert src\engine\gui\GUIManager.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(71,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLsizei", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(71,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLuint", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(75,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLsizei", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(75,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLuint", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(79,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLsizei", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
-S:\repos\SpielMappe\Spiel\src\engine\rendering\OpenGLShader.hpp(79,1): warning C4267: "Argument": Konvertierung von "size_t" nach "GLuint", Datenverlust möglich (Quelldatei wird kompiliert src\main.cpp)
   Spiel.vcxproj -> S:\repos\SpielMappe\x64\Debug\Spiel.exe

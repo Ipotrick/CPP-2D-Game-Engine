@@ -5,15 +5,15 @@
 #include <deque>
 
 #include "../rendering/Renderer.hpp"
+#include "../io/InputManager.hpp"
 
 #include "base/GUIRootElement.hpp"
 #include "base/GUIElement.hpp"
-#include "components/GUIBox.hpp"
-#include "components/GUIColumn.hpp"
+#include "components/GUICommonElements.hpp"
 
 namespace gui {
 
-	using ElementVariant = std::variant<std::monostate, Box, FillBox, Column>;
+	using ElementVariant = std::variant<std::monostate, Box, FillBox, Column, GUIButton>;
 
 	struct RootElementHandle {
 		bool valid() const { return index != -1 && version != -1; }
@@ -39,6 +39,7 @@ namespace gui {
 			}
 			else {
 				elements.emplace_back(element);
+				minsizes.resize(elements.size(), Vec2{ 0.0f, 0.0f });
 				index = static_cast<u32>(elements.size() - 1);
 			}
 			return index;
@@ -48,7 +49,7 @@ namespace gui {
 
 		bool isHandleValid(const RootElementHandle& handle) const;
 
-		void draw(DrawContext const& context, Renderer& renderer);
+		void draw(DrawContext const& context, Renderer& renderer, InputManager& in);
 
 		size_t size() const;
 	private: 
@@ -56,6 +57,16 @@ namespace gui {
 		friend void onDraw(Manager&, T&, DrawContext const&, std::vector<Sprite>& ); 
 		template<typename T>
 		friend void onDestroy(Manager&, T&, std::vector<u32>&);
+		template<typename T, typename ... Args>
+		friend void onUpdate(Manager&, T&, const Args& ...);
+		friend Vec2 minsizeOf(Manager&, u32);
+
+		/// Temporary variables for drawing:
+
+		InputManager* in{ nullptr };
+		Renderer const* renderer{ nullptr };
+
+		/// --------------------------------
 
 		struct RootElementVersionPair {
 			Root element; 
@@ -65,10 +76,10 @@ namespace gui {
 
 		std::vector<RootElementVersionPair> rootElements;
 		std::vector<u32> freeRootElementIndices;
-		std::vector<u32> destroylist;						// used as buffer for element indices when destroying elements
-
+		std::vector<u32> destroylist;						// used as buffer for element ids when destroying elements and their children
 
 		std::vector<ElementVariant> elements;
+		std::vector<std::optional<Vec2>> minsizes;			// used to cache min sizes of elements, to minimise redundant calculations
 		std::deque<u32> freeElementIndices;
 	};
 }

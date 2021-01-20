@@ -2,4 +2,4 @@
 
 #include "Game.hpp"
 
-void loadRenderTestMap(float depthRed = 0.5f);
+void loadRenderTestMap(Game& game, float depthRed = 0.5f);

@@ -3,8 +3,8 @@
 
 void PhysicsSystem2::eraseDeadConstraints()
 {
-	size_t end = collConstraints.size();
-	for (size_t i = 0; i < end; i++) {
+	uint32_t end = uint32_t(collConstraints.size());
+	for (uint32_t i = 0; i < end; i++) {
 		if (!collConstraints[i].updated) {
 			collConstraints.erase(i);
 			//as the last one takes place of th erased element we have to check again against this index

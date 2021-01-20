@@ -2,4 +2,4 @@
 
 #include "Game.hpp"
 
-void playerScript(EntityHandle me, Player& data, float deltaTime);
+void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime);

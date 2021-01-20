@@ -1,12 +1,12 @@
 #include "PlayerScript.hpp"
 
-void playerScript(EntityHandle me, Player& data, float deltaTime)
+void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 {
-	World& world = Game::world;
-	auto cmps = Game::world.componentView(me);
+	World& world = game.world;
+	auto cmps = game.world.componentView(me);
 
 	for (auto ent : world.entityView<Player>()) {
-		EngineCore::renderer.getCamera().position = world.getComp<Transform>(ent).position;
+		game.renderer.getCamera().position = world.getComp<Transform>(ent).position;
 	}
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
@@ -42,7 +42,7 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
-			world.addComp(particle, EngineCore::renderer.makeTexRef(TextureDiscriptor("Cloud.png")));
+			world.addComp(particle, game.renderer.makeTexRef(TextureDiscriptor("Cloud.png")));
 			world.spawn(particle);
 			world.getComp<Age>(particle).curAge += rando * 0.02f;
 			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass*100000 / world.getComp<PhysicsBody>(me).mass*10;
@@ -53,25 +53,25 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 	float minPower = 0.05f;
 	float maxPower = 10.0f;
 
-	if (EngineCore::in.keyPressed(Key::LEFT_SHIFT)) {
+	if (game.in.keyPressed(Key::LEFT_SHIFT)) {
 		data.power = std::min(data.power + deltaTime * powerAdjust, maxPower);
 	}
-	if (EngineCore::in.keyPressed(Key::LEFT_CONTROL)) {
+	if (game.in.keyPressed(Key::LEFT_CONTROL)) {
 		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
 	}
-	data.flameSpawnTimer.setLapTime(0.008 * (1 / data.power));
+	data.flameSpawnTimer.setLapTime(0.008f * (1.0f / data.power));
 
-	if (EngineCore::in.keyPressed(Key::Q)) {
+	if (game.in.keyPressed(Key::Q)) {
 		world.getComp<Movement>(me).angleVelocity += 100 * deltaTime;
 	}
-	if (EngineCore::in.keyPressed(Key::E)) {
+	if (game.in.keyPressed(Key::E)) {
 		world.getComp<Movement>(me).angleVelocity -= 100 * deltaTime;
 	}
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
-	if (EngineCore::in.keyPressed(Key::SPACE)) {
+	if (game.in.keyPressed(Key::SPACE)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
-		spawnParticles(num, rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90), 20, rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90) * (0.4f) );
+		spawnParticles(uint32_t(num), rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90), 20, rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90) * (0.4f) );
 
 	}
 
@@ -94,7 +94,7 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 		world.spawn(bullet);
 	};
 
-	if (EngineCore::in.keyJustPressed(Key::C)) {
+	if (game.in.keyJustPressed(Key::C)) {
 		constexpr int BULLET_COUNT{ 300 };
 		constexpr float BULLET_VEL = 10.0f;
 		for (int i = 0; i < BULLET_COUNT; ++i) {
@@ -106,7 +106,7 @@ void playerScript(EntityHandle me, Player& data, float deltaTime)
 		}
 	}
 
-	if (EngineCore::in.keyPressed(Key::F)) {
+	if (game.in.keyPressed(Key::F)) {
 		constexpr float BULLET_VEL = 40.0f;
 		constexpr float SIZE = 0.4f;
 		constexpr float SPREAD_ANGLE = 40.0f;

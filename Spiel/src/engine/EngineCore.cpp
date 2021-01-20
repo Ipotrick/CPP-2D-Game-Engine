@@ -4,26 +4,10 @@ using namespace std::literals::chrono_literals;
 
 EngineCore::EngineCore()
 {
-	/*
-	* there can only be one engine instance at a time
-	*/
-	if (bInstantiated) {
-		std::cerr << "ERRROR: there can only be one instance of an engine at a time!" << std::endl;
-		exit(-1);
-	}
-	bInstantiated = true;
 }
 
 EngineCore::~EngineCore()
 {
-	/*
-	* there can only be one engine instance at a time
-	*/
-	if (!bInstantiated) {
-		std::cerr << "ERRROR: there can only be one instance of an engine at a time!" << std::endl;
-		exit(-1);
-	}
-	bInstantiated = false;
 }
 
 void EngineCore::initialize(std::string windowName, uint32_t windowWidth, uint32_t windowHeight)
@@ -39,15 +23,14 @@ void EngineCore::initialize(std::string windowName, uint32_t windowWidth, uint32
 	renderer.initialize(&window);
 	running = true;
 	deltaTimeQueue.push_back(maxDeltaTime);
-	JobSystem::initialize();
 
-	uiContext = {
-		.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) },
-		.drCorner = { static_cast<float>(window.getWidth()), 0.0f },
-		.scale = 1.0f,
-		.recursionDepth = 1,
-		.drawMode = RenderSpace::PixelSpace
-	};
+	//uiContext = {
+	//	.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) },
+	//	.drCorner = { static_cast<float>(window.getWidth()), 0.0f },
+	//	.scale = 1.0f,
+	//	.recursionDepth = 1,
+	//	.drawMode = RenderSpace::PixelSpace
+	//};
 }
 
 float EngineCore::getDeltaTime(int sampleSize)
@@ -96,8 +79,8 @@ void EngineCore::run() {
 		in.engineUpdate();
 
 		// update rendering:
-		ui.update();
-		ui.draw(uiContext);
+		//ui.update();
+		//ui.draw(uiContext);
 		renderer.waitTillFinished();
 
 		if (!window.isFocused() && in.getFocus() != Focus::Out) {
@@ -109,8 +92,8 @@ void EngineCore::run() {
 			in.returnMouseFocus();
 		}
 		// update the uiContext while window acces is mutex free:
-		uiContext.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) };
-		uiContext.drCorner = { static_cast<float>(window.getWidth()), 0.0f };
+		//uiContext.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) };
+		//uiContext.drCorner = { static_cast<float>(window.getWidth()), 0.0f };
 
 		if (window.shouldClose()) { // if window closes the program ends
 			running = false;
@@ -126,4 +109,9 @@ void EngineCore::run() {
 	window.close();
 
 	destroy();
+}
+
+void globalInitialize()
+{
+	JobSystem::initialize();
 }

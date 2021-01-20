@@ -60,7 +60,7 @@ void Renderer::flushSubmissions() {
 
 	// resize backbuffer layer count:
 	if (backBuffer->layers.size() != frontBuffer->layers.size()) {
-		for (int i = frontBuffer->layers.size(); i < backBuffer->layers.size(); i++) {
+		for (size_t i = frontBuffer->layers.size(); i < backBuffer->layers.size(); i++) {
 			// queue scripts of layers that are destroyed in a resize to a smaller size
 			if (backBuffer->layers[i].script) {
 				backBuffer->scriptDestructQueue.push_back(std::move(backBuffer->layers[i].script));
@@ -158,7 +158,7 @@ void Renderer::reset()
 	frontBuffer->layers.resize(0);
 }
 
-Vec2 Renderer::convertCoordSys(Vec2 coord, RenderSpace from, RenderSpace to)
+Vec2 Renderer::convertCoordSys(Vec2 coord, RenderSpace from, RenderSpace to) const
 {
 	switch (from) {
 	case RenderSpace::PixelSpace:
@@ -230,7 +230,7 @@ Vec2 Renderer::convertCoordSys(Vec2 coord, RenderSpace from, RenderSpace to)
 }
 
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(Vec2 coord) const
 {
 	return {
 		coord.x / window->getWidth() * 2.0f - 1.0f,
@@ -238,19 +238,19 @@ template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::
 	};
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(Vec2 coord) const
 {
 	return (rotate(coord - frontBuffer->camera.position, -frontBuffer->camera.rotation) * frontBuffer->camera.frustumBend * frontBuffer->camera.zoom);
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(Vec2 coord) const
 {
 	const float xScale = (float)window->getWidth() / (float)window->getHeight();
 	coord.x /= xScale;
 	return coord;
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(Vec2 coord) const
 {
 	return {
 		(coord.x + 1.0f) / 2.0f * window->getWidth(),
@@ -258,48 +258,48 @@ template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace:
 	};
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(Vec2 coord) const
 {
 	return rotate(coord / frontBuffer->camera.frustumBend / frontBuffer->camera.zoom, frontBuffer->camera.rotation) + frontBuffer->camera.position;
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(Vec2 coord) const
 {
 	const float xScale = (float)window->getWidth() / (float)window->getHeight();
 	coord.x *= xScale;
 	return coord;
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::PixelSpace>(Vec2 coord) const
 {
 	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(
 		convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord));
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WorldSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WorldSpace>(Vec2 coord) const
 {
 	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(
 		convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord));
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::PixelSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::PixelSpace>(Vec2 coord) const
 {
 	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(
 		convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord));
 }
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::UniformWindowSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::UniformWindowSpace>(Vec2 coord) const
 {
 	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(
 		convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(coord));
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WorldSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WorldSpace>(Vec2 coord) const
 {
 	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::WorldSpace>(
 		convertCoordSys<RenderSpace::UniformWindowSpace, RenderSpace::WindowSpace>(coord));
 }
 
-template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::UniformWindowSpace>(Vec2 coord)
+template<> Vec2 Renderer::convertCoordSys<RenderSpace::WorldSpace, RenderSpace::UniformWindowSpace>(Vec2 coord) const
 {
 	return convertCoordSys<RenderSpace::WindowSpace, RenderSpace::UniformWindowSpace>(
 		convertCoordSys<RenderSpace::WorldSpace, RenderSpace::WindowSpace>(coord));

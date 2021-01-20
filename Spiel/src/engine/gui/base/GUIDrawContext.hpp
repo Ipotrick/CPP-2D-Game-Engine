@@ -166,7 +166,21 @@ namespace gui {
 
 	enum class Listing {
 		Packed,
-		Uniform
+		Spread
+	};
+
+	struct Padding {
+		Padding setTop(float p) const { Padding pad = *this; pad.top = p; return pad; }
+		Padding setBottom(float p) const { Padding pad = *this; pad.bottom = p; return pad; }
+		Padding setLeft(float p) const { Padding pad = *this; pad.left = p; return pad; }
+		Padding setRight(float p) const { Padding pad = *this; pad.right = p; return pad; }
+		Padding setX(float p) const { Padding pad = *this; pad.right = p; pad.left = p; return pad; }
+		Padding setY(float p) const { Padding pad = *this; pad.top = p; pad.bottom = p; return pad; }
+
+		float top{ 0.0f };
+		float bottom{ 0.0f };
+		float left{ 0.0f };
+		float right{ 0.0f };
 	};
 	
 	struct DrawContext {
@@ -212,20 +226,7 @@ namespace gui {
 		 * Tells flexible elements to either fill up all available space or to size themselfs the smallest size possible in vertical direction.
 		 */
 		bool bFlexFillY{ true };
-	};
-
-	struct Padding {
-		Padding setTop(float p) const { Padding pad = *this; pad.top = p; return pad; }
-		Padding setBottom(float p) const { Padding pad = *this; pad.bottom = p; return pad; }
-		Padding setLeft(float p) const { Padding pad = *this; pad.left = p; return pad; }
-		Padding setRight(float p) const { Padding pad = *this; pad.right = p; return pad; }
-		Padding setX(float p) const { Padding pad = *this; pad.right = p; pad.left = p; return pad; }
-		Padding setY(float p) const { Padding pad = *this; pad.top = p; pad.bottom = p; return pad; }
-
-		float top{ 0.0f };
-		float bottom{ 0.0f };
-		float left{ 0.0f };
-		float right{ 0.0f };
+		bool bCursorFocus{ false };
 	};
 
 	inline static DrawContext fit(DrawContext const& context, Vec2 scaledSize, Vec2 place)

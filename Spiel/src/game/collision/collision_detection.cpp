@@ -116,6 +116,7 @@ int fastMod(int i)
 	case 2: return 2;
 	case 3: return 3;
 	case 4: return 0;
+	default: { assert(false);  return 0; }
 	}
 }
 
@@ -221,7 +222,7 @@ SATTestResult partialSATTest(CollidableAdapter const& coll, CollidableAdapter co
 }
 
 CollisionTestResult circleCircleCollisionCheck(CollidableAdapter const& coll, CollidableAdapter const& other) {
-	float dist = circleDist(coll.position, coll.size.x / 2.0, other.position, other.size.x / 2.0);
+	float dist = circleDist(coll.position, coll.size.x / 2.0f, other.position, other.size.x / 2.0f);
 
 	if (dist < 0.0f) {
 		CollisionTestResult result;

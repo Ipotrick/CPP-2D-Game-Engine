@@ -41,9 +41,9 @@ public:
 
 		if (render.didWindowSizeChange()) {
 			bloomFBO1.clear();
-			bloomFBO1.resize(bWidth, bHeight);
+			bloomFBO1.resize(uint32_t(bWidth), uint32_t(bHeight));
 			bloomFBO2.clear();
-			bloomFBO2.resize(bWidth, bHeight);
+			bloomFBO2.resize(uint32_t(bWidth), uint32_t(bHeight));
 		}
 
 		bloomFBO1.clear();

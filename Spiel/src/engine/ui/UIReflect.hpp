@@ -57,7 +57,7 @@ public:
 			rindex = index;
 		}
 		if (rindex >= indexToVersion.size()) {
-			indexToVersion.resize(size_t(rindex + 1), 0);
+			indexToVersion.resize(rindex + 1, 0);
 		}
 		indexToVersion[rindex] += 1;
 		return UIEntityHandle{ rindex, indexToVersion[rindex] };
