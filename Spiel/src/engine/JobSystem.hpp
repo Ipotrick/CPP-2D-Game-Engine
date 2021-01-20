@@ -35,6 +35,8 @@ class JobSystem {
 public:
 	using Tag = uint64_t;
 
+	~JobSystem();
+
 	/**
 	 * Submits a job to be executed in parallel by worker threads.
 	 * The job that is submitted must be an RVALUE.
@@ -50,7 +52,7 @@ public:
 	{
 		std::unique_lock lock(mut);
 		assert(state == State::Running);
-		uint32_t tag = nextJobTag++;
+		Tag tag = nextJobTag++;
 		
 		TJob* jobMemPtr = new TJob(std::move(job));
 		auto newbatch = JobBatch((void*)jobMemPtr, 1ull );
@@ -78,7 +80,7 @@ public:
 	{
 		std::unique_lock lock(mut);
 		assert(state == State::Running);
-		uint32_t tag = nextJobTag++;
+		Tag tag = nextJobTag++;
 
 		const size_t jobListSize = jobList.size();
 		std::vector<TJob, TAllocator>* jobMemPtr = new std::vector<TJob, TAllocator>(std::move(jobList));

@@ -44,7 +44,7 @@ struct Health {
 
 	int maxHealth;
 	int curHealth;
-	UIEntityHandle healthBar = {};
+	//UIEntityHandle healthBar = {};
 };
 
 // age component

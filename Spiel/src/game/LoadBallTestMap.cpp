@@ -1,9 +1,9 @@
 #include "LoadBallTestMap.hpp"
 
-void loadBallTestMap()
+void loadBallTestMap(Game& game)
 {
-	auto& world = Game::world;
-	auto makeWall = [&](int x, int y) {
+	auto& world = game.world;
+	auto makeWall = [&](float x, float y) {
 		auto wall = world.create();
 		auto comp = world.componentView(wall);
 		comp.add<Transform>(Transform(Vec2(x, y), 0));
@@ -105,9 +105,9 @@ void loadBallTestMap()
 		"################################"
 	};
 
-	for (int vert = 0; vert < height; vert++) {
-		for (int hor = 0; hor < width; hor++) {
-			if (map.at(vert * width + hor) == '#') {
+	for (float vert = 0; vert < height - 0.001f; vert++) {
+		for (float hor = 0; hor < width - 0.001f; hor++) {
+			if (map.at(uint32_t(vert * width + hor)) == '#') {
 				//for (int i = 0; i < 100; i++)
 				makeWall(hor, height - vert);
 			}

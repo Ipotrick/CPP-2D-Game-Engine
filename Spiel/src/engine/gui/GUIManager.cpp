@@ -1,7 +1,7 @@
 #include "GUIManager.hpp"
 
-#include "base/GUIDrawElements.hpp"
-#include "base/GUIDestroyElements.hpp"
+#include "components/GUIDrawElements.hpp"
+#include "components/GUIDestroyElements.hpp"
 
 namespace gui {
 
@@ -56,8 +56,12 @@ namespace gui {
 			rootElements[handle.index].version == handle.version;
 	}
 
-	void Manager::draw(DrawContext const& context, Renderer& renderer)
+	void Manager::draw(DrawContext const& context, Renderer& renderer, InputManager& in)
 	{
+		this->in = &in;
+		this->renderer = &renderer;
+		for (auto& size : minsizes) size.reset();		// clear sizes cache
+
 		std::vector<Sprite> sprites;
 		for (auto& [element, version, exists] : rootElements) {
 			if (exists) {
@@ -65,6 +69,8 @@ namespace gui {
 			}
 		}
 		renderer.submit(sprites);
+		this->renderer = nullptr;
+		this->in = nullptr;
 	}
 
 	size_t Manager::size() const

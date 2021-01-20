@@ -75,16 +75,7 @@
     <ClInclude Include="..\Libraries\stb_image\stb_image.hpp">
       <Filter>_stbi</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\AgeScript.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\BasicScripts.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\BloomRScript.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\BulletScript.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\EngineConfig.hpp">
@@ -100,9 +91,6 @@
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\GameSystemUnifroms.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\HealthScript.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\LoadBallTestMap.hpp">
@@ -121,9 +109,6 @@
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\LayerConstants.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\drawScript.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\game\serialization\YAMLECM.hpp">
@@ -378,9 +363,6 @@
     <ClInclude Include="src\engine\EngineCore.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\ui\UICreate.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\types\ShortNames.hpp">
       <Filter>engine\types</Filter>
     </ClInclude>
@@ -432,9 +414,6 @@
     <ClInclude Include="src\guitest\GUITest.hpp">
       <Filter>guitest</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIContainerElement.hpp">
-      <Filter>engine\gui\elements</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\gui\base\GUIElement.hpp">
       <Filter>engine\gui\base</Filter>
     </ClInclude>
@@ -444,28 +423,28 @@
     <ClInclude Include="src\engine\gui\base\GUIDrawUtil.hpp">
       <Filter>engine\gui\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIBox.hpp">
+    <ClInclude Include="src\engine\gui\components\GUIDestroyElements.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\base\GUIDrawElements.hpp">
-      <Filter>engine\gui\base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\gui\base\GUIDestroyElements.hpp">
-      <Filter>engine\gui\base</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIColumn.hpp">
+    <ClInclude Include="src\engine\gui\components\GUIDrawElements.hpp">
       <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIUpdateElements.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUICommonElements.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\Scripts.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\HealthScript.hpp">
+      <Filter>game\hpp</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
       <Filter>_stbi</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\AgeScript.cpp">
-      <Filter>game</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\BulletScript.cpp">
-      <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\Game.cpp">
       <Filter>game</Filter>
@@ -490,9 +469,6 @@
     </ClCompile>
     <ClCompile Include="src\game\TesterScript.cpp">
       <Filter>game\hpp</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\drawScript.cpp">
-      <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="src\game\serialization\YAMLECM.cpp">
       <Filter>game\serialization</Filter>
@@ -602,9 +578,6 @@
     <ClCompile Include="src\engine\JobSystem.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\ui\UICreate.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\types\Spinlock.cpp">
       <Filter>engine\types</Filter>
     </ClCompile>
@@ -631,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\gui\GUIManager.cpp">
       <Filter>engine\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\Scripts.cpp">
+      <Filter>game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

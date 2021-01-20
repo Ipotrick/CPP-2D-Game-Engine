@@ -2,4 +2,4 @@
 
 #include "Game.hpp"
 
-void loadBallTestMap();
+void loadBallTestMap(Game& game);

@@ -304,7 +304,7 @@ void CollisionSystem::collisionDetection(CollisionSECM secm)
 				currentEntity = nextEntity;	//set lastId to new id
 			}
 		}
-		secm.getComp<CollisionsToken>(currentEntity).end = collisionInfos.size();
+		secm.getComp<CollisionsToken>(currentEntity).end = uint32_t(collisionInfos.size());
 	}
 
 	for (EntityHandle ent : secm.entityView<Movement, Collider>()) {

@@ -2,4 +2,4 @@
 
 #include "Game.hpp"
 
-void suckerScript(EntityHandle me, SuckerComp& data, float deltaTime);
+void suckerScript(Game& game, EntityHandle me, SuckerComp& data, float deltaTime);

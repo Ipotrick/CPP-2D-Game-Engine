@@ -1,6 +1,6 @@
 #include "movementScript.hpp"
 
-void movementScript(EntityHandle entity, Transform& t, Movement& m, float deltaTime)
+void movementScript(Game& game, EntityHandle entity, Transform& t, Movement& m, float deltaTime)
 {
 	if (fabs(m.velocity.x) + fabs(m.velocity.y) < 0.000001) m.velocity = Vec2(0, 0);
 	if (fabs(m.angleVelocity) < 0.000001) m.angleVelocity = 0;
@@ -8,11 +8,11 @@ void movementScript(EntityHandle entity, Transform& t, Movement& m, float deltaT
 	t.rotaVec = t.rotaVec * RotaVec2(m.angleVelocity * RAD * deltaTime);
 }
 
-void movementScriptNarrow(EntityHandle entity)
+void movementScriptNarrow(Game& game, EntityHandle entity)
 {
-	Transform& t = Game::world.getComp<Transform>(entity);
-	Movement& m = Game::world.getComp<Movement>(entity);
-	float deltaTime = Game::getDeltaTimeSafe();
+	Transform& t = game.world.getComp<Transform>(entity);
+	Movement& m = game.world.getComp<Movement>(entity);
+	float deltaTime = game.getDeltaTimeSafe();
 	if (fabs(m.velocity.x) + fabs(m.velocity.y) < 0.000001) m.velocity = Vec2(0, 0);
 	if (fabs(m.angleVelocity) < 0.000001) m.angleVelocity = 0;
 	t.position += m.velocity * deltaTime;

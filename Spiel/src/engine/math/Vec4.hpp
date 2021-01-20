@@ -38,6 +38,11 @@ public:
 
     Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
+    static Vec4 From256(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+    {
+        return Vec4{ static_cast<float>(r) / 256.0f, static_cast<float>(g) / 256.0f, static_cast<float>(b) / 256.0f, static_cast<float>(a) / 256.0f };
+    }
+
     // openGL access func
     float const* data() const { return &x; }
 

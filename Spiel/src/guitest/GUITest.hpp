@@ -9,20 +9,25 @@ public:
 	gui::RootElementHandle makeUI()
 	{
 		using namespace gui;
-		return ui.build(Root{
+		return ui.build( 
+			Root{
 			.sizeing = Sizeing().absX(100).absY(100),
 			.placeing = Placeing().absDistLeft(100).absDistTop(100),
 			.color = Vec4{ 1, 0, 0.66, 1 },
-			.child = ui.build(Column{
-				.xalignment = XAlign::Left,
-				.yalignment = YAlign::Top,
-				.listing = Listing::Uniform,
+			.child = ui.build( 
+				Column{
+				.xalignment = XAlign::Center,
+				.yalignment = YAlign::Center,
+				.listing = Listing::Spread,
 				.children = {
-					ui.build(FillBox{}),
-					ui.build(FillBox{}),
-					ui.build(Box{.minsize = {35,35}, .color = {0,0,0,1}}),
-					ui.build(FillBox{}),
-					ui.build(FillBox{}),
+					ui.build(Box{.minsize = {10,10}, .color = {1,1,1,1}}),
+					ui.build(Box{.minsize = {15,15}, .color = {1,1,1,1}}),
+					ui.build( 
+						gui::GUIButton{
+						.size = {25,25},
+						.onPress = [&](GUIButton& self) { std::cout << "Button Press\n"; },
+						.onRelease = [&](GUIButton& self) { std::cout << "Button Release\n"; },
+					}),
 				},
 			})
 		});
@@ -54,7 +59,7 @@ public:
 		context.topleft = Vec2{ 0, static_cast<float>(window.getSize().second) };
 		context.bottomright = Vec2{ static_cast<float>(window.getSize().first), 0 };
 		context.scale = uiscale;
-		ui.draw(context, renderer);
+		ui.draw(context, renderer, in);
 	}
 
 	virtual void destroy() override

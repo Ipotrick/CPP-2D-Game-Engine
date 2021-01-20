@@ -27,56 +27,56 @@ void OpenGLShader::reset()
 	bVertexTypeSet = false;
 }
 
-void OpenGLShader::setUniform(int layoutLocation, int const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, int const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniform1iv(layoutLocation, count, value);
 }
 
-void OpenGLShader::setUniform(int layoutLocation, float const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, float const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniform1fv(layoutLocation, count, value);
 }
 
-void OpenGLShader::setUniform(int layoutLocation, Vec2 const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, Vec2 const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniform2fv(layoutLocation, count, reinterpret_cast<float const*>(value));
 }
 
-void OpenGLShader::setUniform(int layoutLocation, Vec3 const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, Vec3 const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniform3fv(layoutLocation, count, reinterpret_cast<float const*>(value));
 }
 
-void OpenGLShader::setUniform(int layoutLocation, Vec4 const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, Vec4 const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniform4fv(layoutLocation, count, reinterpret_cast<float const*>(value));
 }
 
-void OpenGLShader::setUniform(int layoutLocation, Mat3 const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, Mat3 const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniformMatrix3fv(layoutLocation, count, false, reinterpret_cast<float const*>(value));
 }
 
-void OpenGLShader::setUniform(int layoutLocation, Mat4 const* value, size_t count)
+void OpenGLShader::setUniform(int layoutLocation, Mat4 const* value, uint32_t count)
 {
 	assert(initialized());
 	glUseProgram(program);
 	glUniformMatrix4fv(layoutLocation, count, false, reinterpret_cast<float const*>(value));
 }
 
-void OpenGLShader::bufferVertices(int vertexCount, void* vertexData)
+void OpenGLShader::bufferVertices(uint32_t vertexCount, void* vertexData)
 {
 	assert(bVertexTypeSet);
 	if (vertexCount > maxVertecies) {
@@ -86,7 +86,7 @@ void OpenGLShader::bufferVertices(int vertexCount, void* vertexData)
 	glNamedBufferSubData(vbo, 0, vertexStructSize * vertexCount, vertexData);
 }
 
-void OpenGLShader::renderTo(size_t indexCount, uint32_t* indices, OpenGLFrameBuffer& frameBuffer)
+void OpenGLShader::renderTo(uint32_t indexCount, uint32_t* indices, OpenGLFrameBuffer& frameBuffer)
 {
 	assert(initialized());
 

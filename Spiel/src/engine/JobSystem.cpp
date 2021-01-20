@@ -1,5 +1,10 @@
 #include "JobSystem.hpp"
 
+JobSystem::~JobSystem()
+{
+	reset();
+}
+
 void JobSystem::wait(Tag tag)
 {
 	std::unique_lock lock(mut);
@@ -25,9 +30,7 @@ void JobSystem::initialize()
 	threads.reserve(threadCount);
 	for (uint32_t id = 0; id < threadCount; ++id) {
 		threads.push_back(std::thread(workerFunction, id));
-	}
-	for (auto& thread : threads) {
-		thread.detach();
+		threads.back().detach();
 	}
 }
 
@@ -37,6 +40,8 @@ void JobSystem::reset()
 	assert(state == State::Uninitialized);
 	state = State::Uninitialized;
 	workerCV.notify_all();
+
+	for (auto& thread : threads) thread.join();
 
 	threads.clear();
 }
