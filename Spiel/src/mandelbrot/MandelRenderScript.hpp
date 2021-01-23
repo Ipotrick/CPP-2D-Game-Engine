@@ -21,7 +21,7 @@ public:
 
 		mandelShader.bind();
 		glUniformMatrix4fv(1, 1, GL_FALSE, vp.data());
-		mandelShader.renderToFBO(render.getMainTFBO());
+		mandelShader.renderToFBO(render.getMainFramebuffer());
 	}
 	virtual void onDestroy(RenderingWorker& render) 
 	{

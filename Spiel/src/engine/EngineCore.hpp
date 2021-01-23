@@ -14,7 +14,6 @@
 #include "rendering/RenderTypes.hpp"
 #include "rendering/Window.hpp"
 #include "rendering/Camera.hpp"
-#include "io/InputManager.hpp"
 #include "rendering/Renderer.hpp"
 #include "JobSystem.hpp"
 #include "entity/EntityComponentManagerView.hpp"
@@ -70,17 +69,21 @@ public:
 	 */
 	uint32_t getIteration() { return iteration; }
 
+	void setMaxFPS(float fps)
+	{
+		minimunLoopTime = std::chrono::microseconds(cast<u64>(1.0f / fps * 1'000'000));
+	}
+
 	// TODO REPLACE WINDOWING AND CAMERA UTILITY:
 	Vec2 getWindowSize();											// TODO REPLACE
 	float getWindowAspectRatio();									// TODO REPLACE
-	Window window;											// TODO REPLACE OR ENHANCE
+	Window mainWindow;											// TODO REPLACE OR ENHANCE
 
 	Renderer renderer;
 
-	InputManager in{ window };
-
 private:
 	bool running{ true };
+	bool bInitialized{ false };
 
 	uint32_t iteration{ 0 };
 

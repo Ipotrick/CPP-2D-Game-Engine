@@ -3,10 +3,14 @@
 #include <string>
 #include <mutex>
 #include <cassert>
+#include <array>
+#include <vector>
 
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
 #include "../types/ShortNames.hpp"
+#include "../io/Input.hpp"
+#include "../math/Vec2.hpp"
+
+void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods);
 
 class Window {
 public:
@@ -29,6 +33,11 @@ public:
 	{
 		std::unique_lock l(mut);
 		return { width, height };
+	}
+	Vec2 getSizeVec() const
+	{
+		std::unique_lock l(mut);
+		return Vec2{ cast<f32>(width), cast<f32>(height) };
 	}
 
 	u32 getWidth() const {
@@ -126,7 +135,30 @@ public:
 
 	GLFWwindow* getNativeHandle() { return glfwWindow; }
 
+	bool keyPressed(Key key) const;
+	bool keyJustPressed(Key key) const;
+	bool keyReleased(Key key) const { return !keyJustPressed(key); }
+	bool keyJustReleased(Key key) const;
+	void consumeKeyEvent(Key key);
+	std::vector<KeyEvent> getKeyEventsInOrder() const;
+
+	bool buttonPressed(MouseButton button) const;
+	bool buttonJustPressed(MouseButton button) const;
+	bool buttonJustReleased(MouseButton button) const;
+	void consumeMouseButtonEvent(MouseButton button);
+
+	/**
+	 * \return cursor position relative to the window in window coordinates (-1 < x < 1, -1 < y < 1, x to right, y to top);
+	 */
+	Vec2 getCursorPos() const;
+	/**
+	 * \return previous (the state before the last update) cursor position relative to the window in window coordinates (-1 < x < 1, -1 < y < 1, x to right, y to top);
+	 */
+	Vec2 getPrevCursorPos() const;
+
 private:
+	friend void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods);
+
 	mutable std::mutex mut{};
 	friend class InputManager;
 
@@ -138,6 +170,16 @@ private:
 
 	GLFWwindow* glfwWindow{ nullptr };
 
-	static bool staticInit();
-	inline static bool bGLEWInit{ staticInit() };
+	// Input:
+	std::vector<KeyEvent> keyEventsInOrder;
+	std::array<bool, MAX_KEY_INDEX - MIN_KEY_INDEX + 1> previousKeyStates	= { false };
+	std::array<bool, MAX_KEY_INDEX - MIN_KEY_INDEX + 1> keyStates			= { false };
+	std::array<bool, MAX_KEY_INDEX - MIN_KEY_INDEX + 1> keyHide				= { false };
+	std::array<bool, 8> previousMouseButtonStates							= { false };
+	std::array<bool, 8> mouseButtonStates									= { false };
+	std::array<bool, 8> mouseButtonHide										= { false };
+
+	Vec2 cursorPosition{ 0.0f, 0.0f };
+	Vec2 previousCursorPosition{ 0.0f, 0.0f };
+
 };

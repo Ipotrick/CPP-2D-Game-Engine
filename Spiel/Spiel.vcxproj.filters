@@ -354,9 +354,6 @@
     <ClInclude Include="src\engine\io\InputFocus.hpp">
       <Filter>engine\io</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\io\InputManager.hpp">
-      <Filter>engine\io</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\JobSystem.hpp">
       <Filter>engine</Filter>
     </ClInclude>
@@ -429,9 +426,6 @@
     <ClInclude Include="src\engine\gui\components\GUIDrawElements.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIUpdateElements.hpp">
-      <Filter>engine\gui\elements</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\gui\components\GUICommonElements.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
@@ -440,6 +434,18 @@
     </ClInclude>
     <ClInclude Include="src\game\HealthScript.hpp">
       <Filter>game\hpp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUITextElements.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIDrawTextElements.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIMouseEvent.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\RenderWorkerThread.hpp">
+      <Filter>engine\rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -572,9 +578,6 @@
     <ClCompile Include="src\engine\entity\EntityManager.cpp">
       <Filter>engine\entity</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\io\InputManager.cpp">
-      <Filter>engine\io</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\JobSystem.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -607,6 +610,12 @@
     </ClCompile>
     <ClCompile Include="src\game\Scripts.cpp">
       <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\gui\base\GUIDrawContext.cpp">
+      <Filter>engine\gui\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\RnederWorkerThread.cpp">
+      <Filter>engine\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

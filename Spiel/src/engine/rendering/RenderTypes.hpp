@@ -63,6 +63,7 @@ struct TextureRef {
 */
 class BigTextureRef : private TextureRef {
 public:
+	using TextureRef::valid;
 	const TextureString& getFilename() const
 	{
 		return info.name;
@@ -139,6 +140,7 @@ struct Sprite {
 	Vec2 scale{ 1.0f, 1.0f };
 	std::optional<TextureRef> texRef;
 	Form form{ Form::Rectangle };
+	float cornerRounding{ 0.0f };
 	RenderSpace drawMode{ RenderSpace::WindowSpace };
 
 	bool operator<(Sprite const& rhs) const

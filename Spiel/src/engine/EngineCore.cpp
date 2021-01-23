@@ -1,5 +1,7 @@
 #include "EngineCore.hpp"
 
+#include "rendering/RenderWorkerThread.hpp"
+
 using namespace std::literals::chrono_literals;
 
 EngineCore::EngineCore()
@@ -16,13 +18,14 @@ void EngineCore::initialize(std::string windowName, uint32_t windowWidth, uint32
 	minimunLoopTime = 0ms;	// 10000 microseconds = 10 milliseonds => 100 loops per second
 	maxDeltaTime = 0.02f;
 	deltaTime = 0.0;
-	if (!window.open(windowName, windowWidth, windowHeight)) {
+	if (!mainWindow.open(windowName, windowWidth, windowHeight)) {
 		std::cerr << "errror: could not open window!" << std::endl;
 		exit(-1);
 	}
-	renderer.initialize(&window);
+	renderer.initialize(&mainWindow);
 	running = true;
 	deltaTimeQueue.push_back(maxDeltaTime);
+	bInitialized = true;
 
 	//uiContext = {
 	//	.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) },
@@ -51,20 +54,21 @@ float EngineCore::getDeltaTime(int sampleSize)
 }
 
 Vec2 EngineCore::getWindowSize() {
-	return { static_cast<float>(window.getWidth()), static_cast<float>(window.getHeight()) };
+	return { static_cast<float>(mainWindow.getWidth()), static_cast<float>(mainWindow.getHeight()) };
 }
 
 float EngineCore::getWindowAspectRatio() {
-	return static_cast<float>(window.getWidth())/ static_cast<float>(window.getHeight());
+	return static_cast<float>(mainWindow.getWidth())/ static_cast<float>(mainWindow.getHeight());
 }
 
 void EngineCore::run() {
 	running = true;
 	create();
+	assert(bInitialized == true);
 
 	for(iteration = 0; running; ++iteration) {
 		Timer loopTimer(new_deltaTime);							// messures time taken for frame
-		Waiter loopWaiter(minimunLoopTime, Waiter::Type::BUSY);	// makes sure the loop will take a specified minimum amount of time
+		Waiter loopWaiter(minimunLoopTime, Waiter::Type::SLEEPY);	// makes sure the loop will take a specified minimum amount of time
 
 		deltaTime = micsecToFloat(new_deltaTime);
 		totalDeltaTime += deltaTime;
@@ -75,27 +79,12 @@ void EngineCore::run() {
 
 		update(getDeltaTimeSafe());
 
-		// update in:
-		in.engineUpdate();
-
 		// update rendering:
-		//ui.update();
-		//ui.draw(uiContext);
 		renderer.waitTillFinished();
 
-		if (!window.isFocused() && in.getFocus() != Focus::Out) {
-			in.takeFocus(Focus::Out);
-			in.takeMouseFocus(Focus::Out);
-		}
-		else if (window.isFocused() && in.getFocus() == Focus::Out) {
-			in.returnFocus();
-			in.returnMouseFocus();
-		}
-		// update the uiContext while window acces is mutex free:
-		//uiContext.ulCorner = { 0.0f, static_cast<float>(window.getHeight()) };
-		//uiContext.drCorner = { static_cast<float>(window.getWidth()), 0.0f };
+		mainWindow.update();
 
-		if (window.shouldClose()) { // if window closes the program ends
+		if (mainWindow.shouldClose()) { // if window closes the program ends
 			running = false;
 			break;
 		}
@@ -106,12 +95,17 @@ void EngineCore::run() {
 	}
 	renderer.reset();
 
-	window.close();
+	mainWindow.close();
 
 	destroy();
 }
 
 void globalInitialize()
 {
+	if (!glfwInit()) {
+		std::cerr << "ERROR: failed to initialize GLEW!" << std::endl;
+		exit(-1);
+	}
 	JobSystem::initialize();
+	RenderWorkerThread::init();
 }

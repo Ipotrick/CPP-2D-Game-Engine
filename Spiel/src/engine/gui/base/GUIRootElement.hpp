@@ -9,9 +9,8 @@
 namespace gui {
 
 	struct Root {
-		Sizeing sizeing;
-		Placeing placeing;
-		Vec4 color{ 0,0,0,1 };
+		Sizing sizeing;
+		Placing placeing;
 		u32 child{ INVALID_ELEMENT_ID };
 	};
 }

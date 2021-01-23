@@ -87,8 +87,6 @@ void Game::update(float deltaTime)
 		if (JobSystem::finished(loadingWorkerTag)) {
 			Monke::log("job with tag {0} finished clientside", (uint32_t)loadingWorkerTag);
 			bLoading = false;
-			in.returnFocus();
-			in.returnMouseFocus();
 			world = loadedWorld;
 		}
 	}
@@ -98,12 +96,11 @@ void Game::update(float deltaTime)
 		renderer.submit(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace), LAYER_WORLD_BACKGROUND);
 
 		collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
+		renderer.submit(collisionSystem.getDebugSprites(), LAYER_WORLD_FOREGROUND);
 		physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
+		renderer.submit(physicsSystem2.getDebugSprites(), LAYER_WORLD_FOREGROUND);
 		for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) movementScript(*this, ent, t, m, deltaTime);
-		in.manualUpdate();
 		gameplayUpdate(deltaTime);
-		for (auto& d : collisionSystem.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
-		for (auto& d : physicsSystem2.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
 		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) drawScript(*this, ent, t, d);
 		world.update();
 	}
@@ -111,89 +108,88 @@ void Game::update(float deltaTime)
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	if (in.keyPressed(Key::NP_6, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::NP_6)) {
 		world.physics.linearEffectDir = { 1, 0 };
 		renderer.getCamera().rotation = 90;
 	}
-	if (in.keyPressed(Key::NP_8, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::NP_8)) {
 		world.physics.linearEffectDir = { 0, 1 };
 		renderer.getCamera().rotation = 180;
 	}
-	if (in.keyPressed(Key::LEFT_ALT, Focus::Global) && in.keyPressed(Key::F4, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::LEFT_ALT) && mainWindow.keyPressed(Key::F4)) {
 		EngineCore::quit();
 	}
-	if (in.keyPressed(Key::G)) {
+	if (mainWindow.keyPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
 	}
-	if (in.keyJustPressed(Key::P) && !in.keyPressed(Key::LEFT_SHIFT)) {
+	if (mainWindow.keyJustPressed(Key::P) && !mainWindow.keyPressed(Key::LEFT_SHIFT)) {
 		renderer.getCamera().position = { 0,0 };
 		world = World();
 		loadRenderTestMap(*this, 0.5f);
 	}
-	if (in.keyJustPressed(Key::P) && in.keyPressed(Key::LEFT_SHIFT)) {
+	if (mainWindow.keyJustPressed(Key::P) && mainWindow.keyPressed(Key::LEFT_SHIFT)) {
 		renderer.getCamera().position = { 0,0 };
 		world = World();
 		loadRenderTestMap(*this, 0.3f);
 	}
-	if (in.keyPressed(Key::H)) {
+	if (mainWindow.keyPressed(Key::H)) {
 		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
-	if (in.keyPressed(Key::UP)) {
+	if (mainWindow.keyPressed(Key::UP)) {
 		renderer.getCamera().position -= rotate(Vec2(0.0f, -5.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::LEFT)) {
+	if (mainWindow.keyPressed(Key::LEFT)) {
 		renderer.getCamera().position -= rotate(Vec2(5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::DOWN)) {
+	if (mainWindow.keyPressed(Key::DOWN)) {
 		renderer.getCamera().position -= rotate(Vec2(0.0f, 5.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::RIGHT)) {
+	if (mainWindow.keyPressed(Key::RIGHT)) {
 		renderer.getCamera().position -= rotate(Vec2(-5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::NP_ADD)) {
-		//renderer.getCamera().zoom += 2;
+	if (mainWindow.keyPressed(Key::NP_ADD)) {
 		renderer.getCamera().zoom *= 1.0f + (1.0f * deltaTime);
 	}
-	if (in.keyPressed(Key::NP_SUBTRACT)) {
+	if (mainWindow.keyPressed(Key::NP_SUBTRACT)) {
 		renderer.getCamera().zoom *= 1.0f - (1.0f * deltaTime);
 	}
-	if (in.keyPressed(Key::NP_7)) {
+	if (mainWindow.keyPressed(Key::NP_7)) {
 		renderer.getCamera().rotation -= 100.0f * deltaTime;
 	}
-	if (in.keyPressed(Key::NP_9)) {
+	if (mainWindow.keyPressed(Key::NP_9)) {
 		renderer.getCamera().rotation += 100.0f * deltaTime;
 	}
-	if (in.keyPressed(Key::NP_0)) {
+	if (mainWindow.keyPressed(Key::NP_0)) {
 		renderer.getCamera().rotation = 0.0f;
 		renderer.getCamera().position = { 0, 0 };
 		renderer.getCamera().zoom = 1 / 5.0f;
 		//uiContext.scale = 1.0f;
 	}
-	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
+	if (mainWindow.keyJustPressed(Key::B) && mainWindow.keyReleased(Key::LEFT_SHIFT)) {
 		//if (ui.doesFrameExist("Statiscics")) {
 		//	ui.getFrame("Statiscics").disable();
 		//}
 	}
-	if (in.keyJustPressed(Key::B) && in.keyPressed(Key::LEFT_SHIFT)) {
+	if (mainWindow.keyJustPressed(Key::B) && mainWindow.keyPressed(Key::LEFT_SHIFT)) {
 		//if (ui.doesFrameExist("Statiscics")) {
 		//	ui.getFrame("Statiscics").enable();
 		//}
 	}
-	if (in.keyPressed(Key::PERIOD, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::PERIOD)) {
 		renderer.getLayer(LAYER_WORLD_BACKGROUND).detachRenderScript();
 	}
-	if (in.keyPressed(Key::I)) {
+	if (mainWindow.keyPressed(Key::I)) {
 		//uiContext.scale = clamp(uiContext.scale - deltaTime, 0.1f, 10.0f);
 	}
-	if (in.keyPressed(Key::O)) {
+	if (mainWindow.keyPressed(Key::O)) {
 		//uiContext.scale = clamp(uiContext.scale + deltaTime, 0.1f, 10.0f);
 	}
-	if (in.keyPressed(Key::J)) {
+	if (mainWindow.keyPressed(Key::J)) {
 		world = World();
 		loadBallTestMap(*this);
 		//ui.update();
 	}
-	if (in.keyJustPressed(Key::K)) {
+	if (mainWindow.keyJustPressed(Key::K)) {
 
 		class SaveJob : public IJob {
 		public:
@@ -219,10 +215,8 @@ void Game::gameplayUpdate(float deltaTime)
 		auto tag = JobSystem::submit(SaveJob(world));
 		JobSystem::orphan(tag);
 	}
-	if (in.keyJustPressed(Key::L)) {
+	if (mainWindow.keyJustPressed(Key::L)) {
 		bLoading = true;
-		in.takeFocus(Focus::UI);
-		in.takeMouseFocus(Focus::UI);
 
 		class LoadJob : public IJob {
 		public:
@@ -321,7 +315,7 @@ void Game::destroy()
 
 void Game::cursorManipFunc()
 {
-	Vec2 worldCoord = renderer.getCamera().windowToWorld(in.getMousePosition());
+	Vec2 worldCoord = renderer.getCamera().windowToWorld(mainWindow.getCursorPos());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
 	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
@@ -329,7 +323,7 @@ void Game::cursorManipFunc()
 	//	Sprite(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
 	//	LAYER_FIRST_UI
 	//);
-	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
+	if (!cursorData.locked && mainWindow.buttonPressed(MouseButton::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
@@ -340,7 +334,7 @@ void Game::cursorManipFunc()
 			cursorData.locked = true;
 		}
 	}
-	else if (in.buttonPressed(Button::MB_LEFT)) {
+	else if (mainWindow.buttonPressed(MouseButton::MB_LEFT)) {
 		if (world.isHandleValid(cursorData.lockedID)) {
 			world.getComp<Transform>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
 			if (world.hasComp<Movement>(cursorData.lockedID)) {

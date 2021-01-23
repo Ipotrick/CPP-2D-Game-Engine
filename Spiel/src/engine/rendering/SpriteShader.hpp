@@ -33,8 +33,8 @@ struct SpriteShaderModel {
 			Vec2 texMax;
 			GLint texSampler;
 			GLint isCircle;
+			float cornerRounding;
 			GLint renderSpace;
-			GLint p0;
 		};
 		float data[FLOAT_SIZE];
 	};

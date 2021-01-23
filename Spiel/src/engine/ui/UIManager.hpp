@@ -1,12 +1,11 @@
 #pragma once
 
 #include "UIReflect.hpp"
-#include "../io/InputManager.hpp"
 #include "../util/utils.hpp"
 
 class UIManager : public UIElementPrivilage {
 public:
-	UIManager(Renderer& renderer, InputManager& in)
+	UIManager(Renderer& renderer, Window& in)
 		:renderer{renderer}, in{ in }
 	{ }
 
@@ -121,7 +120,7 @@ private:
 	size_t lastUpdateActiveElements{ 0 };
 	size_t lastUpdateDrwawbleCount{ 0 };
 	Renderer& renderer; 
-	InputManager& in;
+	Window& in;
 	robin_hood::unordered_map<std::string_view, UIEntityIndex> aliasToEntity;
 	robin_hood::unordered_map<UIEntityIndex, std::string_view> entityToAlias;
 	UIElementTuple uiElementTuple;
