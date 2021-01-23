@@ -53,23 +53,23 @@ void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 	float minPower = 0.05f;
 	float maxPower = 10.0f;
 
-	if (game.in.keyPressed(Key::LEFT_SHIFT)) {
+	if (game.mainWindow.keyPressed(Key::LEFT_SHIFT)) {
 		data.power = std::min(data.power + deltaTime * powerAdjust, maxPower);
 	}
-	if (game.in.keyPressed(Key::LEFT_CONTROL)) {
+	if (game.mainWindow.keyPressed(Key::LEFT_CONTROL)) {
 		data.power = std::max(data.power - deltaTime * powerAdjust, minPower);
 	}
 	data.flameSpawnTimer.setLapTime(0.008f * (1.0f / data.power));
 
-	if (game.in.keyPressed(Key::Q)) {
+	if (game.mainWindow.keyPressed(Key::Q)) {
 		world.getComp<Movement>(me).angleVelocity += 100 * deltaTime;
 	}
-	if (game.in.keyPressed(Key::E)) {
+	if (game.mainWindow.keyPressed(Key::E)) {
 		world.getComp<Movement>(me).angleVelocity -= 100 * deltaTime;
 	}
 	world.getComp<Movement>(me).angleVelocity *= 1 - deltaTime * 10;
 
-	if (game.in.keyPressed(Key::SPACE)) {
+	if (game.mainWindow.keyPressed(Key::SPACE)) {
 		auto num = data.flameSpawnTimer.getLaps(deltaTime);
 		spawnParticles(uint32_t(num), rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90), 20, rotate(-cmps.get<Transform>().rotaVec.toUnitX0(), 90) * (0.4f) );
 
@@ -94,7 +94,7 @@ void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 		world.spawn(bullet);
 	};
 
-	if (game.in.keyJustPressed(Key::C)) {
+	if (game.mainWindow.keyJustPressed(Key::C)) {
 		constexpr int BULLET_COUNT{ 300 };
 		constexpr float BULLET_VEL = 10.0f;
 		for (int i = 0; i < BULLET_COUNT; ++i) {
@@ -106,7 +106,7 @@ void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 		}
 	}
 
-	if (game.in.keyPressed(Key::F)) {
+	if (game.mainWindow.keyPressed(Key::F)) {
 		constexpr float BULLET_VEL = 40.0f;
 		constexpr float SIZE = 0.4f;
 		constexpr float SPREAD_ANGLE = 40.0f;

@@ -36,11 +36,11 @@ public:
 
 	void cursorManipFunc();
 
-	inline static World world;
+	World world;
 
-	inline static CursorManipData cursorData;
-	inline static CollisionSystem collisionSystem{ world.submodule<COLLISION_SECM_COMPONENTS>() };
-	inline static PhysicsSystem2 physicsSystem2;
+	CursorManipData cursorData;
+	CollisionSystem collisionSystem{ world.submodule<COLLISION_SECM_COMPONENTS>() };
+	PhysicsSystem2 physicsSystem2;
 
 	// TEMP TODO REMOVE
 	LapTimer spawnerLapTimer{0.0001f};

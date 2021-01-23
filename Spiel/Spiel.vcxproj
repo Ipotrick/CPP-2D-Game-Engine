@@ -35,11 +35,12 @@
     <ClInclude Include="src\engine\gui\components\GUICommonElements.hpp" />
     <ClInclude Include="src\engine\gui\components\GUIDestroyElements.hpp" />
     <ClInclude Include="src\engine\gui\components\GUIDrawElements.hpp" />
-    <ClInclude Include="src\engine\gui\components\GUIUpdateElements.hpp" />
+    <ClInclude Include="src\engine\gui\components\GUIDrawTextElements.hpp" />
+    <ClInclude Include="src\engine\gui\components\GUIMouseEvent.hpp" />
+    <ClInclude Include="src\engine\gui\components\GUITextElements.hpp" />
     <ClInclude Include="src\engine\gui\GUIManager.hpp" />
     <ClInclude Include="src\engine\io\Input.hpp" />
     <ClInclude Include="src\engine\io\InputFocus.hpp" />
-    <ClInclude Include="src\engine\io\InputManager.hpp" />
     <ClInclude Include="src\engine\JobSystem.hpp" />
     <ClInclude Include="src\engine\math\basic_math.hpp" />
     <ClInclude Include="src\engine\math\Mat3.hpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="src\engine\rendering\RenderScript.hpp" />
     <ClInclude Include="src\engine\rendering\RenderSpace.hpp" />
     <ClInclude Include="src\engine\rendering\RenderTypes.hpp" />
+    <ClInclude Include="src\engine\rendering\RenderWorkerThread.hpp" />
     <ClInclude Include="src\engine\rendering\SpriteShader.hpp" />
     <ClInclude Include="src\engine\rendering\TextureCache.hpp" />
     <ClInclude Include="src\engine\rendering\TextureRefManager.hpp" />
@@ -147,8 +149,8 @@
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp" />
     <ClCompile Include="src\engine\EngineCore.cpp" />
     <ClCompile Include="src\engine\entity\EntityManager.cpp" />
+    <ClCompile Include="src\engine\gui\base\GUIDrawContext.cpp" />
     <ClCompile Include="src\engine\gui\GUIManager.cpp" />
-    <ClCompile Include="src\engine\io\InputManager.cpp" />
     <ClCompile Include="src\engine\JobSystem.cpp" />
     <ClCompile Include="src\engine\math\Mat3.cpp" />
     <ClCompile Include="src\engine\math\Mat4.cpp" />
@@ -159,6 +161,7 @@
     <ClCompile Include="src\engine\rendering\OpenGLTextureRenderBuffer.cpp" />
     <ClCompile Include="src\engine\rendering\Renderer.cpp" />
     <ClCompile Include="src\engine\rendering\RenderingWorker.cpp" />
+    <ClCompile Include="src\engine\rendering\RnederWorkerThread.cpp" />
     <ClCompile Include="src\engine\rendering\TextureCache.cpp" />
     <ClCompile Include="src\engine\rendering\TextureRefManager.cpp" />
     <ClCompile Include="src\engine\rendering\TextureSamplerManager.cpp" />

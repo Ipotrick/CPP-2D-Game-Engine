@@ -116,7 +116,7 @@ void UIManager::focusUpdate()
 					if (felement->isEnabled() && felement->isFocusable()) {
 						const auto& area = felement->getFocusArea();
 
-						Vec2 cursorPos = renderer.convertCoordSys(in.getMousePosition(), RenderSpace::WindowSpace, area.drawMode);
+						Vec2 cursorPos = renderer.convertCoordSys(in.getCursorPos(), RenderSpace::WindowSpace, area.drawMode);
 
 						// is cursor in area:
 						if (	cursorPos.x <= area.drCorner.x
@@ -129,7 +129,7 @@ void UIManager::focusUpdate()
 						else {
 							// cursor not over area
 							if (felement->bHoveredOver) {
-								in.returnMouseFocus();
+								//in.returnMouseFocus();
 								felement->onLeave();
 								felement->bHoveredOver = false;
 							}
@@ -138,7 +138,7 @@ void UIManager::focusUpdate()
 					else {
 						if (felement->bHoveredOver) {
 							// if the focused element gets disabled, it's focus gets returnd
-							in.returnMouseFocus();
+							//in.returnMouseFocus();
 							felement->bHoveredOver = false;
 						}
 					}
@@ -161,7 +161,6 @@ void UIManager::focusUpdate()
 		// for all unfocused elements:
 		for (UIFocusable* fe : focusedElementCandidates) {
 			if (fe->bHoveredOver) {
-				in.returnMouseFocus();
 				fe->onLeave();
 				fe->bHoveredOver = false;
 			}
@@ -173,7 +172,6 @@ void UIManager::focusUpdate()
 			felement->bHoveredOver = true;
 		}
 		else {
-			in.takeMouseFocus(felement->hoverFocus);
 			felement->onEnter();
 			felement->bHoveredOver = true;
 		}
@@ -189,7 +187,7 @@ void UIManager::clickableUpdate()
 					auto* element = &container.get(uient);
 					UIClickable* celement = static_cast<UIClickable*>(element);
 
-					bool leftClick = in.buttonPressed(Button::MB_LEFT, celement->hoverFocus);
+					bool leftClick = in.buttonPressed(MouseButton::MB_LEFT);
 
 					if (celement->isEnabled() && celement->bHoveredOver) {
 						if (leftClick) {

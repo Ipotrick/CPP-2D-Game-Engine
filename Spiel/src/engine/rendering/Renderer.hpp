@@ -11,7 +11,6 @@
 #include "RenderBuffer.hpp"
 #include "RenderingWorker.hpp"
 #include "TextureRefManager.hpp"
-#include "../JobSystem.hpp"
 
 #define RENDERER_DEBUG_0
 
@@ -41,12 +40,7 @@ public:
 	*/
 	void waitTillFinished();
 
-	bool finished()
-	{
-		std::unique_lock lock(workerSharedData.mut);
-		return workerSharedData.state == SharedRenderData::State::waitForFrontEnd ||
-			workerSharedData.state == SharedRenderData::State::reset;
-	}
+	bool finished();
 
 	/*
 	* returns how many layers got added/ deleted
@@ -194,10 +188,12 @@ private:
 	size_t spriteCountLastFrame{ 0 };
 	TextureRefManager texRefManager;						// TODO refactor, remove loading queue, use frontbuffer loading queue
 	// concurrent data:
-	std::shared_ptr<RenderBuffer> frontBuffer;				// TODO change to unique_ptr
+	std::unique_ptr<RenderBuffer> frontBuffer;
 	SharedRenderData workerSharedData;	
 	Window* window{ nullptr };
-	std::thread workerThread;
+	//std::thread workerThread;
+	RenderingWorker worker{ &workerSharedData };
+	u64 jobTag{ 0xFFFFFFFFFFFFFFFF };
 };
 
 template<> Vec2 Renderer::convertCoordSys<RenderSpace::PixelSpace, RenderSpace::WindowSpace>(Vec2 coord) const;

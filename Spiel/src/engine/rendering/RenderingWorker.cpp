@@ -68,12 +68,13 @@ void openGLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
 	if (std::strcmp(_severity,"NOTIFICATION")) {
 		printf("OpenGL error [%d]: %s of %s severity, raised from %s: %s\n",
 			id, _type, _severity, _source, msg);
-		__debugbreak();
+		//__debugbreak();
 	}
 }
 
-void RenderingWorker::initialize(Window* window)
+void RenderingWorker::initialize()
 {
+	auto& window = data->window;
 	assert(!bInitialized);
 	bInitialized = true;
 	window->takeRenderingContext();
@@ -98,29 +99,11 @@ void RenderingWorker::initialize(Window* window)
 	passShader.initialize(PASS_SHADER_FRAGMENT_PATH);
 	texCache.initialize();
 
-	std::unique_lock switch_lock(data->mut);
-	data->run = true;
-	data->state = SharedRenderData::State::waitForFrontEnd;
-
 }
 
-void RenderingWorker::update(Window* window)
+void RenderingWorker::update()
 {
-	/**
-	 * TODO
-	 * The reset function is bugged.
-	 * when resetting things like texture cache are not reset correctly:
-	 * a texcache reset should invalidate all textures (all opengl ressources), so that they are loaded newly.
-	 */
-
-	//if (windowOfLastFrame != window) /* when the window changes, we need to reset and initialize new with the rendering context of the new window */
-	//{
-	//	if (windowOfLastFrame != nullptr) {
-	//		reset(windowOfLastFrame);
-	//	}
-	//	initialize(window);
-	//}
-
+	auto& window = data->window;
 	// update framebuffer sizes to window size:
 	auto [width, height] = window->getSize();
 	if (width != lastWindowWidth or height != lastWindowHeight) {
@@ -165,31 +148,16 @@ void RenderingWorker::update(Window* window)
 	window->swapBuffers();
 }
 
-void RenderingWorker::operator()()
-{
-	initialize(data->window);
-	
-	while (waitForFrontend()) {
-		update(data->window);
-	}
-
-	reset(data->window);
-}
-
-void RenderingWorker::reset(Window* window)
+void RenderingWorker::reset()
 {
 	assert(bInitialized);
+	auto& window = data->window;
 	bInitialized = false;
 	mainFramebuffer.reset();
 	spriteShaderModelSSBO.reset();
 	passShader.reset();
 	windowOfLastFrame = nullptr;
 	texCache.reset();
-
-	std::unique_lock<std::mutex> switch_lock(data->mut);
-	data->run = false;
-	data->state = SharedRenderData::State::reset;
-	data->cond.notify_one();
 	window->releaseRenderingContext();
 }
 
@@ -210,16 +178,6 @@ void RenderingWorker::drawLayer(RenderLayer& layer, Mat4 const& cameraViewProj, 
 	if (layer.script) {
 		layer.script->onUpdate(*this, layer);
 	}
-}
-
-bool RenderingWorker::waitForFrontend()
-{
-	Timer t(data->new_renderSyncTime);
-	std::unique_lock switch_lock(data->mut);
-	data->state = SharedRenderData::State::waitForFrontEnd;
-	data->cond.notify_one();
-	data->cond.wait(switch_lock, [&]() { return data->state == SharedRenderData::State::running; });
-	return data->run;
 }
 
 size_t RenderingWorker::drawBatch(std::vector<Sprite>& sprites, Mat4 const& worldVPMat, Mat4 const& pixelVPMat, size_t index, OpenGLFrameBuffer& framebuffer)
@@ -276,6 +234,7 @@ void RenderingWorker::generateVertices(Sprite const& d, int samplerSlot, Mat4 co
 	model.texMax = maxTex;
 	model.texSampler = samplerSlot;
 	model.isCircle = static_cast<GLint>(d.form);
+	model.cornerRounding = d.cornerRounding;
 	model.renderSpace = static_cast<GLint>(d.drawMode);
 
 	int32_t modelIndex = (uint32_t)spriteShaderCPUModelBuffer.size() - 1;

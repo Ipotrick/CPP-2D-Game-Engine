@@ -9,27 +9,49 @@ public:
 	gui::RootElementHandle makeUI()
 	{
 		using namespace gui;
+		
 		return ui.build( 
-			Root{
-			.sizeing = Sizeing().absX(100).absY(100),
-			.placeing = Placeing().absDistLeft(100).absDistTop(100),
-			.color = Vec4{ 1, 0, 0.66, 1 },
-			.child = ui.build( 
+		Root{
+		.sizeing	= { 200, 600 },
+		.placeing	= Placing().relDistLeft(0.5).relDistBottom(0.5f),
+		.child		= ui.build( 
+			FillBox{
+			.color		= Vec4::From256( 100, 100, 150, 255 ),
+			.xalignment = XAlign::Center,
+			.yalignment = YAlign::Center,
+			.child		= ui.build(
 				Column{
-				.xalignment = XAlign::Center,
-				.yalignment = YAlign::Center,
-				.listing = Listing::Spread,
-				.children = {
-					ui.build(Box{.minsize = {10,10}, .color = {1,1,1,1}}),
-					ui.build(Box{.minsize = {15,15}, .color = {1,1,1,1}}),
-					ui.build( 
-						gui::GUIButton{
-						.size = {25,25},
-						.onPress = [&](GUIButton& self) { std::cout << "Button Press\n"; },
-						.onRelease = [&](GUIButton& self) { std::cout << "Button Release\n"; },
+				.children	= {
+					ui.build(
+						FillBox{
+						.xalignment = XAlign::Center,
+						.yalignment = YAlign::Center,
+						.child		= ui.build(StaticText{.str = "Test UI Element"}),
 					}),
-				},
-			})
+					ui.build(
+						gui::Button{
+						.size	= { 25, 25 },
+						.onRelease = [&](Button& self) { std::cout << "button1\n"; },
+					}),
+					ui.build(
+						gui::Button{
+						.size	= { 25, 25 },
+						.onRelease = [&](Button& self) { std::cout << "button2\n"; },
+					}),
+					ui.build(
+						Box{
+						.size	= { 190, 30 }, 
+						.child	= ui.build(DragField{})
+					}),
+					ui.build(
+						TextInput{
+							.size = {190, 50},
+							.onStore = [](std::string str) { std::cout << str << std::endl; },
+							.bClearOnEnter = true,
+					}),
+					}
+				}),
+			}),
 		});
 	}
 
@@ -37,29 +59,25 @@ public:
 	{
 		initialize("GUI Test", 1000, 1000);
 		handle = makeUI();
+		handle2 = makeUI();
+		setMaxFPS(144);
 	}
 
-	virtual void update(float deltaTime) override 
+	virtual void update(float deltaTime) override
 	{
-		if (in.keyJustPressed(Key::A)) {
+		ui.draw(renderer, mainWindow, deltaTime);
+		if (mainWindow.keyJustPressed(Key::A)) {
 			if (ui.isHandleValid(handle)) {
 				ui.destroy(handle);
 			}
 		}
-		if (in.keyJustPressed(Key::S)) {
+		if (mainWindow.keyJustPressed(Key::S)) {
 			if (!ui.isHandleValid(handle)) {
 				handle = makeUI();
 			}
 		}
-		if (in.keyJustPressed(Key::D)) {
-			std::cout << "there currently exist " << ui.size() << " ui elements " << std::endl;
-		}
-
-		gui::DrawContext context;
-		context.topleft = Vec2{ 0, static_cast<float>(window.getSize().second) };
-		context.bottomright = Vec2{ static_cast<float>(window.getSize().first), 0 };
-		context.scale = uiscale;
-		ui.draw(context, renderer, in);
+		if (mainWindow.keyPressed(Key::NP_ADD)) { ui.globalScaling *= 1.0f + deltaTime; }
+		if (mainWindow.keyPressed(Key::NP_SUBTRACT)) { ui.globalScaling /= 1.0f + deltaTime; }
 	}
 
 	virtual void destroy() override
@@ -68,6 +86,7 @@ public:
 
 private:
 	gui::RootElementHandle handle;
+	gui::RootElementHandle handle2;
 	gui::Manager ui;
 	float uiscale{ 1.0f };
 };

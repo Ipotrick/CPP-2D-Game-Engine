@@ -3,135 +3,12 @@
 #include "../../types/ShortNames.hpp"
 
 #include "../../math/Vec.hpp"
+#include "../../rendering/RenderSpace.hpp"
 
 namespace gui {
-	struct Sizeing {
-		enum class Mode {
-			Relative,
-			Absolute
-		};
-
-		Sizeing absX(float size) const
-		{
-			auto ret = *this;
-			ret.xmode = Mode::Absolute;
-			ret.x = size;
-			return ret;
-		}
-
-		Sizeing absY(float size) const
-		{
-			auto ret = *this;
-			ret.ymode = Mode::Absolute;
-			ret.y = size;
-			return ret;
-		}
-
-		Sizeing relX(float size) const
-		{
-			auto ret = *this;
-			ret.xmode = Mode::Relative;
-			ret.x = size;
-			return ret;
-		}
-
-		Sizeing relY(float size) const
-		{
-			auto ret = *this;
-			ret.ymode = Mode::Relative;
-			ret.y = size;
-			return ret;
-		}
-
-		Mode xmode{ Mode::Relative };
-		float x{ 1.0f };
-		Mode ymode{ Mode::Relative };
-		float y{ 1.0f };
-	};
-
-	struct Placeing {
-		enum class XMode {
-			RelativeLeft,
-			RelativeRight,
-			AbsoluteLeft,
-			AbsoluteRight
-		};
-
-		enum class YMode {
-			RelativeTop,
-			RelativeBottom,
-			AbsoluteTop,
-			AbsoluteBottom
-		};
-
-		Placeing absDistLeft(float dist) const
-		{
-			auto ret = *this;
-			ret.xmode = XMode::AbsoluteLeft;
-			ret.x = dist;
-			return ret;
-		}
-
-		Placeing absDistRight(float dist) const
-		{
-			auto ret = *this;
-			ret.xmode = XMode::AbsoluteRight;
-			ret.x = dist;
-			return ret;
-		}
-
-		Placeing absDistTop(float dist) const
-		{
-			auto ret = *this;
-			ret.ymode = YMode::AbsoluteTop;
-			ret.y = dist;
-			return ret;
-		}
-
-		Placeing absDistBottom(float dist) const
-		{
-			auto ret = *this;
-			ret.ymode = YMode::AbsoluteBottom;
-			ret.y = dist;
-			return ret;
-		}
-
-		Placeing relDistLeft(float dist) const
-		{
-			auto ret = *this;
-			ret.xmode = XMode::RelativeLeft;
-			ret.x = dist;
-			return ret;
-		}
-
-		Placeing relDistRight(float dist) const
-		{
-			auto ret = *this;
-			ret.xmode = XMode::AbsoluteRight;
-			ret.x = dist;
-			return ret;
-		}
-
-		Placeing relDistTop(float dist) const
-		{
-			auto ret = *this;
-			ret.ymode = YMode::RelativeTop;
-			ret.y = dist;
-			return ret;
-		}
-
-		Placeing relDistBottom(float dist) const
-		{
-			auto ret = *this;
-			ret.ymode = YMode::RelativeBottom;
-			ret.y = dist;
-			return ret;
-		}
-
-		XMode xmode{ XMode::RelativeLeft };
-		float x{ 0.5 };
-		YMode ymode{ YMode::RelativeTop };
-		float y{ 0.5 };
+	enum class Mode {
+		Relative,
+		Absolute
 	};
 
 	enum class XAlign {
@@ -164,23 +41,27 @@ namespace gui {
 		Center
 	};
 
-	enum class Listing {
-		Packed,
+	enum class Packing {
+		Tight,
 		Spread
 	};
 
 	struct Padding {
-		Padding setTop(float p) const { Padding pad = *this; pad.top = p; return pad; }
-		Padding setBottom(float p) const { Padding pad = *this; pad.bottom = p; return pad; }
-		Padding setLeft(float p) const { Padding pad = *this; pad.left = p; return pad; }
-		Padding setRight(float p) const { Padding pad = *this; pad.right = p; return pad; }
-		Padding setX(float p) const { Padding pad = *this; pad.right = p; pad.left = p; return pad; }
-		Padding setY(float p) const { Padding pad = *this; pad.top = p; pad.bottom = p; return pad; }
+		Padding absTop(float p) const;
+		Padding absBottom(float p) const;
+		Padding absLeft(float p) const;
+		Padding absRight(float p) const;
+		Padding absY(float p) const;
+		Padding absX(float p) const;
 
-		float top{ 0.0f };
-		float bottom{ 0.0f };
-		float left{ 0.0f };
-		float right{ 0.0f };
+		float top{ 5.0f };
+		float bottom{ 5.0f };
+		float left{ 5.0f };
+		float right{ 5.0f };
+		Mode topmode{ Mode::Absolute };
+		Mode bottommode{ Mode::Absolute };
+		Mode leftmode{ Mode::Absolute };
+		Mode rightmode{ Mode::Absolute };
 	};
 	
 	struct DrawContext {
@@ -199,12 +80,24 @@ namespace gui {
 
 		float bottom() const { return bottomright.y; }
 
+		/**
+		 * \param dist SCALED absolute size that should be cut from the left.
+		 */
 		void cutLeft(float dist) { topleft.x += dist; }
 
+		/**
+		 * \param dist SCALED absolute size that should be cut from the right.
+		 */
 		void cutRight(float dist) { bottomright.x -= dist; }
 
+		/**
+		 * \param dist SCALED absolute size that should be cut from the top.
+		 */
 		void cutTop(float dist) { topleft.y -= dist; }
 
+		/**
+		 * \param dist SCALED absolute size that should be cut from the bottom.
+		 */
 		void cutBottom(float dist) { bottomright.y += dist; }
 
 		void assertState() const
@@ -218,6 +111,7 @@ namespace gui {
 		RenderSpace renderSpace{ RenderSpace::PixelSpace };
 		float renderDepth{ 0.0f };
 		float scale{ 1.0f };
+		u32 root{ 0xFFFFFFFF };
 		/**
 		 * Tells flexible elements to either fill up all available space or to size themselfs the smallest size possible in the horizontal direction.
 		 */
@@ -226,14 +120,77 @@ namespace gui {
 		 * Tells flexible elements to either fill up all available space or to size themselfs the smallest size possible in vertical direction.
 		 */
 		bool bFlexFillY{ true };
-		bool bCursorFocus{ false };
 	};
 
-	inline static DrawContext fit(DrawContext const& context, Vec2 scaledSize, Vec2 place)
+	struct Sizing {
+
+		Sizing absX(float size) const;
+
+		Sizing absY(float size) const;
+
+		Sizing relX(float size) const;
+
+		Sizing relY(float size) const;
+
+		float x{ 1.0f };
+		float y{ 1.0f };
+		Mode xmode{ Mode::Absolute };
+		Mode ymode{ Mode::Absolute };
+	};
+
+	/**
+	 * \param sizeing defines the size paramters relative to the given context parameter.
+	 * \param context is the relative frame ans scaling used to determine the size.
+	 * \return size SCALED by the context.scale.
+	 */
+	static constexpr Vec2 getSize(const Sizing& sizeing, const DrawContext& context)
 	{
-		DrawContext newcontext	= context;
-		newcontext.topleft		= place + Vec2{ -scaledSize.x, scaledSize.y } * 0.5;
-		newcontext.bottomright	= place - Vec2{ -scaledSize.x, scaledSize.y } * 0.5;
-		return newcontext;
+		return Vec2{
+			sizeing.xmode == Mode::Absolute ? sizeing.x * context.scale : sizeing.x * context.size().x,
+			sizeing.ymode == Mode::Absolute ? sizeing.y * context.scale : sizeing.y * context.size().y,
+		};
 	}
+
+	struct Placing {
+		enum class XMode {
+			RelativeLeft,
+			RelativeRight,
+			AbsoluteLeft,
+			AbsoluteRight
+		};
+
+		enum class YMode {
+			RelativeTop,
+			RelativeBottom,
+			AbsoluteTop,
+			AbsoluteBottom
+		};
+
+		Placing absDistLeft(float dist) const;
+
+		Placing absDistRight(float dist) const;
+
+		Placing absDistTop(float dist) const;
+
+		Placing absDistBottom(float dist) const;
+
+		Placing relDistLeft(float dist) const;
+
+		Placing relDistRight(float dist) const;
+
+		Placing relDistTop(float dist) const;
+
+		Placing relDistBottom(float dist) const;
+
+		void move(Vec2 dist, const DrawContext& context, const Sizing& sizing);
+
+		float x{ 0.5 };
+		float y{ 0.5 };
+		XMode xmode{ XMode::RelativeLeft };
+		YMode ymode{ YMode::RelativeTop };
+	};
+
+	void fit(DrawContext& context, Vec2 scaledSize, Vec2 place);
+
+	void fit(DrawContext& context, Padding const& padding);
 }

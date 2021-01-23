@@ -3,13 +3,16 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
-enum class Button {
+enum class MouseButton {
 	MB_LEFT = 0,
 	MB_RIGHT = 1,
 	MB_MIDDLE = 2,
 	MB_4 = 3,
 	MB_5 = 4
 };
+
+static inline constexpr unsigned int MIN_MOUSE_BUTTON_INDEX{ 0 };
+static inline constexpr unsigned int MAX_MOUSE_BUTTON_INDEX{ 4 };
 
 enum class Key {
 
@@ -138,5 +141,17 @@ MENU              = 348
 
 };
 
-inline static constexpr int MAX_KEY_INDEX = 348;
-inline static constexpr int MIN_KEY_INDEX = 32;
+inline static constexpr unsigned int MAX_KEY_INDEX = 348;
+inline static constexpr unsigned int MIN_KEY_INDEX = 32;
+
+struct KeyEvent {
+	enum class Type {
+		None,
+		JustPressed,
+		Pressed,
+		JustReleased,
+	};
+
+	Key key{ 0 };
+	Type type{ Type::None };
+};

@@ -11,6 +11,7 @@ struct ModelUniform {
 	vec2 texmax;
 	int texId;
 	int isCircle;
+	float cornerRounding;
 	/*
 	 *	render space = 0 => world space
 	 *  render space = 1 => window space
@@ -18,7 +19,6 @@ struct ModelUniform {
 	 *	render space = 3 => pixel space
 	*/
 	int renderSpace;
-	int entityId;
 };
 
 layout(std430, binding = 2) buffer ModelData {
@@ -26,21 +26,28 @@ layout(std430, binding = 2) buffer ModelData {
 };
 
 in vec2 v_texCoord;
-in vec2 v_circleCoord;
+in vec2 v_relativeCoord;
 flat in int v_modelID;
 
 layout(location = 0) out vec4 o_color;
 
+const float EDGE_SMOOTHING = 0.1f;
+
 void main() 
 {
-	ModelUniform model = models[v_modelID];
+	const ModelUniform model = models[v_modelID];
 
 	vec4 color = model.color;
-	if (model.texId >= 0) {
-		color *= texture2D(texSampler[model.texId], v_texCoord);
-	}
+	if (model.texId >= 0) { color *= texture2D(texSampler[model.texId], v_texCoord); }
 
-	if ((color.a == 0.0f /* is fragment completely transparent */) || (model.isCircle == 1 && length(v_circleCoord) > 0.5f /* is fragment in circle and is fragment in circle mode */)) {
+	const vec2 model_coord = abs(model.scale * v_relativeCoord);
+	const float rounding_radius = max(model.cornerRounding * 2.0f, 0.00000001f);		// max cause rounding_radius must be >0 for of smoothstep stability
+	const vec2 inner_size = model.scale - rounding_radius;
+	const vec2 clamped_inner_coord = clamp(model_coord, vec2(0,0), inner_size);
+	const float distance_to_inner_rect = length(model_coord - clamped_inner_coord);
+	color.a *= smoothstep(rounding_radius * (1.0f + EDGE_SMOOTHING * 0.5f), rounding_radius * (1.0f - EDGE_SMOOTHING * 0.5f), distance_to_inner_rect);
+
+	if ((color.a == 0.0f) || (model.isCircle == 1 && length(v_relativeCoord) > 1.0f )) {
 		discard;
 	} else {
 		o_color = color;

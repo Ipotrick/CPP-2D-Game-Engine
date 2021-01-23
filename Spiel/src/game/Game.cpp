@@ -7,18 +7,18 @@
 #include "serialization/YAMLSerializer.hpp"
 
 #include "movementScript.hpp"
-#include "drawScript.hpp"
 #include "LayerConstants.hpp"
-#include "BasicScripts.hpp"
 #include "ParticleScript.hpp"
 #include "SuckerScript.hpp"
 #include "TesterScript.hpp"
-#include "../engine/ui/UICreate.hpp"
+#include "PlayerScript.hpp"
+#include "HealthScript.hpp"
 
 #include "BloomRScript.hpp"
 
 #include "LoadBallTestMap.hpp"
 #include "LoadRenderTestMap.hpp"
+#include "Scripts.hpp"
 
 static int makeID()
 {
@@ -56,20 +56,6 @@ Game::Game()
 	collisionSystem.disableColliderDetection(Collider::PARTICLE);
 }
 
-#define UI_CREATE(parent, code, Type, name) \
-{ \
-	Type name; \
-	code \
-	parent.addChild(EngineCore::ui.createAndGetPtr(name)); \
-}
-
-#define UI_TEXT(parent, code)		UI_CREATE(parent, code, UIText, me)
-
-#define UI_SEPERATOR(parent, code)	UI_CREATE(parent, code, UISeperator, me)
-
-#define UI_TEXT_UPDATE(code) \
-me.setUpdateFn([&](UIElement* e){ UIText& me = *((UIText*)e); code });
-
 void Game::create() {
 	world.setOnRemCallback<Health>(onHealthRemCallback);
 
@@ -82,7 +68,7 @@ void Game::create() {
 	const auto font = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png"));
 
 #ifdef _DEBUG
-	loadBallTestMap();
+	loadBallTestMap(*this);
 #else
 	std::ifstream ifstream("world.yaml");
 	if (ifstream.good()) {
@@ -93,132 +79,6 @@ void Game::create() {
 	}
 #endif
 
-	auto makeRenderStatsUI = [&](auto& parent) {
-		UICollapsable c("Rendering Statics:", font);
-		c.setHeadLength(20);
-		{
-			UIList8 l;
-			l.setSizeModeY(SizeMode::FillMin);
-			l.setSizeModeX(SizeMode::FillUp);
-			l.setPadding({ 5.0f, 0.0f });
-			{
-				UIPair uicountPair;
-				uicountPair.setHorizontal();
-				{
-					UIText uiCountText("ui count:", font);
-					uiCountText.setSize(textFieldSize);
-					uicountPair.setFirst(ui.createAndGetPtr(uiCountText));
-				}
-				{
-					UIText uiCountText2("", font, [&](UIElement* e) {
-						((UIText*)e)->text = std::to_string(ui.activeElementCount());
-						}
-					);
-					uiCountText2.setSize(textFieldSize);
-					uicountPair.setSecond(ui.createAndGetPtr(uiCountText2));
-				}
-				l.addChild(ui.createAndGetPtr(uicountPair));
-			}
-			{
-				UIPair uidcountPair;
-				uidcountPair.setHorizontal();
-				{
-					UIText uidCountText("ui draw:", font);
-					uidCountText.setSize(textFieldSize);
-					uidcountPair.setFirst(ui.createAndGetPtr(uidCountText));
-				}
-				{
-					UIText uidCountText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(ui.drawCount()); });
-					uidCountText2.setSize(textFieldSize);
-					uidcountPair.setSecond(ui.createAndGetPtr(uidCountText2));
-				}
-				l.addChild(ui.createAndGetPtr(uidcountPair));
-			}
-			{
-				UIPair drawCallPair;
-				drawCallPair.setHorizontal();
-				{
-					UIText drawcallText("Drawcalls:", font);
-					drawcallText.setSize(textFieldSize);
-					drawCallPair.setFirst(ui.createAndGetPtr(drawcallText));
-				}
-				{
-					UIText drawcallText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(renderer.getDrawCallsLastFrame()); });
-					drawcallText2.setSize(textFieldSize);
-					drawCallPair.setSecond(ui.createAndGetPtr(drawcallText2));
-				}
-				l.addChild(ui.createAndGetPtr(drawCallPair));
-			}
-
-			c.addChild(ui.createAndGetPtr(l));
-		}
-		parent.addChild(ui.createAndGetPtr(c));
-	};
-
-	// ui render stats ui:
-	{
-		UIFrame frame;
-		frame.layer = LAYER_SECOND_UI;
-		frame.setWidth(200);
-		frame.setPadding({ 5.0f, 5.0f });
-		frame.anchor.setLeftAbsolute(10);
-		frame.anchor.setTopAbsolute(10);
-		{
-			UIList16 list;
-			list.setSizeModeX(SizeMode::FillUp);
-			list.setSizeModeY(SizeMode::FillMin);
-			list.setSpacing(5.0f);
-			list.addChild(
-				ui::text({
-				.anchor = UIAnchor({
-						.xmode = UIAnchor::X::LeftRelativeDist,
-						.x = 0.5
-					}),
-				.size = textFieldSize,
-				.textAnchor = UIAnchor({
-						.xmode = UIAnchor::X::LeftRelativeDist,
-						.x = 0.5
-					}),
-				.text = "Statistics:",
-				.fontTexture = font
-				}
-			));
-			UI_SEPERATOR(list, me.setHorizontal();)
-			{
-				UIPair entCountPair;
-				entCountPair.setHorizontal();
-				{
-					UIText entitiesText("Entities:", font);
-					entitiesText.setSize(textFieldSize);
-					entCountPair.setFirst(ui.createAndGetPtr(entitiesText));
-				}
-				{
-					UIText entitiesText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(world.size()); });
-					entitiesText2.setSize(textFieldSize);
-					entCountPair.setSecond(ui.createAndGetPtr(entitiesText2));
-				}
-				list.addChild(ui.createAndGetPtr(entCountPair));
-			}
-			makeRenderStatsUI(list);
-			{
-				UIPair ticksPair;
-				ticksPair.setHorizontal();
-				{
-					UIText ticksText("Ticks/s:", font);
-					ticksText.setSize(textFieldSize);
-					ticksPair.setFirst(ui.createAndGetPtr(ticksText));
-				}
-				{
-					UIText ticksText2("", font, [&](UIElement* e) { ((UIText*)e)->text = std::to_string(1.0f / getDeltaTime(10)); });
-					ticksText2.setSize(textFieldSize);
-					ticksPair.setSecond(ui.createAndGetPtr(ticksText2));
-				}
-				list.addChild(ui.createAndGetPtr(ticksPair));
-			}
-			frame.addChild(ui.createAndGetPtr(list));
-		}
-		ui.createFrame(frame, "Statiscics");
-	}
 }
 
 void Game::update(float deltaTime) 
@@ -227,13 +87,7 @@ void Game::update(float deltaTime)
 		if (JobSystem::finished(loadingWorkerTag)) {
 			Monke::log("job with tag {0} finished clientside", (uint32_t)loadingWorkerTag);
 			bLoading = false;
-			in.returnFocus();
-			in.returnMouseFocus();
 			world = loadedWorld;
-			if (ui.doesFrameExist("loadingtext")) {
-				ui.destroyFrame("loadingtext");
-			}
-			ui.update();
 		}
 	}
 	else {
@@ -242,102 +96,100 @@ void Game::update(float deltaTime)
 		renderer.submit(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace), LAYER_WORLD_BACKGROUND);
 
 		collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
+		renderer.submit(collisionSystem.getDebugSprites(), LAYER_WORLD_FOREGROUND);
 		physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
-		for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) movementScript(ent, t, m, deltaTime);
-		in.manualUpdate();
+		renderer.submit(physicsSystem2.getDebugSprites(), LAYER_WORLD_FOREGROUND);
+		for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) movementScript(*this, ent, t, m, deltaTime);
 		gameplayUpdate(deltaTime);
-		for (auto& d : collisionSystem.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
-		for (auto& d : physicsSystem2.getDebugSprites()) renderer.submit(d, LAYER_WORLD_FOREGROUND);
-		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) drawScript(ent, t, d);
+		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) drawScript(*this, ent, t, d);
 		world.update();
 	}
 }
 
 void Game::gameplayUpdate(float deltaTime)
 {
-	if (in.keyPressed(Key::NP_6, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::NP_6)) {
 		world.physics.linearEffectDir = { 1, 0 };
 		renderer.getCamera().rotation = 90;
 	}
-	if (in.keyPressed(Key::NP_8, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::NP_8)) {
 		world.physics.linearEffectDir = { 0, 1 };
 		renderer.getCamera().rotation = 180;
 	}
-	if (in.keyPressed(Key::LEFT_ALT, Focus::Global) && in.keyPressed(Key::F4, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::LEFT_ALT) && mainWindow.keyPressed(Key::F4)) {
 		EngineCore::quit();
 	}
-	if (in.keyPressed(Key::G)) {
+	if (mainWindow.keyPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
 	}
-	if (in.keyJustPressed(Key::P) && !in.keyPressed(Key::LEFT_SHIFT)) {
+	if (mainWindow.keyJustPressed(Key::P) && !mainWindow.keyPressed(Key::LEFT_SHIFT)) {
 		renderer.getCamera().position = { 0,0 };
 		world = World();
-		loadRenderTestMap(0.5f);
+		loadRenderTestMap(*this, 0.5f);
 	}
-	if (in.keyJustPressed(Key::P) && in.keyPressed(Key::LEFT_SHIFT)) {
+	if (mainWindow.keyJustPressed(Key::P) && mainWindow.keyPressed(Key::LEFT_SHIFT)) {
 		renderer.getCamera().position = { 0,0 };
 		world = World();
-		loadRenderTestMap(0.3f);
+		loadRenderTestMap(*this, 0.3f);
 	}
-	if (in.keyPressed(Key::H)) {
+	if (mainWindow.keyPressed(Key::H)) {
 		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
-	if (in.keyPressed(Key::UP)) {
+	if (mainWindow.keyPressed(Key::UP)) {
 		renderer.getCamera().position -= rotate(Vec2(0.0f, -5.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::LEFT)) {
+	if (mainWindow.keyPressed(Key::LEFT)) {
 		renderer.getCamera().position -= rotate(Vec2(5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::DOWN)) {
+	if (mainWindow.keyPressed(Key::DOWN)) {
 		renderer.getCamera().position -= rotate(Vec2(0.0f, 5.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::RIGHT)) {
+	if (mainWindow.keyPressed(Key::RIGHT)) {
 		renderer.getCamera().position -= rotate(Vec2(-5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
 	}
-	if (in.keyPressed(Key::NP_ADD)) {
-		//renderer.getCamera().zoom += 2;
+	if (mainWindow.keyPressed(Key::NP_ADD)) {
 		renderer.getCamera().zoom *= 1.0f + (1.0f * deltaTime);
 	}
-	if (in.keyPressed(Key::NP_SUBTRACT)) {
+	if (mainWindow.keyPressed(Key::NP_SUBTRACT)) {
 		renderer.getCamera().zoom *= 1.0f - (1.0f * deltaTime);
 	}
-	if (in.keyPressed(Key::NP_7)) {
+	if (mainWindow.keyPressed(Key::NP_7)) {
 		renderer.getCamera().rotation -= 100.0f * deltaTime;
 	}
-	if (in.keyPressed(Key::NP_9)) {
+	if (mainWindow.keyPressed(Key::NP_9)) {
 		renderer.getCamera().rotation += 100.0f * deltaTime;
 	}
-	if (in.keyPressed(Key::NP_0)) {
+	if (mainWindow.keyPressed(Key::NP_0)) {
 		renderer.getCamera().rotation = 0.0f;
 		renderer.getCamera().position = { 0, 0 };
 		renderer.getCamera().zoom = 1 / 5.0f;
-		uiContext.scale = 1.0f;
+		//uiContext.scale = 1.0f;
 	}
-	if (in.keyJustPressed(Key::B) && in.keyReleased(Key::LEFT_SHIFT)) {
-		if (ui.doesFrameExist("Statiscics")) {
-			ui.getFrame("Statiscics").disable();
-		}
+	if (mainWindow.keyJustPressed(Key::B) && mainWindow.keyReleased(Key::LEFT_SHIFT)) {
+		//if (ui.doesFrameExist("Statiscics")) {
+		//	ui.getFrame("Statiscics").disable();
+		//}
 	}
-	if (in.keyJustPressed(Key::B) && in.keyPressed(Key::LEFT_SHIFT)) {
-		if (ui.doesFrameExist("Statiscics")) {
-			ui.getFrame("Statiscics").enable();
-		}
+	if (mainWindow.keyJustPressed(Key::B) && mainWindow.keyPressed(Key::LEFT_SHIFT)) {
+		//if (ui.doesFrameExist("Statiscics")) {
+		//	ui.getFrame("Statiscics").enable();
+		//}
 	}
-	if (in.keyPressed(Key::PERIOD, Focus::Global)) {
+	if (mainWindow.keyPressed(Key::PERIOD)) {
 		renderer.getLayer(LAYER_WORLD_BACKGROUND).detachRenderScript();
 	}
-	if (in.keyPressed(Key::I)) {
-		uiContext.scale = clamp(uiContext.scale - deltaTime, 0.1f, 10.0f);
+	if (mainWindow.keyPressed(Key::I)) {
+		//uiContext.scale = clamp(uiContext.scale - deltaTime, 0.1f, 10.0f);
 	}
-	if (in.keyPressed(Key::O)) {
-		uiContext.scale = clamp(uiContext.scale + deltaTime, 0.1f, 10.0f);
+	if (mainWindow.keyPressed(Key::O)) {
+		//uiContext.scale = clamp(uiContext.scale + deltaTime, 0.1f, 10.0f);
 	}
-	if (in.keyPressed(Key::J)) {
+	if (mainWindow.keyPressed(Key::J)) {
 		world = World();
-		loadBallTestMap();
-		ui.update();
+		loadBallTestMap(*this);
+		//ui.update();
 	}
-	if (in.keyJustPressed(Key::K)) {
+	if (mainWindow.keyJustPressed(Key::K)) {
 
 		class SaveJob : public IJob {
 		public:
@@ -363,10 +215,8 @@ void Game::gameplayUpdate(float deltaTime)
 		auto tag = JobSystem::submit(SaveJob(world));
 		JobSystem::orphan(tag);
 	}
-	if (in.keyJustPressed(Key::L)) {
+	if (mainWindow.keyJustPressed(Key::L)) {
 		bLoading = true;
-		in.takeFocus(Focus::UI);
-		in.takeMouseFocus(Focus::UI);
 
 		class LoadJob : public IJob {
 		public:
@@ -391,40 +241,40 @@ void Game::gameplayUpdate(float deltaTime)
 
 		loadingWorkerTag = JobSystem::submit(LoadJob(loadedWorld));
 
-		ui::frame("loadingtext",
-			UIFrame::Parameters{
-			.anchor = UIAnchor(UIAnchor::Parameters{
-				.xmode = UIAnchor::X::LeftRelativeDist,
-				.x = 0.5,
-				.ymode = UIAnchor::Y::TopRelativeDist,
-				.y = 0.5,}),
-			.size = {1000, 300},
-			.layer = LAYER_FIRST_UI,
-			.borders = {10,10}},
-		{
-			ui::text({
-				.size = {1000, 300},
-				.textAnchor = UIAnchor(UIAnchor::Parameters{
-					.xmode = UIAnchor::X::LeftRelativeDist,
-					.x = 0.5,
-					.ymode = UIAnchor::Y::TopRelativeDist,
-					.y = 0.5,}),
-				.text = "Loading ...",
-				.fontTexture = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas.png")),
-				.fontSize = {30,100}
-			})
-		}
-		);
+		//ui::frame("loadingtext",
+		//	UIFrame::Parameters{
+		//	.anchor = UIAnchor(UIAnchor::Parameters{
+		//		.xmode = UIAnchor::X::LeftRelativeDist,
+		//		.x = 0.5,
+		//		.ymode = UIAnchor::Y::TopRelativeDist,
+		//		.y = 0.5,}),
+		//	.size = {1000, 300},
+		//	.layer = LAYER_FIRST_UI,
+		//	.borders = {10,10}},
+		//{
+		//	ui::text({
+		//		.size = {1000, 300},
+		//		.textAnchor = UIAnchor(UIAnchor::Parameters{
+		//			.xmode = UIAnchor::X::LeftRelativeDist,
+		//			.x = 0.5,
+		//			.ymode = UIAnchor::Y::TopRelativeDist,
+		//			.y = 0.5,}),
+		//		.text = "Loading ...",
+		//		.fontTexture = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas.png")),
+		//		.fontSize = {30,100}
+		//	})
+		//}
+		//);
 	}
 
 	//execute scripts
-	for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(ent, comp, deltaTime);
-	for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Health>()) healthScript(*this, ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Player>()) playerScript(*this, ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Age>()) ageScript(*this, ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Bullet>()) bulletScript(*this, ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<ParticleScriptComp>()) particleScript(*this, ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<SuckerComp>()) suckerScript(*this, ent, comp, deltaTime);
+	for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(*this, ent, comp, deltaTime);
 
 	cursorManipFunc();
 
@@ -456,7 +306,7 @@ void Game::gameplayUpdate(float deltaTime)
 
 void Game::destroy()
 {
-	ui.destroyFrame("Statiscics");
+	//ui.destroyFrame("Statiscics");
 	YAMLWorldSerializer s(world);
 	auto str = s.serializeToString();
 	std::ofstream ofs("world.yaml");
@@ -465,7 +315,7 @@ void Game::destroy()
 
 void Game::cursorManipFunc()
 {
-	Vec2 worldCoord = renderer.getCamera().windowToWorld(in.getMousePosition());
+	Vec2 worldCoord = renderer.getCamera().windowToWorld(mainWindow.getCursorPos());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
 	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
@@ -473,7 +323,7 @@ void Game::cursorManipFunc()
 	//	Sprite(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
 	//	LAYER_FIRST_UI
 	//);
-	if (!cursorData.locked && in.buttonPressed(Button::MB_LEFT)) {
+	if (!cursorData.locked && mainWindow.buttonPressed(MouseButton::MB_LEFT)) {
 		std::vector<CollisionInfo> collisions;
 		collisionSystem.checkForCollisions(collisions, Collider::DYNAMIC | Collider::SENSOR | Collider::STATIC | Collider::PARTICLE, b, c);
 		if (!collisions.empty()) {
@@ -484,7 +334,7 @@ void Game::cursorManipFunc()
 			cursorData.locked = true;
 		}
 	}
-	else if (in.buttonPressed(Button::MB_LEFT)) {
+	else if (mainWindow.buttonPressed(MouseButton::MB_LEFT)) {
 		if (world.isHandleValid(cursorData.lockedID)) {
 			world.getComp<Transform>(cursorData.lockedID).position = cursorData.relativePos + worldCoord;
 			if (world.hasComp<Movement>(cursorData.lockedID)) {

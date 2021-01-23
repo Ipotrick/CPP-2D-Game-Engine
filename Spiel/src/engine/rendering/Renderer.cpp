@@ -1,5 +1,7 @@
 #include "Renderer.hpp"
 
+#include "RenderWorkerThread.hpp"
+
 using namespace std::literals::chrono_literals;
 
 #define ASSERT_IS_STATE(s) \
@@ -15,6 +17,11 @@ if (s != this->state) { \
 	exit(-1);\
 }
 
+bool Renderer::finished()
+{
+	return !RenderWorkerThread::exists(jobTag);
+}
+
 void Renderer::initialize(Window* window)
 {
 	ASSERT_IS_STATE(RenderState::Uninitialized);
@@ -22,12 +29,11 @@ void Renderer::initialize(Window* window)
 
 	this->window = window;
 	workerSharedData.window = window;
-	workerThread = std::thread(RenderingWorker(&workerSharedData));
 	renderingTime = 0ms;
 	syncTime = 0ms;
-	frontBuffer = std::make_shared<RenderBuffer>();
+	frontBuffer = std::make_unique<RenderBuffer>();
 
-	workerThread.detach();
+	RenderWorkerThread::wait(RenderWorkerThread::submit(&worker, RenderWorkerThread::Action::Init));
 	setLayerCount(1);
 }
 
@@ -36,12 +42,12 @@ void Renderer::waitTillFinished() {
 	state = RenderState::PreStart;
 
 	Timer t(syncTime);
-	std::unique_lock switch_lock(workerSharedData.mut);
-	workerSharedData.cond.wait(switch_lock, [&]() { return workerSharedData.state == SharedRenderData::State::waitForFrontEnd; });	// wait for worker to finish
-
-	workerSharedData.state = SharedRenderData::State::waitForStartCommand;
+	if (RenderWorkerThread::exists(jobTag)) {
+		RenderWorkerThread::wait(jobTag);
+		jobTag = 0xFFFFFFFFFFFFFFFF;
+	}
 	renderingTime = workerSharedData.new_renderTime;		// copy perf data
-	drawCallCount = workerSharedData.drawCallCount;		// copy perf data
+	drawCallCount = workerSharedData.drawCallCount;			// copy perf data
 	spriteCountLastFrame = workerSharedData.spriteCount;	// copy perf data
 
 	state = RenderState::PreStart;
@@ -118,42 +124,20 @@ void Renderer::render() {
 	state = RenderState::PreWait;
 	this->window = window;
 
-	class WorkerBlockJob : public IJob {
-	public:
-		WorkerBlockJob(Renderer* renderer)
-			:renderer{renderer}
-		{ }
-		virtual void execute(const uint32_t threadId)
-		{
-			while (!renderer->finished()) {
-				std::this_thread::sleep_for(std::chrono::microseconds(200));
-			}
-		}
-	private:
-		Renderer* renderer;
-	};
-	
-	auto tag = JobSystem::submit(WorkerBlockJob(this));
-	JobSystem::orphan(tag);
-
 	flushSubmissions();
-	workerSharedData.state = SharedRenderData::State::running;
 	workerSharedData.window = window;
-	workerSharedData.cond.notify_one(); // wake up worker
+	jobTag = RenderWorkerThread::submit(&worker, RenderWorkerThread::Action::Update);
 }
 
 void Renderer::reset()
 {
 	ASSERT_IS_NOT_STATE(RenderState::Uninitialized);
-	std::unique_lock lock(workerSharedData.mut);
-
-	workerSharedData.run = false;
-	workerSharedData.state = SharedRenderData::State::running;
-
-	workerSharedData.cond.notify_one(); // wake up worker
 	state = RenderState::Uninitialized;
 
-	workerSharedData.cond.wait(lock, [&]() { return workerSharedData.state == SharedRenderData::State::reset; });
+	if (RenderWorkerThread::exists(jobTag)) {
+		RenderWorkerThread::wait(jobTag);
+	}
+	RenderWorkerThread::wait(RenderWorkerThread::submit(&worker, RenderWorkerThread::Action::Reset));
 
 	frontBuffer->layers.resize(0);
 }

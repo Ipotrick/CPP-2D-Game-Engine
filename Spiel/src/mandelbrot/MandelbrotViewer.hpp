@@ -95,7 +95,7 @@ public:
 		if (in.keyPressed(Key::LEFT_CONTROL)) {
 			cam.zoom *= 1.0f - deltaTime;
 		}
-		cam.frustumBend = { (float)window.height / (float)window.width, 1 };
+		cam.frustumBend = { (float)mainWindow.height / (float)mainWindow.width, 1 };
 	}
 
 	void destroy() override

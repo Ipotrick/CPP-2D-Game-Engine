@@ -1,38 +1,51 @@
 #pragma once
 
 #include "../base/GUIElement.hpp"
+#include "../components/GUITextElements.hpp"
 
 namespace gui {
 	struct Column : IElement {
 		Vec2 minsize{ 10.0f, 10.0f };
 		XAlign xalignment{ XAlign::Left };
 		YAlign yalignment{ YAlign::Top };
-		Listing listing{ Listing::Packed };
-		float spaceing{ 0.0f };
+		Padding padding{0,0,0,0};
+		Packing packing{ Packing::Tight };
+		float spaceing{ 5.0f };
 		std::vector<u32> children;
 	};
 
 	struct Box : IElement {
-		Vec2 minsize{ 10,10 };
+		Vec2 size{ 10,10 };
 		Vec4 color{ 1, 0.33, 0.66, 1 };
+		XAlign xalignment{ XAlign::Left };
+		YAlign yalignment{ YAlign::Top };
+		Padding padding{0,0,0,0};
+		u32 child{ INVALID_ELEMENT_ID };
 	};
 
 	struct FillBox : IElement {
-		Vec4 color{
-			rand() % 1000 / 1000.0f,
-			rand() % 1000 / 1000.0f,
-			rand() % 1000 / 1000.0f,
-			1.0f
-		};
+		Vec4 color{0,0,0,1};
+		XAlign xalignment{ XAlign::Left };
+		YAlign yalignment{ YAlign::Top };
+		Padding padding;
+		u32 child{ INVALID_ELEMENT_ID };
 	};
 
-	struct GUIButton : IElement {
+	struct Button : IElement {
 		Vec2 size{ 15,15 };
-		std::function<void(GUIButton& self)> onPress;
-		std::function<void(GUIButton& self)> onHold;
-		std::function<void(GUIButton& self)> onRelease;
+		std::function<void(Button& self)> onPress;
+		std::function<void(Button& self)> onHold;
+		std::function<void(Button& self)> onRelease;
+	};
+	namespace {
+		struct _Button : public Button {
+			_Button(Button&& b) : Button{ b } {}
+			bool bHold{ false };
+			bool bHover{ false };
+		};
+	}
 
-		// Non initialization fields:
-		bool _bHold{ false };
+	struct DragField : IElement {
+		Vec4 color = { 1,0.7,0.4, 1 };
 	};
 }

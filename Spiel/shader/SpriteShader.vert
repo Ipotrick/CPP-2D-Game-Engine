@@ -10,6 +10,7 @@ struct ModelUniform {
 	vec2 texmax;
 	int texId;
 	int isCircle;
+	float cornerRounding;
 	/*
 	 *	render space = 0 => world space
 	 *  render space = 1 => window space
@@ -17,7 +18,6 @@ struct ModelUniform {
 	 *	render space = 3 => pixel space
 	*/
 	int renderSpace;
-	int entityId;
 };
 
 layout(std430, binding = 2) buffer ModelData {
@@ -56,7 +56,7 @@ layout(location = 1) in int modelID;
 
 // fragment out
 out vec2 v_texCoord;
-out vec2 v_circleCoord;
+out vec2 v_relativeCoord;
 /*
  * the flat keyword prevents the rasteriser interpolating the modelID, 
  * without it the shader wont work as interpolating integers is illegal on nvidia hardware
@@ -90,7 +90,7 @@ void main()
 	vec4 translated_corner_coord = rotated_corner_coord + vec4(model.position.xyz, 0);
 	
 	v_texCoord = texcoord;
-	v_circleCoord = corner;
+	v_relativeCoord = corner * 2.0f;
 	v_modelID = modelID;
 	gl_Position = projectionViewMatrices[model.renderSpace] * translated_corner_coord;
 }
