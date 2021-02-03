@@ -293,6 +293,17 @@ inline Vec2 aabbBounds(Vec2 size, RotaVec2 rotaVec) {
 	return maxPos - minPos;
 }
 
+inline bool isCoordInBounds(Vec2 boundsSize, Vec2 boundsPos, Vec2 pointPos)
+{
+	const Vec2 relativePointPos = pointPos - boundsPos;
+	boundsSize *= 0.5f;
+	return
+		relativePointPos.x < boundsSize.x &&
+		relativePointPos.y < boundsSize.y &&
+		relativePointPos.x > -boundsSize.x &&
+		relativePointPos.y > -boundsSize.y;
+}
+
 template<>
 inline Vec2 clamp<Vec2>(const Vec2 v, const Vec2 min, const Vec2 max)
 {

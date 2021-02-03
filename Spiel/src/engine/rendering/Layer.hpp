@@ -89,11 +89,14 @@ public:
 	/**
 	 * In render depth testing modi.
 	 */
-	DepthTest depthTest{ DepthTest::Ignore };
+	DepthTest depthTest{ DepthTest::LessOrEqual };
 	/**
 	 * Toggles if all sprites are cleard each frame.
 	 */
 	bool bClearEveryFrame{ true };	// if set to false, the buffer will not be cleared between frames.
+
+	float zNear{ -1.0f };
+	float zFar{ 1.0f };
 
 	RenderSpace renderMode{ RenderSpace::WindowSpace };
 

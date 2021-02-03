@@ -1,5 +1,9 @@
 #pragma once
 
+#include "../types/ShortNames.hpp"
+
+#include <optional>
+
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 
@@ -22,16 +26,16 @@ COMMA             = 44,  /* , */
 MINUS             = 45,  /* - */
 PERIOD            = 46,  /* . */
 SLASH             = 47,  /* / */
-ZERO              = 48,
-ONE               = 49,
-TWO               = 50,
-THREE             = 51,
-FOUR              = 52,
-FIFE              = 53,
-SIX               = 54,
-SEVEN             = 55,
-EIGHT             = 56,
-NINE              = 57,
+N_0				  = 48,  /* 0 */
+N_1               = 49,  /* 1 */
+N_2               = 50,  /* 2 */
+N_3				  = 51,  /* 3 */
+N_4               = 52,  /* 4 */
+N_5               = 53,  /* 5 */
+N_6               = 54,  /* 6 */
+N_7               = 55,  /* 7 */
+N_8               = 56,  /* 8 */
+N_9               = 57,  /* 9 */
 SEMICOLON         = 59,  /* ; */
 EQUAL             = 61,  /* = */
 A                 = 65,
@@ -141,6 +145,8 @@ MENU              = 348
 
 };
 
+std::optional<u8> keyToChar(Key key, bool shift);
+
 inline static constexpr unsigned int MAX_KEY_INDEX = 348;
 inline static constexpr unsigned int MIN_KEY_INDEX = 32;
 
@@ -150,6 +156,7 @@ struct KeyEvent {
 		JustPressed,
 		Pressed,
 		JustReleased,
+		Repeat
 	};
 
 	Key key{ 0 };

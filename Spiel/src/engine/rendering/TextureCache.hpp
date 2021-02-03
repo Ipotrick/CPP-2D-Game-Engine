@@ -25,12 +25,12 @@ public:
 	void initialize();
 	bool loadTexture(const BigTextureRef& texRef);
 	bool isTextureLoaded(const TextureRef& texRef);
+	bool isTextureLoaded(s32 id);
 	bool isTextureLoaded(const BigTextureRef& texRef);
 	OpenGLTexture& getTexture(const TextureId texId);
 	OpenGLTexture& getTexture(const TextureRef& ref);
 	void cacheTextures(const std::vector<BigTextureRef>& loadingQueue);
 private:
-	bool isTextureLoaded(const TextureId);
 	std::string texturesPath;
 	std::vector<OpenGLTexture> textures;
 	std::vector<bool> loaded;

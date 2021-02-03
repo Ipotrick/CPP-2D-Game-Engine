@@ -16,19 +16,7 @@ public:
 		Reset
 	};
 
-	static u64 submit(RenderingWorker* workerdata, Action action)
-	{
-		std::unique_lock lock(mut);
-		assert(state == State::Running);
-		Tag tag = nextJobTag++;
-
-		auto newjob = Job(workerdata, action);
-		jobs[tag] = newjob;
-		jobQueue.push_back(tag);
-
-		workerCV.notify_one();
-		return tag;
-	}
+	static Tag submit(RenderingWorker* workerdata, Action action);
 
 	/**
 	 * Stops the curret thread until job batch belonging to the given tag is finished.

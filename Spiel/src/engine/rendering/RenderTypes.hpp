@@ -4,8 +4,6 @@
 #include <string>
 #include <optional>
 
-#include <boost/static_string.hpp>
-
 #include "robin_hood.h"
 
 #include "GL/glew.h"
@@ -16,7 +14,7 @@
 #include "Window.hpp"
 #include "RenderSpace.hpp"
 
-using TextureString = boost::static_string<32>;
+using TextureString = std::string;
 
 using TextureId = int;
 
@@ -106,29 +104,6 @@ protected:
 	TextureDiscriptor info;
 };
 
-inline TextureRef makeAtlasRef(int atlasId, const Vec2 atlasGridSize, const Vec2 startAtlasCell, const Vec2 endAtlasCell = Vec2{ 0,0 })
-{
-	TextureRef texRef;
-	texRef.id = atlasId;
-	texRef.minPos = startAtlasCell / atlasGridSize;
-	if (endAtlasCell == Vec2{ 0,0 }) {
-		texRef.maxPos = (startAtlasCell + Vec2(1, 1)) / atlasGridSize;
-	}
-	else {
-		texRef.maxPos = (endAtlasCell + Vec2(1, 1)) / atlasGridSize;
-	}
-	return texRef;
-}
-
-inline TextureRef makeAsciiRef(int atlasTextureId, char c)
-{
-	TextureRef texRef;
-	c -= 0x20;
-	Vec2 atlasCoord{ float(c % 8), float(15 - c / 8) };
-	texRef = makeAtlasRef(atlasTextureId, Vec2(8, 16), atlasCoord);
-	return texRef;
-}
-
 /**
  * A Sprite is a colored Rectangle or a Circle, that can optinaly be textured.
  */
@@ -138,7 +113,9 @@ struct Sprite {
 	/* in radiants 2pi = one rotation*/
 	RotaVec2 rotationVec;
 	Vec2 scale{ 1.0f, 1.0f };
-	std::optional<TextureRef> texRef;
+	s32 textureId{ -1 };
+	Vec2 minTex{ 0,0 };
+	Vec2 maxTex{ 1,1 };
 	Form form{ Form::Rectangle };
 	float cornerRounding{ 0.0f };
 	RenderSpace drawMode{ RenderSpace::WindowSpace };
@@ -167,7 +144,9 @@ inline Sprite makeSprite(uint32_t id, Vec2 position, float drawingPrio, Vec2 sca
 		.position = {position.x, position.y, drawingPrio},
 		.rotationVec = rotation,
 		.scale = scale,
-		.texRef = texRef,
+		.textureId = texRef.id,
+		.minTex = texRef.minPos,
+		.maxTex = texRef.maxPos,
 		.form = form,
 		.drawMode = drawMode
 	};
@@ -189,9 +168,3 @@ inline Sprite makeSprite(uint32_t id, Vec2 position, float drawingPrio, Vec2 sca
 		.drawMode = drawMode
 	};
 }
-
-struct Light {
-	Vec4 color;
-	Vec2 position;
-	float radius;
-};

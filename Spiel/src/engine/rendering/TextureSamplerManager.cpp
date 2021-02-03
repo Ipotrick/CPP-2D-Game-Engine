@@ -12,19 +12,19 @@ void TextureSamplerManager::clear()
 	nextSamplerSlot = 0;
 }
 
-std::optional<GLint> TextureSamplerManager::getSampler(TextureRef const& texRef)
+std::optional<GLint> TextureSamplerManager::getSampler(s32 id)
 {
-	if (texToSampler.contains(texRef.id))	/* do have the texture allready bound to a sampler? */
+	if (texToSampler.contains(id))	/* do have the texture allready bound to a sampler? */
 	{
-		return texToSampler[texRef.id];		/* then get the sampler slot and use it for this sprite too */
+		return texToSampler[id];		/* then get the sampler slot and use it for this sprite too */
 	}
 	else if (nextSamplerSlot < SAMPLER_COUNT)	/* if we have sampler slots left, we try to get the texture id and bind it to a new sampler */
 	{
-		if (texCache.isTextureLoaded(texRef) && texCache.getTexture(texRef).good) {
+		if (texCache.isTextureLoaded(id) && texCache.getTexture(id).good) {
 			const int samplerSlot = nextSamplerSlot++;
-			auto texture = texCache.getTexture(texRef);
+			auto texture = texCache.getTexture(id);
 			texture.bindToSampler(samplerSlot);
-			texToSampler.insert({ texRef.id, samplerSlot });
+			texToSampler.insert({ id, samplerSlot });
 			return samplerSlot;
 		}
 		else	/* the given texture ref is invalid, we set the sampler to the sampler holding the default/error texture */

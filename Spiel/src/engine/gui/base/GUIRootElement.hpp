@@ -9,8 +9,9 @@
 namespace gui {
 
 	struct Root {
-		Sizing sizeing;
-		Placing placeing;
+		std::function<void(Root&)> onUpdate;
+		Sizing sizing;
+		Placing placing;
 		u32 child{ INVALID_ELEMENT_ID };
 	};
 }

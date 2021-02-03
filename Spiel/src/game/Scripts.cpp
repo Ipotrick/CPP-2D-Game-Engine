@@ -50,7 +50,9 @@ void drawScript(Game& game, EntityHandle entity, const Transform& t, const Draw&
 				.position = Vec3{t.position.x, t.position.y, clamp(d.drawingPrio, 0.0f, 1.0f) },
 				.rotationVec = t.rotaVec,
 				.scale = d.scale,
-				.texRef = texRef.makeSmall(),
+				.textureId = texRef.getId(),
+				.minTex = texRef.makeSmall().minPos,
+				.maxTex = texRef.makeSmall().maxPos,
 				.form = d.form,
 				.drawMode = RenderSpace::WorldSpace
 			},

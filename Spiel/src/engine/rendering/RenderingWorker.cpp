@@ -136,8 +136,15 @@ void RenderingWorker::update()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	auto& camera = data->renderBuffer->camera;
-	Mat4 worldViewProjMat = Mat4::scale(camera.zoom) * Mat4::scale({ camera.frustumBend.x, camera.frustumBend.y, 1.0f }) * Mat4::rotate_z(-camera.rotation) * Mat4::translate({ -camera.position.x, -camera.position.y, 0.0f });
-	Mat4 pixelViewProjMatrix = Mat4::translate(Vec3(-1, -1, 0)) * Mat4::scale(Vec3(1.0f / (lastWindowWidth), 1.0f / (lastWindowHeight), 1.0f)) * Mat4::scale(Vec3(2.0f, 2.0f, 1.0f));
+	Mat4 worldViewProjMat = 
+		Mat4::scale(camera.zoom) * 
+		Mat4::scale({ camera.frustumBend.x, camera.frustumBend.y, 1.0f }) * 
+		Mat4::rotate_z(-camera.rotation) * 
+		Mat4::translate({ -camera.position.x, -camera.position.y, 0.0f });
+	Mat4 pixelViewProjMatrix = 
+		Mat4::translate(Vec3(-1, -1, 0)) * 
+		Mat4::scale(Vec3(1.0f / (lastWindowWidth), 1.0f / (lastWindowHeight), 1.0f)) * 
+		Mat4::scale(Vec3(2.0f, 2.0f, 1.0f));
 
 	for (auto& layer : data->renderBuffer->layers) {
 		drawLayer(layer, worldViewProjMat, pixelViewProjMatrix);
@@ -196,8 +203,8 @@ size_t RenderingWorker::drawBatch(std::vector<Sprite>& sprites, Mat4 const& worl
 	int spriteCount{ 0 };
 	for (; (index < sprites.size()) & (spriteCount < MAX_RECT_COUNT); index++, spriteCount++) {
 		int thisSpriteTexSampler{ -1 };
-		if (sprites[index].texRef.has_value()) {
-			auto sampler = samplerManager.getSampler(sprites[index].texRef.value());
+		if (sprites[index].textureId != -1) {
+			auto sampler = samplerManager.getSampler(sprites[index].textureId);
 			if (sampler.has_value())
 				thisSpriteTexSampler = sampler.value();
 			else
@@ -219,15 +226,15 @@ size_t RenderingWorker::drawBatch(std::vector<Sprite>& sprites, Mat4 const& worl
 void RenderingWorker::generateVertices(Sprite const& d, int samplerSlot, Mat4 const& viewProjMat, Mat4 const& pixelProjectionMatrix, std::vector<SpriteShaderVertex>& vertexBuffer) {
 	Vec2 minTex{ 0,0 };
 	Vec2 maxTex{ 1,1 };
-	if (d.texRef.has_value()) {
-		minTex = d.texRef.value().minPos;
-		maxTex = d.texRef.value().maxPos;
+	if (d.textureId != -1) {
+		minTex = d.minTex;
+		maxTex = d.maxTex;
 	}
 
 	spriteShaderCPUModelBuffer.push_back({});
 	auto& model = spriteShaderCPUModelBuffer.back();
 	model.color = d.color;
-	model.position = { d.position.x, d.position.y, -d.position.z, 0};
+	model.position = { d.position.x, d.position.y, d.position.z, 0};
 	model.rotation = d.rotationVec.toUnitX0();
 	model.scale = d.scale;
 	model.texMin = minTex;

@@ -46,7 +46,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = C02F39D4
+ServiceHubLogSessionKey = 261094D9
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -64,9 +64,21 @@ VisualStudioVersion = 16.0
 VSAPPIDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
 VSAPPIDNAME = devenv.exe
 VSLANG = 1031
+VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
   main.cpp
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(21,51): warning C4305: "Argument": Verkürzung von "int" in "uint8_t"
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(21,40): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(21,33): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(21,26): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+S:\repos\SpielMappe\Spiel\src\guitest\GUITest.hpp(196,16): warning C4244: "=": Konvertierung von "f64" in "float", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\guitest\GUITest.hpp(197,15): warning C4244: "=": Konvertierung von "f64" in "float", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\guitest\GUITest.hpp(198,21): warning C4244: "Argument": Konvertierung von "const _Ty" in "float", möglicher Datenverlust
+          with
+          [
+              _Ty=double
+          ]
   Spiel.vcxproj -> S:\repos\SpielMappe\x64\Debug\Spiel.exe

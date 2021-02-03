@@ -1,7 +1,5 @@
 #include "CollisionSystem.hpp"
 
-#include "../../engine/types/TempVector.hpp"
-
 CollisionSystem::CollisionSystem(CollisionSECM secm, uint32_t qtreeCapacity) :
 	secm{ secm },
 	qtreeCapacity{ qtreeCapacity },

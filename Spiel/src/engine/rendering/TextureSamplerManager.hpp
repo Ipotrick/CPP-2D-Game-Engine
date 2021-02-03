@@ -21,7 +21,7 @@ public:
 	 * \param texRef reference to the texture that a sampler is requested to
 	 * \return {} when all samplers are in use. int >= 0 when sampler is found. int == 0 when texRef is invalid or the default texture.
 	 */
-	std::optional<GLint> getSampler(TextureRef const& texRef);
+	std::optional<GLint> getSampler(s32 texid);
 private:
 	TextureCache& texCache;
 	size_t SAMPLER_COUNT;

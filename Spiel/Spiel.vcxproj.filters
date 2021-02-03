@@ -10,12 +10,6 @@
     <Filter Include="game">
       <UniqueIdentifier>{c03f9369-5c3a-46cd-8948-4a84ccb71f8d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Headder">
-      <UniqueIdentifier>{bf17f518-82fd-4730-b2af-82625c8d26db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Src">
-      <UniqueIdentifier>{5d41953b-9201-427d-ba9b-c67e229ac5c0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game\hpp">
       <UniqueIdentifier>{fd180900-ce4a-4730-9fe5-1af5a5df7528}</UniqueIdentifier>
     </Filter>
@@ -33,9 +27,6 @@
     </Filter>
     <Filter Include="engine\rendering">
       <UniqueIdentifier>{d8359791-7a49-499e-bbdc-cf990fecdb98}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="engine\ui">
-      <UniqueIdentifier>{5f46b40c-411b-4fdd-89f3-c7d51dbb50ae}</UniqueIdentifier>
     </Filter>
     <Filter Include="engine\math">
       <UniqueIdentifier>{3313dd1a-4270-48fa-89dd-47f402d87302}</UniqueIdentifier>
@@ -69,6 +60,12 @@
     </Filter>
     <Filter Include="engine\gui\base">
       <UniqueIdentifier>{7873256f-c4ff-4cec-b09c-3095132abda2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{5d41953b-9201-427d-ba9b-c67e229ac5c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\rendering\pipeline">
+      <UniqueIdentifier>{7b9675a9-92db-4b76-86c2-4860b046f561}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -216,66 +213,6 @@
     <ClInclude Include="src\engine\rendering\Layer.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\ui\DrawFrame.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIAnchor.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIBar.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIButton.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIClickable.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UICollapsable.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIContext.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIElement.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIField.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIFocusable.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIFrame.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIList.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIManager.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIMultiParent.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIPaddingBase.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIPair.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIReflect.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UISeperator.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UISingleParent.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\ui\UIText.hpp">
-      <Filter>engine\ui</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\math\basic_math.hpp">
       <Filter>engine\math</Filter>
     </ClInclude>
@@ -351,9 +288,6 @@
     <ClInclude Include="src\engine\io\Input.hpp">
       <Filter>engine\io</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\io\InputFocus.hpp">
-      <Filter>engine\io</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\JobSystem.hpp">
       <Filter>engine</Filter>
     </ClInclude>
@@ -368,12 +302,6 @@
     </ClInclude>
     <ClInclude Include="src\engine\allocator\ArenaAllocatorPerThread.hpp">
       <Filter>engine\allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\types\Spinlock.hpp">
-      <Filter>engine\types</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\types\TempVector.hpp">
-      <Filter>engine\types</Filter>
     </ClInclude>
     <ClInclude Include="src\game\LoadRenderTestMap.hpp">
       <Filter>game\hpp</Filter>
@@ -420,12 +348,6 @@
     <ClInclude Include="src\engine\gui\base\GUIDrawUtil.hpp">
       <Filter>engine\gui\base</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIDestroyElements.hpp">
-      <Filter>engine\gui\elements</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIDrawElements.hpp">
-      <Filter>engine\gui\elements</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\gui\components\GUICommonElements.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
@@ -438,14 +360,44 @@
     <ClInclude Include="src\engine\gui\components\GUITextElements.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIDrawTextElements.hpp">
-      <Filter>engine\gui\elements</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\gui\components\GUIMouseEvent.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\RenderWorkerThread.hpp">
       <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUITextUtil.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIDragEvent.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUICommonElementsStyling.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUICommonElementsDraw.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUITextElementsDraw.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\base\GUIStyle.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIChildAccess.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIDraw.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUITextElementsStyling.hpp">
+      <Filter>engine\gui\elements</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\RenderRessourceManager.hpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\OpenGLTexture2.hpp">
+      <Filter>engine\rendering\pipeline</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -471,7 +423,7 @@
       <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="src\main.cpp">
-      <Filter>Src</Filter>
+      <Filter>main</Filter>
     </ClCompile>
     <ClCompile Include="src\game\TesterScript.cpp">
       <Filter>game\hpp</Filter>
@@ -536,36 +488,6 @@
     <ClCompile Include="src\engine\rendering\Window.cpp">
       <Filter>engine\rendering</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\ui\DrawFrame.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIAnchor.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIBar.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIButton.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UICollapsable.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIFrame.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIManager.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIPair.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UISeperator.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\ui\UIText.cpp">
-      <Filter>engine\ui</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\math\Mat3.cpp">
       <Filter>engine\math</Filter>
     </ClCompile>
@@ -580,9 +502,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\JobSystem.cpp">
       <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\types\Spinlock.cpp">
-      <Filter>engine\types</Filter>
     </ClCompile>
     <ClCompile Include="src\game\LoadRenderTestMap.cpp">
       <Filter>game</Filter>
@@ -616,6 +535,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\rendering\RnederWorkerThread.cpp">
       <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\io\Input.cpp">
+      <Filter>engine\io</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

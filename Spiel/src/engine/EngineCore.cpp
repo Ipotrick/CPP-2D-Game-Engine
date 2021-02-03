@@ -82,7 +82,7 @@ void EngineCore::run() {
 		// update rendering:
 		renderer.waitTillFinished();
 
-		mainWindow.update();
+		mainWindow.update(deltaTime);
 
 		if (mainWindow.shouldClose()) { // if window closes the program ends
 			running = false;

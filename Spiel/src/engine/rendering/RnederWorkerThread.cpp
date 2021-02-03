@@ -7,12 +7,25 @@ RenderWorkerThread::~RenderWorkerThread()
 	}
 }
 
+RenderWorkerThread::Tag RenderWorkerThread::submit(RenderingWorker* workerdata, Action action)
+{
+	std::unique_lock lock(mut);
+	assert(state == State::Running);
+	Tag tag = nextJobTag++;
+
+	auto newjob = Job(workerdata, action);
+	jobs[tag] = newjob;
+	jobQueue.push_back(tag);
+
+	workerCV.notify_one();
+	return tag;
+}
+
 void RenderWorkerThread::wait(Tag tag)
 {
 	std::unique_lock lock(mut);
 	assert(state == State::Running);
-	assert(batches.contains(tag));				// can not wait for non existant job
-	assert(!batches[tag].bOrphaned);			// can not wait for orphaned job
+	assert(jobs.contains(tag));				// can not wait for non existant job
 	jobs[tag].bWaitedFor = true;
 
 	clientCV.wait(lock,
@@ -36,6 +49,7 @@ void RenderWorkerThread::init()
 	state = State::Running;
 
 	thread = std::thread(workerFunction);
+	thread.detach();
 }
 
 void RenderWorkerThread::reset()
@@ -43,9 +57,10 @@ void RenderWorkerThread::reset()
 	std::unique_lock lock(mut);
 	assert(state == State::Uninitialized);
 	state = State::Uninitialized;
+	lock.unlock();
 	workerCV.notify_one();
 
-	thread.join();
+	//thread.join();
 }
 
 void RenderWorkerThread::workerFunction()

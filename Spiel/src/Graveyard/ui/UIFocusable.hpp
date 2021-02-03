@@ -1,7 +1,6 @@
 #pragma once
 
 #include "UIElement.hpp"
-#include "../io/InputFocus.hpp"
 
 class UIFocusable : public UIElement {
 public:
@@ -51,7 +50,6 @@ public:
 		return this->bFocusable;
 	}
 
-	Focus hoverFocus{ Focus::UI };
 	bool bHoveredOver{ false };
 protected:
 	/*

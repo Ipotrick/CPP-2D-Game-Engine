@@ -17,14 +17,26 @@ void OpenGLFrameBuffer::initialize(uint32_t width, uint32_t height)
 
 	glGenRenderbuffers(1, &depthBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1, 1);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32F, 1, 1);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
 	GLenum DrawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
-	glDrawBuffers(1, DrawBuffers); // "1" is the size of DrawBuffers
+	glDrawBuffers(1, DrawBuffers);
 
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+}
+
+void OpenGLFrameBuffer::clear()
+{
+	constexpr GLfloat clearColor[4] = { 0, 0, 0, 0 };
+	constexpr GLfloat clearDepth[1] = { std::numeric_limits<float>::max() };
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glClearBufferfv(GL_COLOR, 0, clearColor);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	glClearBufferfv(GL_DEPTH, 0, clearDepth);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
 void OpenGLFrameBuffer::reset()
@@ -39,16 +51,6 @@ void OpenGLFrameBuffer::reset()
 	}
 }
 
-void OpenGLFrameBuffer::clear()
-{
-	GLuint clearColor[4] = { 0, 0, 0, 0 };
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glClearBufferuiv(GL_COLOR, 0, clearColor);
-	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	glClearBufferuiv(GL_COLOR, 0, clearColor);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-}
 
 void OpenGLFrameBuffer::bind()
 {
