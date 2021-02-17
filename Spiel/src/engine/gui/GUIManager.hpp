@@ -4,8 +4,11 @@
 #include <variant>
 #include <deque>
 
-#include "../rendering/Renderer.hpp"
- 
+#include <boost/container/stable_vector.hpp>
+
+#include "../rendering/RenderCoordinateSystem.hpp"
+#include "../rendering/Font.hpp"
+
 #include "base/GUIRootElement.hpp"
 #include "base/GUIElement.hpp"
 #include "components/GUICommonElements.hpp"
@@ -41,7 +44,7 @@ namespace gui {
 			u32 version = 0xFFFFFFFF;
 		};
 
-		Manager(int renderLayer = 0) : renderLayer{ renderLayer } {}
+		Manager(int renderLayer = 0) {}
 
 		Manager(Manager&& rhs) = delete;
 
@@ -94,23 +97,7 @@ namespace gui {
 				index = static_cast<u32>(elements.size() - 1);
 			}
 
-			std::visit( 
-				[&](auto&& e)  {
-					if (u32* child = getChild(e)) {
-						if (*child != INVALID_ELEMENT_ID) {
-							parents[*child] = index;
-						}
-					}
-					if (std::vector<u32>* children = getChildren(e)) {
-						for (u32 child : *children) {
-							if (child != INVALID_ELEMENT_ID) {
-								parents[child] = index;
-							}
-						}
-					}
-				}, 
-				elements[index]
-			);
+			updateChildHierarchy(index);
 
 			return index;
 		}
@@ -120,6 +107,10 @@ namespace gui {
 		 * \return if the given element contains and parent child relationships.
 		 */
 		bool hasChild(u32 element);
+
+		std::vector<u32>* getChildrenIf(u32 element);
+
+		u32* getChildIf(u32 element);
 
 		/**
 		 * repositions the child in the list of children of the parent.
@@ -141,11 +132,20 @@ namespace gui {
 		void changeParent(u32 child, u32 newParent, u32 newParentPosition = 0xFFFFFFFF);
 
 		/**
+		 * after adding children to an element manually, one has to update the child hierarchie.
+		 * 
+		 * \param parent element whomst children were changed.
+		 */
+		void updateChildHierarchy(u32 parent);
+
+		/**
 		 * destroys a root and all its children.
 		 * 
 		 * \param handle of the root that should be destroyed.
 		 */
 		void destroy(const RootHandle& handle);
+
+		void destroy(const u32 elementid);
 
 		/**
 		 * asserts if root element that the handle refers too still exists.
@@ -163,7 +163,9 @@ namespace gui {
 		 * \param window that the renderer belongs to.
 		 * \param deltaTime the time difference to the last draw call.
 		 */
-		void draw(Renderer& renderer, Window& window, float deltaTime);
+		void draw(const RenderCoordSys& coordSys, TextureManager* tex, FontManager* fonts, Window& window, float deltaTime);
+
+		const std::vector<Sprite>& getSprites() const { return this->spritesOfLastDraw; }
 
 		/**
 		 * \return the amount of root and normal elements currently stored.
@@ -174,14 +176,24 @@ namespace gui {
 
 		float globalScaling{ 1.0f };
 	private:
-		friend Vec2 updateAndGetMinsize(Manager&, u32);
+		friend Vec2 updateAndGetMinsize(Manager&, u32); 
+		template<typename T> 
+		friend Vec2 updateAndGetMinsize(Manager& manager, u32 id, T& self);
 		friend void drawRoot(Manager& manager, u32 id, std::vector<Sprite>& out);
 		template<typename T>
-		friend void onDraw(Manager&, T&, u32, DrawContext const&, std::vector<Sprite>& ); 
+		friend void onDraw(Manager&, T&, u32, DrawContext const&, std::vector<Sprite>&); 
 		template<typename T>
 		friend void onMouseEvent(Manager& manager, T& element, u32 id, u32 rootid);
 		template<typename T>
 		friend void onDragEvent(Manager& manager, T& self, u32 id, u32 rootid);
+
+		template<typename ... T>
+		bool isOneOf(u32 elementid)
+		{
+			//ElementVariant& element = elements[elementid];
+			//return (std::holds_alternative<T>(element) || ...);
+			return true;
+		}
 
 		/**
 		 * Removes the child and parent relationship in the manager.
@@ -209,7 +221,9 @@ namespace gui {
 
 		/// Temporary variables with lifetime of the draw:  ///
 		Window* window{ nullptr };
-		Renderer* renderer{ nullptr };
+		RenderCoordSys coordSys;
+		TextureManager* tex{ nullptr };
+		FontManager* fonts{ nullptr };
 		float deltaTime{ 0.0f };
 		// Mouse Event Listener:
 		u32 mouseEventElement{ INVALID_ELEMENT_ID };
@@ -220,19 +234,21 @@ namespace gui {
 		DragDroppable* droppedElement{ nullptr };
 		/// ----------------------------------------------- ///
 
-		int renderLayer = 0;
+		std::vector<Sprite> spritesOfLastDraw;
+
 		struct RootElementMetaInfo {
 			Root element;
 			u32 version = 0;
 			bool containsElement = false;
 		};
-		std::vector<RootElementMetaInfo> rootElements;
-		std::vector<u32> freeRootElementIndices;
-		std::vector<u32> destroylist;						// used as buffer for element ids when destroying elements and their children
+		
+		boost::container::stable_vector<RootElementMetaInfo> rootElements;
+		boost::container::stable_vector<u32> freeRootElementIndices;
+		boost::container::stable_vector<u32> destroylist;						// used as buffer for element ids when destroying elements and their children
 
-		std::vector<ElementVariant>		elements;
-		std::vector<u32>				parents;			// stores parent of each element
-		std::vector<Vec2>				minsizes;			// used to cache min sizes of elements, to minimise redundant calculations
+		boost::container::stable_vector<ElementVariant>		elements;
+		boost::container::stable_vector<u32>				parents;			// stores parent of each element
+		boost::container::stable_vector<Vec2>				minsizes;			// used to cache min sizes of elements, to minimise redundant calculations
 		std::deque<u32>					freeElementIndices;
 
 		struct DraggedElementInfo {

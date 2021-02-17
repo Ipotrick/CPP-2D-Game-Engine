@@ -11,10 +11,10 @@ public:
 	{
 		renderer.setLayerCount(LAYER_COUNT);
 
-		renderer.getLayer(LAYER_MANDELBROT).renderMode = RenderSpace::WorldSpace;
+		renderer.getLayer(LAYER_MANDELBROT).renderMode = RenderSpace::Camera;
 		renderer.getLayer(LAYER_MANDELBROT).attachRenderScript(std::make_unique<MandelRenderScript>());
 
-		renderer.getLayer(LAYER_UI).renderMode = RenderSpace::PixelSpace;
+		renderer.getLayer(LAYER_UI).renderMode = RenderSpace::Pixel;
 
 
 		UIFrame frame;

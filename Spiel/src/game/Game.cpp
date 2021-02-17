@@ -14,7 +14,7 @@
 #include "PlayerScript.hpp"
 #include "HealthScript.hpp"
 
-#include "BloomRScript.hpp"
+//#include "BloomRScript.hpp"
 
 #include "LoadBallTestMap.hpp"
 #include "LoadRenderTestMap.hpp"
@@ -28,44 +28,37 @@ static int makeID()
 
 using namespace util;
 
-Game::Game()
+Game::Game() : EngineCore{ "Balls2", 1600, 900 }
 {
-	initialize("Balls2", 1600, 900);
-
-	renderer.setLayerCount(LAYER_MAX);
-
-	renderer.getLayer(LAYER_WORLD_BACKGROUND).bClearEveryFrame = true;
-	renderer.getLayer(LAYER_WORLD_BACKGROUND).renderMode = RenderSpace::WorldSpace;
-
-	renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::WorldSpace; 
-	renderer.getLayer(LAYER_WORLD_MIDGROUND).depthTest = DepthTest::LessOrEqual;
-
-	renderer.getLayer(LAYER_WORLD_PARTICLE).renderMode = RenderSpace::WorldSpace;
-
-	renderer.getLayer(LAYER_WORLD_FOREGROUND).renderMode = RenderSpace::WorldSpace;
-
-	renderer.getLayer(LAYER_WORLD_POSTPROCESS).renderMode = RenderSpace::WorldSpace;
-	renderer.getLayer(LAYER_WORLD_POSTPROCESS).attachRenderScript(std::make_unique<BloomRScript>());
-
-	renderer.getLayer(LAYER_DEBUG_UI).renderMode = RenderSpace::WorldSpace;
-
-	renderer.getLayer(LAYER_FIRST_UI).renderMode = RenderSpace::PixelSpace;
-
-	renderer.getLayer(LAYER_SECOND_UI).renderMode = RenderSpace::PixelSpace;
+	renderer.init(&mainWindow);
+	renderer.supersamplingFactor = 2.0f;
+	//renderer.setLayerCount(LAYER_MAX);
+	//
+	//renderer.getLayer(LAYER_WORLD_BACKGROUND).bClearEveryFrame = true;
+	//renderer.getLayer(LAYER_WORLD_BACKGROUND).renderMode = RenderSpace::Camera;
+	//
+	//renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::Camera; 
+	//renderer.getLayer(LAYER_WORLD_MIDGROUND).depthTest = DepthTest::LessOrEqual;
+	//
+	//renderer.getLayer(LAYER_WORLD_PARTICLE).renderMode = RenderSpace::Camera;
+	//
+	//renderer.getLayer(LAYER_WORLD_FOREGROUND).renderMode = RenderSpace::Camera;
+	//
+	//renderer.getLayer(LAYER_WORLD_POSTPROCESS).renderMode = RenderSpace::Camera;
+	//renderer.getLayer(LAYER_WORLD_POSTPROCESS).attachRenderScript(std::make_unique<BloomRScript>());
+	//
+	//renderer.getLayer(LAYER_DEBUG_UI).renderMode = RenderSpace::Camera;
+	//
+	//renderer.getLayer(LAYER_FIRST_UI).renderMode = RenderSpace::Pixel;
+	//
+	//renderer.getLayer(LAYER_SECOND_UI).renderMode = RenderSpace::Pixel;
 
 	collisionSystem.disableColliderDetection(Collider::PARTICLE);
 }
 
 void Game::create() {
 	world.setOnRemCallback<Health>(onHealthRemCallback);
-
-	auto size = getWindowSize();
-	renderer.getCamera().frustumBend = (Vec2(1 / getWindowAspectRatio(), 1.0f));
-	renderer.getCamera().zoom = 1 / 3.5f;
-
-	const float firstRowWidth = 90.0f;
-	const Vec2 textFieldSize{ firstRowWidth , 17.0f };
-	const auto font = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas2.png"));
+	renderer.camera.zoom = 0.1;
 
 #ifdef _DEBUG
 	loadBallTestMap(*this);
@@ -91,30 +84,40 @@ void Game::update(float deltaTime)
 		}
 	}
 	else {
-		std::cout << "sprites last frame: " << renderer.getSpriteCountLastFrame() << std::endl;
 
-		renderer.submit(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::WindowSpace), LAYER_WORLD_BACKGROUND);
+		renderer.drawSprite(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::Window, LAYER_WORLD_BACKGROUND, LAYER_MAX));
 
 		collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
-		renderer.submit(collisionSystem.getDebugSprites(), LAYER_WORLD_FOREGROUND);
+		//renderer.submit(collisionSystem.getDebugSprites(), LAYER_WORLD_FOREGROUND);
 		physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
-		renderer.submit(physicsSystem2.getDebugSprites(), LAYER_WORLD_FOREGROUND);
+		//renderer.submit(physicsSystem2.getDebugSprites(), LAYER_WORLD_FOREGROUND);
 		for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) movementScript(*this, ent, t, m, deltaTime);
 		gameplayUpdate(deltaTime);
-		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) drawScript(*this, ent, t, d);
+		for (auto [ent, td] : world.entityComponentView<TextureDescriptor>()) {
+			if (!world.hasComp<TextureSection>(ent)) {
+				world.addComp(ent, TextureSection{ renderer.tex.makeHandle(td) });
+			}
+		}
+		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) {
+			drawScript(*this, ent, t, d);
+		}
+		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) {
+			drawScript(*this, ent, t, d);
+		}
 		world.update();
 	}
+	renderer.start();
 }
 
 void Game::gameplayUpdate(float deltaTime)
 {
 	if (mainWindow.keyPressed(Key::NP_6)) {
 		world.physics.linearEffectDir = { 1, 0 };
-		renderer.getCamera().rotation = 90;
+		renderer.camera.rotation = 90;
 	}
 	if (mainWindow.keyPressed(Key::NP_8)) {
 		world.physics.linearEffectDir = { 0, 1 };
-		renderer.getCamera().rotation = 180;
+		renderer.camera.rotation = 180;
 	}
 	if (mainWindow.keyPressed(Key::LEFT_ALT) && mainWindow.keyPressed(Key::F4)) {
 		EngineCore::quit();
@@ -123,12 +126,12 @@ void Game::gameplayUpdate(float deltaTime)
 		world.physics.linearEffectAccel += 8 * deltaTime;
 	}
 	if (mainWindow.keyJustPressed(Key::P) && !mainWindow.keyPressed(Key::LEFT_SHIFT)) {
-		renderer.getCamera().position = { 0,0 };
+		renderer.camera.position = { 0,0 };
 		world = World();
 		loadRenderTestMap(*this, 0.5f);
 	}
 	if (mainWindow.keyJustPressed(Key::P) && mainWindow.keyPressed(Key::LEFT_SHIFT)) {
-		renderer.getCamera().position = { 0,0 };
+		renderer.camera.position = { 0,0 };
 		world = World();
 		loadRenderTestMap(*this, 0.3f);
 	}
@@ -136,33 +139,33 @@ void Game::gameplayUpdate(float deltaTime)
 		world.physics.linearEffectAccel -= 8 * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::UP)) {
-		renderer.getCamera().position -= rotate(Vec2(0.0f, -5.0f), renderer.getCamera().rotation) * deltaTime;
+		renderer.camera.position -= rotate(Vec2(0.0f, -5.0f), renderer.camera.rotation) * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::LEFT)) {
-		renderer.getCamera().position -= rotate(Vec2(5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
+		renderer.camera.position -= rotate(Vec2(5.0f, 0.0f), renderer.camera.rotation) * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::DOWN)) {
-		renderer.getCamera().position -= rotate(Vec2(0.0f, 5.0f), renderer.getCamera().rotation) * deltaTime;
+		renderer.camera.position -= rotate(Vec2(0.0f, 5.0f), renderer.camera.rotation) * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::RIGHT)) {
-		renderer.getCamera().position -= rotate(Vec2(-5.0f, 0.0f), renderer.getCamera().rotation) * deltaTime;
+		renderer.camera.position -= rotate(Vec2(-5.0f, 0.0f), renderer.camera.rotation) * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::NP_ADD)) {
-		renderer.getCamera().zoom *= 1.0f + (1.0f * deltaTime);
+		renderer.camera.zoom *= 1.0f + (1.0f * deltaTime);
 	}
 	if (mainWindow.keyPressed(Key::NP_SUBTRACT)) {
-		renderer.getCamera().zoom *= 1.0f - (1.0f * deltaTime);
+		renderer.camera.zoom *= 1.0f - (1.0f * deltaTime);
 	}
 	if (mainWindow.keyPressed(Key::NP_7)) {
-		renderer.getCamera().rotation -= 100.0f * deltaTime;
+		renderer.camera.rotation -= 100.0f * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::NP_9)) {
-		renderer.getCamera().rotation += 100.0f * deltaTime;
+		renderer.camera.rotation += 100.0f * deltaTime;
 	}
 	if (mainWindow.keyPressed(Key::NP_0)) {
-		renderer.getCamera().rotation = 0.0f;
-		renderer.getCamera().position = { 0, 0 };
-		renderer.getCamera().zoom = 1 / 5.0f;
+		renderer.camera.rotation = 0.0f;
+		renderer.camera.position = { 0, 0 };
+		renderer.camera.zoom = 1 / 5.0f;
 		//uiContext.scale = 1.0f;
 	}
 	if (mainWindow.keyJustPressed(Key::B) && mainWindow.keyReleased(Key::LEFT_SHIFT)) {
@@ -176,7 +179,7 @@ void Game::gameplayUpdate(float deltaTime)
 		//}
 	}
 	if (mainWindow.keyPressed(Key::PERIOD)) {
-		renderer.getLayer(LAYER_WORLD_BACKGROUND).detachRenderScript();
+		//renderer.getLayer(LAYER_WORLD_BACKGROUND).detachRenderScript();
 	}
 	if (mainWindow.keyPressed(Key::I)) {
 		//uiContext.scale = clamp(uiContext.scale - deltaTime, 0.1f, 10.0f);
@@ -306,7 +309,7 @@ void Game::gameplayUpdate(float deltaTime)
 
 void Game::destroy()
 {
-	//ui.destroyFrame("Statiscics");
+	renderer.reset();
 	YAMLWorldSerializer s(world);
 	auto str = s.serializeToString();
 	std::ofstream ofs("world.yaml");
@@ -315,12 +318,12 @@ void Game::destroy()
 
 void Game::cursorManipFunc()
 {
-	Vec2 worldCoord = renderer.getCamera().windowToWorld(mainWindow.getCursorPos());
+	Vec2 worldCoord = renderer.getCoordSys().convertCoordSys<RenderSpace::Window, RenderSpace::Camera>(mainWindow.getCursorPos());
 	Vec2 worldVel = (cursorData.oldPos - worldCoord) * getDeltaTimeSafe();
 	Transform b = Transform(worldCoord, 0);
 	Collider c = Collider({ 0.02,0.02 }, Form::Circle);
 	//renderer.submit(
-	//	Sprite(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.getCamera().zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
+	//	Sprite(0, worldCoord, 2.0f, Vec2(0.02, 0.02) / renderer.camera.zoom, Vec4(1, 0, 0, 1), Form::Circle, RotaVec2(0), //RenderSpace::WorldSpace),
 	//	LAYER_FIRST_UI
 	//);
 	if (!cursorData.locked && mainWindow.buttonPressed(MouseButton::MB_LEFT)) {
@@ -358,14 +361,14 @@ void Game::cursorManipFunc()
 	//auto& colliderCursor = world.getComp<Collider>(cursor);
 	//baseCursor.position = getPosWorldSpace(getCursorPos());
 	//
-	//baseCursor.rotation = renderer.getCamera().rotation;
-	//colliderCursor.size = Vec2(1, 1) / renderer.getCamera().zoom / 100.0f;
+	//baseCursor.rotation = renderer.camera.rotation;
+	//colliderCursor.size = Vec2(1, 1) / renderer.camera.zoom / 100.0f;
 	//
 	//for (auto ent : world.entity_view<Player>()) {
-	//	renderer.getCamera().position = world.getComp<Base>(ent).position;
+	//	renderer.camera.position = world.getComp<Base>(ent).position;
 	//}
 	//
-	////world.getComp<Draw>(cursorID).scale = vec2(1, 1) / renderer.getCamera().zoom / 100.0f;
+	////world.getComp<Draw>(cursorID).scale = vec2(1, 1) / renderer.camera.zoom / 100.0f;
 	//if (buttonPressed(BUTTON::MB_LEFT)) {
 	//	world.setStaticsChanged();
 	//	if (cursorManipData.locked) {

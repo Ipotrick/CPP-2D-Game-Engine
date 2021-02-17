@@ -52,6 +52,20 @@ public:
 		return getComp<CompType>(entity.index);
 	}
 
+	template<typename CompType>		CompType* getIf(EntityHandleIndex index)
+	{
+		if (hasComp<CompType>(index)) {
+			return &storage<CompType>().get(index);
+		}
+		else {
+			return nullptr;
+		}
+	}
+	template<typename CompType>		CompType* getIf(EntityHandle entity)
+	{
+		return getIf(entity.index);
+	}
+
 	template<typename ... CompType> std::tuple<CompType&...> getComps(EntityHandleIndex index)
 	{
 		return std::tuple<CompType&...>(getComp<CompType>(index) ...);

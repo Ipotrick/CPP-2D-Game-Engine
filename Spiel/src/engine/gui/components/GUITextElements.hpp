@@ -1,34 +1,38 @@
 #pragma once
 
 #include "../base/GUIElement.hpp"
+#include "../../rendering/OpenGLAbstraction/OpenGLTexture.hpp"
 
 namespace gui {
 
 	struct StaticText : IElement {
-		std::function<void(StaticText&)> onUpdate;
+		std::function<void(StaticText&, u32)> onUpdate;
 		std::string_view value;
-		Vec2 fontSize{ 10,20 };
-		Vec4 color{ 0,0,0,1 };
-		BigTextureRef fonttexture{ "ConsolasSoft.png" };
+		f32 fontSize{ NAN };
+		Vec4 color{ UNSET_COLOR };
+		std::pair<FontDescriptor, FontHandle> fontPair;
+		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
 	};
 
 	struct Text : IElement {
-		std::function<void(Text&)> onUpdate;
-		std::string* value{ nullptr };
-		Vec2 fontSize{ 10,20 };
-		Vec4 color{ 0,0,0,1 };
-		BigTextureRef fonttexture{ "ConsolasSoft.png" };
+		std::function<void(Text&, u32)> onUpdate;
+		ValueOrPtr<std::string> value{ "" };
+		f32 fontSize{ NAN };
+		Vec4 color{ UNSET_COLOR };
+		std::pair<FontDescriptor, FontHandle> fontPair;
+		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
 	};
 
 	struct TextInput : IElement {
-		std::function<void(TextInput&)> onUpdate;
+		std::function<void(TextInput&, u32)> onUpdate;
+		std::function<void(std::string)> onStore;
 		Vec2 size{ 100,20 };
 		XAlign xalign{ XAlign::Left };
 		YAlign yalign{ YAlign::Top };
-		Vec2 fontSize{ 10,20 };
-		Vec4 color{ 0,0,0,1 };
-		BigTextureRef fonttexture{ "ConsolasSoft.png" };
-		std::function<void(std::string)> onStore;
+		f32 fontSize{ NAN };
+		Vec4 color{ UNSET_COLOR };
+		std::pair<FontDescriptor, FontHandle> fontPair;
+		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
 		bool bClearOnEnter{ false };
 	};
 	namespace {
@@ -39,14 +43,16 @@ namespace gui {
 	}
 
 	struct TextInputF64 : IElement {
-		std::function<void(TextInput&)> onUpdate;
+		std::function<void(TextInputF64&, u32)> onUpdate;
 		f64* value{ nullptr };
 		Vec2 size{ 100,20 };
-		Vec2 fontSize{ 10,20 };
+		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
 		Vec4 colorFont{ UNSET_COLOR };
 		Vec4 colorFontError{ UNSET_COLOR };
-		BigTextureRef fonttexture{ "ConsolasSoft.png" };
+		Padding textPadding{ NAN,NAN,NAN,NAN };
+		std::pair<FontDescriptor, FontHandle> fontPair;
+		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
 	};
 	namespace {
 		struct _TextInputF64 : public TextInputF64 {

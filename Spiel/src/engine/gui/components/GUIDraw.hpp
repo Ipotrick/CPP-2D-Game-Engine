@@ -6,8 +6,9 @@
 
 namespace gui {
 	template<typename T>
-	void onDraw(Manager& manager, T& element, u32 id, DrawContext const& context, std::vector<Sprite>& out) {}
+	void onDraw(Manager& manager, T& element, u32 id, DrawContext const& context, std::vector<Sprite>& out) { static_assert(false); }
 
+	template<> void onDraw(Manager& manager, std::monostate& self, u32 id, DrawContext const& context, std::vector<Sprite>& out) {}
 	template<> void onDraw(Manager& manager, Box& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, Group& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, _Button& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
@@ -31,20 +32,20 @@ namespace gui {
 	 * shoud allways be called on child first and then one should update oneself.
 	 * \return UNSCALED minimum size the element needs.
 	 */
-	Vec2 updateAndGetMinsize(Manager& manager, T& element) { static_assert(false); return {}; }
-	template<> Vec2 updateAndGetMinsize(Manager& manager, std::monostate& self) { return {}; }
-	template<> Vec2 updateAndGetMinsize(Manager& manager, Box& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, Group& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, _Button& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, StaticText& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, Text& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, _TextInput& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, _Checkbox& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, SliderF64& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, DragDroppable& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, DropBox& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, _TextInputF64& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, Footer& self);
+	Vec2 updateAndGetMinsize(Manager& manager, u32 id, T& element) { static_assert(false); return {}; }
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, std::monostate& self) { return {}; }
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Box& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Group& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Button& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, StaticText& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Text& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInput& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Checkbox& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, SliderF64& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, DragDroppable& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, DropBox& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInputF64& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Footer& self);
 
 	/**
 	 * shoud allways be called on child first and then one should update oneself.
@@ -52,7 +53,7 @@ namespace gui {
 	 */
 	inline Vec2 updateAndGetMinsize(Manager& manager, u32 id)
 	{
-		std::visit([&](auto&& element) { manager.minsizes[id] = updateAndGetMinsize(manager, element); }, manager.elements[id]);
+		std::visit([&](auto&& element) { manager.minsizes[id] = updateAndGetMinsize(manager, id, element); }, manager.elements[id]);
 		return manager.minsizes[id];
 	}
 

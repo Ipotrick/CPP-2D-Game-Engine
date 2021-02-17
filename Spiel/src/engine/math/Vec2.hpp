@@ -71,6 +71,21 @@ public:
 	float y;
 };
 
+inline Vec2 round(Vec2 const& vec)
+{
+	return Vec2{ std::round(vec.x), std::round(vec.y) };
+}
+
+inline Vec2 floor(Vec2 const& vec)
+{
+	return Vec2{ std::floor(vec.x), std::floor(vec.y) };
+}
+
+inline Vec2 ceil(Vec2 const& vec)
+{
+	return Vec2{ std::ceil(vec.x), std::ceil(vec.y) };
+}
+
 inline Vec2 const operator-(Vec2 const& vec) {
 	return { -vec.x, -vec.y };
 }
@@ -225,11 +240,23 @@ inline Vec2 abs(Vec2 v)
 	return v;
 }
 
+/*
+	TODO MASSIVE REWORK
+*/
 class RotaVec2 {
 public:
 	RotaVec2() = default;
 	RotaVec2(float sin, float cos) : sin{ sin }, cos{ cos } {}
 	explicit RotaVec2(float angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
+
+	static RotaVec2 fromUnitX0(Vec2 vec)
+	{
+		return RotaVec2{ vec.y, vec.x };
+	}
+	static RotaVec2 fromUnitY0(Vec2 vec)
+	{
+		return RotaVec2{ vec.x, -vec.y };
+	}
 
 	RotaVec2 operator -()
 	{
@@ -264,6 +291,13 @@ public:
 inline RotaVec2 operator*(RotaVec2 a, RotaVec2 b)
 {
 	return RotaVec2(a.sin*b.cos + a.cos*b.sin, a.cos * b.cos - a.sin * b.sin);
+}
+
+inline RotaVec2& operator*=(RotaVec2& a, RotaVec2 b)
+{
+	auto c = a * b;
+	a = c;
+	return a;
 }
 
 inline Vec2 rotate(Vec2 vec, RotaVec2 rotationVec) {

@@ -46,9 +46,7 @@ public:
 
 	void takeRenderingContext();
 
-	void releaseRenderingContext();
-	
-	bool isRenderContextLocked() const;
+	void returnRenderingContext();
 
 	bool isFocused() const;
 
@@ -89,9 +87,8 @@ public:
 private:
 	static void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods);
 
-	mutable std::mutex mut{};
-
 	bool bRenderContextLocked{ false };
+	mutable std::mutex mut{};
 	bool bSetSize{ false };
 	u32 height{ 100 };
 	u32 width{ 100 };

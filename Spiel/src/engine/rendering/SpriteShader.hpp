@@ -1,6 +1,6 @@
 #pragma once
 
-#include "OpenGLShader.hpp"
+#include "OpenGLAbstraction/OpenGLShader.hpp"
 
 struct SpriteShaderVertex {
 	static int constexpr FLOAT_SIZE{ 2 };
@@ -32,7 +32,7 @@ struct SpriteShaderModel {
 			Vec2 texMin;
 			Vec2 texMax;
 			GLint texSampler;
-			GLint isCircle;
+			GLint isMSDF;
 			float cornerRounding;
 			GLint renderSpace;
 		};

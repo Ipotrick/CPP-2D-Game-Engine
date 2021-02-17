@@ -4,13 +4,18 @@
 #include "../engine/gui/GUIManager.hpp"
 
 #include "../engine/rendering/pipeline/RenderRessourceManager.hpp"
-#include "../engine/rendering/pipeline/OpenGLTexture2.hpp"
+#include "../engine/rendering/DefaultRenderer.hpp"
 
-using TextureManager = RenderRessourceManager<TextureHandle, TextureDescriptor2, OpenGLTexture2>;
+#include "../engine/rendering/Font.hpp"
 
 class GUIApp : public EngineCore {
 public:
-#define GET_MEMBER(x) [this]() { return this->x; }
+
+	GUIApp() : EngineCore{ "GUI Test", 1000, 1000 }
+	{
+		renderer.init(&mainWindow);
+		renderer.supersamplingFactor = 2;
+	}
 
 	gui::Manager::RootHandle makeUI()
 	{
@@ -62,32 +67,36 @@ public:
 						}),
 						ui.build(Button{
 							.size = Vec2{ 150, 25 },
-							.text = StaticText{.value = "Grow UI"},
 							.onHold = [this](Button& self) { ui.globalScaling += getDeltaTime() * 0.5f; },
+							.child = ui.build(StaticText{.value = "Grow UI"}),
 						}),
 						ui.build(Button{
 							.size = Vec2{ 150, 25 },
-							.text = StaticText{.value = "Shrink UI"},
 							.onHold = [this](Button& self) { ui.globalScaling -= getDeltaTime() * 0.5f; },
+							.child = ui.build(StaticText{.value = "Shrink UI"}),
 						}),
 						// text input demo:
 						ui.build(TextInput{
 							.onUpdate = [this](TextInput& self) { self.xalign = (bCheckbox ? XAlign::Left : XAlign::Center); },
-							.size = {190, 50},
 							.onStore = [this](std::string str) { text = str; },
+							.size = {190, 50},
 							.bClearOnEnter = true,
 						}),
 						ui.build(Text{.value = &text, .color = {0.9,0.9,0.9,1}}),
-						// fps slider:
-						ui.build(Text{.value = &deltaTimeText, .color = {0.9,0.9,0.9,1}}),
-						ui.build(Text{.value = &sliderText, .color = {0.9,0.9,0.9,1}}),
 						ui.build(Row{
 							.xalign = XAlign::Center,
 							.packing = Packing::Tight,
 							.children = {
-								ui.build(TextInputF64{.value = &mainSliderMin, .size = Vec2{45,25}}),
-								ui.build(SliderF64{.value = &sliderValue, .size = Vec2{120,30}, .min = &mainSliderMin, .max = &mainSliderMax}),
-								ui.build(TextInputF64{.value = &mainSliderMax, .size = Vec2{45,25}}),
+								ui.build(TextInputF64{.value = &mainSliderMin, .size = Vec2{45,20}}),
+								ui.build(SliderF64{
+									.value = &sliderValue, 
+									.size = Vec2{120,20},
+									.min = &mainSliderMin, 
+									.max = &mainSliderMax, 
+									.bThin=false,
+									.child = ui.build(Text{.value= &sliderText, .color = Vec4{1,1,1,1}})
+								}),
+								ui.build(TextInputF64{.value = &mainSliderMax, .size = Vec2{45,20}}),
 							}
 						}),
 						// three sliders:
@@ -98,24 +107,24 @@ public:
 								ui.build(Column{
 									.xalign = XAlign::Center,
 									.children = {
-										ui.build(Text{.value = &threeSlidersMainMinText, .fontSize = Vec2{7,14}, .color = Vec4{1,1,1,1}}),
-										ui.build(SliderF64{.value = &threeSlidersMainMin, .size = Vec2{25,100}, .min = 5.0, .max = 50.0, .bVertical = true}),
+										ui.build(Text{.value = &threeSlidersMainMinText, .fontSize = 12, .color = Vec4{1,1,1,1}}),
+										ui.build(SliderF64{.value = &threeSlidersMainMin, .size = Vec2{20,100}, .min = 5.0, .max = 50.0, .bVertical = true}),
 									}
 								}),
 								ui.build(Column{
 									.xalign = XAlign::Center,
 									.children = {
-										ui.build(Text{.value = &threeSlidersMainMaxText, .fontSize = Vec2{7,14}, .color = Vec4{1,1,1,1}}),
-										ui.build(SliderF64{.value = &threeSlidersMainMax, .size = Vec2{25,100}, .min = 5.0, .max = 50.0, .bVertical = true}),
+										ui.build(Text{.value = &threeSlidersMainMaxText, .fontSize = 12, .color = Vec4{1,1,1,1}}),
+										ui.build(SliderF64{.value = &threeSlidersMainMax, .size = Vec2{20,100}, .min = 5.0, .max = 50.0, .bVertical = true}),
 									}
 								}),
 								ui.build(Column{
 									.xalign = XAlign::Center,
 									.children = {
-										ui.build(Text{.value = &threeSlidersMainValueText, .fontSize = Vec2{7,14}, .color = Vec4{1,1,1,1}}),
+										ui.build(Text{.value = &threeSlidersMainValueText, .fontSize = 12, .color = Vec4{1,1,1,1}}),
 										ui.build(SliderF64{
 											.value = &threeSlidersMainValue,
-											.size = Vec2{25,100},
+											.size = Vec2{20,100},
 											.min = &threeSlidersMainMin,
 											.max = &threeSlidersMainMax,
 											.bVertical = true,
@@ -174,7 +183,6 @@ public:
 		});
 	}
 
-
 	std::string genDeltaTimeStr()
 	{
 		return std::string("deltatime: ") + std::to_string(this->getDeltaTime());
@@ -182,10 +190,8 @@ public:
 
 	virtual void create() override final
 	{
-		initialize("GUI Test", 1000, 1000);
 		handle = makeUI();
 
-		setMaxFPS(200);
 		ui.printMemoryUtalisation();
 	}
 
@@ -194,12 +200,16 @@ public:
 		threeSlidersMainMinText = std::string("min:") + std::to_string(threeSlidersMainMin);
 		threeSlidersMainMaxText = std::string("max:") + std::to_string(threeSlidersMainMax);
 		threeSlidersMainValueText = std::string("size:") + std::to_string(threeSlidersMainValue);
-		deltaTimeText = genDeltaTimeStr(); 
-		sliderText = std::string("max fps: ") + std::to_string(sliderValue);
+		sliderText = std::string("FPS: ") + std::to_string(sliderValue);
 		gridSize.x = threeSlidersMainValue;
 		gridSize.y= threeSlidersMainValue;
 		setMaxFPS(std::max(5.0, sliderValue));
-		ui.draw(renderer, mainWindow, deltaTime);
+		ui.draw(renderer.getCoordSys(), &renderer.tex, &renderer.fonts, mainWindow, deltaTime);
+		renderer.drawUISprites(ui.getSprites());
+		if (mainWindow.keyJustPressed(Key::G)) {
+			TextureDescriptor desc{ "ressources/ConsolasSoft.png" };
+			renderer.tex.clear();
+		}
 		if (mainWindow.keyJustPressed(Key::A)) {
 			if (ui.isHandleValid(handle)) {
 				ui.destroy(handle);
@@ -212,6 +222,8 @@ public:
 		}
 		if (mainWindow.keyPressed(Key::NP_ADD)) { ui.globalScaling *= 1.0f + deltaTime; }
 		if (mainWindow.keyPressed(Key::NP_SUBTRACT)) { ui.globalScaling /= 1.0f + deltaTime; }
+		renderer.start();
+
 	}
 
 	virtual void destroy() override final
@@ -219,11 +231,12 @@ public:
 	}
 
 private:
+	DefaultRenderer renderer;
+
 	gui::Manager ui;
 	gui::Manager::RootHandle handle;
 	bool bCheckbox{ false };
 	std::string text;
-	std::string deltaTimeText;
 	Vec2 gridSize{ 25,25 };
 
 	std::string sliderText;
@@ -238,5 +251,4 @@ private:
 	std::string threeSlidersMainMinText;
 	f64 threeSlidersMainValue{ 0.0 };
 	std::string threeSlidersMainValueText;
-	TextureManager tmanager;
 };

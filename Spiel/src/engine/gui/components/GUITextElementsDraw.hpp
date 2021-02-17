@@ -3,24 +3,27 @@
 #include <charconv>
 
 #include "GUICommonElementsDraw.hpp"
+#include "../../rendering/Window.hpp"
 
 namespace gui {
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, _TextInput& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInput& self)
 	{
-		if (self.onUpdate) self.onUpdate(self);
+		if (self.onUpdate) self.onUpdate(self, id);
+		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
+			self.fontTexPair.second = manager.tex->makeHandle(self.fontTexPair.first);
+		}
+		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
+			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
+		}
 		return self.size;
 	}
 	template<> inline void onDraw(Manager& manager, _TextInput& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
-		if (!self.fonttexture.valid()) {
-			manager.renderer->validateTextureRef(self.fonttexture);
-		}
-
 		const auto scaledCompleteSize = manager.minsizes[id] * context.scale;
 		const Vec2 centerPlace = getPlace(scaledCompleteSize, context);
 
-		const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		const bool cursorOverElement = isCoordInBounds(scaledCompleteSize, centerPlace, cursor);
 
 		if (cursorOverElement)
@@ -71,9 +74,8 @@ namespace gui {
 			.color = color,
 			.position = Vec3{centerPlace, context.renderDepth},
 			.scale = scaledCompleteSize,
-			.form = Form::Rectangle,
 			.cornerRounding = 3.0f * context.scale,
-			.drawMode = RenderSpace::PixelSpace 
+			.drawMode = RenderSpace::Pixel 
 			}
 		);
 
@@ -82,65 +84,76 @@ namespace gui {
 		textContext.yalign = self.yalign;
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.color;
-		textContext.texref = self.fonttexture.makeSmall();
+		textContext.tex = self.fontTexPair.second;
+		textContext.font = &manager.fonts->get(self.fontPair.second);
+		fit(textContext, scaledCompleteSize, centerPlace);
+		auto charsDrawn = drawFontText(self.str.data(), textContext, out);
 
-		u32 charsProcessed = drawText(self.str.c_str(), textContext, out);
-
-		if (self.str.size() > charsProcessed) /* we stopped char processing cause the string is too long, we need to remove the last few chars */{
-			self.str = self.str.substr(0, charsProcessed);
+		if (self.str.size() > charsDrawn) /* we stopped char processing cause the string is too long, we need to remove the last few chars */{
+			self.str = self.str.substr(0, charsDrawn);
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, StaticText& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, StaticText& self)
 	{
-		if (self.onUpdate) self.onUpdate(self);
-		return getMinSizeText(self.value.data(), self.fontSize);
+		if (self.onUpdate) self.onUpdate(self, id);
+		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
+			self.fontTexPair.second = manager.tex->makeHandle(self.fontTexPair.first);
+		}
+		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
+			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
+		}
+		return getMinSizeText(self.value.data(), self.fontSize, manager.fonts->get(self.fontPair.second));
 	}
 	template<> inline void onDraw(Manager& manager, StaticText& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
-		if (!self.fonttexture.valid()) {
-			manager.renderer->validateTextureRef(self.fonttexture);
-		}
-
 		TextContext textContext{ context };
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.color;
-		textContext.texref = self.fonttexture.makeSmall();
-		drawText(self.value.data(), textContext, out);
+		textContext.tex = self.fontTexPair.second;
+		textContext.font = &manager.fonts->get(self.fontPair.second);
+		drawFontText(self.value.data(), textContext, out);
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, Text& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, Text& self)
 	{
-		if (self.onUpdate) self.onUpdate(self);
-		return getMinSizeText(self.value->c_str(), self.fontSize);
+		if (self.onUpdate) self.onUpdate(self, id);
+		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
+			self.fontTexPair.second = manager.tex->makeHandle(self.fontTexPair.first);
+		}
+		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
+			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
+		}
+		return getMinSizeText(std::string(self.value).c_str(), self.fontSize, manager.fonts->get(self.fontPair.second));
 	}
 	template<> inline void onDraw(Manager& manager, Text& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
-		if (!self.fonttexture.valid()) {
-			manager.renderer->validateTextureRef(self.fonttexture);
-		}
-
 		TextContext textContext{ context };
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.color;
-		textContext.texref = self.fonttexture.makeSmall();
-		drawText(self.value->c_str(), textContext, out);
+		textContext.tex = self.fontTexPair.second;
+		textContext.font = &manager.fonts->get(self.fontPair.second);
+		drawFontText(std::string(self.value).data(), textContext, out);
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, _TextInputF64& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInputF64& self)
 	{
+		if (self.onUpdate) self.onUpdate(self, id);
+		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
+			self.fontTexPair.second = manager.tex->makeHandle(self.fontTexPair.first);
+		}
+		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
+			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
+		}
 		return self.size;
 	}
 	template<> inline void onDraw(Manager& manager, _TextInputF64& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
-		if (!self.fonttexture.valid()) {
-			manager.renderer->validateTextureRef(self.fonttexture);
-		}
 
 		const Vec2 scaledCompleteSize = manager.minsizes[id] * context.scale;
 		const Vec2 centerPlace = getPlace(scaledCompleteSize, context);
 
-		const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		const bool cursorOverElement = isCoordInBounds(scaledCompleteSize, centerPlace, cursor);
 
 		if (cursorOverElement) {
@@ -208,9 +221,8 @@ namespace gui {
 			.color = bTextValid ? color : self.colorFontError,
 			.position = Vec3{centerPlace, context.renderDepth},
 			.scale = scaledCompleteSize,
-			.form = Form::Rectangle,
 			.cornerRounding = 3.0f * context.scale,
-			.drawMode = RenderSpace::PixelSpace
+			.drawMode = RenderSpace::Pixel
 			}
 		);
 
@@ -219,10 +231,11 @@ namespace gui {
 		textContext.yalign = YAlign::Center;
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.colorFont;
-		textContext.texref = self.fonttexture.makeSmall();
+		textContext.tex = self.fontTexPair.second;
+		textContext.font = &manager.fonts->get(self.fontPair.second);
 		fit(textContext, scaledCompleteSize, centerPlace);
-
-		u32 charsProcessed = drawText(self.str.c_str(), textContext, out);
+		fit(textContext, self.textPadding);
+		u32 charsProcessed = drawFontText(self.str.c_str(), textContext, out);
 
 		if (self.str.size() > charsProcessed) /* we stopped char processing cause the string is too long, we need to remove the last few chars */ {
 			self.str = self.str.substr(0, charsProcessed);

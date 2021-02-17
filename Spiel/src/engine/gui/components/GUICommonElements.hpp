@@ -10,7 +10,7 @@ namespace gui {
 	struct Group;
 
 	struct Column : IElement {
-		std::function<void(Group&)> onUpdate;
+		std::function<void(Group&, u32)> onUpdate;
 		ValueOrPtr<XAlign> xalign{ XAlign::Left };
 		ValueOrPtr<YAlign> yalign{ YAlign::Top };
 		ValueOrPtr<Padding> padding{ Padding{NAN,NAN,NAN,NAN} };
@@ -20,7 +20,7 @@ namespace gui {
 	};
 
 	struct Row : IElement {
-		std::function<void(Group&)> onUpdate;
+		std::function<void(Group&, u32)> onUpdate;
 		ValueOrPtr<XAlign>xalign{ XAlign::Left };
 		ValueOrPtr<YAlign>yalign{ YAlign::Center };
 		ValueOrPtr<Padding>padding{ Padding{NAN,NAN,NAN,NAN} };
@@ -51,11 +51,11 @@ namespace gui {
 			children{std::move(r.children)}
 		{}
 
-		std::function<void(Group&)> onUpdate;
-		ValueOrPtr < XAlign> xalign{ XAlign::Left };
-		ValueOrPtr < YAlign> yalign{ YAlign::Top };
-		ValueOrPtr < Padding> padding{ Padding{NAN,NAN,NAN,NAN} };
-		ValueOrPtr < Packing> packing{ Packing::Tight };
+		std::function<void(Group&, u32)> onUpdate;
+		ValueOrPtr<XAlign> xalign{ XAlign::Left };
+		ValueOrPtr<YAlign> yalign{ YAlign::Top };
+		ValueOrPtr<Padding> padding{ Padding{NAN,NAN,NAN,NAN} };
+		ValueOrPtr<Packing> packing{ Packing::Tight };
 		ValueOrPtr<f32> spacing{ NAN };
 		ValueOrPtr<bool> bVertical{ true };
 		std::vector<u32> children;
@@ -64,7 +64,7 @@ namespace gui {
 
 	enum class OnDrag { Move, Resize };
 	struct Box : IElement {
-		std::function<void(Box&)> onUpdate;
+		std::function<void(Box&, u32)> onUpdate;
 		ValueOrPtr<Vec2> minsize{ Vec2{} };
 		ValueOrPtr<bool> bFillSpace{ false };
 		ValueOrPtr<Vec4> color{ UNSET_COLOR };
@@ -79,14 +79,14 @@ namespace gui {
 
 
 	struct Button : IElement {
-		std::function<void(Button&)> onUpdate;
-		ValueOrPtr < Vec2> size{ Vec2{15,15} };
-		ValueOrPtr < Vec4> color{ UNSET_COLOR };
-		ValueOrPtr < Vec4> holdColor{ UNSET_COLOR };
-		std::optional<StaticText> text;
+		std::function<void(Button&, u32)> onUpdate;
+		Vec2 size{ Vec2{15,15} };
+		Vec4 color{ UNSET_COLOR };
+		Vec4 holdColor{ UNSET_COLOR };
 		std::function<void(Button& self)> onPress;
 		std::function<void(Button& self)> onHold;
 		std::function<void(Button& self)> onRelease;
+		u32 child{ INVALID_ELEMENT_ID };
 	};
 	namespace {
 		struct _Button : public Button {
@@ -99,7 +99,7 @@ namespace gui {
 
 
 	struct Checkbox : IElement {
-		std::function<void(Checkbox&)> onUpdate;
+		std::function<void(Checkbox&, u32)> onUpdate;
 		bool* value{ nullptr };
 		ValueOrPtr<Vec2> size{ Vec2{15,15} };
 		ValueOrPtr<Vec4> color{ UNSET_COLOR };
@@ -117,31 +117,32 @@ namespace gui {
 
 
 	struct SliderF64 : IElement {
-		std::function<void(SliderF64&)> onUpdate;
+		std::function<void(SliderF64&, u32)> onUpdate;
 		f64* value{ nullptr };
-		ValueOrPtr<Vec2> size{ Vec2{100,20} };
+		ValueOrPtr<Vec2> size{ Vec2{150,25} };
 		ValueOrPtr<f64> min{ 0.0 };
 		ValueOrPtr<f64> max{ 1.0 };
-		ValueOrPtr<bool> bVertical{ false };
+		bool bVertical{ false };
+		bool bThin{ true };
 		ValueOrPtr<Vec4> colorBar{ UNSET_COLOR };
 		ValueOrPtr<Vec4> colorSlider{ UNSET_COLOR };
 		ValueOrPtr<Vec4> colorError{ UNSET_COLOR };
+		u32 child{ INVALID_ELEMENT_ID };
 	};
 
 
 
 	struct DragDroppable : IElement {
-		std::function<void(DragDroppable&)> onUpdate;
+		std::function<void(DragDroppable&, u32)> onUpdate;
 		std::any data;
-		//ValueOrPtr<Vec4> color{ UNSET_COLOR };
-		bool bCatchable{ true };
+		ValueOrPtr<bool> bCatchable{ true };
 		u32 child{ INVALID_ELEMENT_ID };
 	};
 
 
 
 	struct DropBox : IElement {
-		std::function<void(DropBox&)> onUpdate;
+		std::function<void(DropBox&, u32)> onUpdate;
 		// gets executed in a catch event
 		// the u32 represents the id of the catched element
 		// return true when we want to catch the element and make it our child
@@ -158,10 +159,10 @@ namespace gui {
 
 
 	struct Footer : IElement {
-		std::function<void(Footer&)> onUpdate;
-		Mode mode{ Mode::Absolute };
-		f32 size{ 30 };
-		f32 spacing{ NAN };
+		std::function<void(Footer&, u32)> onUpdate;
+		ValueOrPtr<Mode> mode{ Mode::Absolute };
+		ValueOrPtr<f32> size{ 30 };
+		ValueOrPtr<f32> spacing{ NAN };
 		std::vector<u32> children;
 	};
 }

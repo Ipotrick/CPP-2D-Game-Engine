@@ -21,8 +21,8 @@ namespace gui {
 	template<> inline void onDragEvent(Manager& manager, Box& self, u32 id, u32 rootindex)
 	{
 		Root& root = manager.rootElements[rootindex].element;
-		Vec2 cursorPos = manager.renderer->convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(manager.window->getCursorPos());
-		Vec2 cursorPrevPos = manager.renderer->convertCoordSys<RenderSpace::WindowSpace, RenderSpace::PixelSpace>(manager.window->getPrevCursorPos());
+		Vec2 cursorPos = manager.coordSys.convertCoordSys<RenderSpace::Window, RenderSpace::Pixel>(manager.window->getCursorPos());
+		Vec2 cursorPrevPos = manager.coordSys.convertCoordSys<RenderSpace::Window, RenderSpace::Pixel>(manager.window->getPrevCursorPos());
 
 		DrawContext windowContext;
 		windowContext.scale = manager.globalScaling;

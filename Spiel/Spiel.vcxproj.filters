@@ -16,12 +16,6 @@
     <Filter Include="game\serialization">
       <UniqueIdentifier>{1281a756-300d-4648-9d30-7bc11d02ff92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game\collision">
-      <UniqueIdentifier>{8a9aa8bd-93eb-4e80-9d66-f335ef576c98}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="game\physics">
-      <UniqueIdentifier>{7b906e04-a3f9-48d5-b58c-52f1c6c4562e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="mandelbrot">
       <UniqueIdentifier>{d52581ae-b099-40ae-9d8f-9a554a51eeda}</UniqueIdentifier>
     </Filter>
@@ -66,6 +60,21 @@
     </Filter>
     <Filter Include="engine\rendering\pipeline">
       <UniqueIdentifier>{7b9675a9-92db-4b76-86c2-4860b046f561}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\rendering\OpenGLAbstraction">
+      <UniqueIdentifier>{0e002ab0-11bc-450d-97f9-66a4d60f9fdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\rendering\DefaultPipes">
+      <UniqueIdentifier>{2dd4f57b-25ae-4347-b3f6-1b186d1c9f3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ants">
+      <UniqueIdentifier>{fdfa8763-e916-4711-8269-4abc83b56f20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\physics2d">
+      <UniqueIdentifier>{3d3e80cb-7511-4882-95de-b1997c91e1e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine\collision2d">
+      <UniqueIdentifier>{53f8f9a3-1ae6-4636-8dbc-87b8c73f76a4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -123,44 +132,8 @@
     <ClInclude Include="src\game\serialization\YAMLSerializer.hpp">
       <Filter>game\serialization</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\collision\CacheAABBJob.hpp">
-      <Filter>game\collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\collision\collision_detection.hpp">
-      <Filter>game\collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\collision\CollisionSystem.hpp">
-      <Filter>game\collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics\CollisionConstraintSet.hpp">
-      <Filter>game\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics\Physics.hpp">
-      <Filter>game\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics\PhysicsSystem.hpp">
-      <Filter>game\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics\PhysicsSystem2.hpp">
-      <Filter>game\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics\PhysicsTypes.hpp">
-      <Filter>game\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics\PushoutCalcJob.hpp">
-      <Filter>game\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\collision\QuadTree.hpp">
-      <Filter>game\collision</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\movementScript.hpp">
       <Filter>game\hpp</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\collision\CoreComponents.hpp">
-      <Filter>game\collision</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\collision\CoreSystemUniforms.hpp">
-      <Filter>game\collision</Filter>
     </ClInclude>
     <ClInclude Include="src\mandelbrot\EngineConfig.hpp">
       <Filter>mandelbrot</Filter>
@@ -174,43 +147,16 @@
     <ClInclude Include="src\mandelbrot\MandelRenderScript.hpp">
       <Filter>mandelbrot</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\collision\CollisionUniform.hpp">
-      <Filter>game\collision</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\World.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\Camera.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\RenderBuffer.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\Renderer.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\RenderingWorker.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\RenderScript.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\rendering\RenderSpace.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\RenderTypes.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\TextureCache.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\TextureRefManager.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\rendering\Window.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\Layer.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\math\basic_math.hpp">
@@ -279,9 +225,6 @@
     <ClInclude Include="src\engine\util\Perf.hpp">
       <Filter>engine\util</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\util\random.hpp">
-      <Filter>engine\util</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\util\utils.hpp">
       <Filter>engine\util</Filter>
     </ClInclude>
@@ -306,25 +249,7 @@
     <ClInclude Include="src\game\LoadRenderTestMap.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLPassShader.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLShaderUtil.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLTextureRenderBuffer.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLShader.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\rendering\SpriteShader.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLShaderStorage.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLTexture.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\TextureSamplerManager.hpp">
@@ -363,9 +288,6 @@
     <ClInclude Include="src\engine\gui\components\GUIMouseEvent.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\RenderWorkerThread.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\gui\base\GUITextUtil.hpp">
       <Filter>engine\gui\base</Filter>
     </ClInclude>
@@ -387,17 +309,122 @@
     <ClInclude Include="src\engine\gui\components\GUIChildAccess.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\gui\components\GUIDraw.hpp">
-      <Filter>engine\gui\elements</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\gui\components\GUITextElementsStyling.hpp">
       <Filter>engine\gui\elements</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\pipeline\RenderRessourceManager.hpp">
       <Filter>engine\rendering\pipeline</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\pipeline\OpenGLTexture2.hpp">
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLPassShader.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShader.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderStorage.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderUtil.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLTextureRenderBuffer.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLTexture.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\Sprite.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\RenderPipe.hpp">
       <Filter>engine\rendering\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\RenderPipeline.hpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\RenderPipelineThread.hpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\DefaultPipes\SpriteRenderPipe.hpp">
+      <Filter>engine\rendering\DefaultPipes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\DefaultRenderer.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\RenderCoordinateSystem.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\DefaultPipes\BloomPipe.hpp">
+      <Filter>engine\rendering\DefaultPipes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\Glyph.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\types\PagedIndexMap.hpp">
+      <Filter>engine\types</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\RessourceManager.hpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\pipeline\RessourceHandle.hpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\Font.hpp">
+      <Filter>engine\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\util\UnicodeUtil.hpp">
+      <Filter>engine\util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ants\Ants.hpp">
+      <Filter>Ants</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ants\AntsWorld.hpp">
+      <Filter>Ants</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\gui\components\GUIDraw.hpp">
+      <Filter>engine\gui\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\CacheAABBJob.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\collision_detection.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\CollisionSystem.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\CollisionUniform.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\CoreComponents.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\CoreSystemUniforms.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\collision\QuadTree.hpp">
+      <Filter>engine\collision2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\CollisionConstraintSet.hpp">
+      <Filter>engine\physics2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\Physics.hpp">
+      <Filter>engine\physics2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\PhysicsSystem.hpp">
+      <Filter>engine\physics2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\PhysicsSystem2.hpp">
+      <Filter>engine\physics2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\PhysicsTypes.hpp">
+      <Filter>engine\physics2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\physics\PushoutCalcJob.hpp">
+      <Filter>engine\physics2d</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Ants\PheroGrid.hpp">
+      <Filter>Ants</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -443,27 +470,6 @@
     <ClCompile Include="src\game\serialization\YAMLSerializer.cpp">
       <Filter>game\serialization</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\collision\collision_detection.cpp">
-      <Filter>game\collision</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\collision\CollisionSystem.cpp">
-      <Filter>game\collision</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\physics\CollisionConstraintSet.cpp">
-      <Filter>game\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\physics\Physics.cpp">
-      <Filter>game\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\physics\PhysicsSystem.cpp">
-      <Filter>game\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\physics\PhysicsSystem2.cpp">
-      <Filter>game\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\collision\QuadTree.cpp">
-      <Filter>game\collision</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\EngineCore.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -472,18 +478,6 @@
     </ClCompile>
     <ClCompile Include="src\game\World.cpp">
       <Filter>game</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\Renderer.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\RenderingWorker.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\TextureCache.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\TextureRefManager.cpp">
-      <Filter>engine\rendering</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\rendering\Window.cpp">
       <Filter>engine\rendering</Filter>
@@ -506,24 +500,6 @@
     <ClCompile Include="src\game\LoadRenderTestMap.cpp">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\rendering\OpenGLPassShader.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\OpenGLShaderUtil.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\OpenGLTextureRenderBuffer.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\OpenGLShader.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\OpenGLTexture.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\TextureSamplerManager.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\gui\GUIManager.cpp">
       <Filter>engine\gui</Filter>
     </ClCompile>
@@ -533,11 +509,65 @@
     <ClCompile Include="src\engine\gui\base\GUIDrawContext.cpp">
       <Filter>engine\gui\base</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\rendering\RnederWorkerThread.cpp">
-      <Filter>engine\rendering</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\io\Input.cpp">
       <Filter>engine\io</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLPassShader.cpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLShader.cpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderUtil.cpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLTextureRenderBuffer.cpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\TextureSamplerManager.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLTexture.cpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\pipeline\RenderPipeline.cpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\pipeline\RenderPipelineThread.cpp">
+      <Filter>engine\rendering\pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\DefaultPipes\SpriteRenderPipe.cpp">
+      <Filter>engine\rendering\DefaultPipes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\RenderCoordinateSystem.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\Font.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\Glyph.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\collision\collision_detection.cpp">
+      <Filter>engine\collision2d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\collision\CollisionSystem.cpp">
+      <Filter>engine\collision2d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\collision\QuadTree.cpp">
+      <Filter>engine\collision2d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\physics\CollisionConstraintSet.cpp">
+      <Filter>engine\physics2d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\physics\Physics.cpp">
+      <Filter>engine\physics2d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\physics\PhysicsSystem.cpp">
+      <Filter>engine\physics2d</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\physics\PhysicsSystem2.cpp">
+      <Filter>engine\physics2d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

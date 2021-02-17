@@ -99,7 +99,7 @@ namespace YAML {
             rhs.ignoreGroupMask     = node["IgnoreMask"].as<CollisionMask>();
             rhs.groupMask           = node["Mask"].as<CollisionMask>();
             rhs.extraColliders      = node["ExtraCollider"].as<std::vector<CompountCollider>>();
-            rhs.sleeping            = node["isSleeping"].as<bool>();
+            //rhs.sleeping            = node["isSleeping"].as<bool>();
             rhs.form                = node["Form"].as<Form>();
             rhs.collisionSettings = 0x00;
             rhs.collisionSettings &= node["IgnoreTypes"]["Dynamic"].as<bool>()  *  Collider::DYNAMIC;
@@ -215,81 +215,6 @@ namespace YAML {
 
             rhs.friction = node["Friction"].as<float>();
             rhs.rotationalFriction = node["RotaFriction"].as<float>();
-
-            return true;
-        }
-    };
-}
-
-template<> constexpr bool isYAMLSerializable<TextureDiscriptor>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureDiscriptor& b);
-namespace YAML {
-    template<>
-    struct convert<TextureDiscriptor> {
-        static Node encode(const TextureDiscriptor& rhs)
-        {
-            Node node;
-            return node;
-        }
-
-        static bool decode(const Node& node, TextureDiscriptor& rhs)
-        {
-            if (node.size() != 1) {
-                return false;
-            }
-
-            rhs.name = node["name"].as<std::string>();
-
-            return true;
-        }
-    };
-}
-
-template<> constexpr bool isYAMLSerializable<TextureRef>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureRef& b);
-namespace YAML {
-    template<>
-    struct convert<TextureRef> {
-        static Node encode(const TextureRef& rhs)
-        {
-            Node node;
-            return node;
-        }
-
-        static bool decode(const Node& node, TextureRef& rhs)
-        {
-            if (node.size() != 2) {
-                return false;
-            }
-
-            rhs.minPos = node["minPos"].as<Vec2>();
-            rhs.maxPos = node["maxPos"].as<Vec2>();
-
-            return true;
-        }
-    };
-}
-
-template<> constexpr bool isYAMLSerializable<BigTextureRef>() { return true; }
-YAML::Emitter& operator<<(YAML::Emitter& out, const BigTextureRef& b);
-namespace YAML {
-    template<>
-    struct convert<BigTextureRef> {
-        static Node encode(const BigTextureRef& rhs)
-        {
-            Node node;
-            return node;
-        }
-
-        static bool decode(const Node& node, BigTextureRef& rhs)
-        {
-            if (node.size() != 2) {
-                return false;
-            }
-
-            auto info = node["info"].as<TextureDiscriptor>();
-            auto ref = node["ref"].as<TextureRef>();
-            rhs = BigTextureRef(info, ref);
 
             return true;
         }

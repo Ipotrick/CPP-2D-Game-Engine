@@ -11,10 +11,8 @@
 #include "types/Timing.hpp"
 #include "util/Perf.hpp"
 #include "types/BaseTypes.hpp"
-#include "rendering/RenderTypes.hpp"
 #include "rendering/Window.hpp"
 #include "rendering/Camera.hpp"
-#include "rendering/Renderer.hpp"
 #include "JobSystem.hpp"
 #include "entity/EntityComponentManagerView.hpp"
 
@@ -22,14 +20,11 @@ void globalInitialize();
 
 class EngineCore {
 public:
-	EngineCore();
+	EngineCore(std::string windowName, uint32_t windowWidth, uint32_t windowHeight);
 	~EngineCore();
 
 	void operator=(const EngineCore& rhs) = delete;
 	void operator=(EngineCore&& rhs) = delete;
-
-	// creates window and initializes renderer
-	void initialize(std::string windowName, uint32_t windowWidth, uint32_t windowHeight);
 
 	/* ends programm after finishing the current frame */
 	virtual void quit() final { running = false; }
@@ -74,12 +69,9 @@ public:
 		minimunLoopTime = std::chrono::microseconds(cast<u64>(1.0f / fps * 1'000'000));
 	}
 
-	// TODO REPLACE WINDOWING AND CAMERA UTILITY:
-	Vec2 getWindowSize();											// TODO REPLACE
-	float getWindowAspectRatio();									// TODO REPLACE
-	Window mainWindow;											// TODO REPLACE OR ENHANCE
+	Window mainWindow;	
 
-	Renderer renderer;
+	//Renderer renderer;
 
 private:
 	bool running{ true };

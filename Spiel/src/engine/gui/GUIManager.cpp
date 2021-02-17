@@ -46,6 +46,28 @@ namespace gui {
 		return bHasChild;
 	}
 
+	std::vector<u32>* Manager::getChildrenIf(u32 element)
+	{
+		std::vector<u32>* ret{ nullptr };
+		assert(element < elements.size() && elements[element].index() != 0);
+		std::visit(
+			[&](auto&& element) { ret =  getChildren(element); },
+			elements[element]
+		);
+		return ret;
+	}
+
+	u32* Manager::getChildIf(u32 element)
+	{
+		u32* ret{ nullptr };
+		assert(element < elements.size() && elements[element].index() != 0);
+		std::visit(
+			[&](auto&& element) { ret =  getChild(element); },
+			elements[element]
+		);
+		return ret;
+	}
+
 	void Manager::changeChildPosition(u32 child, u32 newPosition)
 	{
 		std::visit(
@@ -119,16 +141,44 @@ namespace gui {
 		adoptChild(child, newParent, newParentPosition);
 	}
 
+	void Manager::updateChildHierarchy(u32 parent)
+	{
+		std::visit(
+			[&](auto&& e) {
+				if (u32* child = getChild(e)) {
+					if (*child != INVALID_ELEMENT_ID) {
+						parents[*child] = parent;
+					}
+				}
+				if (std::vector<u32>* children = getChildren(e)) {
+					for (u32 child : *children) {
+						if (child != INVALID_ELEMENT_ID) {
+							parents[child] = parent;
+						}
+					}
+				}
+			},
+			elements[parent]
+		);
+	}
+
 	void Manager::destroy(const RootHandle& handle)
 	{
 		assert(isHandleValid(handle));
 
 		auto& [element, version, exists] = rootElements[handle.index];
 
-		if (element.child != INVALID_ELEMENT_ID) {
-			destroylist.clear();
-			destroylist.push_back(element.child);
+		destroy(element.child);
 
+		exists = false;
+		freeRootElementIndices.push_back(handle.index);
+	}
+
+	void Manager::destroy(const u32 elementid)
+	{
+		if (elementid != INVALID_ELEMENT_ID) {
+			destroylist.clear();
+			destroylist.push_back(elementid);
 			while (!destroylist.empty()) {
 				const u32 id = destroylist.back();
 				destroylist.pop_back();
@@ -136,8 +186,7 @@ namespace gui {
 				parents[id] = INVALID_ELEMENT_ID;
 
 				std::visit(
-					[&](auto&& element) 
-					{
+					[&](auto&& element) {
 						if (u32* child = getChild(element)) {
 							if (*child != INVALID_ELEMENT_ID) {
 								destroylist.push_back(*child);
@@ -150,17 +199,14 @@ namespace gui {
 								}
 							}
 						}
-					}, 
+					},
 					elements[id]
-				);
-				 
+						);
+
 				freeElementIndices.push_back(id);
 				elements[id] = std::monostate();
 			}
 		}
-
-		exists = false;
-		freeRootElementIndices.push_back(handle.index);
 	}
 
 	bool Manager::isHandleValid(const RootHandle& handle) const
@@ -170,13 +216,17 @@ namespace gui {
 			rootElements[handle.index].version == handle.version;
 	}
 
-	void Manager::draw(Renderer& renderer, Window& window, float deltaTime)
+	void Manager::draw(const RenderCoordSys& coordSys, TextureManager* tex, FontManager* fonts, Window& window, float deltaTime)
 	{
 		this->window = &window;
-		this->renderer = &renderer;
+		this->coordSys = coordSys;
+		this->tex = tex;
+		this->fonts = fonts;
 		this->deltaTime = deltaTime;
 		this->mouseEventElement = INVALID_ELEMENT_ID;
 		this->mouseEventElementDepth = 0.0f;
+
+		spritesOfLastDraw.clear();
 
 		for (auto& size : minsizes) { size = {NAN,NAN}; }	// clear sizes cache
 
@@ -185,7 +235,7 @@ namespace gui {
 		updateFocusedTextInput();
 
 		for (u32 id = 0; id < rootElements.size(); ++id) {
-			if (rootElements[id].containsElement) { drawRoot(*this, id, renderer.getLayer(renderLayer).getSprites()); }
+			if (rootElements[id].containsElement) { drawRoot(*this, id, spritesOfLastDraw); }
 		} 
 
 		if (mouseEventElement != INVALID_ELEMENT_ID) {
@@ -200,8 +250,9 @@ namespace gui {
 
 		this->mouseEventElementDepth = 0.0f;
 		this->mouseEventElement = INVALID_ELEMENT_ID;
+		this->fonts = nullptr;
+		this->tex = nullptr;
 		this->deltaTime = 0.0f;
-		this->renderer = nullptr;
 		this->window = nullptr;
 	}
 

@@ -25,6 +25,17 @@ public:
 	virtual void execute(const uint32_t threadId) = 0;
 };
 
+class LambdaJob : public IJob {
+public:
+	LambdaJob(std::function<void(uint32_t)>&& lambda) : lambda{ lambda }{}
+	virtual void execute(const uint32_t threadId) override
+	{
+		lambda(threadId);
+	}
+private:
+	std::function<void(uint32_t)> lambda;
+};
+
 template<typename T>
 /**
  * Concept for a job class that derives the IJob interface.

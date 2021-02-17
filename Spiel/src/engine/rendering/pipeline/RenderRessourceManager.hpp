@@ -5,16 +5,13 @@
 #include <cassert>
 #include <ranges>
 #include <concepts>
+#include <array>
 
 #include <robin_hood.h>
 
 #include "../../types/ShortNames.hpp"
 
-struct RessourceHandleBase {
-	u32 index{ 0xFFFFFFFF };
-	u16 version{ 0 };
-	u16 managerid{ 0xFFFF };
-};
+#include "RessourceHandle.hpp"
 
 // TODO make concepts for THandle, TDescriptor, TRessource
 
@@ -24,24 +21,26 @@ template<
 	typename TRessource
 >
 class RenderRessourceManager {
-protected:
+public:
 	class Backend {
 	public:
 		// Frontend Interface:
 
-		void queueLoad(std::tuple<u32, TDescriptor>&& res)
+		Backend(u16 managerId) : MANAGER_ID{ managerId } {}
+
+		void queueLoad(std::pair<u32, TDescriptor>&& res)
 		{
 			std::unique_lock l(mut);
-			if (std::ranges::find(loadingQueue, res) == std::end(loadingQueue)) {
-				loadingQueue.push_back(std::move(res));
+			if (std::ranges::find(loadingQueueFront, res) == std::end(loadingQueueFront)) {
+				loadingQueueFront.push_back(std::move(res));
 			}
 		}
 
 		void queueUnload(u32 index)
 		{
 			std::unique_lock l(mut);
-			if (std::ranges::find(unloadingQueue, index) == std::end(unloadingQueue)) {
-				unloadingQueue.push_back(index);
+			if (std::ranges::find(unloadingQueueFront, index) == std::end(unloadingQueueFront)) {
+				unloadingQueueFront.push_back(index);
 			}
 		}
 
@@ -49,13 +48,13 @@ protected:
 		 * pushes data from frontend buffer to the backend.
 		 * clears the frontend buffer afterwards.
 		 */
-		void push()
+		void flush()
 		{
 			std::unique_lock l(mut);
-			loadingQueueBack.insert(std::end(loadingQueueBack), std::begin(loadingQueue), std::end(loadingQueue));
-			loadingQueue.clear();
-			unloadingQueueBack.insert(std::end(unloadingQueueBack), std::begin(unloadingQueue), std::end(unloadingQueue));
-			unloadingQueue.clear();
+			loadingQueueBack.insert(std::end(loadingQueueBack), std::begin(loadingQueueFront), std::end(loadingQueueFront));
+			loadingQueueFront.clear();
+			unloadingQueueBack.insert(std::end(unloadingQueueBack), std::begin(unloadingQueueFront), std::end(unloadingQueueFront));
+			unloadingQueueFront.clear();
 		}
 
 		// Backend Interface:
@@ -69,12 +68,18 @@ protected:
 		 */
 		void loadQueue(std::unique_lock<std::mutex>& lock)
 		{
-			assert(lock.mutex() == mut && lock.owns_lock());
-			for (auto& [index, discriptor] : loadingQueueBack) {
-				if (index >= ressources.size()) {
-					ressources.resize(index + 1);
+			assert(lock.mutex() == &mut && lock.owns_lock());
+			for (auto& [index, descriptor] : loadingQueueBack) {
+				std::cout << "loading texture in index: " << index << " descriptor: " << descriptor << std::endl;
+				assert(index <= ressources.size());
+				if (index == ressources.size()) {
+					ressources.emplace_back(TRessource{ descriptor }, 0, true);
 				}
-				ressources[index] = std::move(TRessource{ discriptor });
+				else {
+					ressources[index].value.load(descriptor);
+					ressources[index].version += 1;
+					ressources[index].exists = true;
+				}
 			}
 			loadingQueueBack.clear();
 		}
@@ -84,37 +89,53 @@ protected:
 		 */
 		void unloadQueue(std::unique_lock<std::mutex>& lock)
 		{
-			assert(lock.mutex() == mut && lock.owns_lock());
-			for (auto& [index] : unloadingQueueBack) {
-				ressources[index].reset();
+			assert(lock.mutex() == &mut && lock.owns_lock());
+			for (u32 index : unloadingQueueBack) {
+				ressources[index].value.reset();
+				ressources[index].exists = false;
 			}
 			unloadingQueueBack.clear();
 		}
 
 		bool isLoaded(std::unique_lock<std::mutex>& lock, s32 index) const
 		{
-			assert(lock.mutex() == mut && lock.owns_lock());
-			return ressources[index].loaded();
+			assert(lock.mutex() == &mut && lock.owns_lock());
+			return index < ressources.size() && ressources[index].value.loaded();
 		}
 
 		void reload(std::unique_lock<std::mutex>& lock, s32 index) const
 		{
-			assert(lock.mutex() == mut && lock.owns_lock());
-			ressources[index].reload();
+			assert(lock.mutex() == &mut && lock.owns_lock());
+			ressources[index].value.reload();
 		}
 
-		TRessource& get(std::unique_lock<std::mutex>& lock, s32 index)
+		const TRessource& get(std::unique_lock<std::mutex>& lock, s32 index)
 		{
-			assert(lock.mutex() == mut && lock.owns_lock());
-			ressources[index];
+			assert(lock.mutex() == &mut && lock.owns_lock());
+			return ressources[index].value;
+		}
+
+		bool isHandleValid(std::unique_lock<std::mutex>& lock, const THandle& handle) const
+		{
+			return
+				handle.managerId == MANAGER_ID &&
+				handle.index < ressources.size() &&
+				handle.version == ressources[handle.index].version &&
+				ressources[handle.index].exists;
 		}
 	private:
+		const u16 MANAGER_ID;
 		mutable std::mutex mut; 
-		std::vector<std::tuple<u32, TDescriptor>> loadingQueue;
-		std::vector<std::tuple<u32, TDescriptor>> loadingQueueBack;
-		std::vector<u32> unloadingQueue;
+		std::vector<std::pair<u32, TDescriptor>> loadingQueueFront;
+		std::vector<std::pair<u32, TDescriptor>> loadingQueueBack;
+		std::vector<u32> unloadingQueueFront;
 		std::vector<u32> unloadingQueueBack;
-		std::vector<TRessource> ressources;
+		struct RessourceVersionPair {
+			TRessource value;
+			u16 version{ 0 };
+			bool exists{ false };
+		};
+		std::vector<RessourceVersionPair> ressources;
 	};
 public:
 	RenderRessourceManager() = default;
@@ -134,44 +155,45 @@ public:
 			cu32 index = discToIndex[disc];
 			discToIndex.erase(disc);
 			freeRessourceSlots.push_back(index);
+			ressourceSlots[index].exists = false;
 			backend.queueUnload(index);
 		}
 	}
 
 	void clear()
 	{
-		for (auto& disc : discToIndex) {
-			cu32 index = discToIndex[disc];
-			freeRessourceSlots.push_back(index);
-			backend.queueUnload(index);
+		for (u32 i = 0; i < ressourceSlots.size(); i++) {
+			if (ressourceSlots[i].exists) {
+				freeRessourceSlots.push_back(i);
+				ressourceSlots[i].exists = false;
+				backend.queueUnload(i);
+			}
 		}
 		discToIndex.clear();
-		nextRessourceIndex = 0;
-		freeRessourceSlots.clear();
-		ressourceSlotVersions.clear();
 	}
 
 	THandle makeHandle(const TDescriptor& disc)
 	{
 		THandle handle;
-		handle.managerid = MANAGER_ID;
+		handle.managerId = MANAGER_ID;
 		if (discToIndex.contains(disc)) {
 			handle.index = discToIndex[disc];
 		}
 		else /* not loaded */{
 			if (freeRessourceSlots.empty()) /* reuse old index */ {
 				handle.index = nextRessourceIndex++;
-				ressourceSlotVersions.push_back(0);
+				ressourceSlots.push_back({ 0, true });
 			}
 			else /* make new index */ {
 				handle.index = freeRessourceSlots.back();
 				freeRessourceSlots.pop_back();
-				ressourceSlotVersions[handle.index] += 1;
+				ressourceSlots[handle.index].version += 1;
+				ressourceSlots[handle.index].exists = true;
 			}
 			discToIndex[disc] = handle.index;
-			backend.queueLoad({ handle.index, handle.version, disc });
+			backend.queueLoad({ handle.index, disc });
 		}
-		handle.version = ressourceSlotVersions[handle.index];
+		handle.version = ressourceSlots[handle.index].version;
 		return handle;
 	}
 
@@ -180,24 +202,29 @@ public:
 		return
 			handle.managerId == MANAGER_ID &&
 			handle.index < nextRessourceIndex &&
-			handle.version == ressourceSlotVersions[handle.index];
+			handle.version == ressourceSlots[handle.index].version &&
+			ressourceSlots[handle.index].exists;
 	}
 
-	bool isLoaded(const TDescriptor& desc) const
+	bool contains(const TDescriptor& desc) const
 	{
 		return discToIndex.contains(desc);
 	}
 
-	Backend* getBackend() { return backend; }
+	Backend* getBackend() { return &backend; }
 protected:
-	inline static u16 s_nextManagerId{ 0 };
-	const u16 MANAGER_ID{ s_nextManagerId++ };
+	inline static u16 s_nextmanagerId{ 0 };
+	const u16 MANAGER_ID{ s_nextmanagerId++ };
 	robin_hood::unordered_map<TDescriptor, u32> discToIndex;
 	u32 nextRessourceIndex{ 0 };
-	std::vector<u16> ressourceSlotVersions;
+	struct Slot {
+		u32 version{ 0 };
+		bool exists{ false };
+	};
+	std::vector<Slot> ressourceSlots;
 	std::vector<u32> freeRessourceSlots;
 
 	std::array<u8, 128> cachepadding0;
-	Backend backend;
+	Backend backend{ MANAGER_ID };
 	std::array<u8, 128> cachepadding1;
 };

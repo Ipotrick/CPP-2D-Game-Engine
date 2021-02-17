@@ -20,7 +20,9 @@ void Window::keyCallback(GLFWwindow* win, int key, int scancode, int action, int
 
 Window::~Window()
 {
-	close();
+	if (glfwWindow) {
+		close();
+	}
 }
 
 bool Window::open(std::string name, uint32_t width, uint32_t height)
@@ -47,7 +49,7 @@ bool Window::open(std::string name, uint32_t width, uint32_t height)
 void Window::close()
 {
 	std::unique_lock l(mut);
-	assert(!bRenderContextLocked);
+	assert(glfwWindow);
 	glfwDestroyWindow(glfwWindow);
 	glfwWindow = nullptr;
 }
@@ -168,26 +170,18 @@ void Window::setName(std::string name)
 void Window::takeRenderingContext()
 {
 	std::unique_lock lock(mut);
-	assert(!bRenderContextLocked);
+	assert(!this->bRenderContextLocked);
 	glfwMakeContextCurrent(glfwWindow);
 	if (glewInit() != GLEW_OK) {
 		glfwTerminate();
 	}
-	bRenderContextLocked = true;
+	this->bRenderContextLocked = true;
 }
 
-void Window::releaseRenderingContext()
+void Window::returnRenderingContext()
 {
-	std::unique_lock l(mut);
-	assert(bRenderContextLocked);
-	glfwMakeContextCurrent(nullptr);
-	bRenderContextLocked = false;
-}
-
-bool Window::isRenderContextLocked() const
-{
-	std::unique_lock l(mut);
-	return bRenderContextLocked; // i don't think this is threadsave to use to lock the render context:/
+	assert(this->bRenderContextLocked);
+	this->bRenderContextLocked = false;
 }
 
 bool Window::isFocused() const
@@ -213,6 +207,8 @@ bool Window::shouldClose() const
 
 void Window::swapBuffers()
 {
+	std::unique_lock lock(mut);
+	assert(glfwWindow);
 	glfwSwapBuffers(glfwWindow);
 }
 

@@ -22,9 +22,11 @@ namespace gui {
 	class ValueOrPtr {
 	public:
 		ValueOrPtr(const T& t) :value{t} {}
+		ValueOrPtr(T&& t) :value{t} {}
 		ValueOrPtr(T*const t) :value{t} {}
 
 		ValueOrPtr& operator=(const T& t) { value = t; return *this; }
+		ValueOrPtr& operator=(T&& t) { value = t; return *this; }
 
 		ValueOrPtr& operator=(T* t) { value = t; return *this; }
 

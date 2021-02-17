@@ -4,13 +4,13 @@
 
 namespace gui {
 
-	template<> inline Vec2 updateAndGetMinsize<Box>(Manager& manager, Box& self)
+	template<> inline Vec2 updateAndGetMinsize<Box>(Manager& manager, u32 id, Box& self)
 	{
+		if (self.onUpdate) self.onUpdate(self, id);
 		Vec2 minsize;
 		if (self.child != INVALID_ELEMENT_ID) {
 			minsize = updateAndGetMinsize(manager, self.child);
 		}
-		if (self.onUpdate) self.onUpdate(self);
 		minsize += size(self.padding);
 		minsize = max(minsize, self.minsize);
 		return minsize;
@@ -25,15 +25,14 @@ namespace gui {
 					.color = self.color,
 					.position = Vec3{place, context.renderDepth},
 					.scale = scaledSize,
-					.form = Form::Rectangle,
 					.cornerRounding = 3.0f * context.scale,
-					.drawMode = RenderSpace::PixelSpace
+					.drawMode = RenderSpace::Pixel
 				}
 			);
 		}
 
 		if (self.bDragable) {
-			const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+			const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 			const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
 
 			if (cursorOverElement) {
@@ -51,9 +50,10 @@ namespace gui {
 		}
 	}
 	
-	template<> inline Vec2 updateAndGetMinsize<_Button>(Manager& manager, _Button& self)
+	template<> inline Vec2 updateAndGetMinsize<_Button>(Manager& manager, u32 id, _Button& self)
 	{
-		if (self.onUpdate) self.onUpdate(self);
+		if (self.onUpdate) self.onUpdate(self, id);
+		if (self.child != INVALID_ELEMENT_ID) updateAndGetMinsize(manager, self.child);
 		return self.size;
 	}
 	template<> inline void onDraw<_Button>(Manager& manager, _Button& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -61,7 +61,7 @@ namespace gui {
 		auto scaledSize = self.size * context.scale;
 		auto place = getPlace(scaledSize, context);
 
-		Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
 
 		if (cursorOverElement) {
@@ -72,42 +72,34 @@ namespace gui {
 			self.bHover = false;
 		}
 
-		if (self.bHover) {		// bHover is not the same as cursorOverElement, bHover is only set by a successfull mouse event request
-			scaledSize *= 0.95f;
-		}
+		f32 extraSizeScale = (self.bHover ? 0.95 : 1.0f);
 
 		out.push_back(
 			Sprite{
 				.color = self.bHold ? self.holdColor : self.color,
 				.position = Vec3{place, context.renderDepth },
-				.scale = scaledSize,
-				.form = Form::Rectangle,
+				.scale = scaledSize * extraSizeScale,
 				.cornerRounding = 3.0f * context.scale,
-				.drawMode = RenderSpace::PixelSpace
+				.drawMode = RenderSpace::Pixel
 			}
 		);
 
-		if (self.text.has_value()) {
-			if (!self.text.value().fonttexture.valid()) {
-				manager.renderer->validateTextureRef(self.text.value().fonttexture);
-			}
 
-			auto t = self.text.value();
-			auto c = context;
-			fit(c, scaledSize, place);
-			TextContext tcontext{ c };
-			tcontext.scale *= (self.bHover ? 0.95f : 1.0f);
-			tcontext.fontSize = t.fontSize;
-			tcontext.texref = t.fonttexture.makeSmall();;
-			tcontext.xalign = XAlign::Center;
-			tcontext.yalign = YAlign::Center;
-			drawText(t.value.data(), tcontext, out);
+		if (self.child != INVALID_ELEMENT_ID) {
+			const bool validChild = manager.isOneOf<Text, StaticText>(self.child);
+			assert(validChild);
+			auto childcontext = context;
+			fit(childcontext, scaledSize, place);
+			childcontext.xalign = XAlign::Center;
+			childcontext.yalign = YAlign::Center;
+			childcontext.scale *= extraSizeScale;
+			draw(manager, manager.elements[self.child], self.child, childcontext, out);
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, _Checkbox& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Checkbox& self)
 	{
-		if (self.onUpdate) self.onUpdate(self);
+		if (self.onUpdate) self.onUpdate(self, id);
 		return self.size;
 	}
 	template<> inline void onDraw<_Checkbox>(Manager& manager, _Checkbox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -115,7 +107,7 @@ namespace gui {
 		Vec2 scaledSize = self.size * context.scale;
 		Vec2 place = getPlace(scaledSize, context);
 
-		const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
 
 		f32 HOVER_SCALING{ 0.9f };
@@ -129,9 +121,8 @@ namespace gui {
 				.color = self.color,
 				.position = Vec3{place, context.renderDepth},
 				.scale = scaledSize,
-				.form = Form::Rectangle,
 				.cornerRounding = 2.0f * context.scale,
-				.drawMode = RenderSpace::PixelSpace
+				.drawMode = RenderSpace::Pixel
 			}
 		);
 
@@ -154,26 +145,30 @@ namespace gui {
 					.color = (*self.value ? self.colorEnabled : self.colorDisabled),
 					.position = Vec3{place, context.renderDepth },
 					.scale = scaledSize,
-					.form = Form::Rectangle,
 					.cornerRounding = 1.5f * context.scale,
-					.drawMode = RenderSpace::PixelSpace
+					.drawMode = RenderSpace::Pixel
 				}
 			);
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize<SliderF64>(Manager& manager, SliderF64& self)
+	template<> inline Vec2 updateAndGetMinsize<SliderF64>(Manager& manager, u32 id, SliderF64& self)
 	{
-		if (self.onUpdate) self.onUpdate(self);
+		if (self.onUpdate) self.onUpdate(self, id);
+		if (self.child != INVALID_ELEMENT_ID) updateAndGetMinsize(manager, self.child);
 		return self.size;
 	}
 	template<> inline void onDraw<SliderF64>(Manager& manager, SliderF64& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
 		const Vec2 responsiveArea = self.size * context.scale;
 		const Vec2 place = getPlace(responsiveArea, context);
-		const Vec2 scaledBarSize = responsiveArea * (self.bVertical ? Vec2{ 0.2f, 0.95f } : Vec2{ 0.95f, 0.2f });
+		const Vec2 scaledBarSize = responsiveArea * (self.bThin ? (self.bVertical ? Vec2{ 0.225f, 1.0f } : Vec2{ 1.0f, 0.225f }) : Vec2{ 1,1 });
 		const f32 barThiccness = std::min(scaledBarSize.x, scaledBarSize.y);
-		const f32 sliderBlobSize = std::min(responsiveArea.x, responsiveArea.y) * 0.8f;
+
+		const f32 biggerInidcatorSize = std::min(responsiveArea.x, responsiveArea.y);
+		const f32 smallerInidcatorSize = biggerInidcatorSize * (self.bThin ? 1.0f : 0.2f);
+		const Vec2 indicatorSize2 = (self.bVertical ? Vec2{ biggerInidcatorSize, smallerInidcatorSize } : Vec2{ smallerInidcatorSize, biggerInidcatorSize });
+
 		const bool rangeOK{ self.max > self.min };
 		// Draw bar:
 		out.push_back(
@@ -181,13 +176,12 @@ namespace gui {
 				.color = rangeOK ? self.colorBar : self.colorError,
 				.position = Vec3{place, context.renderDepth},
 				.scale = scaledBarSize,
-				.form = Form::Rectangle,
-				.cornerRounding = barThiccness * 0.5f,
-				.drawMode = RenderSpace::PixelSpace
+				.cornerRounding = biggerInidcatorSize * 0.2f * 0.5f,
+				.drawMode = RenderSpace::Pixel
 			}
 		);
 
-		const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		if (isCoordInBounds(responsiveArea, place, cursor)) {
 			manager.requestMouseEvent(id, context.root, context.renderDepth);
 		}
@@ -197,17 +191,16 @@ namespace gui {
 				Sprite{
 					.color = rangeOK ? self.colorBar : self.colorError,
 					.position = Vec3{place, context.renderDepth},
-					.scale = Vec2{sliderBlobSize,sliderBlobSize},
-					.form = Form::Rectangle,
-					.cornerRounding = sliderBlobSize * 0.5f,
-					.drawMode = RenderSpace::PixelSpace
+					.scale = indicatorSize2,
+					.cornerRounding = smallerInidcatorSize * 0.5f,
+					.drawMode = RenderSpace::Pixel
 				}
 			);
 		};
 
 		if (self.value) {
-			const f32 sliderMinPosMainAxis	= (self.bVertical ? place.y - scaledBarSize.y * 0.5f : place.x - scaledBarSize.x * 0.5f) + sliderBlobSize * 0.5f;
-			const f32 sliderMaxPosMainAxis	= (self.bVertical ? place.y + scaledBarSize.y * 0.5f : place.x + scaledBarSize.x * 0.5f) - sliderBlobSize * 0.5f;
+			const f32 sliderMinPosMainAxis	= (self.bVertical ? place.y - scaledBarSize.y * 0.5f : place.x - scaledBarSize.x * 0.5f) + smallerInidcatorSize * 0.5f;
+			const f32 sliderMaxPosMainAxis	= (self.bVertical ? place.y + scaledBarSize.y * 0.5f : place.x + scaledBarSize.x * 0.5f) - smallerInidcatorSize * 0.5f;
 			const f32 clampedCursorPos		= std::clamp((self.bVertical ? cursor.y : cursor.x), sliderMinPosMainAxis, sliderMaxPosMainAxis);
 			const f32 relativeCursorPos		= (clampedCursorPos - sliderMinPosMainAxis) / (sliderMaxPosMainAxis - sliderMinPosMainAxis);;
 
@@ -229,12 +222,23 @@ namespace gui {
 					Sprite{ 
 						.color = self.colorSlider * (bDragged ? 0.9f : 1.0f),
 						.position = Vec3{sliderPos, context.renderDepth},
-						.scale = Vec2{sliderBlobSize,sliderBlobSize},
-						.form = Form::Rectangle,
-						.cornerRounding = sliderBlobSize * 0.5f,
-						.drawMode = RenderSpace::PixelSpace
+						.scale = indicatorSize2,
+						.cornerRounding = smallerInidcatorSize * 0.5f,
+						.drawMode = RenderSpace::Pixel
 					}
 				);
+
+				if (self.child != INVALID_ELEMENT_ID) {
+					const bool validChild = manager.isOneOf<Text, StaticText>(self.child);
+					assert(validChild && !self.bVertical && !self.bThin);
+					auto childcontext = context;
+					fit(childcontext, scaledBarSize, place);
+					childcontext.cutLeft(smallerInidcatorSize);
+					childcontext.cutRight(smallerInidcatorSize);
+					childcontext.xalign = XAlign::Center;
+					childcontext.yalign = YAlign::Center;
+					draw(manager, manager.elements[self.child], self.child, childcontext, out);
+				}
 			}
 		}
 		else {
@@ -242,8 +246,9 @@ namespace gui {
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, Group& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, Group& self)
 	{
+		if (self.onUpdate) { self.onUpdate(self, id); }
 		Vec2 minsize;
 		for (u32 child : self.children) {
 			auto childMinSize = updateAndGetMinsize(manager, child);
@@ -263,7 +268,6 @@ namespace gui {
 		else {
 			minsize.x += (self.children.size() - 1) * self.spacing;
 		}
-		if (self.onUpdate) { self.onUpdate(self); }
 		minsize += size(self.padding);
 		return minsize;
 	}
@@ -353,13 +357,13 @@ namespace gui {
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, DragDroppable& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, DragDroppable& self)
 	{
+		if (self.onUpdate) self.onUpdate(self, id);
 		Vec2 minsize;
 		if (self.child != INVALID_ELEMENT_ID) {
 			minsize = updateAndGetMinsize(manager, self.child);
 		}
-		if (self.onUpdate) self.onUpdate(self);
 		return minsize;
 	}
 	template<> inline void onDraw<DragDroppable>(Manager& manager, DragDroppable& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -367,7 +371,7 @@ namespace gui {
 		const Vec2 scaledSize = manager.minsizes[id] * context.scale;
 		Vec2 place = getPlace(scaledSize, context);
 
-		const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
 
 		if (cursorOverElement) {
@@ -394,13 +398,13 @@ namespace gui {
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, DropBox& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, DropBox& self)
 	{
+		if (self.onUpdate) self.onUpdate(self, id);
 		Vec2 minsize;
 		if (self.child != INVALID_ELEMENT_ID) {
 			minsize = updateAndGetMinsize(manager, self.child);
 		}
-		if (self.onUpdate) self.onUpdate(self);
 		minsize = max(minsize, self.minsize);
 		return minsize;
 	}
@@ -409,7 +413,7 @@ namespace gui {
 		const Vec2 scaledSize = manager.minsizes[id] * context.scale;
 		const Vec2 place = getPlace(scaledSize, context);
 
-		const Vec2 cursor = manager.renderer->convertCoordSys(manager.window->getCursorPos(), RenderSpace::WindowSpace, RenderSpace::PixelSpace);
+		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
 		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
 
 		if (cursorOverElement) {
@@ -424,9 +428,8 @@ namespace gui {
 					.color = self.color,
 					.position = Vec3{place, context.renderDepth},
 					.scale = scaledSize,
-					.form = Form::Rectangle,
 					.cornerRounding = 3.0f * context.scale,
-					.drawMode = RenderSpace::PixelSpace
+					.drawMode = RenderSpace::Pixel
 				}
 			);
 		}
@@ -440,15 +443,15 @@ namespace gui {
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, Footer& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, Footer& self)
 	{
+		if (self.onUpdate) self.onUpdate(self, id);
 		Vec2 minsize;
 		for (u32 child : self.children) {
 			auto childMinSize = updateAndGetMinsize(manager, child);
 			minsize.x = std::max(minsize.x, childMinSize.x);
 			minsize.y += childMinSize.y;
 		}
-		if (self.onUpdate) self.onUpdate(self);
 		minsize.y += self.spacing;
 		return minsize;
 	}
