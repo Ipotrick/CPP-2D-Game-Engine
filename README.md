@@ -1,4 +1,4 @@
-# This is a toy project i use to learn C++, OpenGL and designing software (for game engine development and) in general.
+# This is a toy project i use to learn C++, OpenGL and designing software.
 # This is configured to be used for Visual Studio 2019 only. 
 
 dependencies:
