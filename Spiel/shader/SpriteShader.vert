@@ -9,7 +9,7 @@ struct ModelUniform {
 	vec2 texmin;
 	vec2 texmax;
 	int texId;
-	int isCircle;
+	int isMSDF;
 	float cornerRounding;
 	/*
 	 *	render space = 0 => world space
@@ -62,12 +62,16 @@ out vec2 v_relativeCoord;
  * without it the shader wont work as interpolating integers is illegal on nvidia hardware
 */
 flat out int v_modelID;	 
+out float v_relative_fragment_size;
 
 // uniforms:
 layout (location = 0) uniform mat4 worldSpaceVP;
 // window space has no uniform as it is the identity matrix
 layout (location = 2) uniform mat4 uniformWindowSpaceVP;
 layout (location = 3) uniform mat4 pixelSpaceVP;
+layout (location = 4) uniform uint screenWidth;
+layout (location = 5) uniform uint screenHeight;
+layout (location = 6) uniform float mtsdf_smoothing;
 
 void main() 
 {
@@ -88,9 +92,15 @@ void main()
 	vec4 scaled_corner_coord = corner_coord * vec4(model.scale.xy, 1, 1);
 	vec4 rotated_corner_coord = rotate_vec4_z_axis(scaled_corner_coord, model.rotation);
 	vec4 translated_corner_coord = rotated_corner_coord + vec4(model.position.xyz, 0);
-	
+	vec4 windowspace_coord = projectionViewMatrices[model.renderSpace] * translated_corner_coord;
+
+	vec4 center_coord = vec4(0,0,0,1);
+	vec4 translated_center_coord = center_coord + vec4(model.position.xyz, 0);
+	vec4 windowspace_center_coord = projectionViewMatrices[model.renderSpace] * translated_center_coord;
+
 	v_texCoord = texcoord;
+	v_relative_fragment_size = length(vec2(windowspace_center_coord.xy - windowspace_coord.xy) * vec2(screenWidth, screenHeight));
 	v_relativeCoord = corner * 2.0f;
 	v_modelID = modelID;
-	gl_Position = projectionViewMatrices[model.renderSpace] * translated_corner_coord;
+	gl_Position = windowspace_coord;
 }

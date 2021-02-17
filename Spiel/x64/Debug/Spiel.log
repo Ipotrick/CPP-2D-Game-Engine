@@ -46,7 +46,7 @@ ProgramFiles(x86) = C:\Program Files (x86)
 ProgramW6432 = C:\Program Files
 PSModulePath = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
 PUBLIC = C:\Users\Public
-ServiceHubLogSessionKey = C02F39D4
+ServiceHubLogSessionKey = F3FB6E5C
 SESSIONNAME = Console
 SystemDrive = C:
 SystemRoot = C:\WINDOWS
@@ -64,9 +64,71 @@ VisualStudioVersion = 16.0
 VSAPPIDDIR = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\
 VSAPPIDNAME = devenv.exe
 VSLANG = 1031
+VSLS_SESSION_KEEPALIVE_INTERVAL = 20
 VSSKUEDITION = Community
 windir = C:\WINDOWS
 
 cl : befehlszeile warning D9002: Unbekannte Option "/hotpatch" wird ignoriert.
   main.cpp
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(28,51): warning C4305: "Argument": Verkürzung von "int" in "uint8_t"
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(28,40): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(28,33): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+S:\repos\SpielMappe\Spiel\src\engine\gui\base\GUIStyle.hpp(28,26): warning C4309: "Argument": Verkürzung eines konstanten Wertes
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(47,27): warning C4244: "Initialisierung": Konvertierung von "const _Ty" in "f32", möglicher Datenverlust
+          with
+          [
+              _Ty=s32
+          ]
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(47,15): warning C4244: "Initialisierung": Konvertierung von "const _Ty" in "const f32", möglicher Datenverlust
+          with
+          [
+              _Ty=s32
+          ]
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(48,27): warning C4244: "Initialisierung": Konvertierung von "const _Ty" in "f32", möglicher Datenverlust
+          with
+          [
+              _Ty=s32
+          ]
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(48,15): warning C4244: "Initialisierung": Konvertierung von "const _Ty" in "const f32", möglicher Datenverlust
+          with
+          [
+              _Ty=s32
+          ]
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(134,1): warning C4267: "=": Konvertierung von "size_t" nach "u32", Datenverlust möglich
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(300,102): warning C4244: "Argument": Konvertierung von "const s32" in "f32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(301,94): warning C4244: "Argument": Konvertierung von "const s32" in "f32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(128,54): warning C4244: "Initialisierung": Konvertierung von "uint64_t" in "u32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(157,31): warning C4804: ">": unsichere Verwendung des Typs "bool" in einer Operation
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(163,100): warning C4244: "Argument": Konvertierung von "const s32" in "const float", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(168,109): warning C4244: "Argument": Konvertierung von "const s32" in "const float", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(179,72): warning C4244: "Initialisierung": Konvertierung von "double" in "f32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(179,22): warning C4244: "Initialisierung": Konvertierung von "double" in "const f32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(187,37): warning C4244: "Initialisierung": Konvertierung von "double" in "f32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\AntsWorld.hpp(187,21): warning C4244: "Initialisierung": Konvertierung von "double" in "const f32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\Ants.hpp(40,1): warning C4267: "Initialisierung": Konvertierung von "size_t" nach "u32", Datenverlust möglich
+S:\repos\SpielMappe\Spiel\src\Ants\Ants.hpp(98,26): warning C4244: "Argument": Konvertierung von "f64" in "float", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\Ants.hpp(148,13): warning C4244: "Initialisierung": Konvertierung von "uint64_t" in "u32", möglicher Datenverlust
+S:\repos\SpielMappe\Spiel\src\Ants\Ants.hpp(160,1): warning C4244: "*=": Konvertierung von "f64" in "f32", möglicher Datenverlust
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\utility(190,16): warning C4244: "Initialisierung": Konvertierung von "const f32" in "_Ty1", möglicher Datenverlust
+          with
+          [
+              _Ty1=s32
+          ]
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(49): message : Siehe Verweis auf die gerade kompilierte Instanziierung "std::pair<s32,s32>::pair<const f32&,const f32&,0>(_Other1,_Other2) noexcept" der Funktions-Vorlage.
+          with
+          [
+              _Other1=const f32 &,
+              _Other2=const f32 &
+          ]
+S:\repos\SpielMappe\Spiel\src\Ants\PheroGrid.hpp(49): message : Siehe Verweis auf die gerade kompilierte Instanziierung "std::pair<s32,s32>::pair<const f32&,const f32&,0>(_Other1,_Other2) noexcept" der Funktions-Vorlage.
+          with
+          [
+              _Other1=const f32 &,
+              _Other2=const f32 &
+          ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.28.29333\include\utility(190,1): warning C4244: "Initialisierung": Konvertierung von "const f32" in "_Ty2", möglicher Datenverlust
+          with
+          [
+              _Ty2=s32
+          ]
   Spiel.vcxproj -> S:\repos\SpielMappe\x64\Debug\Spiel.exe

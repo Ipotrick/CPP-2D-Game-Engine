@@ -133,7 +133,7 @@ void loadBallTestMap(Game& game)
 	cmps.add(PhysicsBody(0.0, 25.0f, calcMomentOfIntertia(25.0f, scalePlayer), 0.9f));
 	cmps.add<Movement>();
 	cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.4, Form::Rectangle));
-	cmps.add(BigTextureRef("bitch.png"));
+	cmps.add(TextureDescriptor{ "ressources/bitch.png" });
 	cmps.add<Player>();
 	world.identify(player);
 	world.spawn(player);
@@ -148,7 +148,7 @@ void loadBallTestMap(Game& game)
 	cmpsBox.add(PhysicsBody(0.0, 5.0f, calcMomentOfIntertia(5.0f, scaleBox), 0.9f));
 	cmpsBox.add<Movement>();
 	cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
-	cmpsBox.add(BigTextureRef("Dir.png"));
+	cmpsBox.add(TextureDescriptor{ "ressources/Dir.png" });
 	cmpsBox.add(Health(100));
 	world.spawn(box);
 
@@ -180,7 +180,7 @@ void loadBallTestMap(Game& game)
 		world.addComp(trash, trashSolidBody);
 		world.addComp(trash, Draw(color, sscale, 0.5f, form));
 		world.addComp(trash, Health(100));
-		world.addComp(trash, BigTextureRef("Dir.png"));
+		world.addComp(trash, TextureDescriptor{ "ressources/Dir.png" });
 		world.spawn(trash);
 	}
 
@@ -188,7 +188,9 @@ void loadBallTestMap(Game& game)
 	auto cmps2 = world.componentView(spawner);
 	cmps2.add<Transform>(Transform(Vec2(20, 40), 0));
 	cmps2.add<Collider>(Collider(Vec2(0.3, 0.3), Form::Circle));
-	cmps2.add<PhysicsBody>(PhysicsBody(0.0f, 100000000000000000000000000000000.0f, 10000000000000000000000000000000000.0f, 0));
+	cmps2.add<PhysicsBody>(PhysicsBody(0.0f, 
+		100000000000000000000000000000000.0f, 
+		100000000000000000000000000000000.0f, 0));
 	cmps2.add<SpawnerComp>();
 	world.spawn(spawner);
 

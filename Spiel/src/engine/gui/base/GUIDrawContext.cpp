@@ -2,6 +2,33 @@
 
 namespace gui {
 
+	void Sizing::changeBy(Vec2 diff, const DrawContext& context, Placing& place)
+	{
+		Vec2 scaledDiff =  diff / context.scale;
+		switch (xmode) {
+		case Mode::Absolute:
+			x += scaledDiff.x;
+			break;
+		case Mode::Relative:
+			x += scaledDiff.x / context.size().x; break;
+		default:
+			break;
+		}
+		switch (ymode) {
+		case Mode::Absolute:
+			y -= scaledDiff.y;
+			break;
+		case Mode::Relative:
+			y += scaledDiff.y / context.size().y;
+			break;
+		default:
+			break;
+		}
+
+		if (place.xmode == Placing::XMode::AbsoluteRight) place.move(Vec2{ diff.x,0 }, context, *this);
+		if (place.ymode == Placing::YMode::AbsoluteBottom) place.move(Vec2{ 0, diff.y }, context, *this);
+	}
+
 	Placing Placing::absDistLeft(float dist) const
 	{
 		auto ret = *this;
@@ -176,6 +203,14 @@ namespace gui {
 		pad.right = p;
 		return pad;
 	}
+	Vec2 size(const Padding& p)
+	{
+		return Vec2{ p.left + p.right, p.top + p.bottom };
+	}
+	bool hasNANS(const Padding& p)
+	{
+		return std::isnan(p.left) || std::isnan(p.right) || std::isnan(p.top) || std::isnan(p.bottom);
+	}
 	void fit(DrawContext& context, Vec2 scaledSize, Vec2 place)
 	{
 		context.topleft = place + Vec2{ -scaledSize.x, scaledSize.y } *0.5;
@@ -203,5 +238,13 @@ namespace gui {
 		case Mode::Relative: context.cutRight(padding.right * context.size().x); break;
 		default: break;
 		}
+	}
+
+	void DrawContext::grow(Vec2 scaledSize)
+	{
+		topleft.x -= scaledSize.x * 0.5f * scale;
+		bottomright.x += scaledSize.x * 0.5f * scale;
+		topleft.y += scaledSize.y * 0.5f * scale;
+		bottomright.y -= scaledSize.y * 0.5f * scale;
 	}
 }

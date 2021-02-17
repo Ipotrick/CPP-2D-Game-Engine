@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../rendering/RenderTypes.hpp"
+#include "../../rendering/Sprite.hpp"
 
 #include "GUIDrawContext.hpp"
 

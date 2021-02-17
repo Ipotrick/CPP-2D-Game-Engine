@@ -37,37 +37,24 @@ void bulletScript(Game& game, EntityHandle me, Bullet& data, float deltaTime)
 #include "LayerConstants.hpp"
 void drawScript(Game& game, EntityHandle entity, const Transform& t, const Draw& d)
 {
-	int layer = d.bParticleLayer ? LAYER_WORLD_PARTICLE : LAYER_WORLD_MIDGROUND;
-	if (game.world.hasComp<BigTextureRef>(entity)) {
-		BigTextureRef& texRef = game.world.getComp<BigTextureRef>(entity);
-		if (!texRef.good()) {
-			// if a TexRef component was created without the renderer, it will be replaced here:
-			game.renderer.validateTextureRef(texRef);
-		}
-		game.renderer.submit(
-			Sprite{
-				.color = d.color,
-				.position = Vec3{t.position.x, t.position.y, clamp(d.drawingPrio, 0.0f, 1.0f) },
-				.rotationVec = t.rotaVec,
-				.scale = d.scale,
-				.texRef = texRef.makeSmall(),
-				.form = d.form,
-				.drawMode = RenderSpace::WorldSpace
-			},
-			layer
-		);
+	TextureHandle texHandle;
+	Vec2 min{ 0,0 };
+	Vec2 max{ 1,1 };
+	if (game.world.hasComp<TextureSection>(entity)) {
+		const auto& texSection = game.world.getComp<TextureSection>(entity);
+		texHandle = texSection.handle;
+		min = texSection.min;
+		max = texSection.max;
 	}
-	else {
-		game.renderer.submit(
-			Sprite{
-				.color = d.color,
-				.position = Vec3{t.position.x, t.position.y, clamp(d.drawingPrio, 0.0f, 1.0f) },
-				.rotationVec = t.rotaVec,
-				.scale = d.scale,
-				.form = d.form,
-				.drawMode = RenderSpace::WorldSpace
-			},
-			layer
-		);
-	}
+	game.renderer.drawSprite(Sprite{
+		.color = d.color,
+		.position = Vec3{t.position, -1.0f + f32(LAYER_WORLD_MIDGROUND) / f32(LAYER_MAX)},
+		.rotationVec = t.rotaVec,
+		.scale = d.scale,
+		.texHandle = texHandle,
+		.texMin = min,
+		.texMax = max,
+		.cornerRounding = (d.form == Form::Rectangle ? 0.0f : std::min(d.scale.x, d.scale.y) * 0.5f),
+		.drawMode = RenderSpace::Camera,
+	});
 }

@@ -2,14 +2,15 @@
 
 #include <iostream>
 
-#include "collision/CollisionSystem.hpp"
+#include "../engine/collision/CollisionSystem.hpp"
+#include "../engine/rendering/DefaultRenderer.hpp"
 
 #include "../engine/EngineCore.hpp"
 #include "World.hpp"
 using Coll = Collider;
 using Move = Movement;
 // Core Systems
-#include "physics/PhysicsSystem2.hpp"
+#include "../engine/physics/PhysicsSystem2.hpp"
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
@@ -48,4 +49,6 @@ public:
 	bool bLoading{ false };
 	JobSystem::Tag loadingWorkerTag{ JobSystem::Tag() };
 	World loadedWorld;
+
+	DefaultRenderer renderer;
 };

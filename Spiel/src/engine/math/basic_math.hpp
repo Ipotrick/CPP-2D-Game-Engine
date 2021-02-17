@@ -19,3 +19,14 @@ inline T clamp(const T v, const T min, const T max)
 {
 	return std::max(min, std::min(max, v));
 }
+
+template<typename T>
+inline T lininterp(const float v, const T a, const T b) {
+	return b * v + a * (1.0f - v);
+}
+
+template<typename T>
+inline T lininterp(const double v, const T a, const T b)
+{
+	return b * v + a * (1.0 - v);
+}

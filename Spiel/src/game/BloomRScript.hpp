@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../engine/rendering/RenderScript.hpp"
-#include "../engine/rendering/OpenGLPassShader.hpp"
-#include "../engine/rendering/OpenGLTextureRenderBuffer.hpp"
+#include "../engine/rendering/OpenGLAbstraction/OpenGLPassShader.hpp"
+#include "../engine/rendering/OpenGLAbstraction/OpenGLTextureRenderBuffer.hpp"
 #include "../engine/rendering/RenderingWorker.hpp"
 
 class BloomRScript : public RenderScript {

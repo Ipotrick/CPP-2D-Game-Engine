@@ -1,6 +1,7 @@
 //#define MANDELBROT
 //#define BALLS2
-#define GUITEST
+//#define GUITEST
+#define ANTS
 
 #ifdef BALLS2
 
@@ -34,9 +35,22 @@ int main()
 int main()
 {
 	globalInitialize();
-	std::cout << cast<int>(3.2) << std::endl;
 	GUIApp app;
 	app.run();
+}
+
+#endif
+
+#ifdef ANTS
+
+#include "Ants/Ants.hpp"
+
+int main()
+{
+	globalInitialize();
+	AntsApp app;
+	app.run();
+
 }
 
 #endif

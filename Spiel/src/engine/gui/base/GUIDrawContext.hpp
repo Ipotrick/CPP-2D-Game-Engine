@@ -43,7 +43,8 @@ namespace gui {
 
 	enum class Packing {
 		Tight,
-		Spread
+		Spread,
+		Uniform
 	};
 
 	struct Padding {
@@ -54,15 +55,19 @@ namespace gui {
 		Padding absY(float p) const;
 		Padding absX(float p) const;
 
-		float top{ 5.0f };
-		float bottom{ 5.0f };
-		float left{ 5.0f };
-		float right{ 5.0f };
+		float top{ 0.0f };
+		float bottom{ 0.0f };
+		float left{ 0.0f };
+		float right{ 0.0f };
 		Mode topmode{ Mode::Absolute };
 		Mode bottommode{ Mode::Absolute };
 		Mode leftmode{ Mode::Absolute };
 		Mode rightmode{ Mode::Absolute };
 	};
+
+	Vec2 size(const Padding&);
+
+	bool hasNANS(const Padding&);
 	
 	struct DrawContext {
 		/**
@@ -100,6 +105,11 @@ namespace gui {
 		 */
 		void cutBottom(float dist) { bottomright.y += dist; }
 
+		/**
+		 * \param amount SCALED size to grow the context around its center.
+		 */
+		void grow(Vec2 scaledSize);
+
 		void assertState() const
 		{
 			assert(topleft.x <= bottomright.x && topleft.y >= bottomright.y);
@@ -108,7 +118,7 @@ namespace gui {
 		YAlign yalign{ YAlign::Top };
 		Vec2 topleft{ 0.0f, 0.0f };
 		Vec2 bottomright{ 0.0f, 0.0f };
-		RenderSpace renderSpace{ RenderSpace::PixelSpace };
+		RenderSpace renderSpace{ RenderSpace::Pixel };
 		float renderDepth{ 0.0f };
 		float scale{ 1.0f };
 		u32 root{ 0xFFFFFFFF };
@@ -121,6 +131,8 @@ namespace gui {
 		 */
 		bool bFlexFillY{ true };
 	};
+
+	struct Placing;
 
 	struct Sizing {
 
@@ -136,6 +148,8 @@ namespace gui {
 		float y{ 1.0f };
 		Mode xmode{ Mode::Absolute };
 		Mode ymode{ Mode::Absolute };
+
+		void changeBy(Vec2 diff, const DrawContext& context, Placing& place);
 	};
 
 	/**
@@ -193,4 +207,5 @@ namespace gui {
 	void fit(DrawContext& context, Vec2 scaledSize, Vec2 place);
 
 	void fit(DrawContext& context, Padding const& padding);
+
 }

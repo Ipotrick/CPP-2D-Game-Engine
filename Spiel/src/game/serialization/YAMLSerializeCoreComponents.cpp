@@ -42,7 +42,7 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const Collider& c)
 	out << YAML::Key << "IgnoreMask" << YAML::Value << c.ignoreGroupMask;
 	out << YAML::Key << "Mask" << YAML::Value << c.groupMask;
 	out << YAML::Key << "ExtraCollider" << YAML::Value << c.extraColliders;
-	out << YAML::Key << "isSleeping" << YAML::Value << c.sleeping;
+	//out << YAML::Key << "isSleeping" << YAML::Value << c.sleeping;
 	out << YAML::Key << "Form" << YAML::Value << c.form;
 	out << YAML::Key << "IgnoreTypes";
 	out << YAML::BeginMap;	// IgnoreTypes 
@@ -112,37 +112,5 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const FrictionEffector& b)
 	out << YAML::Key << "RotaFriction" << YAML::Value << b.rotationalFriction;
 
 	out << YAML::EndMap;	
-	return out;
-}
-
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureDiscriptor& b)
-{
-	out << YAML::BeginMap;	
-
-	out << YAML::Key << "name" << YAML::Value << b.name.c_str();
-
-	out << YAML::EndMap;	
-	return out;
-}
-
-YAML::Emitter& operator<<(YAML::Emitter& out, const TextureRef& b)
-{
-	out << YAML::BeginMap;	
-
-	out << YAML::Key << "minPos" << YAML::Value << b.minPos;
-	out << YAML::Key << "maxPos" << YAML::Value << b.maxPos;
-
-	out << YAML::EndMap;	
-	return out;
-}
-
-YAML::Emitter& operator<<(YAML::Emitter& out, const BigTextureRef& b)
-{
-	out << YAML::BeginMap;
-
-	out << YAML::Key << "info" << YAML::Value << b.getInfo();
-	out << YAML::Key << "ref" << YAML::Value << b.makeSmall();
-
-	out << YAML::EndMap;
 	return out;
 }

@@ -2,11 +2,11 @@
 
 #include <type_traits>
 
-#include "collision/CoreComponents.hpp"
 #include "GameComponents.hpp"
+#include "../engine/collision/CoreComponents.hpp"
 #include "../engine/entity/EntityComponentStorage.hpp"
 #include "../engine/types/BaseTypes.hpp"
-#include "../engine/rendering/RenderTypes.hpp"
+#include "../engine/rendering/OpenGLAbstraction/OpenGLTexture.hpp"
 
 #define ENGINE_COMPONENT_LIST \
 	ComponentStoragePagedIndexing<Transform>,\
@@ -15,7 +15,8 @@
 	ComponentStoragePagedIndexing<CollisionsToken>,\
 	ComponentStoragePagedIndexing<Movement>,\
 	ComponentStoragePagedIndexing<PhysicsBody>,\
-	ComponentStoragePagedSet<BigTextureRef>,\
+	ComponentStoragePagedSet<TextureDescriptor>,\
+	ComponentStoragePagedSet<TextureSection>,\
 	ComponentStoragePagedSet<LinearEffector>,\
 	ComponentStoragePagedSet<FrictionEffector>,\
 	ComponentStoragePagedSet<Health>,\

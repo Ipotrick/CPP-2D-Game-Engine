@@ -6,7 +6,7 @@ void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 	auto cmps = game.world.componentView(me);
 
 	for (auto ent : world.entityView<Player>()) {
-		game.renderer.getCamera().position = world.getComp<Transform>(ent).position;
+		game.renderer.camera.position = world.getComp<Transform>(ent).position;
 	}
 
 	auto spawnParticles = [&](int num, Vec2 dir, float vel, Vec2 offset) {
@@ -42,7 +42,7 @@ void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 			auto coll = Collider(Vec2(0.2f, 0.2f), Form::Circle, true);
 			coll.ignoreGroupMask |= CollisionGroup<1>::mask;
 			world.addComp<Collider>(particle, coll);
-			world.addComp(particle, game.renderer.makeTexRef(TextureDiscriptor("Cloud.png")));
+			//world.addComp(particle, game.renderer.makeTexRef(TextureDiscriptor("Cloud.png")));
 			world.spawn(particle);
 			world.getComp<Age>(particle).curAge += rando * 0.02f;
 			cmps.get<Movement>().velocity -= mov.velocity * world.getComp<PhysicsBody>(particle).mass*100000 / world.getComp<PhysicsBody>(me).mass*10;

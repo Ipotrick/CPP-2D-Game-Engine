@@ -34,13 +34,13 @@ public:
 
 public:
 
-    Vec4() : x(0), y(0), z(0), w(0) {}
+    constexpr Vec4() : x(0), y(0), z(0), w(0) {}
 
-    Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    constexpr Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
-    static Vec4 From256(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+    constexpr static Vec4 From255(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
     {
-        return Vec4{ static_cast<float>(r) / 256.0f, static_cast<float>(g) / 256.0f, static_cast<float>(b) / 256.0f, static_cast<float>(a) / 256.0f };
+        return Vec4{ static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f, static_cast<float>(a) / 255.0f };
     }
 
     // openGL access func
@@ -102,7 +102,28 @@ public:
         w += vec.w;
         return *this;
     }
+
+    bool operator==(const Vec4& rhs) const
+    {
+        return this->x == rhs.x && 
+            this->y == rhs.y && 
+            this->z == rhs.z && 
+            this->w == rhs.w;
+    }
+
+    void colorInvert()
+    {
+        x = 1.0f - x;
+        y = 1.0f - y;
+        z = 1.0f - z;
+        w = 1.0f - w;
+    }
 };
+
+inline bool hasNANS(const Vec4& vec)
+{
+    return std::isnan(vec.x) || std::isnan(vec.y) || std::isnan(vec.z) || std::isnan(vec.w);
+}
 
 inline const Vec4 operator-(Vec4 const& vec)
 {
