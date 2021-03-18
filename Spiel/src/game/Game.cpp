@@ -3,6 +3,8 @@
 #include <iomanip>
 
 #include "../engine/util/Log.hpp"
+#include "../engine/entity/EntityDispatch.hpp"
+
 #include "GameComponents.hpp"
 #include "serialization/YAMLSerializer.hpp"
 
@@ -14,17 +16,9 @@
 #include "PlayerScript.hpp"
 #include "HealthScript.hpp"
 
-//#include "BloomRScript.hpp"
-
 #include "LoadBallTestMap.hpp"
 #include "LoadRenderTestMap.hpp"
 #include "Scripts.hpp"
-
-static int makeID()
-{
-	static int nextID = 0;
-	return nextID++;
-}
 
 using namespace util;
 
@@ -32,26 +26,6 @@ Game::Game() : EngineCore{ "Balls2", 1600, 900 }
 {
 	renderer.init(&mainWindow);
 	renderer.supersamplingFactor = 2.0f;
-	//renderer.setLayerCount(LAYER_MAX);
-	//
-	//renderer.getLayer(LAYER_WORLD_BACKGROUND).bClearEveryFrame = true;
-	//renderer.getLayer(LAYER_WORLD_BACKGROUND).renderMode = RenderSpace::Camera;
-	//
-	//renderer.getLayer(LAYER_WORLD_MIDGROUND).renderMode = RenderSpace::Camera; 
-	//renderer.getLayer(LAYER_WORLD_MIDGROUND).depthTest = DepthTest::LessOrEqual;
-	//
-	//renderer.getLayer(LAYER_WORLD_PARTICLE).renderMode = RenderSpace::Camera;
-	//
-	//renderer.getLayer(LAYER_WORLD_FOREGROUND).renderMode = RenderSpace::Camera;
-	//
-	//renderer.getLayer(LAYER_WORLD_POSTPROCESS).renderMode = RenderSpace::Camera;
-	//renderer.getLayer(LAYER_WORLD_POSTPROCESS).attachRenderScript(std::make_unique<BloomRScript>());
-	//
-	//renderer.getLayer(LAYER_DEBUG_UI).renderMode = RenderSpace::Camera;
-	//
-	//renderer.getLayer(LAYER_FIRST_UI).renderMode = RenderSpace::Pixel;
-	//
-	//renderer.getLayer(LAYER_SECOND_UI).renderMode = RenderSpace::Pixel;
 
 	collisionSystem.disableColliderDetection(Collider::PARTICLE);
 }
@@ -71,7 +45,6 @@ void Game::create() {
 		s.deserializeString(str);
 	}
 #endif
-
 }
 
 void Game::update(float deltaTime) 
@@ -84,26 +57,34 @@ void Game::update(float deltaTime)
 		}
 	}
 	else {
-
-		renderer.drawSprite(makeSprite(0, { 0,0 }, -1.0f, { 2, 2 }, { 0.1, 0.1, 0.1f, 0.1f }, Form::Rectangle, RotaVec2{ 0 }, RenderSpace::Window, LAYER_WORLD_BACKGROUND, LAYER_MAX));
+		renderer.drawSprite(Sprite{ .color = {0.5,0.5,1,1}, .scale = {2,2} });
 
 		collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
-		//renderer.submit(collisionSystem.getDebugSprites(), LAYER_WORLD_FOREGROUND);
 		physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
-		//renderer.submit(physicsSystem2.getDebugSprites(), LAYER_WORLD_FOREGROUND);
-		for (auto [ent, m, t] : world.entityComponentView<Movement, Transform>()) movementScript(*this, ent, t, m, deltaTime);
+		const auto tag = dispatchEntityWork<128, Movement>(world.storage<Movement>(), [&](u32 id, Movement& mov) { movementScript(*this, world.getHandle(id), world.getComp<Transform>(id), mov, deltaTime); });
+		JobSystem::wait(tag);
 		gameplayUpdate(deltaTime);
-		for (auto [ent, td] : world.entityComponentView<TextureDescriptor>()) {
+		for (auto [ent, td] : world.entityComponentView<TextureLoadInfo>()) {
 			if (!world.hasComp<TextureSection>(ent)) {
-				world.addComp(ent, TextureSection{ renderer.tex.makeHandle(td) });
+				world.addComp(ent, TextureSection{ renderer.tex.getHandle(td) });
+			}
+		}
+		for (auto [ent, texName] : world.entityComponentView<TextureName>()) {
+			if (!world.hasComp<TextureSection>(ent)) {
+				world.addComp(ent, TextureSection{ renderer.tex.getHandle(texName) });
 			}
 		}
 		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) {
+			if (!world.hasComp<ParticleScriptComp>(ent)) {
+				drawScript(*this, ent, t, d);
+			}
+		}
+		renderer.pushCommand(gl::BlendingFunction{ gl::BlendingFactor::SrcAlpha, gl::BlendingFactor::One });
+		for (auto [ent, t, d, psc] : world.entityComponentView<Transform, Draw, ParticleScriptComp>()) {
 			drawScript(*this, ent, t, d);
 		}
-		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) {
-			drawScript(*this, ent, t, d);
-		}
+		renderer.pushCommand(SpritePipe::PopBlendingFunction{});
+
 		world.update();
 	}
 	renderer.start();
@@ -243,31 +224,6 @@ void Game::gameplayUpdate(float deltaTime)
 		};
 
 		loadingWorkerTag = JobSystem::submit(LoadJob(loadedWorld));
-
-		//ui::frame("loadingtext",
-		//	UIFrame::Parameters{
-		//	.anchor = UIAnchor(UIAnchor::Parameters{
-		//		.xmode = UIAnchor::X::LeftRelativeDist,
-		//		.x = 0.5,
-		//		.ymode = UIAnchor::Y::TopRelativeDist,
-		//		.y = 0.5,}),
-		//	.size = {1000, 300},
-		//	.layer = LAYER_FIRST_UI,
-		//	.borders = {10,10}},
-		//{
-		//	ui::text({
-		//		.size = {1000, 300},
-		//		.textAnchor = UIAnchor(UIAnchor::Parameters{
-		//			.xmode = UIAnchor::X::LeftRelativeDist,
-		//			.x = 0.5,
-		//			.ymode = UIAnchor::Y::TopRelativeDist,
-		//			.y = 0.5,}),
-		//		.text = "Loading ...",
-		//		.fontTexture = renderer.makeSmallTexRef(TextureDiscriptor("ConsolasAtlas.png")),
-		//		.fontSize = {30,100}
-		//	})
-		//}
-		//);
 	}
 
 	//execute scripts
@@ -280,25 +236,6 @@ void Game::gameplayUpdate(float deltaTime)
 	for (auto [ent, comp] : world.entityComponentView<Tester>()) testerScript(*this, ent, comp, deltaTime);
 
 	cursorManipFunc();
-
-	//for (auto ent : world.entityView<SpawnerComp>()) {
-	//	const Transform base = world.getComp<Transform>(ent);
-	//	int laps = spawnerLapTimer.getLaps(deltaTime);
-	//	for (int i = 1; i < laps; i++) {
-	//		float rotation = (float)(rand() % 360);
-	//		auto particle = world.create();
-	//		Vec2 movement = rotate(Vec2(5,0), rotation);
-	//		world.addComp<Transform>(particle, Transform(base.position));
-	//		auto size = Vec2(0.36, 0.36) * ((rand() % 1000) / 1000.0f);
-	//		float gray = (rand() % 1000 / 1000.0f);
-	//		world.addComp<Draw>(particle, Draw(Vec4(gray, gray, gray, 0.3), size, rand() % 1000 / 1000.0f, Form::Circle));
-	//		world.addComp<Movement>(particle, Movement(movement, rand()%10000/100.0f -50.0f));
-	//		//world.addComp<Collider>(particle, Collider(size, Form::Circle, true));
-	//		//world.addComp<PhysicsBody>(particle, PhysicsBody(1, 0.01, 10, 0));
-	//		world.addComp<Age>(particle, Age(rand()%1000/2000.0f*3));
-	//		world.spawn(particle);
-	//	}
-	//}
 
 	for (auto ent : world.entityView<Movement, Transform>()) {
 		auto pos = world.getComp<Transform>(ent).position;

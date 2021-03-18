@@ -23,16 +23,18 @@ namespace gui {
 		std::monostate,
 		Box, 
 		Group,
-		StaticText, 
-		Text,
+		_StaticText, 
+		_Text,
 		_TextInput, 
 		_TextInputF64, 
 		_Button,
 		_Checkbox, 
+		_Radiobox, 
+		_ScrollBox,
 		SliderF64,
 		DropBox,
 		DragDroppable,
-		Footer 
+		HeadTail 
 	>;
 
 	class Manager {
@@ -187,6 +189,16 @@ namespace gui {
 		template<typename T>
 		friend void onDragEvent(Manager& manager, T& self, u32 id, u32 rootid);
 
+		struct { bool bIsOver; Vec2 cursor; operator bool() { return bIsOver; } } isCursorOver(Vec2 place, Vec2 size, DrawContext const& context)
+		{
+			const Vec2 windowSpaceCursor = this->window->getCursorPos();
+			const Vec2 cursor = this->coordSys.convertCoordSys(windowSpaceCursor, RenderSpace::Window, context.renderSpace);
+			const bool cursorOverElement = isPointInAABB(cursor, place, size);
+			const bool cursorInClip = isPointInRange(windowSpaceCursor, context.clipMin, context.clipMax);
+
+			return { cursorOverElement && cursorInClip, cursor };
+		}
+
 		template<typename ... T>
 		bool isOneOf(u32 elementid)
 		{
@@ -226,9 +238,12 @@ namespace gui {
 		FontManager* fonts{ nullptr };
 		float deltaTime{ 0.0f };
 		// Mouse Event Listener:
-		u32 mouseEventElement{ INVALID_ELEMENT_ID };
-		u32 mouseEvenetElementRoot{ INVALID_ELEMENT_ID };
-		float mouseEventElementDepth{ 0 };
+		struct MouseEvent {
+			u32 element{ INVALID_ELEMENT_ID };
+			u32 root{ INVALID_ELEMENT_ID };
+			f32 depth{ NAN };
+		};
+		std::vector<MouseEvent> mouseEvenetQueue;
 		// Drag Drop:
 		u32 droppedElementId{ INVALID_ELEMENT_ID };
 		DragDroppable* droppedElement{ nullptr };

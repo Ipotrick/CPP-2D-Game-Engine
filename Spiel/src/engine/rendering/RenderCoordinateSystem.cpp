@@ -8,73 +8,37 @@ RenderCoordSys::RenderCoordSys(const Window& window, const Camera& camera) :
 
 Vec2 RenderCoordSys::convertCoordSys(Vec2 coord, RenderSpace from, RenderSpace to) const
 {
+	Vec2 corrdInWindowSpace;
 	switch (from) {
 	case RenderSpace::Pixel:
-		switch (to) {
-		case RenderSpace::Pixel:
-			return coord;
-			break;
-		case RenderSpace::UniformWindow:
-			return convertCoordSys<RenderSpace::Pixel, RenderSpace::UniformWindow>(coord);
-			break;
-		case RenderSpace::Window:
-			return convertCoordSys<RenderSpace::Pixel, RenderSpace::Window>(coord);
-			break;
-		case RenderSpace::Camera:
-			return convertCoordSys<RenderSpace::Pixel, RenderSpace::Camera>(coord);
-			break;
-		}
+		corrdInWindowSpace = convertCoordSys<RenderSpace::Pixel, RenderSpace::Window>(coord);
 		break;
 	case RenderSpace::UniformWindow:
-		switch (to) {
-		case RenderSpace::Pixel:
-			return convertCoordSys<RenderSpace::UniformWindow, RenderSpace::Pixel>(coord);
-			break;
-		case RenderSpace::UniformWindow:
-			return coord;
-			break;
-		case RenderSpace::Window:
-			return convertCoordSys<RenderSpace::UniformWindow, RenderSpace::Window>(coord);
-			break;
-		case RenderSpace::Camera:
-			return convertCoordSys<RenderSpace::UniformWindow, RenderSpace::Camera>(coord);
-			break;
-		}
+		corrdInWindowSpace = convertCoordSys<RenderSpace::UniformWindow, RenderSpace::Window>(coord);
 		break;
 	case RenderSpace::Window:
-		switch (to) {
-		case RenderSpace::Pixel:
-			return convertCoordSys<RenderSpace::Window, RenderSpace::Pixel>(coord);
-			break;
-		case RenderSpace::UniformWindow:
-			return convertCoordSys<RenderSpace::Window, RenderSpace::UniformWindow>(coord);
-			break;
-		case RenderSpace::Window:
-			return coord;
-			break;
-		case RenderSpace::Camera:
-			return convertCoordSys<RenderSpace::Window, RenderSpace::Camera>(coord);
-			break;
-		}
+		corrdInWindowSpace = coord;
 		break;
 	case RenderSpace::Camera:
-		switch (to) {
-		case RenderSpace::Pixel:
-			return convertCoordSys<RenderSpace::Camera, RenderSpace::Pixel>(coord);
-			break;
-		case RenderSpace::UniformWindow:
-			return convertCoordSys<RenderSpace::Camera, RenderSpace::UniformWindow>(coord);
-			break;
-		case RenderSpace::Window:
-			return convertCoordSys<RenderSpace::Camera, RenderSpace::Window>(coord);
-			break;
-		case RenderSpace::Camera:
-			return coord;
-			break;
-		}
+		corrdInWindowSpace = convertCoordSys<RenderSpace::Camera, RenderSpace::Window>(coord);
 		break;
 	}
-	return { 0, 0 };	// makes the compiler happy
+	Vec2 retVal;
+	switch (to) {
+	case RenderSpace::Pixel:
+		retVal = convertCoordSys<RenderSpace::Window, RenderSpace::Pixel>(corrdInWindowSpace);
+		break;
+	case RenderSpace::UniformWindow:
+		retVal = convertCoordSys<RenderSpace::Window, RenderSpace::UniformWindow>(corrdInWindowSpace);
+		break;
+	case RenderSpace::Window:
+		retVal = corrdInWindowSpace;
+		break;
+	case RenderSpace::Camera:
+		retVal = convertCoordSys<RenderSpace::Window, RenderSpace::Camera>(corrdInWindowSpace);
+		break;
+	}
+	return retVal;
 }
 
 

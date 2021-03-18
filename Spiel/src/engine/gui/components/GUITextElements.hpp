@@ -11,8 +11,14 @@ namespace gui {
 		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
 		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
+		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
 	};
+	namespace {
+		struct _StaticText : public StaticText {
+			_StaticText(StaticText&& e) : StaticText{ e } {}
+			Vec2 lastDrawMinSize{ 0,0 };
+		};
+	}
 
 	struct Text : IElement {
 		std::function<void(Text&, u32)> onUpdate;
@@ -20,8 +26,14 @@ namespace gui {
 		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
 		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
+		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
 	};
+	namespace {
+		struct _Text : public Text {
+			_Text(Text&& e) : Text{ e } {}
+			Vec2 lastDrawMinSize{ 0,0 };
+		};
+	}
 
 	struct TextInput : IElement {
 		std::function<void(TextInput&, u32)> onUpdate;
@@ -32,7 +44,7 @@ namespace gui {
 		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
 		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
+		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
 		bool bClearOnEnter{ false };
 	};
 	namespace {
@@ -52,7 +64,7 @@ namespace gui {
 		Vec4 colorFontError{ UNSET_COLOR };
 		Padding textPadding{ NAN,NAN,NAN,NAN };
 		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureDescriptor, TextureHandle> fontTexPair;
+		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
 	};
 	namespace {
 		struct _TextInputF64 : public TextInputF64 {

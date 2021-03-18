@@ -42,7 +42,7 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const Collider& c)
 	out << YAML::Key << "IgnoreMask" << YAML::Value << c.ignoreGroupMask;
 	out << YAML::Key << "Mask" << YAML::Value << c.groupMask;
 	out << YAML::Key << "ExtraCollider" << YAML::Value << c.extraColliders;
-	//out << YAML::Key << "isSleeping" << YAML::Value << c.sleeping;
+	out << YAML::Key << "particle" << YAML::Value << c.particle;
 	out << YAML::Key << "Form" << YAML::Value << c.form;
 	out << YAML::Key << "IgnoreTypes";
 	out << YAML::BeginMap;	// IgnoreTypes 
@@ -112,5 +112,28 @@ YAML::Emitter& operator<<(YAML::Emitter& out, const FrictionEffector& b)
 	out << YAML::Key << "RotaFriction" << YAML::Value << b.rotationalFriction;
 
 	out << YAML::EndMap;	
+	return out;
+}
+
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureName& b)
+{
+	out << YAML::BeginMap;
+
+	out << YAML::Key << "name" << YAML::Value << b.name;
+
+	out << YAML::EndMap;
+	return out;
+}
+
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureLoadInfo& b)
+{
+	out << YAML::BeginMap;
+
+	out << YAML::Key << "filepath" << YAML::Value << b.filepath;
+	out << YAML::Key << "minFilter" << YAML::Value << cast<u32>(b.minFilter);
+	out << YAML::Key << "magFilter" << YAML::Value << cast<u32>(b.magFilter);
+	out << YAML::Key << "clampMethod" << YAML::Value << cast<u32>(b.clampMethod);
+
+	out << YAML::EndMap;
 	return out;
 }

@@ -37,6 +37,9 @@ namespace gui {
 				else if (std::vector<u32>* children = getChildren(element)) {
 					bHasChild = children->size() > 0ULL;
 				}
+				//else if (std::array<u32,2>* children = getChildPair(element)) {
+				//	bHasChild = children->size() > 0ULL;
+				//}
 				else {
 					bHasChild = false;
 				}
@@ -78,6 +81,9 @@ namespace gui {
 					std::remove_if(children->begin(), children->end(), [&](u32 c) {return c == child; });
 					children->insert(children->begin() + newPosition, child);
 				}
+				//else if (std::array<u32, 2>*children = getChildPair(el)) {
+				//	assert(false);	// CANNOT CHANGE CHILD POS FOR PAIR CONTAINER
+				//}
 				else {
 					assert(false);	// the parent element can not change the position of its child
 				}
@@ -97,6 +103,9 @@ namespace gui {
 						assert(*child == toOrphanChild);		// assert that single parent knows this child
 						*child = INVALID_ELEMENT_ID;
 					}
+					//else if (std::array<u32, 2>*children = getChildPair(element)) {
+					//	assert(false);	// CANNOT ORPHAN A CHILD OF A PAIR CONTAINER
+					//}
 					else if (std::vector<u32>* children = getChildren(element)) {
 						assert(std::find(children->begin(), children->end(), toOrphanChild) != children->end());		// assert that the parent knows the child
 						children->erase(std::remove(children->begin(), children->end(), toOrphanChild), children->end());
@@ -121,6 +130,9 @@ namespace gui {
 						assert(*child == INVALID_ELEMENT_ID);		// assert that single parent does not have a child yet
 						*child = toAdoptChild;
 					}
+					//else if (std::array<u32, 2>* children = getChildPair(element)) {
+					//	assert(false);	// CANNOT ADOPT A CHILD TO A PAIR CONTAINER
+					//}
 					else if (std::vector<u32>* children = getChildren(element)) {
 						assert(std::find(children->begin(), children->end(), toAdoptChild) == children->end());		// assert that the parent doesnt know the child yet
 						if (position == 0xFFFFFFFF) position = children->size();
@@ -150,7 +162,14 @@ namespace gui {
 						parents[*child] = parent;
 					}
 				}
-				if (std::vector<u32>* children = getChildren(e)) {
+				//else if (std::array<u32,2>* children = getChildPair(e)) {
+				//	for (u32 child : *children) {
+				//		if (child != INVALID_ELEMENT_ID) {
+				//			parents[child] = parent;
+				//		}
+				//	}
+				//}
+				else if (std::vector<u32>* children = getChildren(e)) {
 					for (u32 child : *children) {
 						if (child != INVALID_ELEMENT_ID) {
 							parents[child] = parent;
@@ -192,7 +211,14 @@ namespace gui {
 								destroylist.push_back(*child);
 							}
 						}
-						if (std::vector<u32>* children = getChildren(element)) {
+						//else if (std::array<u32, 2>*children = getChildPair(element)) {
+						//	for (u32 child : *children) {
+						//		if (child != INVALID_ELEMENT_ID) {
+						//			destroylist.push_back(child);
+						//		}
+						//	}
+						//}
+						else if (std::vector<u32>* children = getChildren(element)) {
 							for (u32 child : *children) {
 								if (child != INVALID_ELEMENT_ID) {
 									destroylist.push_back(child);
@@ -223,8 +249,7 @@ namespace gui {
 		this->tex = tex;
 		this->fonts = fonts;
 		this->deltaTime = deltaTime;
-		this->mouseEventElement = INVALID_ELEMENT_ID;
-		this->mouseEventElementDepth = 0.0f;
+		this->mouseEvenetQueue.clear();
 
 		spritesOfLastDraw.clear();
 
@@ -238,21 +263,22 @@ namespace gui {
 			if (rootElements[id].containsElement) { drawRoot(*this, id, spritesOfLastDraw); }
 		} 
 
-		if (mouseEventElement != INVALID_ELEMENT_ID) {
-			// execute mouse event request success:
-			onMouseEvent(*this, elements[mouseEventElement], mouseEventElement, mouseEvenetElementRoot);
+		for (auto const& mouseEvent : mouseEvenetQueue) {
+			onMouseEvent(*this, elements[mouseEvent.element], mouseEvent.element, mouseEvent.root);
+		}
+		if (mouseEvenetQueue.size()) {
 			window.consumeMouseButtonEvent(MouseButton::MB_LEFT);
 			window.consumeMouseButtonEvent(MouseButton::MB_MIDDLE);
 			window.consumeMouseButtonEvent(MouseButton::MB_RIGHT);
 			window.consumeMouseButtonEvent(MouseButton::MB_4);
 			window.consumeMouseButtonEvent(MouseButton::MB_5);
+			window.consumeMouseScrollX();
+			window.consumeMouseScrollY();
 		}
 
-		this->mouseEventElementDepth = 0.0f;
-		this->mouseEventElement = INVALID_ELEMENT_ID;
 		this->fonts = nullptr;
 		this->tex = nullptr;
-		this->deltaTime = 0.0f;
+		this->deltaTime = NAN;
 		this->window = nullptr;
 	}
 
@@ -283,10 +309,21 @@ namespace gui {
 
 	void Manager::requestMouseEvent(u32 id, u32 rootid, float depth)
 	{
-		if (depth >= mouseEventElementDepth) {
-			mouseEventElement = id;
-			mouseEvenetElementRoot = rootid;
-		}
+		auto mevent = MouseEvent{ id,rootid,depth };
+		// inserts the mouse event in order into the mouse event queue
+		// highest prio event is the first, least prio is last
+		mouseEvenetQueue.insert(
+			std::upper_bound(
+				mouseEvenetQueue.begin(), 
+				mouseEvenetQueue.end(),
+				mevent,
+				[](MouseEvent const& a, MouseEvent const& b) 
+				{ 
+					return a.depth >= b.depth;
+				}
+			),
+			mevent
+		);
 	}
 
 	void Manager::updateDraggedElement()

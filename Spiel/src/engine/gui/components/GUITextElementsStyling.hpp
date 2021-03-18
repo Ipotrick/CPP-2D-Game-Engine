@@ -31,7 +31,7 @@ namespace gui {
 	}
 
 	template<> inline void applyStyle(TextInput& self, const Style& style) {
-		if (hasNANS(self.color)) self.color = style.fontColor2;
+		if (hasNANS(self.color)) self.color = style.fill2;
 		if (!self.fontPair.first.holdsValue()) self.fontPair.first = style.font;
 		if (!self.fontTexPair.first.holdsValue()) self.fontTexPair.first = style.fontTex;
 		if (std::isnan(self.fontSize)) self.fontSize = style.fontSize;

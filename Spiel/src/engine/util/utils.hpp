@@ -5,51 +5,13 @@
 #include <functional>
 
 namespace util {
-	template<int s, int e>
-	struct range {
-		auto begin() {
-			return iterator(s);
-		}
-		auto end() {
-			if constexpr (s < e) {
-				return iterator(e + 1);
-			}
-			else {
-				return iterator(e - 1);
-			}
-		}
-		class iterator {
-			int current;
-		public:
-			iterator(int start) : current{ start } {  }
-			typedef iterator self_type;
-			typedef int value_type;
-			typedef int& reference;
-			typedef std::forward_iterator_tag iterator_category;
-			self_type operator++(int junk) {
-				if constexpr (s < e) {
-					return current++;
-				}
-				else {
-					return current--;
-				}
-			}
-			self_type operator++() {
-				auto temp = current;
-				operator++(1);
-				return temp;
-			}
-			reference operator*() {
-				return current;
-			}
-			bool operator==(const self_type& rhs) {
-				return current == rhs.current;
-			}
-			bool operator!=(const self_type& rhs) {
-				return current != rhs.current;
-			}
-		};
-	};
+
+	template<typename T>
+	const T& noBranchIf(bool condition, const T& ifTrue, const T& ifFalse)
+	{
+		const T& choice[2] = {ifFalse, ifTrue};
+		return choice[static_cast<int>(condition)];
+	}
 
 	template <
 		size_t Index = 0, // start iteration at 0 index

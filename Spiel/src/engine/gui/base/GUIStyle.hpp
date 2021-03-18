@@ -13,13 +13,15 @@ namespace gui {
 		Vec4 accent0;
 		Vec4 positive;
 		Vec4 negative;
-		f32 fontSize{ 14 };
-		Vec4 fontColor1{ 0,0,0,1 };
-		Vec4 fontColor2{ 1,1,1,1 };
+		f32 fontSize;
+		Vec4 fontColor1;
+		Vec4 fontColor2;
 		Padding padding;
 		f32 spacing;
+		f32 cornerRounding;
+		f32 scrollerWidth;
 		FontDescriptor font;
-		TextureDescriptor fontTex;
+		TextureLoadInfo fontTex;
 	};
 
 	static inline const Style DEFAULT_STYLE{
@@ -35,8 +37,10 @@ namespace gui {
 		.fontColor2 = Vec4{ 0, 0, 0, 1 },
 		.padding = Padding{5,5,5,5},
 		.spacing = 5.0f,
+		.cornerRounding = 3.0f,
+		.scrollerWidth = 10.0f,
 		.font = FontDescriptor{"ressources/fonts/Consolas_font.csv"},
-		.fontTex = TextureDescriptor{"ressources/fonts/Consolas_font.png", TexFilter::Linear, TexFilter::Linear},
+		.fontTex = TextureLoadInfo{"ressources/fonts/Consolas_font.png", TexFilter::Linear, TexFilter::Linear},
 	};
 
 	template<CElement T>

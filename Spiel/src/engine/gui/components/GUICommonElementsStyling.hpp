@@ -15,11 +15,6 @@ namespace gui {
 	{
 		if (hasNANS(self.color)) self.color = style.fill1;
 	}
-
-	//template<> inline void applyStyle(DragDroppable& self, const Style& style)
-	//{
-	//	if (hasNANS(self.color)) self.color = style.accent0;
-	//}
 	
 	template<> inline void applyStyle(Row& self, const Style& style)
 	{
@@ -30,6 +25,7 @@ namespace gui {
 	template<> inline void applyStyle(Box& self, const Style& style)
 	{
 		if (hasNANS(self.padding)) self.padding = DEFAULT_STYLE.padding;
+		if (std::isnan(self.cornerRounding)) self.cornerRounding = DEFAULT_STYLE.cornerRounding;
 		if (hasNANS(self.color)) self.color = (self.bFillSpace ? style.fill0 : style.fill1);
 	}
 
@@ -46,6 +42,13 @@ namespace gui {
 		if (hasNANS(self.colorDisabled)) self.colorDisabled = style.negative;
 	}
 
+	template<> inline void applyStyle(Radiobox& self, const Style& style)
+	{
+		if (hasNANS(self.color)) self.color = style.fill1;
+		if (hasNANS(self.colorEnabled)) self.colorEnabled = style.positive;
+		if (hasNANS(self.colorDisabled)) self.colorDisabled = style.negative;
+	}
+
 	template<> inline void applyStyle(SliderF64& self, const Style& style)
 	{
 		if (hasNANS(self.colorBar)) self.colorBar = style.fill1;
@@ -53,8 +56,16 @@ namespace gui {
 		if (hasNANS(self.colorError)) self.colorError = style.negative;
 	}
 
-	template<> inline void applyStyle(Footer& self, const Style& style)
+	template<> inline void applyStyle(HeadTail& self, const Style& style)
 	{
 		if (std::isnan(self.spacing)) self.spacing = style.spacing;
+	}
+
+	template<> inline void applyStyle(ScrollBox& self, const Style& style)
+	{
+		if (hasNANS(self.colorScrollBar)) self.colorScrollBar = style.fill1;
+		if (hasNANS(self.colorScroller)) self.colorScroller = style.accent0;
+		if (hasNANS(self.colorView)) self.colorView = style.fill2;
+		if (std::isnan(self.scrollerWidth)) self.scrollerWidth = style.scrollerWidth;
 	}
 }

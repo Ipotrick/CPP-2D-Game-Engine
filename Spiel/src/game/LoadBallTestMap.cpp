@@ -133,12 +133,12 @@ void loadBallTestMap(Game& game)
 	cmps.add(PhysicsBody(0.0, 25.0f, calcMomentOfIntertia(25.0f, scalePlayer), 0.9f));
 	cmps.add<Movement>();
 	cmps.add(Draw(Vec4(1, 1, 1, 1), scalePlayer, 0.4, Form::Rectangle));
-	cmps.add(TextureDescriptor{ "ressources/bitch.png" });
+	cmps.add(TextureLoadInfo{ "ressources/bitch.png" });
 	cmps.add<Player>();
 	world.identify(player);
 	world.spawn(player);
 
-	Vec2 scaleBox(1, 1);
+	Vec2 scaleBox(16.0f / 9.0f, 1);
 	auto box = world.create();
 	auto cmpsBox = world.componentView(box);
 	cmpsBox.add<Transform>(Transform(Vec2(2, 2), 0));
@@ -148,7 +148,7 @@ void loadBallTestMap(Game& game)
 	cmpsBox.add(PhysicsBody(0.0, 5.0f, calcMomentOfIntertia(5.0f, scaleBox), 0.9f));
 	cmpsBox.add<Movement>();
 	cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
-	cmpsBox.add(TextureDescriptor{ "ressources/Dir.png" });
+	cmpsBox.add(TextureName{ "blur" });
 	cmpsBox.add(Health(100));
 	world.spawn(box);
 
@@ -180,9 +180,37 @@ void loadBallTestMap(Game& game)
 		world.addComp(trash, trashSolidBody);
 		world.addComp(trash, Draw(color, sscale, 0.5f, form));
 		world.addComp(trash, Health(100));
-		world.addComp(trash, TextureDescriptor{ "ressources/Dir.png" });
+		world.addComp(trash, TextureLoadInfo{ "ressources/Dir.png" });
 		world.spawn(trash);
 	}
+
+	//for (int i = 0; i < 50000; i++) {
+	//	//if (i % 2) {
+	//	//	form = Form::Rectangle;
+	//	//	scale = { 0.2f, 0.4f }; 
+	//	//	trashCollider = Collider(scale, form);
+	//	//}
+	//	//else {
+	//
+	//	float factor = 0.1f;// (rand() % 1000) / 500.0f + 0.7f;
+	//	auto sscale = scale * factor;
+	//	form = Form::Circle;
+	//	trashCollider = Collider(sscale * 0.1f, form);
+	//	//}
+	//	trashCollider.form = form;
+	//	Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+	//	//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
+	//	Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 2.6f + 1.5f, static_cast<float>(rand() % 1000 / 300.0f) * 2.6f + 1.5f };
+	//	auto trash = world.create();
+	//	world.addComp(trash, Transform(position, RotaVec2(0)));
+	//	world.addComp(trash, Movement());
+	//	world.addComp(trash, trashCollider);
+	//	world.addComp(trash, trashSolidBody);
+	//	world.addComp(trash, Draw(color, sscale, 0.5f, form));
+	//	world.addComp(trash, Health(100));
+	//	world.addComp(trash, TextureDescriptor{ "ressources/Dir.png" });
+	//	world.spawn(trash);
+	//}
 
 	auto spawner = world.create();
 	auto cmps2 = world.componentView(spawner);

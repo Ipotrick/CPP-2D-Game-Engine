@@ -19,7 +19,7 @@ class CollisionSystem {
 public:
 	class CollisionsView {
 	public:
-		explicit CollisionsView(const size_t begin, const size_t end, std::vector<CollisionInfo>& collInfos)
+		explicit CollisionsView(const u32 begin, const u32 end, std::vector<CollisionInfo>& collInfos)
 			:beginIndex{ begin }, endIndex{ end }, collInfos{ collInfos }
 		{}
 		auto begin() const
@@ -61,8 +61,8 @@ public:
 			return endIndex - beginIndex;
 		}
 	private:
-		const size_t beginIndex;
-		const size_t endIndex;
+		const u32 beginIndex;
+		const u32 endIndex;
 		std::vector<CollisionInfo>& collInfos;
 	};
 
@@ -70,7 +70,7 @@ public:
 
 	void execute(CollisionSECM secm, float deltaTime);
 
-	std::vector<CollisionInfo>& getCollisions();
+	std::vector<std::vector<CollisionInfo>>& getCollisionsLists();
 
 	const CollisionsView collisions_view(EntityHandle entity)
 	{
@@ -93,14 +93,12 @@ public:
 		colliderDetectionEnableFlags |= colliderFlags;
 	}
 
-	size_t collisionCount() const
-	{
-		return collisionInfos.size();
-	}
+	size_t collisionCount() const;
 private:
 	void prepare(CollisionSECM secm);
 	void cleanBuffers(CollisionSECM secm);
 	void collisionDetection(CollisionSECM secm);
+	void clearCollisionTokens();
 
 	std::vector<Sprite> debugSprites;
 
@@ -124,9 +122,9 @@ private:
 	std::vector<EntityHandleIndex> particleEntities;
 	std::vector<EntityHandleIndex> dynamicSolidEntities;
 	std::vector<EntityHandleIndex> staticSolidEntities;
-	std::vector<std::vector<CollisionInfo>> collInfoPerWorker;
+	std::vector<std::vector<CollisionInfo>> collisionLists;
+
+	std::vector<CollisionInfo> dummy{ {} };
 
 	std::vector<std::unique_ptr<std::vector<EntityHandleIndex>>> jobEntityBuffers;
-
-	std::vector<CollisionInfo> collisionInfos{};
 };

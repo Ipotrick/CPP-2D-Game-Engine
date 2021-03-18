@@ -125,25 +125,25 @@ namespace gui {
 			Sprite{
 				.color = Vec4{1,0.5,1,1},
 				.position = {context.topleft, context.renderDepth},
-				.scale = {5,5},
+				.scale = {2,2},
 				.drawMode = context.renderSpace
 			},
 			Sprite{
 				.color = Vec4{1,0.5,1,1},
 				.position = {context.bottomright, context.renderDepth},
-				.scale = {5,5},
+				.scale = {2,2},
 				.drawMode = context.renderSpace
 			},
 			Sprite{
 				.color = Vec4{1,0.5,1,1},
 				.position = Vec3{context.topleft.x, context.bottomright.y, context.renderDepth},
-				.scale = {5,5},
+				.scale = {2,2},
 				.drawMode = context.renderSpace
 			},
 			Sprite{
 				.color = Vec4{1,0.5,1,1},
 				.position = Vec3{context.bottomright.x, context.topleft.y, context.renderDepth},
-				.scale = {5,5},
+				.scale = {2,2},
 				.drawMode = context.renderSpace
 			}
 		};

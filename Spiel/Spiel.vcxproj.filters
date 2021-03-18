@@ -249,9 +249,6 @@
     <ClInclude Include="src\game\LoadRenderTestMap.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\SpriteShader.hpp">
-      <Filter>engine\rendering</Filter>
-    </ClInclude>
     <ClInclude Include="src\engine\rendering\TextureSamplerManager.hpp">
       <Filter>engine\rendering</Filter>
     </ClInclude>
@@ -327,7 +324,7 @@
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderUtil.hpp">
       <Filter>engine\rendering\OpenGLAbstraction</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLTextureRenderBuffer.hpp">
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLFramebuffer.hpp">
       <Filter>engine\rendering\OpenGLAbstraction</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLTexture.hpp">
@@ -344,9 +341,6 @@
     </ClInclude>
     <ClInclude Include="src\engine\rendering\pipeline\RenderPipelineThread.hpp">
       <Filter>engine\rendering\pipeline</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\rendering\DefaultPipes\SpriteRenderPipe.hpp">
-      <Filter>engine\rendering\DefaultPipes</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\DefaultRenderer.hpp">
       <Filter>engine\rendering</Filter>
@@ -425,6 +419,21 @@
     </ClInclude>
     <ClInclude Include="src\Ants\PheroGrid.hpp">
       <Filter>Ants</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\DefaultPipes\SpritePipe.hpp">
+      <Filter>engine\rendering\DefaultPipes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\Blending.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\DepthTest.hpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\EventSystem.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\entity\EntityDispatch.hpp">
+      <Filter>engine\entity</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -521,7 +530,7 @@
     <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderUtil.cpp">
       <Filter>engine\rendering\OpenGLAbstraction</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLTextureRenderBuffer.cpp">
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLFramebuffer.cpp">
       <Filter>engine\rendering\OpenGLAbstraction</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\rendering\TextureSamplerManager.cpp">
@@ -535,9 +544,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\rendering\pipeline\RenderPipelineThread.cpp">
       <Filter>engine\rendering\pipeline</Filter>
-    </ClCompile>
-    <ClCompile Include="src\engine\rendering\DefaultPipes\SpriteRenderPipe.cpp">
-      <Filter>engine\rendering\DefaultPipes</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\rendering\RenderCoordinateSystem.cpp">
       <Filter>engine\rendering</Filter>
@@ -569,6 +575,15 @@
     <ClCompile Include="src\engine\physics\PhysicsSystem2.cpp">
       <Filter>engine\physics2d</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\rendering\DefaultRenderer.cpp">
+      <Filter>engine\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\DefaultPipes\SpritePipe.cpp">
+      <Filter>engine\rendering\DefaultPipes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLAbstractionTranslationUnit.cpp">
+      <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\BloomFinderShader.frag">
@@ -589,13 +604,16 @@
     <None Include="shader\PassShader.vert">
       <Filter>engine\rendering\shader</Filter>
     </None>
-    <None Include="shader\SpriteShader.frag">
-      <Filter>engine\rendering\shader</Filter>
-    </None>
-    <None Include="shader\SpriteShader.vert">
-      <Filter>engine\rendering\shader</Filter>
-    </None>
     <None Include="shader\TrailShader.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\Sprite.frag">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\Sprite.vert">
+      <Filter>engine\rendering\shader</Filter>
+    </None>
+    <None Include="shader\BlurShader.frag">
       <Filter>engine\rendering\shader</Filter>
     </None>
   </ItemGroup>

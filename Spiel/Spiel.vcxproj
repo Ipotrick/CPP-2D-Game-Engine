@@ -36,8 +36,10 @@
     <ClInclude Include="src\engine\entity\EntityComponentManager.hpp" />
     <ClInclude Include="src\engine\entity\EntityComponentManagerView.hpp" />
     <ClInclude Include="src\engine\entity\EntityComponentStorage.hpp" />
+    <ClInclude Include="src\engine\entity\EntityDispatch.hpp" />
     <ClInclude Include="src\engine\entity\EntityManager.hpp" />
     <ClInclude Include="src\engine\entity\EntityTypes.hpp" />
+    <ClInclude Include="src\engine\EventSystem.hpp" />
     <ClInclude Include="src\engine\gui\base\GUIDrawContext.hpp" />
     <ClInclude Include="src\engine\gui\base\GUIDrawUtil.hpp" />
     <ClInclude Include="src\engine\gui\base\GUIElement.hpp" />
@@ -73,16 +75,18 @@
     <ClInclude Include="src\engine\physics\PushoutCalcJob.hpp" />
     <ClInclude Include="src\engine\rendering\Camera.hpp" />
     <ClInclude Include="src\engine\rendering\DefaultPipes\BloomPipe.hpp" />
-    <ClInclude Include="src\engine\rendering\DefaultPipes\SpriteRenderPipe.hpp" />
+    <ClInclude Include="src\engine\rendering\DefaultPipes\SpritePipe.hpp" />
     <ClInclude Include="src\engine\rendering\DefaultRenderer.hpp" />
     <ClInclude Include="src\engine\rendering\Font.hpp" />
     <ClInclude Include="src\engine\rendering\Glyph.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\Blending.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\DepthTest.hpp" />
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLPassShader.hpp" />
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShader.hpp" />
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderStorage.hpp" />
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderUtil.hpp" />
     <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLTexture.hpp" />
-    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLTextureRenderBuffer.hpp" />
+    <ClInclude Include="src\engine\rendering\OpenGLAbstraction\OpenGLFramebuffer.hpp" />
     <ClInclude Include="src\engine\rendering\pipeline\RenderPipe.hpp" />
     <ClInclude Include="src\engine\rendering\pipeline\RenderPipeline.hpp" />
     <ClInclude Include="src\engine\rendering\pipeline\RenderPipelineThread.hpp" />
@@ -92,7 +96,6 @@
     <ClInclude Include="src\engine\rendering\RenderCoordinateSystem.hpp" />
     <ClInclude Include="src\engine\rendering\RenderSpace.hpp" />
     <ClInclude Include="src\engine\rendering\Sprite.hpp" />
-    <ClInclude Include="src\engine\rendering\SpriteShader.hpp" />
     <ClInclude Include="src\engine\rendering\TextureSamplerManager.hpp" />
     <ClInclude Include="src\engine\rendering\Window.hpp" />
     <ClInclude Include="src\engine\types\BaseTypes.hpp" />
@@ -153,14 +156,16 @@
     <ClCompile Include="src\engine\physics\Physics.cpp" />
     <ClCompile Include="src\engine\physics\PhysicsSystem.cpp" />
     <ClCompile Include="src\engine\physics\PhysicsSystem2.cpp" />
-    <ClCompile Include="src\engine\rendering\DefaultPipes\SpriteRenderPipe.cpp" />
+    <ClCompile Include="src\engine\rendering\DefaultPipes\SpritePipe.cpp" />
+    <ClCompile Include="src\engine\rendering\DefaultRenderer.cpp" />
     <ClCompile Include="src\engine\rendering\Font.cpp" />
     <ClCompile Include="src\engine\rendering\Glyph.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLAbstractionTranslationUnit.cpp" />
     <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLPassShader.cpp" />
     <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLShader.cpp" />
     <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLShaderUtil.cpp" />
     <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLTexture.cpp" />
-    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLTextureRenderBuffer.cpp" />
+    <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLFramebuffer.cpp" />
     <ClCompile Include="src\engine\rendering\pipeline\RenderPipeline.cpp" />
     <ClCompile Include="src\engine\rendering\pipeline\RenderPipelineThread.cpp" />
     <ClCompile Include="src\engine\rendering\RenderCoordinateSystem.cpp" />
@@ -188,12 +193,13 @@
   <ItemGroup>
     <None Include="shader\BloomFinderShader.frag" />
     <None Include="shader\BloomShader.frag" />
+    <None Include="shader\BlurShader.frag" />
     <None Include="shader\FilterPassShader.frag" />
     <None Include="shader\Mandel.frag" />
     <None Include="shader\PassShader.frag" />
     <None Include="shader\PassShader.vert" />
-    <None Include="shader\SpriteShader.frag" />
-    <None Include="shader\SpriteShader.vert" />
+    <None Include="shader\Sprite.frag" />
+    <None Include="shader\Sprite.vert" />
     <None Include="shader\TrailShader.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

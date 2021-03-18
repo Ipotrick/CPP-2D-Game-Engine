@@ -1,106 +1,100 @@
 #include "OpenGLPassShader.hpp"
 
-const std::string PASS_VERTEX_SHADER = 
-"#version 460 core\n"
-"layout(location = 0) in vec2 corner;\n"
-"layout(location = 1) in vec2 uv;\n"
-"out vec2 v_uv;\n"
-"void main()\n"
-"{\n"
-"	v_uv = uv;\n"
-"	gl_Position = vec4(corner.x, corner.y, 0.0f, 1.0f);\n"
-"}\n";
+namespace gl {
 
-void OpenGLPassShader::initialize(std::string const& customFragmentShader)
-{
-	assert(!bInitialized);	// NEVER INITIALIZE A SHADER TWICE
-	bInitialized = true;
+	struct PassShaderVertex {
+		Vec2 cornerPos;
+		Vec2 samplerCoord;
+	};
 
-	auto vertexShader = PASS_VERTEX_SHADER;// readShader(PASS_VERTEX_SHADER);
-	auto fragmentShader = readShader(customFragmentShader);
-	program = createOGLShaderProgram(vertexShader, fragmentShader);
-	 
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(PassShaderVertex) * 4, PASS_SHADER_VERTECIES, GL_STATIC_DRAW);
+	inline constexpr GLuint PASS_SHADER_INDICES[6] = { 0, 1, 2, 1, 2, 3 };
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	// corner position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(PassShaderVertex), 0);
-	// texture uv position
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(PassShaderVertex), (const void*)offsetof(PassShaderVertex, samplerCoord));
-}
+	inline constexpr PassShaderVertex PASS_SHADER_VERTECIES[4] = {
+		PassShaderVertex{ idToCorner(0, { -1,-1 }, { 1,1 }), idToCorner(0, { 0, 0 }, { 1,1 }) },
+		PassShaderVertex{ idToCorner(1, { -1,-1 }, { 1,1 }), idToCorner(1, { 0, 0 }, { 1,1 }) },
+		PassShaderVertex{ idToCorner(2, { -1,-1 }, { 1,1 }), idToCorner(2, { 0, 0 }, { 1,1 }) },
+		PassShaderVertex{ idToCorner(3, { -1,-1 }, { 1,1 }), idToCorner(3, { 0, 0 }, { 1,1 }) },
+	};
 
-void OpenGLPassShader::reset()
-{
-	if (bInitialized) {
-		glDeleteProgram(program);
-		glDeleteVertexArrays(1, &vao);
-		glDeleteBuffers(1, &vbo);
+	const char* PASS_VERTEX_SHADER{
+		R"( 
+		#version 460 core
+
+		layout(location = 0) in vec2 corner;
+		layout(location = 1) in vec2 uv;
+
+		out vec2 v_uv;
+
+		void main()
+		{
+			v_uv = uv;
+			gl_Position = vec4(corner.x, corner.y, 0.0f, 1.0f);
+		}
+		)"
+	};
+
+	const char* PASS_FRAGMENT_DEFAULT_SHADER{
+		R"( 
+		#version 460 core
+
+		layout(location = 50) uniform sampler2D samplerSlot;
+
+		in vec2 v_uv;
+
+		void main() 
+		{
+			gl_FragColor = texture2D(samplerSlot, v_uv);
+		}
+		)"
+	};
+	void PassShader::init(const char* pFragmentShader)
+	{
+		const char* fragmentShader = pFragmentShader ? pFragmentShader : PASS_FRAGMENT_DEFAULT_SHADER;
+		initialize(PASS_VERTEX_SHADER, fragmentShader);
+		setVertexAttributes<Vec2, Vec2>();
+		bufferIndices(6, (u32*)PASS_SHADER_INDICES);
+		bufferVertices(4, (void*)PASS_SHADER_VERTECIES);
 	}
-	bInitialized = false;
-}
+	void PassShader::renderTexToFBO(u32 textureGLID, u32 fboGLID, u32 minX, u32 minY, u32 maxX, u32 maxY)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, fboGLID);
+		glUseProgram(program);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-void OpenGLPassShader::renderTexToFBO(GLuint textureGLID, GLuint fboGLID, uint32_t fboWidth, uint32_t fboHeight)
-{
-	assert(bInitialized);
+		// bind texture id to sampler slot 0
+		GLuint const textureSlot = 0;
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, textureGLID);
+		glUniform1i(50, textureSlot);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, fboGLID);
-	glUseProgram(program);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glViewport(minX, minY, maxX, maxY);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, gl::PASS_SHADER_INDICES);
+	}
+	void PassShader::renderTexToFBO(u32 textureGLID, gl::Framebuffer& fbo)
+	{
+		fbo.bind();
+		glUseProgram(program);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	// bind texture id to sampler slot 0
-	GLuint const textureSlot = 0;
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, textureGLID);
-	glUniform1i(50, textureSlot);
+		// bind texture id to sampler slot 0
+		GLuint const textureSlot = 0;
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_2D, textureGLID);
+		glUniform1i(50, textureSlot);
 
-	glViewport(viewPortOffset.x, viewPortOffset.y, fboWidth, fboHeight);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, PASS_SHADER_INDICES);
-}
+		glViewport(0, 0, fbo.getSize().first, fbo.getSize().second);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, gl::PASS_SHADER_INDICES);
+	}
+	void PassShader::renderToFBO(gl::Framebuffer& fbo)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo.getBuffer());
+		glUseProgram(program);
+		glBindVertexArray(vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-void OpenGLPassShader::renderTexToFBO(GLuint textureGLID, OpenGLFrameBuffer& fbo)
-{
-	assert(bInitialized);
-
-	fbo.bind();
-	glUseProgram(program);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	// bind texture id to sampler slot 0
-	GLuint const textureSlot = 0;
-	glActiveTexture(GL_TEXTURE0 + 0);
-	glBindTexture(GL_TEXTURE_2D, textureGLID);
-	glUniform1i(50, textureSlot);
-
-	glViewport(viewPortOffset.x, viewPortOffset.y, fbo.getSize().first, fbo.getSize().second);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, PASS_SHADER_INDICES);
-}
-
-void OpenGLPassShader::renderToFBO(OpenGLFrameBuffer& fbo)
-{
-	assert(bInitialized);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo.getBuffer());
-	glUseProgram(program);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-	glViewport(viewPortOffset.x, viewPortOffset.y, fbo.getSize().first, fbo.getSize().second);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, PASS_SHADER_INDICES);
-}
-
-void OpenGLPassShader::setViewPortOffset(Vec2 offset)
-{
-	this->viewPortOffset = offset;
-}
-
-void OpenGLPassShader::bind()
-{
-	glUseProgram(program);
+		glViewport(0, 0, fbo.getSize().first, fbo.getSize().second);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, gl::PASS_SHADER_INDICES);
+	}
 }

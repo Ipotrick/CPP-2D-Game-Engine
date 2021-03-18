@@ -3,102 +3,82 @@
 #include "pipeline/RenderPipeline.hpp"
 #include "pipeline/RenderPipelineThread.hpp"
 
-#include "DefaultPipes/SpriteRenderPipe.hpp"
+#include "DefaultPipes/SpritePipe.hpp"
 #include "Font.hpp"
 
 #include "RenderCoordinateSystem.hpp"
 
 class DefaultRenderPipeContext : public RenderPipeContext {
 public:
-	virtual void init()
-	{
-		RenderPipeContext::init();
-		spriteShaderModelSSBO.initialize(SpriteRenderPipe::Backend::MAX_RECT_COUNT, SpriteRenderPipe::Backend::SPRITE_SHADER_MODEL_SSBO_BINDING);
-	}
-	virtual void reset()
-	{
-		RenderPipeContext::reset();
-		spriteShaderModelSSBO.reset();
-	}
+	virtual void init() override final;
+	virtual void reset() override final;
+};
 
-	OpenGLShaderStorage<SpriteShaderModel> spriteShaderModelSSBO;
+struct DefaultRenderPipeline : public RenderPipeline {
+	virtual void exec() override final;
+	virtual void init() override final;
+	virtual void reset() override final;
+
+	void drawBlurTexture();
+
+	std::vector<SpritePipe::Command> sprites;
+	std::vector<SpritePipe::Command> uiSprites;
+
+	gl::PassShader blurShader;
+	gl::Framebuffer blurTexturePreFramebuffer;
+	gl::Framebuffer blurTextureFramebuffer;
+	TextureHandle blurTexture;
+	SpritePipe* spritePipe{ nullptr };
 };
 
 class DefaultRenderer {
 public:
-	~DefaultRenderer()
-	{
-		if (bInitialized) {
-			reset();
-		}
-	}
-	void init(Window* window) 
-	{
-		assert(!bInitialized);
-		pipeline.window = window;
-		pipeline.context = &pipeContext;
-		pipeline.pipes.push_back(&spritePipe.backend);
-		pipeline.pipes.push_back(&uiSpritePipe.backend);
-		bInitialized = true;
-		uiSpritePipe.bClearDepthBeforeDraw = true;
+	~DefaultRenderer();
+	void init(Window* window);
+	void reset();
+	void start();
 
-		worker.execute(&pipeline, RenderPipelineThread::Action::Init);
-	}
-	void reset()
-	{ 
-		assert(bInitialized);
+	void drawSprite(const Sprite& s) { spriteCommands.push_back(s); }
+	void drawSprite(Sprite&& s) { spriteCommands.push_back(std::move(s)); }
+	void drawSprites(const std::vector<Sprite>& s) { spriteCommands.insert(spriteCommands.end(), s.begin(), s.end()); }
 
-		worker.execute(&pipeline, RenderPipelineThread::Action::Reset);
-		worker.wait();
-		bInitialized = false;
-	}
-	void start()
-	{
-		assert(bInitialized);
+	void pushCommand(const SpritePipe::Command& cmd) { spriteCommands.push_back(cmd); }
+	void pushCommand(SpritePipe::Command&& cmd) { spriteCommands.push_back(cmd); }
+	void pushCommands(const std::vector<SpritePipe::Command>& cmd) { spriteCommands.insert(spriteCommands.end(), cmd.begin(), cmd.end()); }
 
-		worker.wait();
+	void drawUISprite(const Sprite& s) { uiSpriteCommands.push_back(s); }
+	void drawUISprite(Sprite&& s) { uiSpriteCommands.push_back(std::move(s)); }
+	void drawUISprites(const std::vector<Sprite>& s) { uiSpriteCommands.insert(uiSpriteCommands.end(), s.begin(), s.end()); }
 
-		flush();
+	void pushUICommand(const SpritePipe::Command& cmd) { uiSpriteCommands.push_back(cmd); }
+	void pushUICommand(SpritePipe::Command&& cmd) { uiSpriteCommands.push_back(cmd); }
+	void pushUICommands(const std::vector<SpritePipe::Command>& cmd) { uiSpriteCommands.insert(uiSpriteCommands.end(), cmd.begin(), cmd.end()); }
 
-		worker.execute(&pipeline, RenderPipelineThread::Action::Exec);
-	}
-
-	void drawSprite(const Sprite& s) { spritePipe.spritesFront.push_back(s); }
-	void drawSprite(Sprite&& s) { spritePipe.spritesFront.push_back(std::move(s)); }
-	void drawSprites(const std::vector<Sprite>& s) { spritePipe.spritesFront.insert(spritePipe.spritesFront.end(), s.begin(), s.end()); }
-
-	void drawUISprite(const Sprite& s) { uiSpritePipe.spritesFront.push_back(s); }
-	void drawUISprite(Sprite&& s) { uiSpritePipe.spritesFront.push_back(std::move(s)); }
-	void drawUISprites(const std::vector<Sprite>& s) { uiSpritePipe.spritesFront.insert(uiSpritePipe.spritesFront.end(), s.begin(), s.end()); }
-
-	const RenderCoordSys& getCoordSys() const
-	{
-		return coordSys;
-	}
+	const RenderCoordSys& getCoordSys() const { return coordSys; }
 
 	f32 supersamplingFactor{ 1.0f };
 	Camera camera;
 	TextureManager tex;
 	FontManager fonts;
 
-private:
-	void flush()
+	TextureHandle getBlurTextureHandle() const
 	{
-		pipeContext.superSampling = supersamplingFactor;
-		coordSys = RenderCoordSys{ *pipeline.window, camera };
-		tex.getBackend()->flush();
-		pipeline.context->camera = camera;
-		spritePipe.flush();
-		uiSpritePipe.flush();
+		return this->blurTexture;
 	}
 
-	RenderCoordSys coordSys;
+private:
+	void flush();
+
+	TextureHandle blurTexture;
+
+	RenderCoordSys coordSys;	
 	bool bInitialized{ false }; 
 	RenderPipelineThread worker;
 	DefaultRenderPipeContext pipeContext;
 
-	SpriteRenderPipe spritePipe{ tex, pipeContext.spriteShaderModelSSBO };
-	SpriteRenderPipe uiSpritePipe{ tex, pipeContext.spriteShaderModelSSBO };
+	std::vector<SpritePipe::Command> spriteCommands;
+	std::vector<SpritePipe::Command> uiSpriteCommands;
+	SpritePipe spritePipe{ tex.getBackend() };
 
-	RenderPipeline pipeline;
+	DefaultRenderPipeline pipeline;
 };

@@ -1,7 +1,7 @@
 //#define MANDELBROT
-//#define BALLS2
+#define BALLS2
 //#define GUITEST
-#define ANTS
+//#define ANTS
 
 #ifdef BALLS2
 
@@ -35,8 +35,9 @@ int main()
 int main()
 {
 	globalInitialize();
-	GUIApp app;
-	app.run();
+	auto* app = new GUIApp();
+	app->run();
+	delete app;
 }
 
 #endif
