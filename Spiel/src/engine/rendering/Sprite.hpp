@@ -3,8 +3,6 @@
 #include <vector>
 #include <string>
 
-#include "GL/glew.h"
-
 #include "../types/BaseTypes.hpp"
 #include "../math/Vec.hpp"
 #include "RenderSpace.hpp"
@@ -23,14 +21,11 @@ struct Sprite {
 	TextureHandle texHandle;
 	Vec2 texMin{ 0,0 };
 	Vec2 texMax{ 1,1 };
-	bool isMSDF{ false };
+	Vec2 clipMin{ -1.0f, -1.0f };
+	Vec2 clipMax{ 1.0f, 1.0f };
 	float cornerRounding{ 0.0f };
+	bool isMSDF{ false };
 	RenderSpace drawMode{ RenderSpace::Window };
-
-	bool operator<(Sprite const& rhs) const
-	{
-		return this->position.z < rhs.position.z;
-	}
 };
 
 inline static std::ostream& operator<<(std::ostream& os, const Sprite& sprite)

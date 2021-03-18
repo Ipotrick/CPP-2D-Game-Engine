@@ -114,12 +114,13 @@ void playerScript(Game& game, EntityHandle me, Player& data, float deltaTime)
 		std::random_device rd;
 		std::mt19937 rand_generator(rd());
 		std::uniform_real_distribution rotation_distr(-SPREAD_ANGLE / 2.0f, SPREAD_ANGLE / 2.0f);
+		std::uniform_real_distribution relDistToPlayerDistr(0.8f,1.5f);
 
 		uint64_t bullets = data.bulletShotLapTimer.getLaps(deltaTime);
 		for (uint64_t i = 0; i < bullets; i++) {
 			Vec2 bullDir = rotate(playerTransform.rotaVec.toUnitY0(), rotation_distr(rand_generator));
 			Vec2 bulletVelocity = playerMovement.velocity + bullDir * BULLET_VEL;
-			Vec2 offset = bullDir;
+			Vec2 offset = bullDir * relDistToPlayerDistr(rand_generator);
 			spawnBullet(bulletVelocity, offset, SIZE);
 		}
 	}

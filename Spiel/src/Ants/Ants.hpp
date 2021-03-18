@@ -7,10 +7,6 @@
 
 #include "AntsWorld.hpp"
 
-/// <summary>
-/// TODO BETTER UI:
-/// </summary>
-
 class AntsApp : public EngineCore {
 public:
 
@@ -26,7 +22,7 @@ public:
 	{
 		using namespace gui;
 		auto generateNestColumn = [&](Group& self, u32 selfid) {
-			for (u32 i = self.children.size() - 1; i >= 6; i--) {
+			for (u32 i = self.children.size() - 1; i >= 7; i--) {
 				ui.destroy(self.children.at(i));
 				self.children.pop_back();
 			}
@@ -69,19 +65,32 @@ public:
 						ui.build(Row{
 							.children = {
 								ui.build(Checkbox{.value = &bPheroVisible}),
-								ui.build(StaticText{.value = "enable phero view:", .color = Vec4{0,0,0,1}}),
+								ui.build(StaticText{.value = "enable phero view", .color = Vec4{0,0,0,1}}),
 							}
 						}),
 						ui.build(Row{
 							.children = {
-								ui.build(Checkbox{.value = &DrawFoodOrNestPhero}),
-								ui.build(StaticText{.value = "food or nest phero:", .color = Vec4{0,0,0,1}}),
+								ui.build(Button{
+									.size = Vec2{120,25},
+									.color=DEFAULT_STYLE.positive,
+									.holdColor = Vec4{0.4,0.4,0.4,1},
+									.onRelease = [&](Button& self) { DrawFoodOrNestPhero = false; },
+									.child = ui.build(StaticText{.value="Food Pheromone"})
+								}),
+								ui.build(Button{
+									.size = Vec2{120,25},
+									.color = DEFAULT_STYLE.negative,
+									.holdColor = Vec4{0.4,0.4,0.4,1},
+									.onRelease = [&](Button& self) { DrawFoodOrNestPhero = true; },
+									.child = ui.build(StaticText{.value = "Nest Pheromone"})
+								}),
 							}
 						}),
+						ui.build(Text{.value = &pheroNestOfFoodText, .color = Vec4{0,0,0,1}}),
 						ui.build(Row{
 							.children = {
 								ui.build(Checkbox{.value = &bPheroTimeOrIntensity}),
-								ui.build(StaticText{.value = "phero time or intensity:", .color = Vec4{0,0,0,1}}),
+								ui.build(StaticText{.value = "switch strength and dist phero", .color = Vec4{0,0,0,1}}),
 							}
 						}),
 						ui.build(StaticText{.value = "Food in Nests:", .color = Vec4{0,0,0,1}}),
@@ -109,6 +118,7 @@ public:
 	void destroy() override { }
 
 	void update(f32 deltaTime) override {
+		pheroNestOfFoodText = DrawFoodOrNestPhero ? std::string("Currently showing Nest Pheromone") : std::string("Currently showing Food Pheromone");
 		ui.globalScaling = std::floorf(uiscale*12.0f)/12.0f;
 		ui.draw(world.renderer.getCoordSys(), &world.renderer.tex, &world.renderer.fonts, mainWindow, deltaTime);
 		world.renderer.drawUISprites(ui.getSprites());
@@ -181,16 +191,12 @@ public:
 
 		deltaTime *= timewarp;
 
-		LogTimer t1(std::cout, "collision update:");
 		world.collsys.execute(world.ecm.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
-		t1.stop();
 		world.updateAnts(deltaTime);
 		world.updateFood(deltaTime);
 		world.updateNests(deltaTime);
-		LogTimer t(std::cout, "phero grid update:");
 		world.nestPheromone.update(deltaTime);
 		world.foodTransportPherogrid.update(deltaTime);
-		t.stop();
 		if (bPheroVisible) {
 			std::vector<Sprite> gridsprites;
 			if (DrawFoodOrNestPhero) {
@@ -206,9 +212,6 @@ public:
 		for (auto ant : world.ecm.entityView<Ant, Transform>()) {
 			drawAnt(world.ecm.getComp<Transform>(ant), world.ecm.getComp<Ant>(ant));
 		}
-		//for (auto p : world.ecm.entityView<Pheromone, Transform>()) {
-		//	drawPheromone(world.ecm.getComp<Transform>(p), world.ecm.getComp<Pheromone>(p));
-		//}
 		for (auto d : world.ecm.entityView<Food, Transform>()) {
 			drawFood(world.ecm.getComp<Transform>(d), world.ecm.getComp<Food>(d));
 		}
@@ -306,6 +309,7 @@ private:
 	bool DrawFoodOrNestPhero{ true };
 	bool bPheroTimeOrIntensity{ true };
 	bool bPheroVisible{ false };
+	std::string pheroNestOfFoodText;
 
 
 	std::string nestText;

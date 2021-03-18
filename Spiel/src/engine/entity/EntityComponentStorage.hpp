@@ -414,7 +414,7 @@ public:
 	}
 	iterator<CompType> end() { return iterator<CompType>(static_cast<EntityHandleIndex>(containsVec.size()), *this); }
 
-private:
+//private:
 	static const int PAGE_BITS{ 7 };
 	static const int PAGE_SIZE{ 1 << PAGE_BITS };
 	static const int OFFSET_MASK{ ~(-1 << PAGE_BITS) };
@@ -588,6 +588,28 @@ public:
 			operator++(0);
 			return me;
 		}
+		self_type operator+(int offset)
+		{
+			auto ret = *this;
+			ret.denseTableIndex = std::clamp(int(ret.denseTableIndex + offset), -1, int(compStore.denseTable.size()));
+			return ret;
+		}
+		self_type operator+=(int offset)
+		{
+			denseTableIndex = std::clamp(int(denseTableIndex + offset), -1, int(compStore.denseTable.size()));
+			return *this;
+		}
+		self_type operator-(int offset)
+		{
+			auto ret = *this;
+			ret.denseTableIndex = std::clamp(int(ret.denseTableIndex - offset), -1, int(compStore.denseTable.size()));
+			return ret;
+		}
+		self_type operator-=(int offset)
+		{
+			denseTableIndex = std::clamp(int(denseTableIndex - offset), -1, int(compStore.denseTable.size()));
+			return *this;
+		}
 		reference operator*()
 		{
 			return compStore.denseTable[denseTableIndex];
@@ -603,6 +625,10 @@ public:
 		bool operator!=(self_type const& rhs) const
 		{
 			return denseTableIndex != rhs.denseTableIndex;
+		}
+		bool operator<(self_type const& rhs) const
+		{
+			return denseTableIndex < rhs.denseTableIndex;
 		}
 		CompType& data()
 		{

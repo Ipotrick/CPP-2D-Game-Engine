@@ -2,6 +2,9 @@
 
 #include <gl/glew.h>
 
+#include "../OpenGLAbstraction/Blending.hpp"
+#include "../OpenGLAbstraction/DepthTest.hpp"
+
 void openGLDebugMessageCallback3(GLenum source, GLenum type, GLuint id,
 	GLenum severity, GLsizei length,
 	const GLchar* msg, const void* data)
@@ -66,60 +69,43 @@ void openGLDebugMessageCallback3(GLenum source, GLenum type, GLuint id,
 	}
 }
 
-void exectuePipeline(RenderPipeline& pipeline)
+void RenderPipeline::init()
 {
-	cu32 currWindowWidth = pipeline.window->getWidth();
-	cu32 currWindowHeight = pipeline.window->getHeight();
-	if (pipeline.context->windowWidth != currWindowWidth * pipeline.context->superSampling || 
-		pipeline.context->windowHeight != currWindowHeight * pipeline.context->superSampling) 
-	{
-		pipeline.context->mainFrameBuffer.resize(currWindowWidth * pipeline.context->superSampling, currWindowHeight * pipeline.context->superSampling);
-		pipeline.context->didFrameSizeChange = true;
-		pipeline.context->windowWidth = currWindowWidth;
-		pipeline.context->windowHeight = currWindowHeight;
-	}
-	else {
-		pipeline.context->didFrameSizeChange = false;
-	}
-
-	pipeline.context->mainFrameBuffer.clear();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (auto& pipe : pipeline.pipes) {
-		pipe->render(*pipeline.context);
-	}
-
-	pipeline.context->passShader.renderTexToFBO(pipeline.context->mainFrameBuffer.getTex(), 0, pipeline.window->getWidth(), pipeline.window->getHeight());
-
-	pipeline.window->swapBuffers();
-}
-
-void initPipeline(RenderPipeline& pipeline)
-{
-	pipeline.window->takeRenderingContext();
+	window->takeRenderingContext();
 
 	// opengl configuration:
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
+	gl::enableBlending();
+	gl::enableDepthTesting();
 
 #if _DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback(openGLDebugMessageCallback3, 0);
 #endif
 
-	pipeline.context->init();
-	for (IRenderPipeBackend* backend : pipeline.pipes) {
-		backend->init(*pipeline.context);
-	}
+	context->init();
 }
 
-void resetPipeline(RenderPipeline& pipeline)
+void RenderPipeline::exec()
 {
-	pipeline.context->reset();
-	for (IRenderPipeBackend* backend : pipeline.pipes) {
-		backend->reset(*pipeline.context);
+	cu32 currWindowWidth = window->getWidth();
+	cu32 currWindowHeight = window->getHeight();
+	if (context->windowWidth != currWindowWidth * context->superSampling ||
+		context->windowHeight != currWindowHeight * context->superSampling) {
+		context->mainFrameBuffer.resize(currWindowWidth * context->superSampling, currWindowHeight * context->superSampling);
+		context->didFrameSizeChange = true;
+		context->windowWidth = currWindowWidth;
+		context->windowHeight = currWindowHeight;
 	}
-	pipeline.window->returnRenderingContext();
+	else {
+		context->didFrameSizeChange = false;
+	}
+
+	context->mainFrameBuffer.clear();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RenderPipeline::reset()
+{
+	context->reset();
+	window->returnRenderingContext();
 }

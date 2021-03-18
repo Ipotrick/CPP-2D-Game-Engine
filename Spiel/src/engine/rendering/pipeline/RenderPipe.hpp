@@ -1,10 +1,15 @@
 #pragma once
 
+#include <mutex>
+
+#include "../OpenGLAbstraction/OpenGLPassShader.hpp"
+#include "../Camera.hpp"
+
 struct RenderPipeContext {
 	virtual void init()
 	{
 		mainFrameBuffer.initialize(mainFrameBuffer.getSize().first, mainFrameBuffer.getSize().second);
-		passShader.initialize("shader/PassShader.frag");
+		passShader.init();
 	}
 	virtual void reset()
 	{
@@ -16,8 +21,8 @@ struct RenderPipeContext {
 
 	}
 
-	OpenGLFrameBuffer mainFrameBuffer;
-	OpenGLPassShader passShader;
+	gl::Framebuffer mainFrameBuffer;
+	gl::PassShader passShader;
 
 	u32 windowWidth{ 1 };
 	u32 windowHeight{ 1 };
@@ -28,15 +33,9 @@ struct RenderPipeContext {
 };
 
 
-class IRenderPipeBackend {
+class IRenderPipe {
 public:
 	virtual void init(RenderPipeContext& context) = 0;
 	virtual void reset(RenderPipeContext& context) = 0;
 	virtual void render(RenderPipeContext& context) = 0;
-};
-
-class IRenderPipe {
-public:
-	virtual void flush() = 0;
-	virtual IRenderPipeBackend* getBackend() = 0;
 };

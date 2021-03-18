@@ -46,42 +46,44 @@ void PhysicsSystem2::drawAllCollisionConstraints()
 
 void PhysicsSystem2::updateCollisionConstraints(CollisionSECM world, CollisionSystem& collSys)
 {
-	for (CollisionInfo collinfo : collSys.collisionInfos) {
-		if (world.hasComp<PhysicsBody>(collinfo.indexA) && world.hasComp<PhysicsBody>(collinfo.indexB)) {
-			EntityHandle a = world.getHandle(collinfo.indexA);
-			EntityHandle b = world.getHandle(collinfo.indexB);
-			// order a and b
-			collinfo.normal[0] *= -1;			// in physics the normal goes from a to b
-			collinfo.normal[1] *= -1;			// in physics the normal goes from a to b
-			if (a.index > b.index) {
-				std::swap(a, b);
-				collinfo.normal[0] *= -1;		// in physics the normal goes from a to b
-				collinfo.normal[1] *= -1;		// in physics the normal goes from a to b
-				if (collinfo.collisionPointNum > 1) {
-					std::swap(collinfo.position[0], collinfo.position[1]);
-					std::swap(collinfo.normal[0], collinfo.normal[1]);
-				}
-			}
-
-			auto* optional = collConstraints.getIfContains(a, b);
-			if (optional == nullptr) {
-				collConstraints.insert(a, b, collinfo);
-			}
-			else {
-				auto& constraint = *optional;
-				if (!constraint.updated) {
-					constraint.updated = true;
-					constraint.collisionPoints[0].normal = collinfo.normal[0];
-					constraint.collisionPoints[1].normal = collinfo.normal[1];
-					if (constraint.collisionPointNum != collinfo.collisionPointNum) {
-						// reset stored impulses when contact changes dramaticly
-						constraint.collisionPoints[0] = CollisionPoint();
-						constraint.collisionPoints[1] = CollisionPoint();
-						constraint.collisionPointNum = collinfo.collisionPointNum;
+	for (auto& collisionList : collSys.collisionLists) {
+		for (CollisionInfo collinfo : collisionList) {
+			if (world.hasComp<PhysicsBody>(collinfo.indexA) && world.hasComp<PhysicsBody>(collinfo.indexB)) {
+				EntityHandle a = world.getHandle(collinfo.indexA);
+				EntityHandle b = world.getHandle(collinfo.indexB);
+				// order a and b
+				collinfo.normal[0] *= -1;			// in physics the normal goes from a to b
+				collinfo.normal[1] *= -1;			// in physics the normal goes from a to b
+				if (a.index > b.index) {
+					std::swap(a, b);
+					collinfo.normal[0] *= -1;		// in physics the normal goes from a to b
+					collinfo.normal[1] *= -1;		// in physics the normal goes from a to b
+					if (collinfo.collisionPointNum > 1) {
+						std::swap(collinfo.position[0], collinfo.position[1]);
+						std::swap(collinfo.normal[0], collinfo.normal[1]);
 					}
-					constraint.collisionPoints[0].position = collinfo.position[0];
-					constraint.collisionPoints[1].position = collinfo.position[1];
-					constraint.clippingDist = collinfo.clippingDist;
+				}
+
+				auto* optional = collConstraints.getIfContains(a, b);
+				if (optional == nullptr) {
+					collConstraints.insert(a, b, collinfo);
+				}
+				else {
+					auto& constraint = *optional;
+					if (!constraint.updated) {
+						constraint.updated = true;
+						constraint.collisionPoints[0].normal = collinfo.normal[0];
+						constraint.collisionPoints[1].normal = collinfo.normal[1];
+						if (constraint.collisionPointNum != collinfo.collisionPointNum) {
+							// reset stored impulses when contact changes dramaticly
+							constraint.collisionPoints[0] = CollisionPoint();
+							constraint.collisionPoints[1] = CollisionPoint();
+							constraint.collisionPointNum = collinfo.collisionPointNum;
+						}
+						constraint.collisionPoints[0].position = collinfo.position[0];
+						constraint.collisionPoints[1].position = collinfo.position[1];
+						constraint.clippingDist = collinfo.clippingDist;
+					}
 				}
 			}
 		}
@@ -93,13 +95,15 @@ void PhysicsSystem2::clearDuplicates(CollisionSECM world, CollisionSystem& collS
 	uniqueCollisionInfos.clear();
 	uniqueCollisionInfosSetBuffer.clear();
 
-	for (auto const& el : collSys.getCollisions()) {
-		const EntityHandleIndex a = std::min(el.indexA, el.indexB);
-		const EntityHandleIndex b = std::max(el.indexA, el.indexB);
-		uint64_t key = makeConstraintKey(a, b);
-		if (!uniqueCollisionInfosSetBuffer.contains(key)) {
-			uniqueCollisionInfosSetBuffer.insert(key);
-			uniqueCollisionInfos.push_back(el);
+	for (const auto& collisionList : collSys.getCollisionsLists()) {
+		for (auto const& el : collisionList) {
+			const EntityHandleIndex a = std::min(el.indexA, el.indexB);
+			const EntityHandleIndex b = std::max(el.indexA, el.indexB);
+			uint64_t key = makeConstraintKey(a, b);
+			if (!uniqueCollisionInfosSetBuffer.contains(key)) {
+				uniqueCollisionInfosSetBuffer.insert(key);
+				uniqueCollisionInfos.push_back(el);
+			}
 		}
 	}
 }

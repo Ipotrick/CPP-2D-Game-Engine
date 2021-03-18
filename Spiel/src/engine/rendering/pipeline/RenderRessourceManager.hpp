@@ -15,10 +15,35 @@
 
 // TODO make concepts for THandle, TDescriptor, TRessource
 
+template<typename T>
+concept CRessourceHandle = requires(T a, T b)
+{
+	{ a == b } -> std::same_as<bool>;
+	a.index;
+	a.version;
+	a.managerId;
+};
+
+template<typename T>
+concept CDescriptor = requires(T a, T b)
+{
+	{ a == b } -> std::same_as<bool>;
+	{ T{ a } } -> std::same_as<T>;
+	{ T{ std::move(a) } } -> std::same_as<T>;
+};
+
+template<typename T>
+concept CRenderRessource = requires(T a)
+{
+	{ a.load({}) } -> std::same_as<void>;
+	{ a.reload() } -> std::same_as<void>;
+};
+
 template<
-	typename THandle, 
-	typename TDescriptor, 
-	typename TRessource
+	CRessourceHandle THandle,
+	CDescriptor TDescriptor,
+	typename TCreator,
+	CRenderRessource TRessource
 >
 class RenderRessourceManager {
 public:
@@ -33,6 +58,14 @@ public:
 			std::unique_lock l(mut);
 			if (std::ranges::find(loadingQueueFront, res) == std::end(loadingQueueFront)) {
 				loadingQueueFront.push_back(std::move(res));
+			}
+		}
+
+		void queueCreate(std::pair<u32, TCreator>&& res)
+		{
+			std::unique_lock l(mut);
+			if (std::ranges::find(createQueueFront, res) == std::end(createQueueFront)) {
+				createQueueFront.push_back(std::move(res));
 			}
 		}
 
@@ -53,6 +86,10 @@ public:
 			std::unique_lock l(mut);
 			loadingQueueBack.insert(std::end(loadingQueueBack), std::begin(loadingQueueFront), std::end(loadingQueueFront));
 			loadingQueueFront.clear();
+			for (auto& create : createQueueFront) {
+				createQueueBack.push_back(std::move(create));
+			}
+			createQueueFront.clear();
 			unloadingQueueBack.insert(std::end(unloadingQueueBack), std::begin(unloadingQueueFront), std::end(unloadingQueueFront));
 			unloadingQueueFront.clear();
 		}
@@ -66,7 +103,7 @@ public:
 		/**
 		 * call BEFORE the draw
 		 */
-		void loadQueue(std::unique_lock<std::mutex>& lock)
+		void createAndLoadQueueExecute(std::unique_lock<std::mutex>& lock)
 		{
 			assert(lock.mutex() == &mut && lock.owns_lock());
 			for (auto& [index, descriptor] : loadingQueueBack) {
@@ -82,6 +119,19 @@ public:
 				}
 			}
 			loadingQueueBack.clear();
+			for (auto&& [index, create] : createQueueBack) {
+				std::cout << "create texture in index: " << index << " create: " << create << std::endl;
+				assert(index <= ressources.size());
+				if (index == ressources.size()) {
+					ressources.emplace_back(TRessource{ create }, 0, true);
+				}
+				else {
+					ressources[index].value.load(create);
+					ressources[index].version += 1;
+					ressources[index].exists = true;
+				}
+			}
+			createQueueBack.clear();
 		}
 
 		/**
@@ -109,7 +159,13 @@ public:
 			ressources[index].value.reload();
 		}
 
-		const TRessource& get(std::unique_lock<std::mutex>& lock, s32 index)
+		const TRessource& get(std::unique_lock<std::mutex>& lock, s32 index) const
+		{
+			assert(lock.mutex() == &mut && lock.owns_lock());
+			return ressources[index].value;
+		}
+
+		TRessource& get(std::unique_lock<std::mutex>& lock, s32 index)
 		{
 			assert(lock.mutex() == &mut && lock.owns_lock());
 			return ressources[index].value;
@@ -128,6 +184,8 @@ public:
 		mutable std::mutex mut; 
 		std::vector<std::pair<u32, TDescriptor>> loadingQueueFront;
 		std::vector<std::pair<u32, TDescriptor>> loadingQueueBack;
+		std::vector<std::pair<u32, TCreator>> createQueueFront;
+		std::vector<std::pair<u32, TCreator>> createQueueBack;
 		std::vector<u32> unloadingQueueFront;
 		std::vector<u32> unloadingQueueBack;
 		struct RessourceVersionPair {
@@ -144,9 +202,9 @@ public:
 	RenderRessourceManager& operator=(RenderRessourceManager&&) = delete;
 	RenderRessourceManager& operator=(const RenderRessourceManager&) = delete;
 
-	void load(const TDescriptor& disc)
+	THandle load(const TDescriptor& disc)
 	{
-		auto dummy = makeHandle(disc);
+		return getHandle(disc);
 	}
 
 	void unload(const TDescriptor& disc)
@@ -160,21 +218,9 @@ public:
 		}
 	}
 
-	void clear()
+	THandle getHandle(const TDescriptor& disc)
 	{
-		for (u32 i = 0; i < ressourceSlots.size(); i++) {
-			if (ressourceSlots[i].exists) {
-				freeRessourceSlots.push_back(i);
-				ressourceSlots[i].exists = false;
-				backend.queueUnload(i);
-			}
-		}
-		discToIndex.clear();
-	}
-
-	THandle makeHandle(const TDescriptor& disc)
-	{
-		THandle handle;
+		THandle handle{};
 		handle.managerId = MANAGER_ID;
 		if (discToIndex.contains(disc)) {
 			handle.index = discToIndex[disc];
@@ -194,16 +240,8 @@ public:
 			backend.queueLoad({ handle.index, disc });
 		}
 		handle.version = ressourceSlots[handle.index].version;
+		ressourceSlots[handle.index].hasDescriptor = true;
 		return handle;
-	}
-
-	bool isHandleValid(const THandle& handle) const
-	{
-		return
-			handle.managerId == MANAGER_ID &&
-			handle.index < nextRessourceIndex &&
-			handle.version == ressourceSlots[handle.index].version &&
-			ressourceSlots[handle.index].exists;
 	}
 
 	bool contains(const TDescriptor& desc) const
@@ -211,14 +249,86 @@ public:
 		return discToIndex.contains(desc);
 	}
 
+	THandle create(TCreator&& create, std::string const& name)
+	{
+		assert(!nameToIndex.contains(name));
+		THandle handle;
+		handle.managerId = MANAGER_ID;
+		if (freeRessourceSlots.empty()) {
+			handle.index = nextRessourceIndex++;
+			ressourceSlots.push_back({ 0, true });
+		}
+		else {
+			handle.index = freeRessourceSlots.back();
+			freeRessourceSlots.pop_back();
+			ressourceSlots[handle.index].version += 1;
+			ressourceSlots[handle.index].exists = true;
+		}
+		backend.queueCreate({handle.index, std::move(create)});
+		handle.version = ressourceSlots[handle.index].version;
+		ressourceSlots[handle.index].hasDescriptor = false;
+		nameToIndex.insert({ name,handle.index });
+		return handle;
+	}
+
+	void destroy(const std::string& name)
+	{
+		if (nameToIndex.contains(name)) {
+			const u32 index = nameToIndex[name];
+			nameToIndex.erase(name);
+			freeRessourceSlots.push_back(index);
+			ressourceSlots[index].exists = false;
+			backend.queueUnload(index);
+		}
+	}
+
+	THandle getHandle(const std::string& name) const
+	{
+		assert(contains(name));
+		u32 index = nameToIndex.at(name);
+		THandle handle{};
+		handle.index = index;
+		handle.version = ressourceSlots[index].version;
+		handle.managerId = MANAGER_ID;
+		return handle;
+	}
+
+	bool contains(const std::string& name) const
+	{
+		return nameToIndex.contains(name);
+	}
+
+	bool isHandleValid(const THandle& handle) const
+	{
+		return
+			handle.managerId == MANAGER_ID &&
+			handle.index < nextRessourceIndex&&
+			handle.version == ressourceSlots[handle.index].version &&
+			ressourceSlots[handle.index].exists;
+	}
+
+	void clear()
+	{
+		for (u32 i = 0; i < ressourceSlots.size(); i++) {
+			if (ressourceSlots[i].exists) {
+				freeRessourceSlots.push_back(i);
+				ressourceSlots[i].exists = false;
+				backend.queueUnload(i);
+			}
+		}
+		discToIndex.clear();
+	}
+
 	Backend* getBackend() { return &backend; }
 protected:
 	inline static u16 s_nextmanagerId{ 0 };
 	const u16 MANAGER_ID{ s_nextmanagerId++ };
 	robin_hood::unordered_map<TDescriptor, u32> discToIndex;
+	robin_hood::unordered_map<std::string, u32> nameToIndex;
 	u32 nextRessourceIndex{ 0 };
 	struct Slot {
 		u32 version{ 0 };
+		bool hasDescriptor{ false };
 		bool exists{ false };
 	};
 	std::vector<Slot> ressourceSlots;

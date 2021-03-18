@@ -25,17 +25,16 @@ namespace gui {
 					.color = self.color,
 					.position = Vec3{place, context.renderDepth},
 					.scale = scaledSize,
-					.cornerRounding = 3.0f * context.scale,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
+					.cornerRounding = self.cornerRounding * context.scale,
 					.drawMode = RenderSpace::Pixel
 				}
 			);
 		}
 
 		if (self.bDragable) {
-			const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
-			const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
-
-			if (cursorOverElement) {
+			if (manager.isCursorOver(place, scaledSize, context)) {
 				manager.requestMouseEvent(id, context.root, context.renderDepth);
 			}
 		}
@@ -61,10 +60,7 @@ namespace gui {
 		auto scaledSize = self.size * context.scale;
 		auto place = getPlace(scaledSize, context);
 
-		Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
-		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
-
-		if (cursorOverElement) {
+		if (manager.isCursorOver(place, scaledSize,context)) {
 			manager.requestMouseEvent(id, context.root, context.renderDepth);
 		}
 		else {
@@ -79,6 +75,8 @@ namespace gui {
 				.color = self.bHold ? self.holdColor : self.color,
 				.position = Vec3{place, context.renderDepth },
 				.scale = scaledSize * extraSizeScale,
+				.clipMin = context.clipMin,
+				.clipMax = context.clipMax,
 				.cornerRounding = 3.0f * context.scale,
 				.drawMode = RenderSpace::Pixel
 			}
@@ -107,9 +105,6 @@ namespace gui {
 		Vec2 scaledSize = self.size * context.scale;
 		Vec2 place = getPlace(scaledSize, context);
 
-		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
-		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
-
 		f32 HOVER_SCALING{ 0.9f };
 
 		if (self.bHover) {
@@ -121,13 +116,15 @@ namespace gui {
 				.color = self.color,
 				.position = Vec3{place, context.renderDepth},
 				.scale = scaledSize,
+				.clipMin = context.clipMin,
+				.clipMax = context.clipMax,
 				.cornerRounding = 2.0f * context.scale,
 				.drawMode = RenderSpace::Pixel
 			}
 		);
 
 		if (self.value) {
-			if (cursorOverElement) {
+			if (manager.isCursorOver(place, scaledSize, context)) {
 				manager.requestMouseEvent(id, context.root, context.renderDepth);
 			}
 			else {
@@ -137,7 +134,7 @@ namespace gui {
 
 			f32 smallerDiemnsion = std::min(scaledSize.x, scaledSize.y);
 
-			smallerDiemnsion *= 0.3f;
+			smallerDiemnsion *= 0.25f;
 			scaledSize -= Vec2{ smallerDiemnsion ,smallerDiemnsion };
 
 			out.push_back(
@@ -145,6 +142,8 @@ namespace gui {
 					.color = (*self.value ? self.colorEnabled : self.colorDisabled),
 					.position = Vec3{place, context.renderDepth },
 					.scale = scaledSize,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
 					.cornerRounding = 1.5f * context.scale,
 					.drawMode = RenderSpace::Pixel
 				}
@@ -176,13 +175,17 @@ namespace gui {
 				.color = rangeOK ? self.colorBar : self.colorError,
 				.position = Vec3{place, context.renderDepth},
 				.scale = scaledBarSize,
+				.clipMin = context.clipMin,
+				.clipMax = context.clipMax,
 				.cornerRounding = biggerInidcatorSize * 0.2f * 0.5f,
 				.drawMode = RenderSpace::Pixel
 			}
 		);
 
-		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
-		if (isCoordInBounds(responsiveArea, place, cursor)) {
+		const auto [isCursorOver, cursor] = manager.isCursorOver(place, responsiveArea, context);
+
+		//const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
+		if (isCursorOver) {
 			manager.requestMouseEvent(id, context.root, context.renderDepth);
 		}
 
@@ -192,6 +195,8 @@ namespace gui {
 					.color = rangeOK ? self.colorBar : self.colorError,
 					.position = Vec3{place, context.renderDepth},
 					.scale = indicatorSize2,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
 					.cornerRounding = smallerInidcatorSize * 0.5f,
 					.drawMode = RenderSpace::Pixel
 				}
@@ -223,6 +228,8 @@ namespace gui {
 						.color = self.colorSlider * (bDragged ? 0.9f : 1.0f),
 						.position = Vec3{sliderPos, context.renderDepth},
 						.scale = indicatorSize2,
+						.clipMin = context.clipMin,
+						.clipMax = context.clipMax,
 						.cornerRounding = smallerInidcatorSize * 0.5f,
 						.drawMode = RenderSpace::Pixel
 					}
@@ -371,10 +378,9 @@ namespace gui {
 		const Vec2 scaledSize = manager.minsizes[id] * context.scale;
 		Vec2 place = getPlace(scaledSize, context);
 
-		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
-		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
+		const auto [isCursorOver, cursor] = manager.isCursorOver(place, scaledSize, context);
 
-		if (cursorOverElement) {
+		if (isCursorOver) {
 			manager.requestMouseEvent(id, context.root, context.renderDepth);
 		}
 
@@ -413,10 +419,7 @@ namespace gui {
 		const Vec2 scaledSize = manager.minsizes[id] * context.scale;
 		const Vec2 place = getPlace(scaledSize, context);
 
-		const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
-		const bool cursorOverElement = isCoordInBounds(scaledSize, place, cursor);
-
-		if (cursorOverElement) {
+		if (manager.isCursorOver(place, scaledSize, context)) {
 			if (manager.window->buttonJustReleased(MouseButton::MB_LEFT) || self.bCatchMouseInput) {
 				manager.requestMouseEvent(id, context.root, context.renderDepth);
 			}
@@ -428,6 +431,8 @@ namespace gui {
 					.color = self.color,
 					.position = Vec3{place, context.renderDepth},
 					.scale = scaledSize,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
 					.cornerRounding = 3.0f * context.scale,
 					.drawMode = RenderSpace::Pixel
 				}
@@ -443,7 +448,7 @@ namespace gui {
 		}
 	}
 
-	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, Footer& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, HeadTail& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
 		Vec2 minsize;
@@ -455,7 +460,7 @@ namespace gui {
 		minsize.y += self.spacing;
 		return minsize;
 	}
-	template<> inline void onDraw<Footer>(Manager& manager, Footer& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
+	template<> inline void onDraw<HeadTail>(Manager& manager, HeadTail& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
 		const f32 scaledFooterSize = self.size * context.scale;
 		const f32 scaledSpacing = self.spacing * context.scale;
@@ -478,6 +483,191 @@ namespace gui {
 		}
 		if (self.children.size() != 2) {
 			std::cerr << "WARNING: footer (id: "<<id<<") element does not have two children!\n";
+		}
+	}
+
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Radiobox& self)
+	{
+		if (self.onUpdate) self.onUpdate(self, id);
+		return self.size;
+	}
+	template<> inline void onDraw(Manager& manager, _Radiobox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
+	{
+		Vec2 scaledSize = self.size * context.scale;
+		Vec2 place = getPlace(scaledSize, context);
+
+		//const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
+		//const bool cursorOverElement = isPointInAABB(cursor, place, scaledSize);
+
+		f32 HOVER_SCALING{ 0.9f };
+
+		if (self.bHover) {
+			scaledSize *= HOVER_SCALING;
+		}
+
+		const f32 smallerScale = std::min(scaledSize.x, scaledSize.y);
+
+		out.push_back(
+			Sprite{
+				.color = self.color,
+				.position = Vec3{place, context.renderDepth},
+				.scale = scaledSize,
+				.clipMin = context.clipMin,
+				.clipMax = context.clipMax,
+				.cornerRounding = smallerScale * 0.5f,
+				.drawMode = RenderSpace::Pixel
+			}
+		);
+
+		if (self.value) {
+			if (manager.isCursorOver(place,scaledSize,context)) {
+				manager.requestMouseEvent(id, context.root, context.renderDepth);
+			}
+			else {
+				self.bHold = false;
+				self.bHover = false;
+			}
+
+			const bool enabled = *self.value == self.index;
+
+			out.push_back(
+				Sprite{
+					.color = (enabled ? self.colorEnabled : self.colorDisabled),
+					.position = Vec3{place, context.renderDepth },
+					.scale = scaledSize*0.75f,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
+					.cornerRounding = smallerScale*0.75f * 0.5f,
+					.drawMode = RenderSpace::Pixel
+				}
+			);
+		}
+	}
+
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _ScrollBox& self)
+	{
+		if (self.onUpdate) self.onUpdate(self, id);
+		updateAndGetMinsize(manager, self.child);
+		Vec2 minsize = size(self.padding) + self.minsize;
+		return minsize;
+	}
+	template<> void onDraw(Manager& manager, _ScrollBox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
+	{
+		const Vec2 scaledSize = (self.bFillSpace ? context.size() : manager.minsizes[id] * context.scale);
+		const Vec2 place = getPlace(scaledSize, context);
+		out.push_back(
+			Sprite{
+				.color = self.colorView,
+				.position = Vec3{place, context.renderDepth},
+				.scale = scaledSize,
+				.clipMin = context.clipMin,
+				.clipMax = context.clipMax,
+				.drawMode = RenderSpace::Pixel
+			}
+		);
+
+		if (self.child != INVALID_ELEMENT_ID) {
+			const Vec2 cursor = manager.coordSys.convertCoordSys(manager.window->getCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
+			const Vec2 scaledChildMinSize = (manager.minsizes[self.child] + size(self.padding)) * context.scale;
+			const f32 scaledScrollerWidth = self.scrollerWidth * context.scale;
+			Vec2 scaledViewSize = scaledSize;
+			Vec2 scaledViewPlace = place;
+
+			Vec2 childContextPlace;
+			Vec2 childContextSize;
+			bool requestMouseEvent{ false };
+			if (scaledViewSize.y < scaledChildMinSize.y * 0.999f) {
+				// we need to enable the scroller in Y dir:
+				scaledViewSize.x -= scaledScrollerWidth;
+				scaledViewPlace.x -= scaledScrollerWidth * 0.5f;
+				const f32 viewScrollableRange = scaledChildMinSize.y - scaledViewSize.y;
+
+				Vec2 scrollBarPlace = scaledViewPlace + Vec2{ (scaledViewSize.x + scaledScrollerWidth) * 0.5f, 0 };
+				Vec2 scrollBarSize = Vec2{ scaledScrollerWidth, scaledViewSize.y };
+				const f32 scrollerHeight = std::max(scaledViewSize.y * (scaledViewSize.y / scaledChildMinSize.y), scaledScrollerWidth);
+				out.push_back(Sprite{
+					.color = self.colorScrollBar,
+					.position = Vec3{scrollBarPlace, context.renderDepth},
+					.scale = scrollBarSize,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
+					.drawMode = RenderSpace::Pixel
+				});
+
+				const f32 scrollerPlaceMax = scrollBarPlace.y + (scrollBarSize.y - scrollerHeight) * 0.5f;
+				const f32 scrollerPlaceMin = scrollBarPlace.y - (scrollBarSize.y - scrollerHeight) * 0.5f;
+				const f32 scrollerCoordRange = scrollerPlaceMax - scrollerPlaceMin;
+				self.viewOffset = std::clamp(self.viewOffset, 0.0f, viewScrollableRange / context.scale);
+				const f32 scrollerRelativePosition = self.viewOffset / (viewScrollableRange / context.scale);
+
+				const auto scrollerSize = Vec2{
+					scaledScrollerWidth,
+					scrollerHeight
+				};
+				const auto scrollerPlace = Vec2{
+					scrollBarPlace.x,
+					scrollerPlaceMax - scrollerCoordRange * scrollerRelativePosition
+				};
+
+				childContextPlace = scaledViewPlace - Vec2{ 0, viewScrollableRange * 0.5f - self.viewOffset * context.scale };
+				childContextSize.x = scaledViewSize.x;
+				childContextSize.y = scaledChildMinSize.y;
+
+				out.push_back(Sprite{
+					.color = self.colorScroller,
+					.position = Vec3{scrollerPlace, context.renderDepth},
+					.scale = scrollerSize,
+					.clipMin = context.clipMin,
+					.clipMax = context.clipMax,
+					.drawMode = RenderSpace::Pixel
+				});
+
+				if (manager.draggedElement.first == id) {
+					const Vec2 prevCursor = manager.coordSys.convertCoordSys(manager.window->getPrevCursorPos(), RenderSpace::Window, RenderSpace::Pixel);
+					const f32 cursorYDistTraveled = cursor.y - prevCursor.y;
+					const f32 relativeScrollerPosChange = cursorYDistTraveled / scrollerCoordRange;
+					self.viewOffset -= (relativeScrollerPosChange * viewScrollableRange) / context.scale;
+				}
+				else {
+					if (manager.isCursorOver(scrollerPlace, scrollerSize, context)) {
+						self.mouseEventType = _ScrollBox::MouseEventType::DragScroller;
+						self.lastDrawScale = context.scale;
+						requestMouseEvent = true;
+					}
+					else if (manager.isCursorOver(scrollBarPlace, scrollBarSize, context)) {
+						self.mouseEventType = _ScrollBox::MouseEventType::ClampScrollerToCursor;
+						const f32 clampedcursor = std::clamp(cursor.y, scrollerPlaceMin, scrollerPlaceMax);
+						const f32 relativeScrollerPosition = 1.0f - (clampedcursor - scrollerPlaceMin) / (scrollerPlaceMax - scrollerPlaceMin);
+						self.viewOffsetIfCursorClamp = relativeScrollerPosition * viewScrollableRange / context.scale;
+						self.lastDrawScale = context.scale;
+						requestMouseEvent = true;
+					}
+					else if (manager.isCursorOver(place, scaledSize, context)) {
+						self.mouseEventType = _ScrollBox::MouseEventType::BackgroundScrolling;
+						manager.requestMouseEvent(id, context.root, context.renderDepth);
+					}
+				}
+			}
+			else {
+				childContextPlace = scaledViewPlace;
+				childContextSize = scaledSize;
+			}
+
+			auto childcontext = context;
+			childcontext.xalign = self.xalign;
+			childcontext.yalign = self.yalign;
+			const Vec2 viewClipMin = scaledViewPlace - scaledViewSize * 0.5f + Vec2{ cast<Padding>(self.padding).left, cast<Padding>(self.padding).bottom } *context.scale;
+			const Vec2 viewClipMax = scaledViewPlace + scaledViewSize * 0.5f - Vec2{ cast<Padding>(self.padding).right, cast<Padding>(self.padding).top } *context.scale;
+			childcontext.clipMin = manager.coordSys.convertCoordSys(viewClipMin, context.renderSpace, RenderSpace::Window);
+			childcontext.clipMax = manager.coordSys.convertCoordSys(viewClipMax, context.renderSpace, RenderSpace::Window);
+			fit(childcontext, childContextSize, childContextPlace);
+			fit(childcontext, self.padding);
+
+			draw(manager, manager.elements[self.child], self.child, childcontext, out);
+
+			if (requestMouseEvent) {
+				manager.requestMouseEvent(id, context.root, context.renderDepth);
+			}
 		}
 	}
 }

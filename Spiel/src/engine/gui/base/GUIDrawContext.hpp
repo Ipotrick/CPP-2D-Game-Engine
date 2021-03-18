@@ -118,6 +118,8 @@ namespace gui {
 		YAlign yalign{ YAlign::Top };
 		Vec2 topleft{ 0.0f, 0.0f };
 		Vec2 bottomright{ 0.0f, 0.0f };
+		Vec2 clipMin{ -1.0f, -1.0f };
+		Vec2 clipMax{  1.0f,  1.0f };
 		RenderSpace renderSpace{ RenderSpace::Pixel };
 		float renderDepth{ 0.0f };
 		float scale{ 1.0f };

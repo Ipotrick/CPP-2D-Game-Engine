@@ -34,7 +34,8 @@ void particleScript(Game& game, EntityHandle me, ParticleScriptComp& data, float
 	if (world.hasComp<Collider>(me)) {
 		auto& collider = world.getComp<Collider>(me);
 		bool coll = false;
-		for (const auto collision : game.collisionSystem.collisions_view(me)) {
+		auto collisionView = game.collisionSystem.collisions_view(me);
+		for (const auto collision : collisionView) {
 			if (world.hasComps<Collider, PhysicsBody>(collision.indexB)) {
 				coll = true;
 			}

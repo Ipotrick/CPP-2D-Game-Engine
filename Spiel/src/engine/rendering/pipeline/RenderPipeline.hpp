@@ -4,7 +4,7 @@
 #include <functional>
 #include <mutex>
 
-#include "../OpenGLAbstraction/OpenGLTextureRenderBuffer.hpp"
+#include "../OpenGLAbstraction/OpenGLFramebuffer.hpp"
 #include "../OpenGLAbstraction/OpenGLPassShader.hpp"
 
 #include "../Camera.hpp"
@@ -12,14 +12,12 @@
 
 #include "RenderPipe.hpp"
 
-struct RenderPipeline {
+class RenderPipeline {
+public:
 	Window* window{ nullptr };
 	RenderPipeContext* context{ nullptr };
-	std::vector<IRenderPipeBackend*> pipes;
+
+	virtual void init();
+	virtual void exec();
+	virtual void reset();
 };
-
-void exectuePipeline(RenderPipeline& pipeline);
-
-void initPipeline(RenderPipeline& pipeline);
-
-void resetPipeline(RenderPipeline& pipeline);

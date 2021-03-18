@@ -56,11 +56,11 @@ void RenderPipelineThread::threadFunction(RenderPipelineThread* data)
 		lock.unlock();
 		switch (data->action) {
 		case Action::Init:
-			initPipeline(*data->pipeline); break;
+			data->pipeline->init(); break;
 		case Action::Exec:
-			exectuePipeline(*data->pipeline); break;
+			data->pipeline->exec(); break;
 		case Action::Reset:
-			resetPipeline(*data->pipeline); break;
+			data->pipeline->reset(); break;
 		}
 		lock.lock();
 

@@ -12,15 +12,17 @@ namespace gui {
 	template<> void onDraw(Manager& manager, Box& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, Group& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, _Button& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
-	template<> void onDraw(Manager& manager, StaticText& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
-	template<> void onDraw(Manager& manager, Text& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
+	template<> void onDraw(Manager& manager, _StaticText& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
+	template<> void onDraw(Manager& manager, _Text& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, _TextInput& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, _Checkbox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
+	template<> void onDraw(Manager& manager, _Radiobox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, SliderF64& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, DragDroppable& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, DropBox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 	template<> void onDraw(Manager& manager, _TextInputF64& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
-	template<> void onDraw(Manager& manager, Footer& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
+	template<> void onDraw(Manager& manager, HeadTail& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
+	template<> void onDraw(Manager& manager, _ScrollBox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
 
 	inline void draw(Manager& manager, ElementVariant& var, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
@@ -37,15 +39,18 @@ namespace gui {
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Box& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Group& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Button& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, StaticText& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Text& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _StaticText& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Text& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInput& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Checkbox& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Radiobox& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, SliderF64& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, DragDroppable& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, DropBox& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInputF64& self);
-	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Footer& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, HeadTail& self);
+	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _ScrollBox& self);
+
 
 	/**
 	 * shoud allways be called on child first and then one should update oneself.
@@ -79,6 +84,4 @@ namespace gui {
 			draw(manager, manager.elements[self.child], self.child, childContext, out);
 		}
 	}
-
-
 }

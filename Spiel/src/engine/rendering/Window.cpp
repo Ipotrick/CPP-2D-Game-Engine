@@ -18,6 +18,13 @@ void Window::keyCallback(GLFWwindow* win, int key, int scancode, int action, int
 	}
 }
 
+void Window::scrollCallback(GLFWwindow* win, double xoffset, double yoffset)
+{
+	Window* window = (Window*)glfwGetWindowUserPointer(win);
+	window->scrollChangeX = xoffset;
+	window->scrollChangeY = yoffset;
+}
+
 Window::~Window()
 {
 	if (glfwWindow) {
@@ -41,6 +48,7 @@ bool Window::open(std::string name, uint32_t width, uint32_t height)
 	}
 
 	glfwSetKeyCallback(glfwWindow, keyCallback);
+	glfwSetScrollCallback(glfwWindow, scrollCallback);
 	glfwSetWindowUserPointer(glfwWindow, this);
 
 	return true;
@@ -64,6 +72,8 @@ void Window::update(float deltaTime)
 {
 	std::unique_lock l(mut);
 	keyEventsInOrder.clear();
+	scrollChangeXHidden = scrollChangeYHidden = false;
+	scrollChangeX = scrollChangeY = 0.0f;
 	glfwPollEvents();
 	if (bSetSize) {
 		glfwSetWindowSize(glfwWindow, width, height);
@@ -261,6 +271,36 @@ std::vector<KeyEvent> Window::getKeyEventsInOrder() const
 	return keyEventsInOrder;
 }
 
+bool Window::isKey(Key key, Action action) const
+{
+	bool ret{ false };
+	switch (action) {
+	case Action::Pressed:
+		ret = keyPressed(key);
+		break;
+	case Action::JustPressed:
+		ret = keyJustPressed(key);
+		break;
+	case Action::Released:
+		ret = keyReleased(key);
+		break;
+	case Action::JustReleased:
+		ret = keyJustReleased(key);
+		break;
+	case Action::Repeated:
+		ret = keyRepeated(key);
+		break;
+	}
+	return ret;
+}
+
+bool Window::isAndConsumeKey(Key key, Action action)
+{
+	bool ret = isKey(key, action);
+	consumeKeyEvent(key);
+	return ret;
+}
+
 bool Window::buttonPressed(MouseButton button) const
 {
 	std::unique_lock lock(mut);
@@ -273,6 +313,11 @@ bool Window::buttonJustPressed(MouseButton button) const
 	return (!mouseButtonHide[cast<u32>(button) - MIN_MOUSE_BUTTON_INDEX]) and 
 		mouseButtonStates[cast<u32>(button) - MIN_MOUSE_BUTTON_INDEX] and
 		!previousMouseButtonStates[cast<u32>(button) - MIN_MOUSE_BUTTON_INDEX];
+}
+
+bool Window::buttonReleased(MouseButton button) const
+{
+	return (!mouseButtonHide[cast<u32>(button) - MIN_MOUSE_BUTTON_INDEX]) and !mouseButtonStates[cast<u32>(button) - MIN_MOUSE_BUTTON_INDEX];
 }
 
 bool Window::buttonJustReleased(MouseButton button) const
@@ -289,6 +334,35 @@ void Window::consumeMouseButtonEvent(MouseButton button)
 	mouseButtonHide[cast<u32>(button) - MIN_MOUSE_BUTTON_INDEX] = true;
 }
 
+bool Window::isButton(MouseButton button, Action action) const
+{
+	bool ret{ false };
+	switch (action) {
+	case Action::Pressed:
+		ret = buttonPressed(button);
+		break;
+	case Action::JustPressed:
+		ret = buttonJustPressed(button);
+		break;
+	case Action::Released:
+		ret = buttonReleased(button);
+		break;
+	case Action::JustReleased:
+		ret = buttonJustReleased(button);
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+
+bool Window::isAndConsumeButton(MouseButton button, Action action)
+{
+	auto ret = isButton(button, action);
+	consumeMouseButtonEvent(button);
+	return ret;
+}
+
 Vec2 Window::getCursorPos() const
 {
 	std::unique_lock lock(mut);
@@ -299,4 +373,25 @@ Vec2 Window::getPrevCursorPos() const
 {
 	std::unique_lock lock(mut);
 	return previousCursorPosition;
+}
+
+f32 Window::getScrollX() const
+{
+	return (!scrollChangeXHidden ? scrollChangeX : 0.0f);
+}
+
+f32 Window::getAndConsumeScrollX()
+{
+	auto ret = getScrollX();
+	consumeMouseScrollX();
+	return ret;
+}
+
+f32 Window::getScrollY() const { return (!scrollChangeYHidden ? scrollChangeY : 0.0f); }
+
+f32 Window::getAndConsumeScrollY()
+{
+	auto ret = getScrollY();
+	consumeMouseScrollY();
+	return ret;
 }

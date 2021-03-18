@@ -260,7 +260,7 @@ public:
 			}
 		}
 
-		if (pheroConcentration > 0.0f) {
+		if (pheroConcentration > 0.01f) {
 			const f32 drillToPheroo = std::min(pheroConcentration, 1.0f);
 			const Vec2 dirToPhero = normalize(drill - transComp.position);
 			const Vec2 newDir = normalize(dirToPhero * drillToPheroo + transComp.rotaVec.toUnitX0());

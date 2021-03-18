@@ -192,13 +192,13 @@ public:
 		executeDestroys();
 	}
 
-protected:
-
 	template<typename CompType> 
 	auto& storage()
 	{
 		return std::get<findIndexInTuple<0, CompType, CompStoreTupleType>()>(componentStorageTuple);
 	}
+
+protected:
 
 	void deregisterDestroyedEntities()
 	{

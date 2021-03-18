@@ -67,32 +67,32 @@ struct Collider {
 		particle{ particle }
 	{}
 
-	inline void setIgnore(uint8_t mask)
+	void setIgnore(uint8_t mask)
 	{
 		collisionSettings |= mask;
 	}
 
-	inline void unsetIgnore(uint8_t mask)
+	void unsetIgnore(uint8_t mask)
 	{
 		collisionSettings &= ~mask;
 	}
 
-	inline void setIgnoredBy(uint8_t mask)
+	void setIgnoredBy(uint8_t mask)
 	{
 		collisionSettings |= mask << 4;
 	}
 
-	inline void unsetIgnoredBy(uint8_t mask)
+	void unsetIgnoredBy(uint8_t mask)
 	{
 		collisionSettings &= ~(mask << 4);
 	}
 
-	inline bool isIgnoring(uint8_t mask) const
+	bool isIgnoring(uint8_t mask) const
 	{
 		return (collisionSettings & mask) != false;
 	}
 
-	inline bool isIgnoredBy(uint8_t mask) const
+	bool isIgnoredBy(uint8_t mask) const
 	{
 		return (collisionSettings & (mask << 4)) != false;
 	}
@@ -116,6 +116,7 @@ struct Collider {
 struct CollisionsToken {
 private:
 	friend class CollisionSystem;
+	uint32_t workerIndex{ 0 };
 	uint32_t begin{ 0 };
 	uint32_t end{ 0 };
 };

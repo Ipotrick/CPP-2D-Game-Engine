@@ -157,6 +157,20 @@ public:
 		return getComp<CompType>(entity.index);
 	}
 
+	template<typename CompType>		CompType* getIf(EntityHandleIndex index)
+	{
+		if (hasComp<CompType>(index)) {
+			return &storage<CompType>().get(index);
+		}
+		else {
+			return nullptr;
+		}
+	}
+	template<typename CompType>		CompType* getIf(EntityHandle entity)
+	{
+		return getIf(entity.index);
+	}
+
 	template<typename ... CompType> std::tuple<CompType&...> getComps(EntityHandleIndex index)
 	{
 		return std::tuple<CompType&...>(getComp<CompType>(index) ...);
@@ -200,7 +214,7 @@ public:
 
 	template<> bool hasntComp<void>(EntityHandle entity)
 	{
-		retirm false;
+		return false;
 	}
 
 	template<typename... CompTypes> bool hasntComps(EntityHandleIndex index)
@@ -245,6 +259,12 @@ public:
 		assertTypeTupleInStorageTuple<0, std::tuple<FirstComp, RestComps...>, std::tuple<CompStoreType...>>();
 		return EntityComponentView<EntityComponentManagerView<CompStoreType...>, FirstComp, RestComps...>(*this);
 	}
+
+	template<typename CompType>
+	constexpr auto& storage()
+	{
+		return *std::get<findIndexInTuple<0, CompType, std::tuple<CompStoreType...>>()>(compStorePtrTuple);
+	}
 private:
 
 	bool isIndexValid(EntityHandleIndex index) const
@@ -255,12 +275,6 @@ private:
 	EntityHandleVersion getVersion(EntityHandleIndex index)
 	{
 		return entManager->getVersion(index);
-	}
-
-	template<typename CompType>
-	constexpr auto& storage()
-	{
-		return *std::get<findIndexInTuple<0, CompType, std::tuple<CompStoreType...>>()>(compStorePtrTuple);
 	}
 
 	EntityManager* entManager;

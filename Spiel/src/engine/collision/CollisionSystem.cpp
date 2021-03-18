@@ -11,7 +11,7 @@ CollisionSystem::CollisionSystem(CollisionSECM secm, uint32_t qtreeCapacity) :
 	jobEntityBuffers.push_back(std::make_unique<std::vector<EntityHandleIndex>>());
 
 	for (int i = 0; i < JobSystem::workerCount(); i++) {
-		collInfoPerWorker.push_back(std::vector<CollisionInfo>());
+		collisionLists.push_back(std::vector<CollisionInfo>());
 	}
 }
 
@@ -21,19 +21,19 @@ void CollisionSystem::execute(CollisionSECM secm, float deltaTime)
 	collisionDetection(secm);
 }
 
-std::vector<CollisionInfo>& CollisionSystem::getCollisions()
+std::vector<std::vector<CollisionInfo>>& CollisionSystem::getCollisionsLists()
 {
-	return this->collisionInfos;
+	return collisionLists;
 }
 
 const CollisionSystem::CollisionsView CollisionSystem::collisions_view(EntityHandleIndex entity)
 {
-	if (secm.hasComp<CollisionsToken>(entity)) {
-		return CollisionsView((size_t)secm.getComp<CollisionsToken>(entity).begin, (size_t)secm.getComp<CollisionsToken>(entity).end, collisionInfos);
+	if (auto* token = secm.getIf<CollisionsToken>(entity)) {
+		if (token->workerIndex != -1) {
+			return CollisionsView(token->begin, token->end, collisionLists[token->workerIndex]);
+		}
 	}
-	else {
-		return CollisionsView(collisionInfos.size(), collisionInfos.size(), collisionInfos);
-	}
+	return CollisionsView(0, 0, dummy);
 }
 
 const std::vector<Sprite>& CollisionSystem::getDebugSprites() const
@@ -62,15 +62,25 @@ void CollisionSystem::checkForCollisions(std::vector<CollisionInfo>& collisions,
 	generateCollisionInfos2(secm, collisions, aabbCache, near, INVALID_ENTITY_HANDLE_INDEX, b, c, aabb, verteciesBuffer);
 }
 
+inline size_t CollisionSystem::collisionCount() const
+{
+	size_t acc = 0;
+	for (auto& c : collisionLists) acc += c.size();
+	return acc;
+}
+
 void CollisionSystem::prepare(CollisionSECM secm)
 {
-	rebuildStatic = true;
-
-	// allocate memory for collider groups and or clean them
 	cleanBuffers(secm);
 
-	// TODO REDO SPLIT OF COLLIDER
-	// split collidables
+	JobSystem::Tag clearCollTokensJobTag = JobSystem::submit(
+		LambdaJob{
+			[&](u32 thread) {
+				clearCollisionTokens();
+			}
+		}
+	);
+
 	Vec2 minPos{ 0,0 }, maxPos{ 0,0 };
 	for (auto colliderEnt : secm.entityView<Collider>()) {
 		auto colliderID = colliderEnt.index;
@@ -97,15 +107,14 @@ void CollisionSystem::prepare(CollisionSECM secm)
 		}
 	}
 
-	auto tag = JobSystem::submitVec(
+	JobSystem::wait(JobSystem::submitVec(
 		std::vector<CacheAABBJob>{
 		CacheAABBJob(particleEntities, secm, aabbCache),
 			CacheAABBJob(dynamicSolidEntities, secm, aabbCache),
 			CacheAABBJob(staticSolidEntities, secm, aabbCache),
 			CacheAABBJob(sensorEntities, secm, aabbCache)
 	}
-	);
-	JobSystem::wait(tag);
+	));
 
 	/* rebuild qtrees: */
 
@@ -136,39 +145,24 @@ void CollisionSystem::prepare(CollisionSECM secm)
 	if (colliderDetectionEnableFlags & qtreeSensor.COLLIDER_TAG) {
 		qtreeSensor.broadInsert(sensorEntities, aabbCache);
 	}
+
+	JobSystem::wait(clearCollTokensJobTag);
 }
 
 void CollisionSystem::cleanBuffers(CollisionSECM secm)
 {
-	auto cleanAndShrink = [this](auto& vector) {
-		if (vector.capacity() >= vector.size() * 50) {
-			vector.shrink_to_fit();
-		}
-		vector.clear();
-	};
-	cleanAndShrink(debugSprites);
-	cleanAndShrink(particleEntities);
-	cleanAndShrink(sensorEntities);
-	cleanAndShrink(dynamicSolidEntities);
-	cleanAndShrink(staticSolidEntities);
-	cleanAndShrink(aabbCache);
-	if (aabbCache.size() < secm.maxEntityIndex()) aabbCache.resize(secm.maxEntityIndex());
-	cleanAndShrink(collisionInfos);
-	for (auto ent : secm.entityView<Collider>()) {
-		if (!secm.hasComp<CollisionsToken>(ent))
-			secm.addComp<CollisionsToken>(ent);
-		else {
-			secm.getComp<CollisionsToken>(ent).begin = 0;
-			secm.getComp<CollisionsToken>(ent).end = 0;
-		}
+	debugSprites.clear();
+	particleEntities.clear();
+	sensorEntities.clear();
+	dynamicSolidEntities.clear();
+	staticSolidEntities.clear();
+	aabbCache.clear();
+	if (aabbCache.size() < secm.maxEntityIndex()) {
+		aabbCache.resize(secm.maxEntityIndex());
 	}
-
-	for (auto& vec : collInfoPerWorker) {
-		vec.clear();
+	for (auto& collisionList : collisionLists) {
+		collisionList.clear();
 	}
-
-	cleanAndShrink(collisionInfos);
-
 	for (auto& jobBuffer : jobEntityBuffers) {
 		jobBuffer->clear();
 	}
@@ -251,7 +245,7 @@ void CollisionSystem::collisionDetection(CollisionSECM secm)
 			secm,
 			qtrees,
 			&aabbCache,
-			&collInfoPerWorker
+			&collisionLists
 		);
 
 		auto c = newCollJob;
@@ -286,32 +280,36 @@ void CollisionSystem::collisionDetection(CollisionSECM secm)
 	// reset quadtree rebuild flags
 	rebuildStatic = false;
 
-	// store all collisioninfos in one vector
-	for (auto const& collisionInfosplit : collInfoPerWorker) {
-		collisionInfos.insert(collisionInfos.end(), collisionInfosplit.cbegin(), collisionInfosplit.cend());
-	}
-
-	if (collisionInfos.size() > 0) {
-		EntityHandleIndex currentEntity = collisionInfos[0].indexA;
-		secm.getComp<CollisionsToken>(currentEntity).begin = 0;
-		for (int i = 1; i < collisionInfos.size(); i++) {
-			if (currentEntity != collisionInfos[i].indexA) {	//new idA found
-				auto nextEntity = collisionInfos[i].indexA;
-				secm.getComp<CollisionsToken>(nextEntity).begin = i;
-				secm.getComp<CollisionsToken>(currentEntity).end = i;
-				currentEntity = nextEntity;	//set lastId to new id
+	for (u32 wi = 0; wi < collisionLists.size(); wi++) {
+		auto& workerCollInfos = collisionLists[wi];
+		if (workerCollInfos.size() > 0) {
+			EntityHandleIndex currentEntity = workerCollInfos[0].indexA;
+			secm.getComp<CollisionsToken>(currentEntity).begin = 0;
+			secm.getComp<CollisionsToken>(currentEntity).workerIndex = wi;
+			for (int i = 1; i < workerCollInfos.size(); i++) {
+				if (currentEntity != workerCollInfos[i].indexA) {	//new idA found
+					auto nextEntity = workerCollInfos[i].indexA;
+					secm.getComp<CollisionsToken>(nextEntity).begin = i;
+					secm.getComp<CollisionsToken>(nextEntity).workerIndex = wi;
+					secm.getComp<CollisionsToken>(currentEntity).end = i;
+					currentEntity = nextEntity;	//set lastId to new id
+				}
 			}
+			secm.getComp<CollisionsToken>(currentEntity).end = uint32_t(workerCollInfos.size());
 		}
-		secm.getComp<CollisionsToken>(currentEntity).end = uint32_t(collisionInfos.size());
 	}
+}
 
-	//for (EntityHandle ent : secm.entityView<Movement, Collider>()) {
-	//	Movement& mov = secm.getComp<Movement>(ent);
-	//	if (mov.velocity.length() < 0.00001f) {
-	//		secm.getComp<Collider>(ent).sleeping = true;
-	//	}
-	//	else {
-	//		secm.getComp<Collider>(ent).sleeping = false;
-	//	}
-	//}
+void CollisionSystem::clearCollisionTokens()
+{
+	for (EntityHandle entity : secm.entityView<Collider>()) {
+		if (auto* token = secm.getIf<CollisionsToken>(entity.index)) {
+			token->begin = 0;
+			token->end = 0;
+			token->workerIndex = -1;
+		}
+		else {
+			secm.addComp<CollisionsToken>(entity);
+		}
+	}
 }

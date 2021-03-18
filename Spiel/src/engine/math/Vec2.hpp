@@ -327,15 +327,24 @@ inline Vec2 aabbBounds(Vec2 size, RotaVec2 rotaVec) {
 	return maxPos - minPos;
 }
 
-inline bool isCoordInBounds(Vec2 boundsSize, Vec2 boundsPos, Vec2 pointPos)
+inline bool isPointInRange(Vec2 p, Vec2 min, Vec2 max)
 {
-	const Vec2 relativePointPos = pointPos - boundsPos;
-	boundsSize *= 0.5f;
 	return
-		relativePointPos.x < boundsSize.x &&
-		relativePointPos.y < boundsSize.y &&
-		relativePointPos.x > -boundsSize.x &&
-		relativePointPos.y > -boundsSize.y;
+		p.x <= max.x &&
+		p.y <= max.y &&
+		p.x >= min.x &&
+		p.y >= min.y;
+}
+
+inline bool isPointInAABB(Vec2 p, Vec2 aabbCenter, Vec2 aabbSize)
+{
+	const Vec2 relativePointPos = p - aabbCenter;
+	aabbSize *= 0.5f;
+	return
+		relativePointPos.x <= aabbSize.x &&
+		relativePointPos.y <= aabbSize.y &&
+		relativePointPos.x >= -aabbSize.x &&
+		relativePointPos.y >= -aabbSize.y;
 }
 
 template<>

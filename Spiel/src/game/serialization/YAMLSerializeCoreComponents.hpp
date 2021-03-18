@@ -99,7 +99,7 @@ namespace YAML {
             rhs.ignoreGroupMask     = node["IgnoreMask"].as<CollisionMask>();
             rhs.groupMask           = node["Mask"].as<CollisionMask>();
             rhs.extraColliders      = node["ExtraCollider"].as<std::vector<CompountCollider>>();
-            //rhs.sleeping            = node["isSleeping"].as<bool>();
+            rhs.particle            = node["particle"].as<bool>();
             rhs.form                = node["Form"].as<Form>();
             rhs.collisionSettings = 0x00;
             rhs.collisionSettings &= node["IgnoreTypes"]["Dynamic"].as<bool>()  *  Collider::DYNAMIC;
@@ -215,6 +215,57 @@ namespace YAML {
 
             rhs.friction = node["Friction"].as<float>();
             rhs.rotationalFriction = node["RotaFriction"].as<float>();
+
+            return true;
+        }
+    };
+}
+
+template<> constexpr bool isYAMLSerializable<TextureName>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureName& b);
+namespace YAML {
+    template<>
+    struct convert<TextureName> {
+        static Node encode(const TextureName& rhs)
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, TextureName& rhs)
+        {
+            if (node.size() != 1) {
+                return false;
+            }
+
+            rhs.name = node["name"].as<std::string>();
+
+            return true;
+        }
+    };
+}
+
+template<> constexpr bool isYAMLSerializable<TextureLoadInfo>() { return true; }
+YAML::Emitter& operator<<(YAML::Emitter& out, const TextureLoadInfo& b);
+namespace YAML {
+    template<>
+    struct convert<TextureLoadInfo> {
+        static Node encode(const TextureLoadInfo& rhs)
+        {
+            Node node;
+            return node;
+        }
+
+        static bool decode(const Node& node, TextureLoadInfo& rhs)
+        {
+            if (node.size() != 4) {
+                return false;
+            }
+
+            rhs.filepath = node["filepath"].as<std::string>();
+            rhs.minFilter = cast<TexFilter>(node["minFilter"].as<u32>());
+            rhs.magFilter = cast<TexFilter>(node["magFilter"].as<u32>());
+            rhs.clampMethod = cast<TexClamp>(node["clampMethod"].as<u32>());
 
             return true;
         }

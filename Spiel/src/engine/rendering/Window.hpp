@@ -62,6 +62,14 @@ public:
 
 	GLFWwindow* getNativeHandle();
 
+	enum class Action {
+		Pressed,
+		JustPressed,
+		Released,
+		JustReleased,
+		Repeated
+	};
+
 	bool keyPressed(Key key) const;
 	bool keyJustPressed(Key key) const;
 	bool keyReleased(Key key) const { return !keyJustPressed(key); }
@@ -69,11 +77,16 @@ public:
 	bool keyRepeated(Key key) const;
 	void consumeKeyEvent(Key key);
 	std::vector<KeyEvent> getKeyEventsInOrder() const;
+	bool isKey(Key key, Action action) const;
+	bool isAndConsumeKey(Key key, Action action);
 
 	bool buttonPressed(MouseButton button) const;
 	bool buttonJustPressed(MouseButton button) const;
+	bool buttonReleased(MouseButton button) const;
 	bool buttonJustReleased(MouseButton button) const;
 	void consumeMouseButtonEvent(MouseButton button);
+	bool isButton(MouseButton button, Action action) const;
+	bool isAndConsumeButton(MouseButton button, Action action);
 
 	/**
 	 * \return cursor position relative to the window in window coordinates (-1 < x < 1, -1 < y < 1, x to right, y to top);
@@ -84,8 +97,16 @@ public:
 	 */
 	Vec2 getPrevCursorPos() const;
 
+	f32 getScrollX() const;
+	void consumeMouseScrollX() { scrollChangeXHidden = true; }
+	f32 getAndConsumeScrollX();
+	f32 getScrollY() const;
+	void consumeMouseScrollY() { scrollChangeYHidden = true; }
+	f32 getAndConsumeScrollY();
+
 private:
 	static void keyCallback(GLFWwindow* win, int key, int scancode, int action, int mods);
+	static void scrollCallback(GLFWwindow*, double xoffset, double yoffset);
 
 	bool bRenderContextLocked{ false };
 	mutable std::mutex mut{};
@@ -97,6 +118,10 @@ private:
 	GLFWwindow* glfwWindow{ nullptr };
 
 	// Input:
+	f32 scrollChangeX{ 0.0f };
+	bool scrollChangeXHidden{ false };
+	f32 scrollChangeY{ 0.0f };
+	bool scrollChangeYHidden{ false };
 	std::vector<KeyEvent> keyEventsInOrder;
 	std::array<bool, MAX_KEY_INDEX - MIN_KEY_INDEX + 1> previousKeyStates	= { false };
 	std::array<bool, MAX_KEY_INDEX - MIN_KEY_INDEX + 1> keysPressed			= { false };

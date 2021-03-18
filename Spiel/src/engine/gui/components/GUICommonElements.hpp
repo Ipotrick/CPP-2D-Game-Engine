@@ -19,6 +19,8 @@ namespace gui {
 		std::vector<u32> children;
 	};
 
+
+
 	struct Row : IElement {
 		std::function<void(Group&, u32)> onUpdate;
 		ValueOrPtr<XAlign>xalign{ XAlign::Left };
@@ -28,6 +30,8 @@ namespace gui {
 		ValueOrPtr<f32>spacing{ NAN };
 		std::vector<u32> children;
 	};
+
+
 
 	struct Group : IElement {
 		Group(Column&& r) :
@@ -62,18 +66,57 @@ namespace gui {
 	};
 
 
+
 	enum class OnDrag { Move, Resize };
 	struct Box : IElement {
 		std::function<void(Box&, u32)> onUpdate;
 		ValueOrPtr<Vec2> minsize{ Vec2{} };
 		ValueOrPtr<bool> bFillSpace{ false };
+		ValueOrPtr<bool> bDragable{ false };
 		ValueOrPtr<Vec4> color{ UNSET_COLOR };
 		ValueOrPtr<XAlign> xalign{ XAlign::Left };
 		ValueOrPtr<YAlign> yalign{ YAlign::Top };
 		ValueOrPtr<Padding> padding{ Padding{NAN, NAN, NAN, NAN} };
-		ValueOrPtr<bool> bDragable{ false };
+		f32 cornerRounding{ NAN };
 		ValueOrPtr<OnDrag> onDrag{ OnDrag::Move };
 		u32 child{ INVALID_ELEMENT_ID };
+	};
+
+
+
+	struct HeadTail : IElement {
+		std::function<void(HeadTail&, u32)> onUpdate;
+		ValueOrPtr<Mode> mode{ Mode::Absolute };
+		ValueOrPtr<f32> size{ 30 };
+		ValueOrPtr<f32> spacing{ NAN };
+		std::array<u32, 2> children{ INVALID_ELEMENT_ID ,INVALID_ELEMENT_ID };
+	};
+
+	struct ScrollBox : IElement {
+		std::function<void(ScrollBox&, u32)> onUpdate;
+		ValueOrPtr<Vec2> minsize{ Vec2{} };
+		ValueOrPtr<bool> bFillSpace{ true };
+		ValueOrPtr<Vec4> colorView{ UNSET_COLOR };
+		ValueOrPtr<Vec4> colorScroller{ UNSET_COLOR };
+		ValueOrPtr<Vec4> colorScrollBar{ UNSET_COLOR };
+		ValueOrPtr<XAlign> xalign{ XAlign::Left };
+		ValueOrPtr<YAlign> yalign{ YAlign::Top };
+		ValueOrPtr<Padding> padding{ Padding{0, 0, 0, 0} };
+		f32 scrollerWidth{ NAN };
+		f32 scrollSpeed{ 10.0f };
+		u32 child{ INVALID_ELEMENT_ID };
+	};
+	struct _ScrollBox : ScrollBox {
+		_ScrollBox(ScrollBox&& sb) : ScrollBox{ sb } {}
+		f32 viewOffset{ 0.0f };
+		f32 viewOffsetIfCursorClamp{ 0.0f };
+		f32 lastDrawScale{ 1.0f };
+		enum class MouseEventType {
+			ClampScrollerToCursor,
+			DragScroller,
+			BackgroundScrolling
+		};
+		MouseEventType mouseEventType{ MouseEventType::ClampScrollerToCursor };
 	};
 
 
@@ -109,6 +152,25 @@ namespace gui {
 	namespace {
 		struct _Checkbox : public Checkbox {
 			_Checkbox(Checkbox&& e) : Checkbox{e} {}
+			bool bHold{ false };
+			bool bHover{ false };
+		};
+	}
+
+
+
+	struct Radiobox : IElement {
+		std::function<void(Radiobox&, u32)> onUpdate;
+		u32* value{nullptr};
+		u32 index{ 0 };
+		ValueOrPtr<Vec2> size{ Vec2{15,15} };
+		ValueOrPtr<Vec4> color{ UNSET_COLOR };
+		ValueOrPtr<Vec4> colorEnabled{ UNSET_COLOR };
+		ValueOrPtr<Vec4> colorDisabled{ UNSET_COLOR };
+	};
+	namespace {
+		struct _Radiobox : public Radiobox {
+			_Radiobox(Radiobox&& e) : Radiobox{ e } {}
 			bool bHold{ false };
 			bool bHover{ false };
 		};
@@ -154,15 +216,5 @@ namespace gui {
 		// false: mouse input will fall throu to the element below.*/
 		bool bCatchMouseInput{ true };
 		u32 child{ INVALID_ELEMENT_ID };
-	};
-
-
-
-	struct Footer : IElement {
-		std::function<void(Footer&, u32)> onUpdate;
-		ValueOrPtr<Mode> mode{ Mode::Absolute };
-		ValueOrPtr<f32> size{ 30 };
-		ValueOrPtr<f32> spacing{ NAN };
-		std::vector<u32> children;
 	};
 }
