@@ -12,21 +12,21 @@
 #include "Glyph.hpp"
 
 struct FontDescriptor {
-	std::string atlasFilePath;
+	std::string filepath;
 
 	bool operator==(const FontDescriptor& rhs) const
 	{
-		return atlasFilePath == rhs.atlasFilePath;
+		return filepath == rhs.filepath;
 	}
 
-	bool holdsValue() const { return atlasFilePath.size() > 0; }
+	bool holdsValue() const { return filepath.size() > 0; }
 };
 
 namespace std {
 	template<> struct hash<FontDescriptor> {
 		std::size_t operator()(FontDescriptor const& d) const noexcept
 		{
-			return std::hash<std::string>{}(d.atlasFilePath);
+			return std::hash<std::string>{}(d.filepath);
 		}
 	};
 }

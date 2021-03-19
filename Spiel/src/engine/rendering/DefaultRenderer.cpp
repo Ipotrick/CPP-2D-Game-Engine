@@ -113,8 +113,8 @@ void DefaultRenderPipeline::drawBlurTexture()
 	int screenWidth = context->mainFrameBuffer.getSize().first;
 	int screenHeight = context->mainFrameBuffer.getSize().second;
 	int horizontal{ -1 };
-	int blurStepSize{ 10 };
-	int blurSteps{ 10 };
+	int blurStepSize{ 2 };
+	int blurSteps{ 1 };
 	blurShader.setUniform(52, &screenWidth);
 	blurShader.setUniform(53, &screenHeight);
 	blurShader.setUniform(54, &blurStepSize);
@@ -124,12 +124,11 @@ void DefaultRenderPipeline::drawBlurTexture()
 	horizontal = false;
 	blurShader.setUniform(51, &horizontal);
 	blurShader.renderTexToFBO(context->mainFrameBuffer.getTex(), blurTexturePreFramebuffer);
-	blurTextureFramebuffer.clear();
 
+	blurTextureFramebuffer.clear();
 	horizontal = true;
 	blurShader.setUniform(51, &horizontal);
 	blurShader.renderTexToFBO(blurTexturePreFramebuffer.getTex(), blurTextureFramebuffer);
-	blurTexturePreFramebuffer.clear();
 
 	spritePipe->texLock.unlock();
 }

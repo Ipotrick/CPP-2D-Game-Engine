@@ -24,8 +24,8 @@ namespace gui {
 
 	template<> inline void applyStyle(Box& self, const Style& style)
 	{
-		if (hasNANS(self.padding)) self.padding = DEFAULT_STYLE.padding;
-		if (std::isnan(self.cornerRounding)) self.cornerRounding = DEFAULT_STYLE.cornerRounding;
+		if (hasNANS(self.padding)) self.padding = style.padding;
+		if (std::isnan(self.cornerRounding)) self.cornerRounding = style.cornerRounding;
 		if (hasNANS(self.color)) self.color = (self.bFillSpace ? style.fill0 : style.fill1);
 	}
 

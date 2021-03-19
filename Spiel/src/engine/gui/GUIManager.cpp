@@ -6,6 +6,13 @@
 #include "components/GUIDragEvent.hpp"
 
 namespace gui {
+	Manager::Manager(TextureManager* tex, FontManager* fonts)
+	{
+		this->tex = tex;
+		this->fonts = fonts;
+		defaultStyle.font = fonts->getHandle(DEFAULT_FONT);
+		defaultStyle.fontTexture = tex->getHandle(DEFAULT_FONT_TEXTURE);
+	}
 
 	Manager::RootHandle gui::Manager::build(Root&& root)
 	{
@@ -37,9 +44,9 @@ namespace gui {
 				else if (std::vector<u32>* children = getChildren(element)) {
 					bHasChild = children->size() > 0ULL;
 				}
-				//else if (std::array<u32,2>* children = getChildPair(element)) {
-				//	bHasChild = children->size() > 0ULL;
-				//}
+				else if (std::array<u32,2>* children = getChildPair(element)) {
+					bHasChild = children->size() > 0ULL;
+				}
 				else {
 					bHasChild = false;
 				}
@@ -81,9 +88,9 @@ namespace gui {
 					std::remove_if(children->begin(), children->end(), [&](u32 c) {return c == child; });
 					children->insert(children->begin() + newPosition, child);
 				}
-				//else if (std::array<u32, 2>*children = getChildPair(el)) {
-				//	assert(false);	// CANNOT CHANGE CHILD POS FOR PAIR CONTAINER
-				//}
+				else if (std::array<u32, 2>*children = getChildPair(el)) {
+					assert(false);	// CANNOT CHANGE CHILD POS FOR PAIR CONTAINER
+				}
 				else {
 					assert(false);	// the parent element can not change the position of its child
 				}
@@ -103,9 +110,9 @@ namespace gui {
 						assert(*child == toOrphanChild);		// assert that single parent knows this child
 						*child = INVALID_ELEMENT_ID;
 					}
-					//else if (std::array<u32, 2>*children = getChildPair(element)) {
-					//	assert(false);	// CANNOT ORPHAN A CHILD OF A PAIR CONTAINER
-					//}
+					else if (std::array<u32, 2>*children = getChildPair(element)) {
+						assert(false);	// CANNOT ORPHAN A CHILD OF A PAIR CONTAINER
+					}
 					else if (std::vector<u32>* children = getChildren(element)) {
 						assert(std::find(children->begin(), children->end(), toOrphanChild) != children->end());		// assert that the parent knows the child
 						children->erase(std::remove(children->begin(), children->end(), toOrphanChild), children->end());
@@ -130,9 +137,9 @@ namespace gui {
 						assert(*child == INVALID_ELEMENT_ID);		// assert that single parent does not have a child yet
 						*child = toAdoptChild;
 					}
-					//else if (std::array<u32, 2>* children = getChildPair(element)) {
-					//	assert(false);	// CANNOT ADOPT A CHILD TO A PAIR CONTAINER
-					//}
+					else if (std::array<u32, 2>* children = getChildPair(element)) {
+						assert(false);	// CANNOT ADOPT A CHILD TO A PAIR CONTAINER
+					}
 					else if (std::vector<u32>* children = getChildren(element)) {
 						assert(std::find(children->begin(), children->end(), toAdoptChild) == children->end());		// assert that the parent doesnt know the child yet
 						if (position == 0xFFFFFFFF) position = children->size();
@@ -162,13 +169,13 @@ namespace gui {
 						parents[*child] = parent;
 					}
 				}
-				//else if (std::array<u32,2>* children = getChildPair(e)) {
-				//	for (u32 child : *children) {
-				//		if (child != INVALID_ELEMENT_ID) {
-				//			parents[child] = parent;
-				//		}
-				//	}
-				//}
+				else if (std::array<u32,2>* children = getChildPair(e)) {
+					for (u32 child : *children) {
+						if (child != INVALID_ELEMENT_ID) {
+							parents[child] = parent;
+						}
+					}
+				}
 				else if (std::vector<u32>* children = getChildren(e)) {
 					for (u32 child : *children) {
 						if (child != INVALID_ELEMENT_ID) {
@@ -211,13 +218,13 @@ namespace gui {
 								destroylist.push_back(*child);
 							}
 						}
-						//else if (std::array<u32, 2>*children = getChildPair(element)) {
-						//	for (u32 child : *children) {
-						//		if (child != INVALID_ELEMENT_ID) {
-						//			destroylist.push_back(child);
-						//		}
-						//	}
-						//}
+						else if (std::array<u32, 2>*children = getChildPair(element)) {
+							for (u32 child : *children) {
+								if (child != INVALID_ELEMENT_ID) {
+									destroylist.push_back(child);
+								}
+							}
+						}
 						else if (std::vector<u32>* children = getChildren(element)) {
 							for (u32 child : *children) {
 								if (child != INVALID_ELEMENT_ID) {
@@ -242,14 +249,14 @@ namespace gui {
 			rootElements[handle.index].version == handle.version;
 	}
 
-	void Manager::draw(const RenderCoordSys& coordSys, TextureManager* tex, FontManager* fonts, Window& window, float deltaTime)
+	void Manager::draw(const RenderCoordSys& coordSys, Window& window, float deltaTime)
 	{
 		this->window = &window;
 		this->coordSys = coordSys;
-		this->tex = tex;
-		this->fonts = fonts;
 		this->deltaTime = deltaTime;
 		this->mouseEvenetQueue.clear();
+
+		blurTextureHandle = tex->getHandle("blur");
 
 		spritesOfLastDraw.clear();
 
@@ -276,8 +283,6 @@ namespace gui {
 			window.consumeMouseScrollY();
 		}
 
-		this->fonts = nullptr;
-		this->tex = nullptr;
 		this->deltaTime = NAN;
 		this->window = nullptr;
 	}

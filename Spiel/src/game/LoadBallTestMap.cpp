@@ -170,7 +170,7 @@ void loadBallTestMap(Game& game)
 		trashCollider = Collider(sscale, form);
 		//}
 		trashCollider.form = form;
-		Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+		Vec4 color = Vec4{ 1,1,1,1 };// Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 		//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
 		Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
 		auto trash = world.create();
@@ -180,7 +180,8 @@ void loadBallTestMap(Game& game)
 		world.addComp(trash, trashSolidBody);
 		world.addComp(trash, Draw(color, sscale, 0.5f, form));
 		world.addComp(trash, Health(100));
-		world.addComp(trash, TextureLoadInfo{ "ressources/Dir.png" });
+		//world.addComp(trash, TextureLoadInfo{ "ressources/Dir.png" });
+		world.addComp(trash, TextureName{ "blur" });
 		world.spawn(trash);
 	}
 

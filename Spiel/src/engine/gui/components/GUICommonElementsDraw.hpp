@@ -19,12 +19,21 @@ namespace gui {
 	{
 		const Vec2 scaledSize = (self.bFillSpace ? context.size() : manager.minsizes[id] * context.scale);
 		const Vec2 place = getPlace(scaledSize, context);
+
+		// const Vec2 minCorner = place - scaledSize * 0.5f;
+		// const Vec2 maxCorner = place + scaledSize * 0.5f;
+		// Vec2 texMin = (manager.coordSys.convertCoordSys(minCorner, context.renderSpace, RenderSpace::Window) + Vec2{ 1.0f,1.0f }) * 0.5f;
+		// Vec2 texMax = (manager.coordSys.convertCoordSys(maxCorner, context.renderSpace, RenderSpace::Window) + Vec2{ 1.0f,1.0f }) * 0.5f;
+
 		if (cast<Vec4&>(self.color).a != 0.0f) {
 			out.push_back(
 				Sprite{
 					.color = self.color,
 					.position = Vec3{place, context.renderDepth},
 					.scale = scaledSize,
+					//.texHandle = manager.blurTextureHandle,
+					//.texMin = texMin,
+					//.texMax = texMax,
 					.clipMin = context.clipMin,
 					.clipMax = context.clipMax,
 					.cornerRounding = self.cornerRounding * context.scale,

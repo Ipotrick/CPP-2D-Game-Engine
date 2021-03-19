@@ -16,8 +16,8 @@ namespace gui {
 
 	template<> inline std::vector<u32>* getChildren(Group& self) { return &self.children; }
 
-	//template<typename T>
-	//std::array<u32,2>* getChildPair(T&) { return nullptr; }
-	//
-	//template<> inline std::array<u32, 2>* getChildPair(HeadTail& self) { return reinterpret_cast<std::array<u32, 2>*>(&self.head); }
+	template<typename T>
+	std::array<u32,2>* getChildPair(T& d) { return nullptr; }
+	
+	template<> inline std::array<u32, 2>* getChildPair(HeadTail& self) { return &self.children; }
 }

@@ -22,7 +22,7 @@ public:
 	void load(const TDescriptor& desc)
 	{
 		assert(!descToIndex.contains(desc));
-		makeHandle(desc);
+		getHandle(desc);
 	}
 
 	void unload(const TDescriptor& desc)
@@ -43,7 +43,7 @@ public:
 		descToIndex.clear();
 	}
 
-	THandle makeHandle(const TDescriptor& desc)
+	THandle getHandle(const TDescriptor& desc)
 	{
 		THandle handle;
 		handle.managerId = MANAGER_ID;

@@ -19,7 +19,7 @@ in vec2 v_clipMax;
 
 layout(location = 0) out vec4 o_color;
 
-const float EDGE_SMOOTHING = 0.05f;
+const float EDGE_SMOOTHING = 0.02f;
 
 float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
@@ -45,7 +45,8 @@ void main()
 			const vec2 inner_size = v_size - rounding_radius;
 			const vec2 clamped_inner_coord = clamp(model_coord, vec2(0,0), inner_size);
 			const float distance_to_inner_rect = length(model_coord - clamped_inner_coord);
-			color.a *= smoothstep(rounding_radius * (1.0f + EDGE_SMOOTHING * 0.5f), rounding_radius * (1.0f - EDGE_SMOOTHING * 0.5f), distance_to_inner_rect);
+			//color.a *= smoothstep(rounding_radius * (1.0f + EDGE_SMOOTHING), rounding_radius * (1.0f - EDGE_SMOOTHING), distance_to_inner_rect);
+			color.a *= 1.0f - step(rounding_radius, distance_to_inner_rect);
 		}
 	}
 

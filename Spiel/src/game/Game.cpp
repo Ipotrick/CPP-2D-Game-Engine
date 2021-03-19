@@ -239,7 +239,7 @@ void Game::gameplayUpdate(float deltaTime)
 
 	for (auto ent : world.entityView<Movement, Transform>()) {
 		auto pos = world.getComp<Transform>(ent).position;
-		if (pos.length() > 1000)
+		if (length(pos) > 1000)
 			world.destroy(ent);
 	}
 }

@@ -12,8 +12,8 @@ Font::~Font()
 
 void Font::load(const FontDescriptor& d)
 {
-	std::cout << "try to load font: " << d.atlasFilePath << std::endl;
-	if (std::ifstream ifs = std::ifstream(d.atlasFilePath)) {
+	std::cout << "try to load font: " << d.filepath << std::endl;
+	if (std::ifstream ifs = std::ifstream(d.filepath)) {
 		this->desc = d;
 		std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 		std::stringstream fileBuffer{ content };
@@ -40,7 +40,7 @@ void Font::load(const FontDescriptor& d)
 void Font::unload()
 {
 	codepointToGlyph.clear();
-	desc.atlasFilePath = "";
+	desc.filepath = "";
 }
 
 std::pair<u32, Glyph> Font::loadGlyphFromCSVLine(std::stringstream& buffer)
