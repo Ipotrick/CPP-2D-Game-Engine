@@ -10,6 +10,13 @@ It has the following features:
 * retained mode gui library
 * entity component system based on sparse sets and paged arrays
 
+here is an example of the collision and physics system in a 2d world where balls fall down to a drain and are spwed out at the top:
+![alt text](https://github.com/Ipotrick/Spiel/tree/master/assets/Balls.png)
+
+and an example where i made an ant simulation where the ants ai would work purely based on two pheromone grids to navigate:
+![alt text](https://github.com/Ipotrick/Spiel/tree/master/assets/antsim.png)
+
+
 dependencies:
 the dependencies are all available in vcpkg, there is no integration of the dependencies outside of vcpkg.
 the dependencies are all linked staticly for windows on x64
