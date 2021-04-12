@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../../types/ShortNames.hpp"
+#include "../../math/Vec2.hpp"
 #include "../pipeline/RenderRessourceManager.hpp"
 
 enum class TexFilter : u32 {
@@ -109,6 +110,12 @@ struct TextureHandle : public RessourceHandleBase {
 	{
 		return *reinterpret_cast<u64 const*>(this) == *reinterpret_cast<u64 const*>(&rhs);
 	}
+};
+
+struct TextureSection {
+	TextureHandle handle;
+	Vec2 min{ 0,0 };
+	Vec2 max{ 1,1 };
 };
 
 struct OpenGLTexture {

@@ -19,6 +19,7 @@ namespace gl {
 		void initialize(OpenGLTexture& tex, uint32_t width = 1, uint32_t height = 1);
 		void reset();
 		void clear();
+		void clearColor();
 		void clearDepth();
 		void bind();
 

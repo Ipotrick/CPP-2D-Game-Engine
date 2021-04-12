@@ -96,7 +96,7 @@ namespace gui {
 	void Placing::move(Vec2 dist, const DrawContext& context, const Sizing& sizing)
 	{
 		dist /= context.scale;
-		Vec2 contextSize = (context.size() - getSize(sizing, context)) / context.scale;
+		Vec2 contextSize = context.size() / context.scale;
 		switch (xmode) {
 		case XMode::AbsoluteLeft:
 			x += dist.x;

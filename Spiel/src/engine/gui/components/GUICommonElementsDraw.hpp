@@ -20,10 +20,10 @@ namespace gui {
 		const Vec2 scaledSize = (self.bFillSpace ? context.size() : manager.minsizes[id] * context.scale);
 		const Vec2 place = getPlace(scaledSize, context);
 
-		// const Vec2 minCorner = place - scaledSize * 0.5f;
-		// const Vec2 maxCorner = place + scaledSize * 0.5f;
-		// Vec2 texMin = (manager.coordSys.convertCoordSys(minCorner, context.renderSpace, RenderSpace::Window) + Vec2{ 1.0f,1.0f }) * 0.5f;
-		// Vec2 texMax = (manager.coordSys.convertCoordSys(maxCorner, context.renderSpace, RenderSpace::Window) + Vec2{ 1.0f,1.0f }) * 0.5f;
+		TextureSection& tex = cast<TextureSection&>(self.texture);
+		auto [texMin, texMax] = self.bScreenTexture ?
+			getScreenTextureMinMax(place, scaledSize, context.renderSpace, manager.coordSys) :
+			std::pair<Vec2,Vec2>{ tex.min, tex.max };
 
 		if (cast<Vec4&>(self.color).a != 0.0f) {
 			out.push_back(
@@ -31,9 +31,9 @@ namespace gui {
 					.color = self.color,
 					.position = Vec3{place, context.renderDepth},
 					.scale = scaledSize,
-					//.texHandle = manager.blurTextureHandle,
-					//.texMin = texMin,
-					//.texMax = texMax,
+					.texHandle = tex.handle,
+					.texMin = texMin,
+					.texMax = texMax,
 					.clipMin = context.clipMin,
 					.clipMax = context.clipMax,
 					.cornerRounding = self.cornerRounding * context.scale,
@@ -61,12 +61,15 @@ namespace gui {
 	template<> inline Vec2 updateAndGetMinsize<_Button>(Manager& manager, u32 id, _Button& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
-		if (self.child != INVALID_ELEMENT_ID) updateAndGetMinsize(manager, self.child);
-		return self.size;
+		Vec2 minsize = self.size;
+		if (self.child != INVALID_ELEMENT_ID) {
+			minsize = max(minsize, updateAndGetMinsize(manager, self.child));
+		}
+		return minsize;
 	}
 	template<> inline void onDraw<_Button>(Manager& manager, _Button& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
-		auto scaledSize = self.size * context.scale;
+		auto scaledSize = manager.minsizes[id] * context.scale;
 		auto place = getPlace(scaledSize, context);
 
 		if (manager.isCursorOver(place, scaledSize,context)) {
@@ -77,13 +80,21 @@ namespace gui {
 			self.bHover = false;
 		}
 
-		f32 extraSizeScale = (self.bHover ? 0.95 : 1.0f);
+		const Vec4 colorAddition = self.bHover ? Vec4{ 0.1,0.1,0.1,0 } : Vec4{};
+
+		TextureSection& tex = cast<TextureSection&>(self.texture);
+		auto [texMin, texMax] = self.bScreenTexture ?
+			getScreenTextureMinMax(place, scaledSize, context.renderSpace, manager.coordSys) :
+			std::pair<Vec2, Vec2>{ tex.min, tex.max };
 
 		out.push_back(
 			Sprite{
-				.color = self.bHold ? self.holdColor : self.color,
+				.color = (self.bHold ? self.holdColor : self.color) + colorAddition,
 				.position = Vec3{place, context.renderDepth },
-				.scale = scaledSize * extraSizeScale,
+				.scale = scaledSize,
+				.texHandle = tex.handle,
+				.texMin = texMin,
+				.texMax = texMax,
 				.clipMin = context.clipMin,
 				.clipMax = context.clipMax,
 				.cornerRounding = 3.0f * context.scale,
@@ -99,7 +110,7 @@ namespace gui {
 			fit(childcontext, scaledSize, place);
 			childcontext.xalign = XAlign::Center;
 			childcontext.yalign = YAlign::Center;
-			childcontext.scale *= extraSizeScale;
+			//childcontext.scale *= extraSizeScale;
 			draw(manager, manager.elements[self.child], self.child, childcontext, out);
 		}
 	}
@@ -500,7 +511,7 @@ namespace gui {
 		if (self.onUpdate) self.onUpdate(self, id);
 		return self.size;
 	}
-	template<> inline void onDraw(Manager& manager, _Radiobox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
+	template<> inline void onDraw<_Radiobox>(Manager& manager, _Radiobox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
 		Vec2 scaledSize = self.size * context.scale;
 		Vec2 place = getPlace(scaledSize, context);
@@ -553,22 +564,33 @@ namespace gui {
 		}
 	}
 
-	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, _ScrollBox& self)
+	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _ScrollBox& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
 		updateAndGetMinsize(manager, self.child);
 		Vec2 minsize = size(self.padding) + self.minsize;
 		return minsize;
 	}
-	template<> void onDraw(Manager& manager, _ScrollBox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
+	template<> inline void onDraw<_ScrollBox>(Manager& manager, _ScrollBox& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
 	{
 		const Vec2 scaledSize = (self.bFillSpace ? context.size() : manager.minsizes[id] * context.scale);
 		const Vec2 place = getPlace(scaledSize, context);
+
+
+		TextureSection& tex = cast<TextureSection&>(self.textureView);
+		auto [texMin, texMax] = self.bScreenTextureView ?
+			getScreenTextureMinMax(place, scaledSize, context.renderSpace, manager.coordSys) :
+			std::pair<Vec2, Vec2>{ tex.min, tex.max };
+
+
 		out.push_back(
 			Sprite{
 				.color = self.colorView,
 				.position = Vec3{place, context.renderDepth},
 				.scale = scaledSize,
+				.texHandle = tex.handle,
+				.texMin = texMin,
+				.texMax = texMax,
 				.clipMin = context.clipMin,
 				.clipMax = context.clipMax,
 				.drawMode = RenderSpace::Pixel

@@ -1,9 +1,11 @@
 #pragma once
 
 #include <iostream>
+#include <any>
 
 #include "../engine/collision/CollisionSystem.hpp"
 #include "../engine/rendering/DefaultRenderer.hpp"
+#include "../engine/gui/GUIManager.hpp"
 
 #include "../engine/EngineCore.hpp"
 #include "World.hpp"
@@ -11,6 +13,7 @@ using Coll = Collider;
 using Move = Movement;
 // Core Systems
 #include "../engine/physics/PhysicsSystem2.hpp"
+
 
 struct CursorManipData {
 	CursorManipData() : locked{ false }, ballSpawnLap{ 0.01 }, wallSpawnLap{ 0.1 } {}
@@ -37,11 +40,20 @@ public:
 
 	void cursorManipFunc();
 
+	void renderingUpdate();
+
+	void reset();
+	void save();
+	void load();
+
+	void spawnBall();
+
 	World world;
 
 	CursorManipData cursorData;
 	CollisionSystem collisionSystem{ world.submodule<COLLISION_SECM_COMPONENTS>() };
 	PhysicsSystem2 physicsSystem2;
+
 
 	// TEMP TODO REMOVE
 	LapTimer spawnerLapTimer{0.0001f};
@@ -51,4 +63,9 @@ public:
 	World loadedWorld;
 
 	DefaultRenderer renderer;
+
+
+	gui::Manager gui{&renderer.tex, &renderer.fonts};
+
+	std::any statsPanel;
 };

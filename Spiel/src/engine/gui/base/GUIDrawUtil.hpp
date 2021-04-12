@@ -148,4 +148,18 @@ namespace gui {
 			}
 		};
 	}
+
+	inline static std::pair<Vec2, Vec2> getWindowSpaceMinMax(Vec2 place, Vec2 scaledSize, RenderSpace originSpace, const RenderCoordSys& coordSys)
+	{
+		const Vec2 min = coordSys.convertCoordSys(place - scaledSize * 0.5f, originSpace, RenderSpace::Window);
+		const Vec2 max = coordSys.convertCoordSys(place + scaledSize * 0.5f, originSpace, RenderSpace::Window);
+		return { min,max };
+	}
+
+	inline static std::pair<Vec2, Vec2> getScreenTextureMinMax(Vec2 place, Vec2 scaledSize, RenderSpace originSpace, const RenderCoordSys& coordSys)
+	{
+		const Vec2 min = (coordSys.convertCoordSys(place - scaledSize * 0.5f, originSpace, RenderSpace::Window) + Vec2{ 1.0f,1.0f }) * 0.5f;
+		const Vec2 max = (coordSys.convertCoordSys(place + scaledSize * 0.5f, originSpace, RenderSpace::Window) + Vec2{ 1.0f,1.0f }) * 0.5f;
+		return { min,max };
+	}
 }

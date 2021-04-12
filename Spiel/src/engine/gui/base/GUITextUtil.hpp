@@ -16,6 +16,31 @@ namespace gui {
 		bool bPixelPerfectAlignment{ false };
 	};
 
+	inline Vec2 minsizeFontText(const char* str, TextContext const& context)
+	{
+		const Font& FONT = *context.font;
+		f32 SCALED_FONT_SIZE = context.fontSize * context.scale;
+
+		f32 currentRowWidth{ 0.0f };
+		f32 maxRowWidth{ 0.0f };
+		f32 rowCount{ 1.0f };
+		for (const char* iter = str; *iter != 0x00; ++iter) {
+			if (*iter == '\n') {
+				currentRowWidth = 0.0f;
+				rowCount += 1;
+			}
+			else {
+				const Glyph scaledGlyph = scaleGlyph(FONT.codepointToGlyph.get(*iter), 4096, 4096);
+				currentRowWidth += scaledGlyph.advance * SCALED_FONT_SIZE;
+				if (context.bPixelPerfectAlignment) {
+					currentRowWidth = ceil(maxRowWidth - 0.1f);
+				}
+				maxRowWidth = std::max(maxRowWidth, currentRowWidth);
+			}
+		}
+		return { maxRowWidth, rowCount * SCALED_FONT_SIZE };
+	}
+
 	/**
 	 * \param str string in UTF-8 coding (CURRENTLY ONLY TAKING ASCII (TODO ADD UTF-8 SUPPORT)) to be drawn
 	 * \param context containing all relevant drawing information refering to the context
@@ -28,7 +53,7 @@ namespace gui {
 
 		const Font& FONT = *context.font;
 
-		f32 SCALED_FONT_SIZE =  context.fontSize * context.scale;
+		f32 SCALED_FONT_SIZE = context.fontSize * context.scale;
 		if (context.bPixelPerfectAlignment) {
 			SCALED_FONT_SIZE = std::round(SCALED_FONT_SIZE);
 		}
@@ -138,6 +163,6 @@ namespace gui {
 			}
 			charsProcessed += 1;
 		}
-		return { charsProcessed, Vec2{maxRowWidth*1.02f, f32(rowWidths.size()) * SCALED_FONT_SIZE } / context.scale };
+		return { charsProcessed, minsizeFontText(str, context) / context.scale };
 	}
 }

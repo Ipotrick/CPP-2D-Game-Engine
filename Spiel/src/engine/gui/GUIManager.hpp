@@ -110,9 +110,9 @@ namespace gui {
 		 */
 		bool hasChild(u32 element);
 
-		std::vector<u32>* getChildrenIf(u32 element);
+		std::vector<u32>* dynamicChildren(u32 element);
 
-		u32* getChildIf(u32 element);
+		std::pair<u32*, u32> staticChildren(u32 element);
 
 		/**
 		 * repositions the child in the list of children of the parent.
@@ -120,7 +120,7 @@ namespace gui {
 		 * \param child to change position of
 		 * \param newPosition of the child.
 		 */
-		void changeChildPosition(u32 child, u32 newPosition);
+		//void changeChildPosition(u32 child, u32 newPosition);
 
 		/**
 		 * Orphans the child from its parent.

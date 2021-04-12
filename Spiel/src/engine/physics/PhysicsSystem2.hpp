@@ -17,11 +17,21 @@
 * implement settings for iteration count of force and penetratin constraints
 */
 
+struct PhysicsSystemSettings {
+	bool positionCorrection = true;
+	bool accumulateImpulses = true;
+	bool warmStart = true;
+	float minDelaTime = 0.2f;		// if deltaTime is bigger, the simulation will slow down to maintain precision
+	int impulseResolutionIterations = 15;
+};
+
 class PhysicsSystem2 {
 public:
 	PhysicsSystem2();
 	void execute(CollisionSECM world, PhysicsUniforms const& uniform, float deltaTime, CollisionSystem& collSys);
 	const std::vector<Sprite>& getDebugSprites() const;
+
+	PhysicsSystemSettings settings;
 private:
 	std::vector<Sprite> debugSprites;
 	void updateCollisionConstraints(CollisionSECM world, CollisionSystem& collSys);
@@ -38,11 +48,6 @@ private:
 	/* EXPERIMENTAL */
 	void findIslands(CollisionSECM world, CollisionSystem& collSys);
 
-	bool positionCorrection = true;
-	bool accumulateImpulses = true;
-	bool warmStart = true;
-	float minDelaTime = 0.2f;		// if deltaTime is bigger, the simulation will slow down to maintain precision
-	int impulseIterations = 15;
 
 	CollisionConstraintSet collConstraints;
 

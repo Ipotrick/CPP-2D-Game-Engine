@@ -47,7 +47,7 @@ public:
 
 	struct PopBlendingFunction { };
 
-	struct PushMTSDFSmoothing { f32 value{ 1.5f }; };
+	struct PushMTSDFSmoothing { f32 value{ 1.0f }; };
 	struct PopMTSDFSmoothing{ };
 
 	using Command = std::variant<
@@ -82,6 +82,8 @@ public:
 	std::stack<gl::BlendingFunction> blendingStack;
 	std::stack<gl::DepthTest> depthTestStack;
 	std::stack<f32> mtsdfSmoothingStack;
+
+	f32 sdfBarrier{ 0.0f };
 
 	std::vector<SpriteInstance> instances;
 

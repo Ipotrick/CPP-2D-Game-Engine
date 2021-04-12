@@ -15,7 +15,7 @@ void DefaultRenderer::init(Window* window)
 	pipeline.spritePipe = &spritePipe;
 	bInitialized = true;
 
-	blurTexture = pipeline.blurTexture = tex.create(TextureCreateInfo{ std::make_unique<u8>(0) }, std::string("blur"));
+	blurTexture = pipeline.blurTexture = tex.create(TextureCreateInfo{ std::make_unique<u8>(0), 1, 1, TexFilter::Linear, TexFilter::Linear }, std::string("blur"));
 	tex.getBackend()->flush();
 	worker.execute(&pipeline, RenderPipelineThread::Action::Init);
 }
@@ -50,6 +50,7 @@ void DefaultRenderer::flush()
 	spriteCommands.clear();
 	std::swap(pipeline.uiSprites, uiSpriteCommands);
 	uiSpriteCommands.clear();
+	spritePipe.sdfBarrier = sdfBarrier;
 }
 
 void DefaultRenderPipeContext::init()
@@ -113,8 +114,8 @@ void DefaultRenderPipeline::drawBlurTexture()
 	int screenWidth = context->mainFrameBuffer.getSize().first;
 	int screenHeight = context->mainFrameBuffer.getSize().second;
 	int horizontal{ -1 };
-	int blurStepSize{ 2 };
-	int blurSteps{ 1 };
+	int blurStepSize{ 6 };
+	int blurSteps{ 4 };
 	blurShader.setUniform(52, &screenWidth);
 	blurShader.setUniform(53, &screenHeight);
 	blurShader.setUniform(54, &blurStepSize);

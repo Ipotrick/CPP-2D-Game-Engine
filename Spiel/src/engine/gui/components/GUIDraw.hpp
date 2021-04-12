@@ -66,7 +66,7 @@ namespace gui {
 	{
 		Root& self = manager.rootElements[id].element;
 
-		if (self.onUpdate) self.onUpdate(self);
+		if (self.onUpdate) self.onUpdate(self, id);
 
 		if (self.child != INVALID_ELEMENT_ID) {
 			DrawContext myContext;

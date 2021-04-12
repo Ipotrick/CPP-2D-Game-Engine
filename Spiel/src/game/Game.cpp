@@ -17,15 +17,16 @@
 #include "HealthScript.hpp"
 
 #include "LoadBallTestMap.hpp"
-#include "LoadRenderTestMap.hpp"
 #include "Scripts.hpp"
+
+#include "StatsGUIPanel.hpp"
 
 using namespace util;
 
 Game::Game() : EngineCore{ "Balls2", 1600, 900 }
 {
 	renderer.init(&mainWindow);
-	renderer.supersamplingFactor = 2.0f;
+	renderer.supersamplingFactor = 1.0f;
 
 	collisionSystem.disableColliderDetection(Collider::PARTICLE);
 }
@@ -45,10 +46,91 @@ void Game::create() {
 		s.deserializeString(str);
 	}
 #endif
+
+	gui.getStyle().fontTexture = renderer.tex.getHandle(TextureLoadInfo{"ressources/fonts/Consolas_font.png", TexFilter::Linear, TexFilter::Linear}); \
+	gui.getStyle().font = renderer.fonts.getHandle(FontDescriptor{ "ressources/fonts/Consolas_font.csv" });
+
+	gui.build(gui::Root{
+		.sizing = gui::Sizing{}.relX(1).absY(20),
+		.placing = gui::Placing{}.relDistLeft(0.5f).absDistTop(0),
+		.child = gui.build(gui::Box{
+			.bFillSpace = true,
+			.bScreenTexture = true,
+			.texture = TextureSection{renderer.tex.getHandle("blur")},
+			.color = Vec4{0.33,0.33,0.33,1.0},
+			.padding = gui::Padding{0,0,5,5},
+			.cornerRounding = 0.0f,
+			.child = gui.build(gui::Row{
+				.yalign = gui::YAlign::Center,
+				.children = {
+					gui.build(gui::Button{
+						.size = Vec2{80,16},
+						.color = Vec4{0,0,0,1.0f},
+						.onRelease = [&](gui::Button& self) { reset(); },
+						.child = gui.build(gui::StaticText{.value = "Reset"})
+					}),
+					gui.build(gui::Button{
+						.size = Vec2{80,16},
+						.color = Vec4{0,0,0,1.0f},
+						.onRelease = [&](gui::Button& self) { save(); },
+						.child = gui.build(gui::StaticText{.value = "Save"})
+					}),
+					gui.build(gui::Button{
+						.size = Vec2{80,16},
+						.color = Vec4{0,0,0,1.0f},
+						.onRelease = [&](gui::Button& self) { load(); },
+						.child = gui.build(gui::StaticText{.value = "Load"})
+					}),
+					gui.build(gui::Button{
+						.size = Vec2{ 80, 16 },
+						.color = Vec4{ 0, 0, 0, 1.0f },
+						.onRelease = [&](gui::Button& self) {  
+							if (statsPanel.has_value()) {
+								statsPanel.reset();
+							}
+							else {
+								statsPanel.emplace<GUIStatsPanel>(this);
+							}
+						},
+						.child = gui.build(gui::StaticText{.value = "Statistics"})
+					}),
+					gui.build(gui::Button{
+						.size = Vec2{ 80, 16 },
+						.color = Vec4{ 0, 0, 0, 1.0f },
+						.onHold = [&](gui::Button& self) { spawnBall(); },
+						.child = gui.build(gui::StaticText{.value = "Spawn Ball"})
+					}),
+					gui.build(gui::SliderF64{
+						.value = &renderer.sdfBarrier,
+						.size = Vec2{ 120, 16 },
+						.min = 0.0,
+						.max = 0.1,
+						.bThin = false,
+						.colorBar = Vec4{0,0,0,1},
+						.child = gui.build(gui::Text{.onUpdate = [&](gui::Text& self, u32 id) {self.value = std::string("font thic:") + std::to_string(renderer.sdfBarrier); } })
+					}),
+					gui.build(gui::Button{
+						.size = Vec2{ 16, 16 },
+						.color = Vec4{ 0, 0, 0, 1.0f },
+						.onRelease = [&](gui::Button& self) { renderer.sdfBarrier += 0.005f; },
+						.child = gui.build(gui::StaticText{.value = "+"})
+					}),
+					gui.build(gui::Button{
+						.size = Vec2{ 16, 16 },
+						.color = Vec4{ 0, 0, 0, 1.0f },
+						.onRelease = [&](gui::Button& self) { renderer.sdfBarrier -= 0.005f; },
+						.child = gui.build(gui::StaticText{.value = "-"})
+					}),
+				}
+			})
+		})
+	});
 }
 
 void Game::update(float deltaTime) 
 {
+	gui.draw(renderer.getCoordSys(), mainWindow, deltaTime);
+	renderer.drawUISprites(gui.getSprites());
 	if (bLoading) {
 		if (JobSystem::finished(loadingWorkerTag)) {
 			Monke::log("job with tag {0} finished clientside", (uint32_t)loadingWorkerTag);
@@ -57,33 +139,22 @@ void Game::update(float deltaTime)
 		}
 	}
 	else {
-		renderer.drawSprite(Sprite{ .color = {0.5,0.5,1,1}, .scale = {2,2} });
-
 		collisionSystem.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), deltaTime);
+		JobSystem::Tag renderTag = JobSystem::submit(LambdaJob(
+			[&](u32 thread) { 
+				renderingUpdate(); 
+			}
+		));
 		physicsSystem2.execute(world.submodule<COLLISION_SECM_COMPONENTS>(), world.physics, deltaTime, collisionSystem);
-		const auto tag = dispatchEntityWork<128, Movement>(world.storage<Movement>(), [&](u32 id, Movement& mov) { movementScript(*this, world.getHandle(id), world.getComp<Transform>(id), mov, deltaTime); });
+		JobSystem::wait(renderTag);
+		JobSystem::Tag tag = dispatchEntityWork<128, Movement>(
+			world.storage<Movement>(), 
+			[&](u32 id, Movement& mov) { 
+				movementScript(*this, world.getHandle(id), world.getComp<Transform>(id), mov, deltaTime); 
+			}
+		);
 		JobSystem::wait(tag);
 		gameplayUpdate(deltaTime);
-		for (auto [ent, td] : world.entityComponentView<TextureLoadInfo>()) {
-			if (!world.hasComp<TextureSection>(ent)) {
-				world.addComp(ent, TextureSection{ renderer.tex.getHandle(td) });
-			}
-		}
-		for (auto [ent, texName] : world.entityComponentView<TextureName>()) {
-			if (!world.hasComp<TextureSection>(ent)) {
-				world.addComp(ent, TextureSection{ renderer.tex.getHandle(texName) });
-			}
-		}
-		for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) {
-			if (!world.hasComp<ParticleScriptComp>(ent)) {
-				drawScript(*this, ent, t, d);
-			}
-		}
-		renderer.pushCommand(gl::BlendingFunction{ gl::BlendingFactor::SrcAlpha, gl::BlendingFactor::One });
-		for (auto [ent, t, d, psc] : world.entityComponentView<Transform, Draw, ParticleScriptComp>()) {
-			drawScript(*this, ent, t, d);
-		}
-		renderer.pushCommand(SpritePipe::PopBlendingFunction{});
 
 		world.update();
 	}
@@ -105,16 +176,6 @@ void Game::gameplayUpdate(float deltaTime)
 	}
 	if (mainWindow.keyPressed(Key::G)) {
 		world.physics.linearEffectAccel += 8 * deltaTime;
-	}
-	if (mainWindow.keyJustPressed(Key::P) && !mainWindow.keyPressed(Key::LEFT_SHIFT)) {
-		renderer.camera.position = { 0,0 };
-		world = World();
-		loadRenderTestMap(*this, 0.5f);
-	}
-	if (mainWindow.keyJustPressed(Key::P) && mainWindow.keyPressed(Key::LEFT_SHIFT)) {
-		renderer.camera.position = { 0,0 };
-		world = World();
-		loadRenderTestMap(*this, 0.3f);
 	}
 	if (mainWindow.keyPressed(Key::H)) {
 		world.physics.linearEffectAccel -= 8 * deltaTime;
@@ -169,61 +230,13 @@ void Game::gameplayUpdate(float deltaTime)
 		//uiContext.scale = clamp(uiContext.scale + deltaTime, 0.1f, 10.0f);
 	}
 	if (mainWindow.keyPressed(Key::J)) {
-		world = World();
-		loadBallTestMap(*this);
-		//ui.update();
+		reset();
 	}
 	if (mainWindow.keyJustPressed(Key::K)) {
-
-		class SaveJob : public IJob {
-		public:
-			SaveJob(World w):
-				w{ std::move(w) }
-			{ }
-			virtual void execute(const uint32_t thread) override
-			{
-				Monke::log("Start saving...");
-
-				std::ofstream of("world.yaml");
-				if (of.good()) {
-					YAMLWorldSerializer s(w);
-					of << s.serializeToString();
-					of.close();
-				}
-				Monke::log("Finished saving!");
-			}
-		private:
-			World w;
-		};
-
-		auto tag = JobSystem::submit(SaveJob(world));
-		JobSystem::orphan(tag);
+		save();
 	}
 	if (mainWindow.keyJustPressed(Key::L)) {
-		bLoading = true;
-
-		class LoadJob : public IJob {
-		public:
-			LoadJob(World& loadedWorld): loadedWorld{ loadedWorld } {}
-
-			virtual void execute(uint32_t const thread) override
-			{
-				Monke::log("Start loading...");
-				loadedWorld = World();
-				std::ifstream ifstream("world.yaml");
-				if (ifstream.good()) {
-					YAMLWorldSerializer s(loadedWorld);
-					std::string str;
-					std::getline(ifstream, str, '\0');
-					s.deserializeString(str);
-				}
-				Monke::log("Finished loading!");
-			}
-		private:
-			World& loadedWorld;
-		};
-
-		loadingWorkerTag = JobSystem::submit(LoadJob(loadedWorld));
+		load();
 	}
 
 	//execute scripts
@@ -412,4 +425,118 @@ void Game::cursorManipFunc()
 	//	}
 	//}
 	//cursorManipData.oldCursorPos = getPosWorldSpace(getCursorPos());
+}
+
+void Game::renderingUpdate()
+{
+	renderer.drawSprite(Sprite{ .color = {0.5,0.5,1,1}, .scale = {2,2} });
+	for (auto [ent, td] : world.entityComponentView<TextureLoadInfo>()) {
+		if (!world.hasComp<TextureSection>(ent)) {
+			world.addComp(ent, TextureSection{ renderer.tex.getHandle(td) });
+		}
+	}
+	for (auto [ent, texName] : world.entityComponentView<TextureName>()) {
+		if (!world.hasComp<TextureSection>(ent)) {
+			world.addComp(ent, TextureSection{ renderer.tex.getHandle(texName) });
+		}
+	}
+	for (auto [ent, t, d] : world.entityComponentView<Transform, Draw>()) {
+		if (!world.hasComp<ParticleScriptComp>(ent)) {
+			drawScript(*this, ent, t, d);
+		}
+	}
+	renderer.pushCommand(gl::BlendingFunction{ gl::BlendingFactor::SrcAlpha, gl::BlendingFactor::One });
+	for (auto [ent, t, d, psc] : world.entityComponentView<Transform, Draw, ParticleScriptComp>()) {
+		drawScript(*this, ent, t, d);
+	}
+	renderer.pushCommand(SpritePipe::PopBlendingFunction{});
+}
+
+void Game::reset()
+{
+	world = World();
+	loadBallTestMap(*this);
+}
+
+void Game::save()
+{
+	class SaveJob : public IJob {
+	public:
+		SaveJob(World w) :
+			w{ std::move(w) }
+		{
+		}
+		virtual void execute(const uint32_t thread) override
+		{
+			Monke::log("Start saving...");
+
+			std::ofstream of("world.yaml");
+			if (of.good()) {
+				YAMLWorldSerializer s(w);
+				of << s.serializeToString();
+				of.close();
+			}
+			Monke::log("Finished saving!");
+		}
+	private:
+		World w;
+	};
+
+	auto tag = JobSystem::submit(SaveJob(world));
+	JobSystem::orphan(tag);
+}
+
+void Game::load()
+{
+	bLoading = true;
+
+	class LoadJob : public IJob {
+	public:
+		LoadJob(World& loadedWorld) : loadedWorld{ loadedWorld } {}
+
+		virtual void execute(uint32_t const thread) override
+		{
+			Monke::log("Start loading...");
+			loadedWorld = World();
+			std::ifstream ifstream("world.yaml");
+			if (ifstream.good()) {
+				YAMLWorldSerializer s(loadedWorld);
+				std::string str;
+				std::getline(ifstream, str, '\0');
+				s.deserializeString(str);
+			}
+			Monke::log("Finished loading!");
+		}
+	private:
+		World& loadedWorld;
+	};
+
+	loadingWorkerTag = JobSystem::submit(LoadJob(loadedWorld));
+}
+
+void Game::spawnBall()
+{
+	Vec2 scale = Vec2(0.2f, 0.2f);
+	Form form = Form::Circle;
+	Collider trashCollider = Collider(scale, form);
+	PhysicsBody trashSolidBody = PhysicsBody(0.2f, 0.5f, calcMomentOfIntertia(0.5, scale), 0.9f);
+	for (int i = 0; i < 10; i++) {
+		float factor = (rand() % 1000) / 600.0f + 0.7f;
+		auto sscale = scale * factor;
+		form = Form::Circle;
+		trashCollider = Collider(sscale, form);
+
+		trashCollider.form = form;
+		Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
+		Vec2 position = { 20 + rand() % 1000 / 500.0f + 1.0f,60 + rand() % 1000 / 500.0f + 1.0f };
+		auto trash = world.create();
+		world.addComp(trash, Transform(position, RotaVec2(0)));
+		world.addComp(trash, Movement());
+		world.addComp(trash, trashCollider);
+		world.addComp(trash, trashSolidBody);
+		world.addComp(trash, Draw(color, sscale, 0.5f, form));
+		world.addComp(trash, Health(100));
+		world.addComp(trash, TextureLoadInfo{ "ressources/Dir.png" });
+		world.spawn(trash);
+	}
 }

@@ -111,7 +111,6 @@
     <ClInclude Include="src\engine\util\Perf.hpp" />
     <ClInclude Include="src\engine\util\UnicodeUtil.hpp" />
     <ClInclude Include="src\engine\util\utils.hpp" />
-    <ClInclude Include="src\game\BloomRScript.hpp" />
     <ClInclude Include="src\game\EngineConfig.hpp" />
     <ClInclude Include="src\game\Game.hpp" />
     <ClInclude Include="src\game\GameComponents.hpp" />
@@ -120,7 +119,6 @@
     <ClInclude Include="src\game\HealthScript.hpp" />
     <ClInclude Include="src\game\LayerConstants.hpp" />
     <ClInclude Include="src\game\LoadBallTestMap.hpp" />
-    <ClInclude Include="src\game\LoadRenderTestMap.hpp" />
     <ClInclude Include="src\game\movementScript.hpp" />
     <ClInclude Include="src\game\ParticleScript.hpp" />
     <ClInclude Include="src\game\PlayerScript.hpp" />
@@ -130,6 +128,7 @@
     <ClInclude Include="src\game\serialization\YAMLSerializeCoreComponents.hpp" />
     <ClInclude Include="src\game\serialization\YAMLSerializeGameComponents.hpp" />
     <ClInclude Include="src\game\serialization\YAMLSerializer.hpp" />
+    <ClInclude Include="src\game\StatsGUIPanel.hpp" />
     <ClInclude Include="src\game\SuckerScript.hpp" />
     <ClInclude Include="src\game\TesterScript.hpp" />
     <ClInclude Include="src\game\World.hpp" />
@@ -175,7 +174,6 @@
     <ClCompile Include="src\game\Game.cpp" />
     <ClCompile Include="src\game\HealthScript.cpp" />
     <ClCompile Include="src\game\LoadBallTestMap.cpp" />
-    <ClCompile Include="src\game\LoadRenderTestMap.cpp" />
     <ClCompile Include="src\game\movementScript.cpp" />
     <ClCompile Include="src\game\ParticleScript.cpp" />
     <ClCompile Include="src\game\PlayerScript.cpp" />
@@ -185,6 +183,7 @@
     <ClCompile Include="src\game\serialization\YAMLSerializeCoreComponents.cpp" />
     <ClCompile Include="src\game\serialization\YAMLSerializeGameComponents.cpp" />
     <ClCompile Include="src\game\serialization\YAMLSerializer.cpp" />
+    <ClCompile Include="src\game\StatsGUIPanel.cpp" />
     <ClCompile Include="src\game\SuckerScript.cpp" />
     <ClCompile Include="src\game\TesterScript.cpp" />
     <ClCompile Include="src\game\World.cpp" />

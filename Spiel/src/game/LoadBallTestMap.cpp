@@ -148,7 +148,7 @@ void loadBallTestMap(Game& game)
 	cmpsBox.add(PhysicsBody(0.0, 5.0f, calcMomentOfIntertia(5.0f, scaleBox), 0.9f));
 	cmpsBox.add<Movement>();
 	cmpsBox.add(Draw(Vec4(1, 1, 1, 1), scaleBox, 0.4, Form::Rectangle));
-	cmpsBox.add(TextureName{ "blur" });
+	cmpsBox.add(TextureLoadInfo{"ressources/Dir.png", TexFilter::Nearest, TexFilter::Nearest});
 	cmpsBox.add(Health(100));
 	world.spawn(box);
 
@@ -164,14 +164,13 @@ void loadBallTestMap(Game& game)
 		//}
 		//else {
 
-		float factor = (rand() % 1000) / 500.0f + 0.7f;
+		float factor = (rand() % 1000) / 600.0f + 0.7f;
 		auto sscale = scale * factor;
 		form = Form::Circle;
 		trashCollider = Collider(sscale, form);
 		//}
 		trashCollider.form = form;
-		Vec4 color = Vec4{ 1,1,1,1 };// Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
-		//Vec2 position = Vec2(5, 1.6 + i * 0.301f);
+		Vec4 color = Vec4(rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, rand() % 1000 / 1000.0f, 1);
 		Vec2 position = { static_cast<float>(rand() % 1001 / 300.0f) * 4.6f + 5.5f, static_cast<float>(rand() % 1000 / 100.0f) * 4.6f + 5.5f };
 		auto trash = world.create();
 		world.addComp(trash, Transform(position, RotaVec2(0)));
@@ -180,8 +179,7 @@ void loadBallTestMap(Game& game)
 		world.addComp(trash, trashSolidBody);
 		world.addComp(trash, Draw(color, sscale, 0.5f, form));
 		world.addComp(trash, Health(100));
-		//world.addComp(trash, TextureLoadInfo{ "ressources/Dir.png" });
-		world.addComp(trash, TextureName{ "blur" });
+		world.addComp(trash, TextureLoadInfo{ "ressources/Dir.png" });
 		world.spawn(trash);
 	}
 
@@ -220,6 +218,7 @@ void loadBallTestMap(Game& game)
 	cmps2.add<PhysicsBody>(PhysicsBody(0.0f, 
 		100000000000000000000000000000000.0f, 
 		100000000000000000000000000000000.0f, 0));
+	cmps2.add<Draw>(Draw{ Vec4{1,0,0,1} });
 	cmps2.add<SpawnerComp>();
 	world.spawn(spawner);
 

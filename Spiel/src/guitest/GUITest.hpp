@@ -54,7 +54,7 @@ public:
 									.bDragable = true,
 									.xalign = XAlign::Center,
 									.yalign = YAlign::Center,
-									.cornerRounding = 0.0f,
+									//.cornerRounding = 0.0f,
 									.child = ui.build(StaticText{.value = "GRAB AND DRAG ME", .color = Vec4{0.9,0.9,0.9,1}}),
 								}),
 								ui.build(Row{

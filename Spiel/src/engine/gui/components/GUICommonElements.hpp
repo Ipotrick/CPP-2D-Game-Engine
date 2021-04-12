@@ -73,11 +73,13 @@ namespace gui {
 		ValueOrPtr<Vec2> minsize{ Vec2{} };
 		ValueOrPtr<bool> bFillSpace{ false };
 		ValueOrPtr<bool> bDragable{ false };
+		ValueOrPtr<bool> bScreenTexture{ false };
+		ValueOrPtr<TextureSection> texture{ TextureSection{} };
 		ValueOrPtr<Vec4> color{ UNSET_COLOR };
-		ValueOrPtr<XAlign> xalign{ XAlign::Left };
-		ValueOrPtr<YAlign> yalign{ YAlign::Top };
 		ValueOrPtr<Padding> padding{ Padding{NAN, NAN, NAN, NAN} };
 		f32 cornerRounding{ NAN };
+		ValueOrPtr<XAlign> xalign{ XAlign::Left };
+		ValueOrPtr<YAlign> yalign{ YAlign::Top };
 		ValueOrPtr<OnDrag> onDrag{ OnDrag::Move };
 		u32 child{ INVALID_ELEMENT_ID };
 	};
@@ -96,6 +98,8 @@ namespace gui {
 		std::function<void(ScrollBox&, u32)> onUpdate;
 		ValueOrPtr<Vec2> minsize{ Vec2{} };
 		ValueOrPtr<bool> bFillSpace{ true };
+		ValueOrPtr<bool> bScreenTextureView{ false };
+		ValueOrPtr<TextureSection> textureView{ TextureSection{} };
 		ValueOrPtr<Vec4> colorView{ UNSET_COLOR };
 		ValueOrPtr<Vec4> colorScroller{ UNSET_COLOR };
 		ValueOrPtr<Vec4> colorScrollBar{ UNSET_COLOR };
@@ -126,6 +130,8 @@ namespace gui {
 		Vec2 size{ Vec2{15,15} };
 		Vec4 color{ UNSET_COLOR };
 		Vec4 holdColor{ UNSET_COLOR };
+		bool bScreenTexture{ false };
+		TextureSection texture{ TextureSection{} };
 		std::function<void(Button& self)> onPress;
 		std::function<void(Button& self)> onHold;
 		std::function<void(Button& self)> onRelease;
@@ -190,8 +196,7 @@ namespace gui {
 		ValueOrPtr<Vec4> colorSlider{ UNSET_COLOR };
 		ValueOrPtr<Vec4> colorError{ UNSET_COLOR };
 		u32 child{ INVALID_ELEMENT_ID };
-	};
-
+	}; 
 
 
 	struct DragDroppable : IElement {

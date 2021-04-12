@@ -66,6 +66,8 @@ public:
 		return this->blurTexture;
 	}
 
+	f64 sdfBarrier{ 0.02 };
+
 private:
 	void flush();
 

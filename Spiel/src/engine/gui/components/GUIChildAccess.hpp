@@ -3,21 +3,18 @@
 #include "GUICommonElements.hpp"
 
 namespace gui {
-	template<typename T>
-	u32* getChild(T&) { return nullptr; }
-
-	template<> inline u32* getChild(Box& self) { return &self.child; }
-	template<> inline u32* getChild(DropBox& self) { return &self.child; }
-	template<> inline u32* getChild(DragDroppable& self) { return &self.child; }
-	template<> inline u32* getChild(_ScrollBox& self) { return &self.child; }
 
 	template<typename T>
-	std::vector<u32>* getChildren(T&) { return nullptr; }
+	std::pair<u32*, u32> getStaticChildren(T&) { return { nullptr, 0}; }
 
-	template<> inline std::vector<u32>* getChildren(Group& self) { return &self.children; }
+	template<> inline std::pair<u32*, u32> getStaticChildren(Box& self) { return { &self.child, 1 }; }
+	template<> inline std::pair<u32*, u32> getStaticChildren(DropBox& self) { return { &self.child, 1 }; }
+	template<> inline std::pair<u32*, u32> getStaticChildren(DragDroppable& self) { return { &self.child, 1 }; }
+	template<> inline std::pair<u32*, u32> getStaticChildren(_ScrollBox& self) { return { &self.child, 1 }; }
+	template<> inline std::pair<u32*, u32> getStaticChildren(HeadTail& self) { return { &self.children[0], 2 }; }
 
 	template<typename T>
-	std::array<u32,2>* getChildPair(T& d) { return nullptr; }
-	
-	template<> inline std::array<u32, 2>* getChildPair(HeadTail& self) { return &self.children; }
+	std::vector<u32>* getDynamicChildrenIf(T&) { return nullptr; }
+
+	template<> inline std::vector<u32>* getDynamicChildrenIf(Group& self) { return &self.children; }
 }
