@@ -11,10 +11,10 @@ It has the following features:
 * entity component system based on sparse sets and paged arrays
 
 here is an example of the collision and physics system in a 2d world where balls fall down to a drain and are spwed out at the top:
-![alt text](https://github.com/Ipotrick/Spiel/tree/master/assets/Balls.png?raw=true)
+![](assets/Balls.png)
 
-and an example where i made an ant simulation where the ants ai would work purely based on two pheromone grids to navigate:
-![alt text](https://github.com/Ipotrick/Spiel/tree/master/assets/antsim.png?raw=true)
+and an example where i made an ant simulation where the ants ai would work purely based on two pheromone grids to navigate, where the grid is updated in parallel via the job system:
+![](assets/antsim.png)
 
 
 dependencies:
