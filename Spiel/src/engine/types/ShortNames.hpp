@@ -26,4 +26,10 @@ using f80 = long double;
  * \return value castet to T
  */
 template<typename T>
-inline constexpr T cast(auto value) { return static_cast<T>(value); }
+inline constexpr T cast(auto value) { 
+	return static_cast<T>(value);
+}
+
+inline constexpr bool nonLazyAnd(bool a, bool b) {
+	return a & b;
+}

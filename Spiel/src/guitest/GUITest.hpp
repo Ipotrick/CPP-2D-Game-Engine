@@ -30,7 +30,7 @@ public:
 			return ui.build(DragDroppable{
 				.child = ui.build(Box{
 					.minsize = Vec2{ 25,25 },
-					.color = DEFAULT_STYLE.accent0,
+					.color = Vec4{0.2,0.6,0.2,1.0},
 					.padding = Padding{},
 				})
 			});
@@ -42,12 +42,9 @@ public:
 		.child		= ui.build(Box{
 			.bFillSpace = true,
 			.bDragable = true,
-			.color = DEFAULT_STYLE.fill1,
 			.child		= ui.build(HeadTail{
 				.children = {
 					ui.build(ScrollBox{
-						.colorView = DEFAULT_STYLE.fill0,
-						.colorScrollBar = DEFAULT_STYLE.fill2,
 						.padding = Padding{5,5,5,5},
 						.child= ui.build(Column{
 							.onUpdate = [this](Group& self, u32 id) { self.xalign = (this->bCheckbox ? XAlign::Left : XAlign::Center); },
@@ -55,10 +52,9 @@ public:
 								ui.build(Box{
 									.bFillSpace = true,
 									.bDragable = true,
-									.color = DEFAULT_STYLE.fill1,
 									.xalign = XAlign::Center,
 									.yalign = YAlign::Center,
-									.cornerRounding = 0.0f,
+									//.cornerRounding = 0.0f,
 									.child = ui.build(StaticText{.value = "GRAB AND DRAG ME", .color = Vec4{0.9,0.9,0.9,1}}),
 								}),
 								ui.build(Row{
@@ -85,7 +81,7 @@ public:
 										}),
 									}
 								}),
-								ui.build(Box{.minsize = Vec2{5,5}, .bFillSpace = true, .color = DEFAULT_STYLE.fill1, .padding = Padding{}, .cornerRounding = 0.0f}),
+								ui.build(Box{.minsize = Vec2{5,5}, .bFillSpace = true, .padding = Padding{}, .cornerRounding = 0.0f}),
 								ui.build(Row{
 									.spacing = 5,
 									.children = {
@@ -202,10 +198,9 @@ public:
 					// Footer:
 					ui.build(Box{ 
 						.bFillSpace = true, 
-						.color = DEFAULT_STYLE.fill1,
 						.xalign = XAlign::Right, 
 						.yalign = YAlign::Center, 
-						.child = ui.build(Box{.minsize = Vec2{20,20},.bDragable = true,  .color = DEFAULT_STYLE.accent0, .onDrag = OnDrag::Resize })
+						.child = ui.build(Box{.minsize = Vec2{20,20},.bDragable = true, .onDrag = OnDrag::Resize })
 					}),
 					}
 				}),
@@ -238,13 +233,26 @@ public:
 				.child = ui.build(StaticText{.value="Test Text"}),
 			})
 		});
+
+		std::random_device rd;
+		std::mt19937 rand(rd());
+		std::uniform_real<f32> distr{ -1.0f, 1.0f };
+
+		for (int i = 0; i < 10000; i++) {
+			backgroundSprites.push_back(
+				Sprite{
+					.position = Vec2{distr(rand),distr(rand)},
+					.scale = Vec2{0.01,0.01},
+					.drawMode = RenderSpace::Window,
+				}
+			);
+		}
 	}
 
 	virtual void update(float deltaTime) override final
 	{
-		for (f32 angle = 0.0f; angle < 360.0f; angle += 1.0f) {
-			renderer.drawSprite(Sprite{ .position = rotate(Vec2{0.5f,0.0f},angle), .scale = Vec2{0.005f,0.005f} });
-		}
+		renderer.drawSprites(backgroundSprites);
+
 		threeSlidersMainMinText = std::string("min:") + std::to_string(threeSlidersMainMin);
 		threeSlidersMainMaxText = std::string("max:") + std::to_string(threeSlidersMainMax);
 		threeSlidersMainValueText = std::string("size:") + std::to_string(threeSlidersMainValue);
@@ -252,7 +260,7 @@ public:
 		gridSize.x = threeSlidersMainValue;
 		gridSize.y= threeSlidersMainValue;
 		setMaxFPS(std::max(5.0, sliderValue));
-		ui.draw(renderer.getCoordSys(), &renderer.tex, &renderer.fonts, mainWindow, deltaTime);
+		ui.draw(renderer.getCoordSys(), mainWindow, deltaTime);
 		renderer.drawUISprites(ui.getSprites());
 		if (mainWindow.keyJustPressed(Key::G)) {
 			TextureLoadInfo desc{ "ressources/ConsolasSoft.png" };
@@ -281,12 +289,14 @@ public:
 private:
 	DefaultRenderer renderer;
 
-	gui::Manager ui;
+	gui::Manager ui{&renderer.tex, &renderer.fonts};
 	gui::Manager::RootHandle handle;
 	bool bCheckbox{ false };
 	std::string text;
 	Vec2 gridSize{ 25,25 };
 	u32 radio1{ 0 };
+
+	std::vector<Sprite> backgroundSprites;
 
 	std::string sliderText;
 	f64 sliderValue{ 9999.0 };

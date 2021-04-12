@@ -1,177 +1,173 @@
 #pragma once
 
+#include "../types/ShortNames.hpp"
+
 #include <iostream>
 
 #include "basic_math.hpp"
 
 class Vec2 {
 public:
-	constexpr Vec2() : x{0}, y{0} {}
-	constexpr Vec2(float x, float y) : x{ x }, y{ y } {}
+	constexpr Vec2() {};
 
-	// openGL access func
-	inline float const * data() const { return &x; }
+	constexpr Vec2(f32 x, f32 y) : 
+		x{ x }, y{ y } 
+	{}
 
-	float& operator[](unsigned i) {
-		assert(i < 2);
-		return (&x)[i];
-	}
+	constexpr f32 const* data() const { return &x; }
 
-	float const operator[](unsigned i) const {
-		assert(i < 2);
-		return (&x)[i];
-	}
-
-	bool operator==(Vec2 const& other) const {
-		return x == other.x
-			&& y == other.y;
-	}
-
-	bool operator!=(Vec2 const& other) const {
-		return x != other.x
-			|| y != other.y;
-	}
-
-	Vec2& operator*=(float const scalar) {
-		x *= scalar;
-		y *= scalar;
-		return *this;
-	}
-
-	Vec2& operator/=(float const scalar) {
-		x /= scalar;
-		y /= scalar;
-		return *this;
-	}
-
-	Vec2& operator*=(Vec2 const& vec) {
-		x *= vec.x;
-		y *= vec.y;
-		return *this;
-	}
-
-	Vec2& operator-=(Vec2 const& vec) {
-		x -= vec.x;
-		y -= vec.y;
-		return *this;
-	}
-
-	Vec2& operator+=(Vec2 const& vec) {
-		x += vec.x;
-		y += vec.y;
-		return *this;
-	}
-
-	float length()
+	constexpr f32& operator[](u32 index)
 	{
-		return sqrtf(x * x + y * y);
+		assert(index < 2);
+		return (&x)[index];
+	}
+	
+	constexpr const f32& operator[](u32 index) const
+	{
+		assert(index < 2);
+		return (&x)[index];
 	}
 public:
-	float x;
-	float y;
+	f32 x{ 0.0f };
+	f32 y{ 0.0f };
 };
 
-inline Vec2 round(Vec2 const& vec)
+
+inline constexpr Vec2& operator*=(Vec2& vec, f32 scalar)
+{
+	vec.x *= scalar;
+	vec.y *= scalar;
+	return vec;
+}
+
+inline constexpr Vec2& operator/=(Vec2& vec, f32 scalar)
+{
+	vec.x /= scalar;
+	vec.y /= scalar;
+	return vec;
+}
+
+inline constexpr Vec2& operator*=(Vec2& vecA, Vec2 vecB)
+{
+	vecA.x *= vecB.x;
+	vecA.y *= vecB.y;
+	return vecA;
+}
+
+inline constexpr Vec2& operator-=(Vec2& vecA, Vec2 vecB)
+{
+	vecA.x -= vecB.x;
+	vecA.y -= vecB.y;
+	return vecA;
+}
+
+inline constexpr Vec2& operator+=(Vec2& vecA, Vec2 vecB)
+{
+	vecA.x += vecB.x;
+	vecA.y += vecB.y;
+	return vecA;
+}
+inline constexpr bool operator==(Vec2 vecA, Vec2 vecB)
+{
+	return vecA.x == vecB.x & vecA.y == vecB.y;
+}
+
+inline constexpr bool operator!=(Vec2 vecA, Vec2 vecB)
+{
+	return vecA.x != vecB.x | vecA.y != vecB.y;
+}
+
+inline constexpr Vec2 round(Vec2 vec)
 {
 	return Vec2{ std::round(vec.x), std::round(vec.y) };
 }
 
-inline Vec2 floor(Vec2 const& vec)
+inline constexpr Vec2 floor(Vec2 vec)
 {
 	return Vec2{ std::floor(vec.x), std::floor(vec.y) };
 }
 
-inline Vec2 ceil(Vec2 const& vec)
+inline constexpr Vec2 ceil(Vec2 vec)
 {
 	return Vec2{ std::ceil(vec.x), std::ceil(vec.y) };
 }
 
-inline Vec2 const operator-(Vec2 const& vec) {
+inline constexpr Vec2 operator-(Vec2 vec) {
 	return { -vec.x, -vec.y };
 }
 
-inline Vec2 const operator*(float const scalar, Vec2 const& vec) {
+inline constexpr Vec2 operator*(f32 scalar, Vec2 vec) {
 	return { scalar * vec.x, scalar * vec.y };
 }
 
-inline Vec2 const operator*(const Vec2& vec, const float scalar) {
+inline constexpr Vec2 operator*(Vec2 vec, f32 scalar) {
 	return { scalar * vec.x, scalar * vec.y };
 }
 
-inline Vec2 const operator*(const Vec2& vecA, const Vec2& vecB) {
+inline constexpr Vec2 operator*(Vec2 vecA, Vec2 vecB) {
 	return { vecA.x * vecB.x, vecA.y * vecB.y };
 }
 
-inline Vec2 const operator/(Vec2 const& vec, float const scalar) {
+inline constexpr Vec2 operator/(Vec2 vec, f32 scalar) {
 	return { vec.x / scalar, vec.y / scalar };
 }
 
-inline Vec2 const operator/(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr Vec2 operator/(Vec2 vecA, Vec2 vecB) {
 	return { vecA.x / vecB.x, vecA.y / vecB.y };
 }
 
-inline Vec2 const operator+(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr Vec2 operator+(Vec2 vecA, Vec2 vecB) {
 	return { vecA.x + vecB.x, vecA.y + vecB.y };
 }
 
-inline Vec2 const operator-(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr Vec2 operator-(Vec2 vecA, Vec2 vecB) {
 	return Vec2(vecA.x - vecB.x, vecA.y - vecB.y);
 }
 
-inline Vec2 const min(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr Vec2 min(Vec2 vecA, Vec2 vecB) {
 	return { std::min(vecA.x, vecB.x), std::min(vecA.y, vecB.y) };
 }
 
-inline Vec2 const max(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr Vec2 max(Vec2 vecA, Vec2 vecB) {
 	return { std::max(vecA.x, vecB.x), std::max(vecA.y, vecB.y) };
 }
 
-// uses trigonometric functions and or sqrt
-__forceinline float const norm(Vec2 const& vec) {
+inline f32 length(Vec2 vec)
+{
 	return sqrtf(vec.x * vec.x + vec.y * vec.y);
 }
 
-// uses trigonometric functions and or sqrt
-inline float const length(Vec2 const& vec) {
-	return sqrtf(vec.x * vec.x + vec.y * vec.y);
+inline Vec2 normalize(Vec2 vec)
+{
+	assert(vec.x != 0.0f || vec.y != 0.0f);
+	f32 invLen = 1.0f / length(vec);
+	return { vec.x * invLen, vec.y * invLen };
 }
 
-// uses trigonometric functions and or sqrt
-inline Vec2 const normalize(Vec2 const& vec) {
-	const float n = norm(vec);
-	if (n != 0.0)
-	{
-		return Vec2(vec.x / n,
-			vec.y / n);
-	}
-	return vec;
+inline f32 distance(Vec2 vecA, Vec2 vecB)
+{
+	return length(vecA - vecB);
 }
 
-// uses trigonometric functions and or sqrt
-__forceinline float const distance(Vec2 const& vecA, Vec2 const& vecB) {
-	return norm(vecA - vecB);
-}
-
-inline const float dot(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr f32 dot(Vec2 vecA, Vec2 vecB) {
 	return (vecA.x * vecB.x + vecA.y * vecB.y);
 }
 
-inline float const cross(Vec2 const& vecA, Vec2 const& vecB) {
+inline constexpr f32 cross(Vec2 vecA, Vec2 vecB) {
 	return vecA.x * vecB.y - vecA.y * vecB.x;
 }
 
-inline Vec2 cross(const Vec2& a, float s)
+inline constexpr Vec2 cross(Vec2 vec, f32 scalar)
 {
-	return Vec2(s * a.y, -s * a.x);
+	return Vec2(scalar * vec.y, -scalar * vec.x);
 }
 
-inline Vec2 cross(float s, const Vec2& a)
+inline constexpr Vec2 cross(f32 scalar, Vec2 vec)
 {
-	return Vec2(-s * a.y, s * a.x);
+	return Vec2(-scalar * vec.y, scalar * vec.x);
 }
 
-// reflect vector vec at normal n
-inline Vec2 const reflect(Vec2 const& vec, Vec2 const& n) {
+inline constexpr Vec2 reflect(Vec2 vec, Vec2 n) {
 	return vec - (2.0f * dot(n, vec)) * n;
 }
 
@@ -185,37 +181,31 @@ inline std::ostream& operator<<(std::ostream& os, const Vec2& vec) {
 	return os;
 }
 
-// uses trigonometric functions and or sqrt
-inline Vec2 rotate(Vec2 const& vec, float angle) {
-	float ca = cosf(angle * ((float)M_PI / 180.0f));
-	float sa = sinf(angle * ((float)M_PI / 180.0f));
+inline Vec2 rotate(Vec2 vec, f32 angle) {
+	f32 ca = cosf(angle * ((f32)M_PI / 180.0f));
+	f32 sa = sinf(angle * ((f32)M_PI / 180.0f));
 	return { ca * vec.x - sa * vec.y , sa * vec.x + ca * vec.y };
 }
 
-// computes sin and cos at compile time
-template<auto angle>
-inline Vec2 rotate(Vec2 const& vec);
+template<u32 angle>
+inline Vec2 rotate(Vec2 vec);
 
-// computes sin and cos at compile time
 template<>
-inline Vec2 rotate<90>(Vec2 const& vec) {
+inline Vec2 rotate<90>(Vec2 vec) {
 	return { -vec.y, vec.x };
 }
 
-// computes sin and cos at compile time
 template<>
-inline Vec2 rotate<180>(Vec2 const& vec) {
+inline Vec2 rotate<180>(Vec2 vec) {
 	return -vec;
 }
 
-// computes sin and cos at compile time
 template<>
-inline Vec2 rotate<270>(Vec2 const& vec) {
+inline Vec2 rotate<270>(Vec2 vec) {
 	return { -vec.y, -vec.x };
 }
 
-// uses trigonometric functions and or sqrt
-inline float getRotation(Vec2 vec) {
+inline f32 angle(Vec2 vec) {
 	if (vec.y == 0.0f)
 		return vec.x < 0.0f ? 180.0f : 0.0f;
 	else if (vec.x == 0)
@@ -233,11 +223,9 @@ inline float getRotation(Vec2 vec) {
 			return 180.0f + atan(-vec.y / -vec.x) * 180.f / 3.14159f;
 }
 
-inline Vec2 abs(Vec2 v)
+inline constexpr Vec2 abs(Vec2 vec)
 {
-	v.x = fabs(v.x);
-	v.y = fabs(v.y);
-	return v;
+	return { fabs(vec.x), fabs(vec.y) };
 }
 
 /*
@@ -246,8 +234,8 @@ inline Vec2 abs(Vec2 v)
 class RotaVec2 {
 public:
 	RotaVec2() = default;
-	RotaVec2(float sin, float cos) : sin{ sin }, cos{ cos } {}
-	explicit RotaVec2(float angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
+	RotaVec2(f32 sin, f32 cos) : sin{ sin }, cos{ cos } {}
+	explicit RotaVec2(f32 angle) : sin{ sinf(angle / RAD) }, cos{ cosf(angle / RAD) } {}
 
 	static RotaVec2 fromUnitX0(Vec2 vec)
 	{
@@ -284,8 +272,8 @@ public:
 		return { -sin, cos };
 	}
 public:
-	float cos{ 1.0f };
-	float sin{ 0.0f };
+	f32 cos{ 1.0f };
+	f32 sin{ 0.0f };
 };
 
 inline RotaVec2 operator*(RotaVec2 a, RotaVec2 b)
@@ -327,28 +315,28 @@ inline Vec2 aabbBounds(Vec2 size, RotaVec2 rotaVec) {
 	return maxPos - minPos;
 }
 
-inline bool isPointInRange(Vec2 p, Vec2 min, Vec2 max)
+inline constexpr bool isPointInRange(Vec2 p, Vec2 min, Vec2 max)
 {
 	return
-		p.x <= max.x &&
-		p.y <= max.y &&
-		p.x >= min.x &&
+		p.x <= max.x &
+		p.y <= max.y &
+		p.x >= min.x &
 		p.y >= min.y;
 }
 
-inline bool isPointInAABB(Vec2 p, Vec2 aabbCenter, Vec2 aabbSize)
+inline constexpr bool isPointInAABB(Vec2 p, Vec2 aabbCenter, Vec2 aabbSize)
 {
 	const Vec2 relativePointPos = p - aabbCenter;
 	aabbSize *= 0.5f;
 	return
-		relativePointPos.x <= aabbSize.x &&
-		relativePointPos.y <= aabbSize.y &&
-		relativePointPos.x >= -aabbSize.x &&
+		relativePointPos.x <= aabbSize.x &
+		relativePointPos.y <= aabbSize.y &
+		relativePointPos.x >= -aabbSize.x &
 		relativePointPos.y >= -aabbSize.y;
 }
 
 template<>
-inline Vec2 clamp<Vec2>(const Vec2 v, const Vec2 min, const Vec2 max)
+inline Vec2 clamp<Vec2>(const Vec2 vec, const Vec2 min, const Vec2 max)
 {
-	return ::max(min, ::min(max, v));
+	return ::max(min, ::min(max, vec));
 }

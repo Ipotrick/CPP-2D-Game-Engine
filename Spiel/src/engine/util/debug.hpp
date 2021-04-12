@@ -16,6 +16,6 @@ inline std::array<Sprite, 3> makeArrow(Vec2 vec, Vec2 origin, Vec4 color = { 1, 
 	return {
 		makeSprite(0, origin, 1, size, color, Form::Circle, RotaVec2(), RenderSpace::Camera, 100000000000000),
 		makeSprite(0, end, 1, size, color, Form::Circle, RotaVec2(), RenderSpace::Camera, 100000000000000),
-		makeSprite(0, middle, 1, {vec.length(), size.y }, color, Form::Rectangle, RotaVec2{ getRotation(vec) }, RenderSpace::Camera, 100000000000000),
+		makeSprite(0, middle, 1, {length(vec), size.y }, color, Form::Rectangle, RotaVec2{ angle(vec) }, RenderSpace::Camera, 100000000000000),
 	};
 }

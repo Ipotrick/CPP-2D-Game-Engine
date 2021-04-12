@@ -14,7 +14,7 @@ public:
 	{
 		world.renderer.init(&mainWindow);
 		world.renderer.camera.zoom /= 600;
-		world.renderer.supersamplingFactor = 1;
+		world.renderer.supersamplingFactor = 2;
 		world.collsys.disableColliderDetection(Collider::PARTICLE);
 	}
 
@@ -37,11 +37,11 @@ public:
 
 
 		return ui.build(Root{
-			.sizing = Sizing{}.absX(180).absY(100),
+			.sizing = Sizing{}.absX(180).absY(130),
 			.placing = Placing{}.absDistLeft(20).absDistTop(20),
 			.child = ui.build(Box{
-				.color = Vec4{0.8,0.8,0.8,1},
 				.bDragable = true,
+				.color = Vec4{0.8,0.8,0.8,1},
 				.child = ui.build(Column{
 					.onUpdate = generateNestColumn,
 					.children = {
@@ -72,14 +72,12 @@ public:
 							.children = {
 								ui.build(Button{
 									.size = Vec2{120,25},
-									.color=DEFAULT_STYLE.positive,
 									.holdColor = Vec4{0.4,0.4,0.4,1},
 									.onRelease = [&](Button& self) { DrawFoodOrNestPhero = false; },
 									.child = ui.build(StaticText{.value="Food Pheromone"})
 								}),
 								ui.build(Button{
 									.size = Vec2{120,25},
-									.color = DEFAULT_STYLE.negative,
 									.holdColor = Vec4{0.4,0.4,0.4,1},
 									.onRelease = [&](Button& self) { DrawFoodOrNestPhero = true; },
 									.child = ui.build(StaticText{.value = "Nest Pheromone"})
@@ -120,7 +118,7 @@ public:
 	void update(f32 deltaTime) override {
 		pheroNestOfFoodText = DrawFoodOrNestPhero ? std::string("Currently showing Nest Pheromone") : std::string("Currently showing Food Pheromone");
 		ui.globalScaling = std::floorf(uiscale*12.0f)/12.0f;
-		ui.draw(world.renderer.getCoordSys(), &world.renderer.tex, &world.renderer.fonts, mainWindow, deltaTime);
+		ui.draw(world.renderer.getCoordSys(), mainWindow, deltaTime);
 		world.renderer.drawUISprites(ui.getSprites());
 
 		antcount = std::floorf(antcount);
@@ -319,6 +317,6 @@ private:
 
 	LapTimer footSpawnLapTimer{ 0.1 };
 	LapTimer barrierSpawnLapTimer{ 0.05 };
-	gui::Manager ui;
+	gui::Manager ui{ &world.renderer.tex, &world.renderer.fonts };
 	gui::Manager::RootHandle nestui;
 };

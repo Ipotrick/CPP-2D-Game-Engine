@@ -46,7 +46,7 @@ namespace gui {
 			u32 version = 0xFFFFFFFF;
 		};
 
-		Manager(int renderLayer = 0) {}
+		Manager(TextureManager* tex, FontManager* fonts);
 
 		Manager(Manager&& rhs) = delete;
 
@@ -69,7 +69,7 @@ namespace gui {
 		template<CElement T>
 		u32 build(T&& element)
 		{
-			return build<T>(DEFAULT_STYLE, std::move(element));
+			return build<T>(defaultStyle, std::move(element));
 		}
 
 		/**
@@ -110,9 +110,9 @@ namespace gui {
 		 */
 		bool hasChild(u32 element);
 
-		std::vector<u32>* getChildrenIf(u32 element);
+		std::vector<u32>* dynamicChildren(u32 element);
 
-		u32* getChildIf(u32 element);
+		std::pair<u32*, u32> staticChildren(u32 element);
 
 		/**
 		 * repositions the child in the list of children of the parent.
@@ -120,7 +120,7 @@ namespace gui {
 		 * \param child to change position of
 		 * \param newPosition of the child.
 		 */
-		void changeChildPosition(u32 child, u32 newPosition);
+		//void changeChildPosition(u32 child, u32 newPosition);
 
 		/**
 		 * Orphans the child from its parent.
@@ -165,7 +165,7 @@ namespace gui {
 		 * \param window that the renderer belongs to.
 		 * \param deltaTime the time difference to the last draw call.
 		 */
-		void draw(const RenderCoordSys& coordSys, TextureManager* tex, FontManager* fonts, Window& window, float deltaTime);
+		void draw(const RenderCoordSys& coordSys, Window& window, float deltaTime);
 
 		const std::vector<Sprite>& getSprites() const { return this->spritesOfLastDraw; }
 
@@ -175,6 +175,11 @@ namespace gui {
 		size_t size() const;
 
 		void printMemoryUtalisation();
+
+		void setStyle(Style style) { this->defaultStyle = style; }
+
+		Style& getStyle() { return this->defaultStyle; }
+		const Style& getStyle() const { return this->defaultStyle; }
 
 		float globalScaling{ 1.0f };
 	private:
@@ -232,10 +237,9 @@ namespace gui {
 		void updateFocusedTextInput();
 
 		/// Temporary variables with lifetime of the draw:  ///
+		TextureHandle blurTextureHandle{};
 		Window* window{ nullptr };
 		RenderCoordSys coordSys;
-		TextureManager* tex{ nullptr };
-		FontManager* fonts{ nullptr };
 		float deltaTime{ 0.0f };
 		// Mouse Event Listener:
 		struct MouseEvent {
@@ -249,14 +253,35 @@ namespace gui {
 		DragDroppable* droppedElement{ nullptr };
 		/// ----------------------------------------------- ///
 
-		std::vector<Sprite> spritesOfLastDraw;
 
+		std::vector<Sprite> spritesOfLastDraw;
+		TextureManager* tex{ nullptr };
+		FontManager* fonts{ nullptr };
+
+		static inline const TextureLoadInfo DEFAULT_FONT_TEXTURE{.filepath="ressources/fonts/Consolas_font.png", .minFilter=TexFilter::Linear, .magFilter=TexFilter::Linear };
+		static inline const FontDescriptor DEFAULT_FONT{.filepath ="ressources/fonts/Consolas_font.csv" };
+		Style defaultStyle{
+			.fill0 = Vec4::From255(0x15, 0x15, 0x16, 0xFF),
+			.fill1 = Vec4::From255(0x24, 0x24, 0x25, 0xFF),
+			.fill2 = Vec4::From255(0x104, 0x104, 0x110, 0xFF),
+			.accent0 = Vec4{0.37,0.37,0.37, 1},
+			//.positive = Vec4::From255(30, 100, 40, 0xFF),
+			//.negative = Vec4::From255(100, 30, 40, 0xFF),
+			.positive = Vec4{0.2,0.6,0.2,1.0},
+			.negative = Vec4{0.6,0.2,0.2,1.0},
+			.fontSize = 12.0f,
+			.fontColor1 = Vec4{ 1, 1, 1, 1 },
+			.fontColor2 = Vec4{ 0, 0, 0, 1 },
+			.padding = Padding{5,5,5,5},
+			.spacing = 5.0f,
+			.cornerRounding = 3.0f,
+			.scrollerWidth = 10.0f, 
+		};
 		struct RootElementMetaInfo {
 			Root element;
 			u32 version = 0;
 			bool containsElement = false;
 		};
-		
 		boost::container::stable_vector<RootElementMetaInfo> rootElements;
 		boost::container::stable_vector<u32> freeRootElementIndices;
 		boost::container::stable_vector<u32> destroylist;						// used as buffer for element ids when destroying elements and their children

@@ -1,88 +1,44 @@
 #pragma once
 
+#include "../types/ShortNames.hpp"
+
 #include <iostream>
 
 #include "basic_math.hpp"
+#include "Vec2.hpp"
 
 class Vec3 {
 public:
-    Vec3() : x{ 0 }, y{ 0 }, z { 0 } {}
-    Vec3(float scalar) : x{ scalar }, y{ scalar }, z{ scalar } {}
-    Vec3(float x, float y, float z) : x(x), y(y), z(z) {}
+    constexpr Vec3() : 
+        x{ 0 }, y{ 0 }, z { 0 } 
+    {}
 
-    Vec3(Vec2 xy, float z = 0.0f) : x{xy.x}, y{xy.y}, z{z} {}
+    constexpr Vec3(f32 scalar) :
+        x{ scalar }, y{ scalar }, z{ scalar } 
+    {}
+
+    constexpr Vec3(f32 x, f32 y, f32 z) :
+        x(x), y(y), z(z) 
+    {}
+
+    constexpr Vec3(Vec2 xy, f32 z = 0.0f) :
+        x{xy.x}, y{xy.y}, z{z} 
+    {}
 
     // openGL access func
-    float const* data() const { return &x; }
+    constexpr f32 const* data() const { return &x; }
 
-    float& operator[](unsigned i) {
+    constexpr f32& operator[](u32 index) {
         assert(i < 3);
-        return (&x)[i];
+        return (&x)[index];
     }
 
-    float const operator[](unsigned i) const
-    {
+    constexpr const f32& operator[](u32 index) const {
         assert(i < 3);
-        return (&x)[i];
+        return (&x)[index];
     }
 
-    Vec3& operator*=(float const scalar) {
-        x *= scalar;
-        y *= scalar;
-        z *= scalar;
-        return *this;
-    }
-
-    Vec3& operator/=(float const scalar) {
-        x /= scalar;
-        y /= scalar;
-        z /= scalar;
-        return *this;
-    }
-
-    Vec3& operator*=(Vec2 const& vec)
-    {
-        x *= vec.x;
-        y *= vec.y;
-        return *this;
-    }
-
-    Vec3& operator-=(Vec2 const& vec)
-    {
-        x -= vec.x;
-        y -= vec.y;
-        return *this;
-    }
-
-    Vec3& operator+=(Vec2 const& vec)
-    {
-        x += vec.x;
-        y += vec.y;
-        return *this;
-    }
-
-    Vec3& operator*=(Vec3 const& vec) {
-        x *= vec.x;
-        y *= vec.y;
-        z *= vec.z;
-        return *this;
-    }
-
-    Vec3& operator-=(Vec3 const& vec) {
-        x -= vec.x;
-        y -= vec.y;
-        z -= vec.z;
-        return *this;
-    }
-
-    Vec3& operator+=(Vec3 const& vec) {
-        x += vec.x;
-        y += vec.y;
-        z += vec.z;
-        return *this;
-    }
-
-    Vec3& operator=(Vec2 const& vec)
+    constexpr Vec3& operator=(Vec2 vec)
     {
         x = vec.x;
         y = vec.y;
@@ -94,109 +50,159 @@ public:
     {
         struct
         {
-            float x; // x coordinate
-            float y; // y coordinate
-            float z; // z coordinate
+            f32 x; // x coordinate
+            f32 y; // y coordinate
+            f32 z; // z coordinate
         };
 
         struct
         {
-            float r; // red component
-            float g; // green component
-            float b; // blue component
+            f32 r; // red component
+            f32 g; // green component
+            f32 b; // blue component
         };
     };
 };
 
-//
-//
-//
+inline constexpr Vec3& operator*=(Vec3& vec, f32 scalar)
+{
+    vec.x *= scalar;
+    vec.y *= scalar;
+    vec.z *= scalar;
+    return vec;
+}
 
-inline Vec3 const operator*(Vec3 const& vecA, Vec2 const& vecB)
+inline constexpr Vec3& operator*=(Vec3& vecA, Vec2 vecB)
+{
+    vecA.x *= vecB.x;
+    vecA.y *= vecB.y;
+    return vecA;
+}
+
+inline constexpr Vec3& operator*=(Vec3& vecA, Vec3 vecB)
+{
+    vecA.x *= vecB.x;
+    vecA.y *= vecB.y;
+    vecA.z *= vecB.z;
+    return vecA;
+}
+
+inline constexpr Vec3& operator+=(Vec3& vecA, Vec3 vecB)
+{
+    vecA.x += vecB.x;
+    vecA.y += vecB.y;
+    vecA.z += vecB.z;
+    return vecA;
+}
+
+inline constexpr Vec3& operator+=(Vec3& vecA, Vec2 vecB)
+{
+    vecA.x += vecB.x;
+    vecA.y += vecB.y;
+    return vecA;
+}
+
+inline constexpr Vec3& operator/=(Vec3 vec, f32 scalar)
+{
+    vec.x /= scalar;
+    vec.y /= scalar;
+    vec.z /= scalar;
+    return vec;
+}
+
+inline constexpr Vec3& operator-=(Vec3& vecA, Vec2 vecB)
+{
+    vecA.x -= vecB.x;
+    vecA.y -= vecB.y;
+    return vecA;
+}
+
+inline constexpr Vec3& operator-=(Vec3& vecA, Vec3 vecB)
+{
+    vecA.x -= vecB.x;
+    vecA.y -= vecB.y;
+    vecA.z -= vecB.z;
+    return vecA;
+}
+
+inline constexpr Vec3 operator*(Vec3 vecA, Vec2 vecB)
 {
     return { vecA.x * vecB.x, vecA.y * vecB.y, vecA.z };
 }
 
-inline Vec3 const operator+(Vec3 const& vecA, Vec2 const& vecB)
+inline constexpr Vec3 operator+(Vec3 vecA, Vec2 vecB)
 {
     return { vecA.x + vecB.x,
                 vecA.y + vecB.y,
                 vecA.z };
 }
 
-inline Vec3 const operator-(Vec3 const& vecA, Vec2 const& vecB)
+inline constexpr Vec3 operator-(Vec3 vecA, Vec2 vecB)
 {
     return { vecA.x - vecB.x,
                 vecA.y - vecB.y,
                 vecA.z };
 }
 
-//
-//
-//
-
-inline Vec3 const operator-(Vec3 const& vec) {
+inline constexpr Vec3 operator-(Vec3 vec) {
     return Vec3(-vec.x, -vec.y, -vec.z);
 }
 
-inline Vec3 const operator*(float const scalar, Vec3 const& vec) {
+inline constexpr Vec3 operator*(f32 scalar, Vec3 vec) {
     return { scalar * vec.x, scalar * vec.y, scalar * vec.z };
 }
 
-inline Vec3 const operator*(Vec3 const& vec, float const scalar) {
+inline constexpr Vec3 operator*(Vec3 vec, f32 scalar) {
     return { scalar * vec.x, scalar * vec.y, scalar * vec.z };
 }
 
-inline Vec3 const operator*(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr Vec3 operator*(Vec3 vecA, Vec3 vecB) {
     return { vecA.x * vecB.x, vecA.y * vecB.y, vecA.z * vecB.z };
 }
 
-inline Vec3 const operator/(Vec3 const& vec, float const scalar) {
+inline constexpr Vec3 operator/(Vec3 vec, f32 scalar) {
     return { vec.x / scalar,
                 vec.y / scalar,
                 vec.z / scalar };
 }
 
-inline Vec3 const operator+(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr Vec3 operator+(Vec3 vecA, Vec3 vecB) {
     return { vecA.x + vecB.x,
                 vecA.y + vecB.y,
                 vecA.z + vecB.z };
 }
 
-inline Vec3 const operator-(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr Vec3 operator-(Vec3 vecA, Vec3 vecB) {
     return { vecA.x - vecB.x,
                 vecA.y - vecB.y,
                 vecA.z - vecB.z };
 }
 
-inline Vec3 const min(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr Vec3 min(Vec3 vecA, Vec3 vecB) {
     return { std::min(vecA.x, vecB.x),
                 std::min(vecA.y, vecB.y),
                 std::min(vecA.z, vecB.z) };
 }
 
-inline Vec3 const max(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr Vec3 max(Vec3 vecA, Vec3 vecB) {
     return { std::max(vecA.x, vecB.x),
                 std::max(vecA.y, vecB.y),
                 std::max(vecA.z, vecB.z) };
 }
 
-// uses trigonometric functions and or sqrt
-inline const float norm(Vec3 const& vec)
+inline f32 norm(Vec3 vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
 
-// uses trigonometric functions and or sqrt
-inline const float length(Vec3 const& vec)
+inline f32 length(Vec3 vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 }
 
-// uses trigonometric functions and or sqrt
-inline const Vec3 normalize(Vec3 const& vec)
+inline Vec3 normalize(Vec3 vec)
 {
-    const float n = norm(vec);
+    const f32 n = norm(vec);
     if (n != 0.0)
     {
         return Vec3(vec.x / n,
@@ -207,22 +213,22 @@ inline const Vec3 normalize(Vec3 const& vec)
 }
 
 // uses trigonometric functions and or sqrt
-inline float const distance(Vec3 const& vecA, Vec3 const& vecB) {
+inline f32 distance(Vec3 vecA, Vec3 vecB) {
     return norm(vecA - vecB);
 }
 
-inline float const dot(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr f32 dot(Vec3 vecA, Vec3 vecB) {
     return (vecA.x * vecB.x + vecA.y * vecB.y + vecA.z * vecB.z);
 }
 
-inline Vec3 const cross(Vec3 const& vecA, Vec3 const& vecB) {
+inline constexpr Vec3 cross(Vec3 vecA, Vec3 vecB) {
     return { vecA.y * vecB.z - vecA.z * vecB.y,
                 vecA.z * vecB.x - vecA.x * vecB.z,
                 vecA.x * vecB.y - vecA.y * vecB.x };
 }
 
 // reflect vector vec at normal n
-inline Vec3 const reflect(Vec3 const& vec, Vec3 const& n) {
+inline constexpr Vec3 reflect(Vec3 vec, Vec3 n) {
     return vec - (2.0f * dot(n, vec)) * n;
 }
 

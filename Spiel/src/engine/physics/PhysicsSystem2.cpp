@@ -23,7 +23,7 @@ const std::vector<Sprite>& PhysicsSystem2::getDebugSprites() const
 
 void PhysicsSystem2::applyImpulses(CollisionSECM world)
 {
-	for (int i = 0; i < impulseIterations; ++i) {
+	for (int i = 0; i < settings.impulseResolutionIterations; ++i) {
 		for (auto& c : collConstraints) {
 			applyImpulse(world, c);
 		}
@@ -167,7 +167,7 @@ void PhysicsSystem2::findIslands(CollisionSECM world, CollisionSystem& collSys)
 void PhysicsSystem2::prepareConstraints(CollisionSECM world, float deltaTime)
 {
 	const float k_allowedPenetration = 0.01f;
-	float k_biasFactor = positionCorrection ? 0.2f : 0.0f;
+	float k_biasFactor = settings.positionCorrection ? 0.2f : 0.0f;
 
 	for (auto& c : collConstraints) {
 		const EntityHandle entA = c.idA;
@@ -201,7 +201,7 @@ void PhysicsSystem2::prepareConstraints(CollisionSECM world, float deltaTime)
 			kTangent += (1 / bodyA.momentOfInertia) * (dot(r1, r1) - rt1 * rt1) + (1 / bodyB.momentOfInertia) * (dot(r2, r2) - rt2 * rt2);
 			c.collisionPoints[i].massTangent = 1.0f / kTangent;
 
-			if (accumulateImpulses) {
+			if (settings.accumulateImpulses) {
 				// Apply normal + friction impulse
 				Vec2 P = (c.collisionPoints[i].accPn * c.collisionPoints[i].normal + c.collisionPoints[i].accPt * tangent) * restitution;
 
@@ -262,7 +262,7 @@ void PhysicsSystem2::applyImpulse(CollisionSECM world, CollisionConstraint& c)
 
 		float dPn = c.collisionPoints[i].massNormal * (-vn + c.bias);
 
-		if (accumulateImpulses) {
+		if (settings.accumulateImpulses) {
 			// Clamp the accumulated impulse
 			float Pn0 = c.collisionPoints[i].accPn;
 			c.collisionPoints[i].accPn = std::max(Pn0 + dPn, 0.0f);
@@ -290,7 +290,7 @@ void PhysicsSystem2::applyImpulse(CollisionSECM world, CollisionConstraint& c)
 		float vt = dot(dv, tangent);
 		float dPt = c.collisionPoints[i].massTangent * (-vt);
 
-		if (accumulateImpulses) {
+		if (settings.accumulateImpulses) {
 			// Compute friction impulse
 			float maxPt = c.friction * c.collisionPoints[i].accPn;
 
@@ -327,13 +327,13 @@ void PhysicsSystem2::applyForcefields(CollisionSECM world, PhysicsUniforms const
 
 void PhysicsSystem2::execute(CollisionSECM world, PhysicsUniforms const& uniform, float deltaTime, CollisionSystem& collSys)
 {
-	deltaTime = std::min(deltaTime, minDelaTime);
+	deltaTime = std::min(deltaTime, settings.minDelaTime);
 	debugSprites.clear();
 
 	//LOG_FUNCTION_TIME("clearDuplicates",clearDuplicates(world, collSys));
 	updateCollisionConstraints(world, collSys);
 	eraseDeadConstraints();
-	if (positionCorrection) springyPositionCorrection(world, deltaTime);
+	if (settings.positionCorrection) springyPositionCorrection(world, deltaTime);
 	prepareConstraints(world, deltaTime);
 	applyImpulses(world);
 	applyForcefields(world, uniform, deltaTime);

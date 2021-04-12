@@ -1,7 +1,7 @@
 //#define MANDELBROT
-#define BALLS2
+//#define BALLS2
 //#define GUITEST
-//#define ANTS
+#define ANTS
 
 #ifdef BALLS2
 

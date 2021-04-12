@@ -81,9 +81,6 @@
     <ClInclude Include="..\Libraries\stb_image\stb_image.hpp">
       <Filter>_stbi</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\BloomRScript.hpp">
-      <Filter>game\hpp</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\EngineConfig.hpp">
       <Filter>game\hpp</Filter>
     </ClInclude>
@@ -245,9 +242,6 @@
     </ClInclude>
     <ClInclude Include="src\engine\allocator\ArenaAllocatorPerThread.hpp">
       <Filter>engine\allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\LoadRenderTestMap.hpp">
-      <Filter>game\hpp</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\rendering\TextureSamplerManager.hpp">
       <Filter>engine\rendering</Filter>
@@ -435,6 +429,9 @@
     <ClInclude Include="src\engine\entity\EntityDispatch.hpp">
       <Filter>engine\entity</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\StatsGUIPanel.hpp">
+      <Filter>game\hpp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Libraries\stb_image\stb_image.cpp">
@@ -505,9 +502,6 @@
     </ClCompile>
     <ClCompile Include="src\engine\JobSystem.cpp">
       <Filter>engine</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\LoadRenderTestMap.cpp">
-      <Filter>game</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\gui\GUIManager.cpp">
       <Filter>engine\gui</Filter>
@@ -583,6 +577,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\rendering\OpenGLAbstraction\OpenGLAbstractionTranslationUnit.cpp">
       <Filter>engine\rendering\OpenGLAbstraction</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\StatsGUIPanel.cpp">
+      <Filter>game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

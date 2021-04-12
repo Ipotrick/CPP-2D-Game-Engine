@@ -6,6 +6,13 @@
 #include "components/GUIDragEvent.hpp"
 
 namespace gui {
+	Manager::Manager(TextureManager* tex, FontManager* fonts)
+	{
+		this->tex = tex;
+		this->fonts = fonts;
+		defaultStyle.font = fonts->getHandle(DEFAULT_FONT);
+		defaultStyle.fontTexture = tex->getHandle(DEFAULT_FONT_TEXTURE);
+	}
 
 	Manager::RootHandle gui::Manager::build(Root&& root)
 	{
@@ -31,17 +38,14 @@ namespace gui {
 		bool bHasChild{ false };
 		std::visit(
 			[&bHasChild](auto&& element) {
-				if (u32* child = getChild(element)) {
-					bHasChild = *child != INVALID_ELEMENT_ID;
+				if (std::vector<u32>* children = getDynamicChildrenIf(element)) {
+					bHasChild |= children->size() > 0;
 				}
-				else if (std::vector<u32>* children = getChildren(element)) {
-					bHasChild = children->size() > 0ULL;
-				}
-				//else if (std::array<u32,2>* children = getChildPair(element)) {
-				//	bHasChild = children->size() > 0ULL;
-				//}
 				else {
-					bHasChild = false;
+					auto [staticChildren, staticChildrenCount] = getStaticChildren(element);
+					for (u32* child = staticChildren; child < staticChildren + staticChildrenCount; child++) {
+						bHasChild |= *child != INVALID_ELEMENT_ID;
+					}
 				}
 			},
 			elements[element]
@@ -49,48 +53,48 @@ namespace gui {
 		return bHasChild;
 	}
 
-	std::vector<u32>* Manager::getChildrenIf(u32 element)
+	std::vector<u32>* Manager::dynamicChildren(u32 element)
 	{
 		std::vector<u32>* ret{ nullptr };
 		assert(element < elements.size() && elements[element].index() != 0);
 		std::visit(
-			[&](auto&& element) { ret =  getChildren(element); },
+			[&](auto&& element) { ret = getDynamicChildrenIf(element); },
 			elements[element]
 		);
 		return ret;
 	}
 
-	u32* Manager::getChildIf(u32 element)
+	std::pair<u32*, u32> Manager::staticChildren(u32 element)
 	{
-		u32* ret{ nullptr };
+		std::pair<u32*, u32> ret{ nullptr, 0 };
 		assert(element < elements.size() && elements[element].index() != 0);
 		std::visit(
-			[&](auto&& element) { ret =  getChild(element); },
+			[&](auto&& element) { ret =  getStaticChildren(element); },
 			elements[element]
 		);
 		return ret;
 	}
 
-	void Manager::changeChildPosition(u32 child, u32 newPosition)
-	{
-		std::visit(
-			[&](auto&& el) 
-			{ 
-				if (std::vector<u32>* children = getChildren(el)) {
-					assert(std::find(children->begin(), children->end(), child) != children->end());		// assert that the parent knows the child
-					std::remove_if(children->begin(), children->end(), [&](u32 c) {return c == child; });
-					children->insert(children->begin() + newPosition, child);
-				}
-				//else if (std::array<u32, 2>*children = getChildPair(el)) {
-				//	assert(false);	// CANNOT CHANGE CHILD POS FOR PAIR CONTAINER
-				//}
-				else {
-					assert(false);	// the parent element can not change the position of its child
-				}
-			}, 
-			elements[parents[child]]
-		);
-	}
+	//void Manager::changeChildPosition(u32 child, u32 newPosition)
+	//{
+	//	std::visit(
+	//		[&](auto&& el) 
+	//		{ 
+	//			if (std::vector<u32>* children = getChildren(el)) {
+	//				assert(std::find(children->begin(), children->end(), child) != children->end());		// assert that the parent knows the child
+	//				std::remove_if(children->begin(), children->end(), [&](u32 c) {return c == child; });
+	//				children->insert(children->begin() + newPosition, child);
+	//			}
+	//			else if (std::array<u32, 2>*children = getChildPair(el)) {
+	//				assert(false);	// CANNOT CHANGE CHILD POS FOR PAIR CONTAINER
+	//			}
+	//			else {
+	//				assert(false);	// the parent element can not change the position of its child
+	//			}
+	//		}, 
+	//		elements[parents[child]]
+	//	);
+	//}
 
 	void Manager::orphanChild(u32 toOrphanChild)
 	{
@@ -98,20 +102,15 @@ namespace gui {
 		parents[toOrphanChild] = INVALID_ELEMENT_ID;
 		if (parent != INVALID_ELEMENT_ID) {
 			std::visit(
-				[&](auto&& element) { 
-					if (u32* child = getChild(element)) {
-						assert(*child == toOrphanChild);		// assert that single parent knows this child
-						*child = INVALID_ELEMENT_ID;
-					}
-					//else if (std::array<u32, 2>*children = getChildPair(element)) {
-					//	assert(false);	// CANNOT ORPHAN A CHILD OF A PAIR CONTAINER
-					//}
-					else if (std::vector<u32>* children = getChildren(element)) {
-						assert(std::find(children->begin(), children->end(), toOrphanChild) != children->end());		// assert that the parent knows the child
+				[&](auto&& element) {
+					if (std::vector<u32>* children = getDynamicChildrenIf(element)) {
 						children->erase(std::remove(children->begin(), children->end(), toOrphanChild), children->end());
 					}
 					else {
-						assert(false);	// parent id is not of a parent element!
+						auto [staticChildren, staticChildrenCount] = getStaticChildren(element);
+						assert(position < staticChildrenCount);
+						assert(*(staticChildren + position) != INVALID_ELEMENT_ID);
+						*(staticChildren + toOrphanChild) = INVALID_ELEMENT_ID;
 					}
 				}, 
 				elements[parent]
@@ -126,20 +125,14 @@ namespace gui {
 		if (parent != INVALID_ELEMENT_ID) {
 			std::visit(
 				[&](auto&& element) {
-					if (u32* child = getChild(element)) {
-						assert(*child == INVALID_ELEMENT_ID);		// assert that single parent does not have a child yet
-						*child = toAdoptChild;
-					}
-					//else if (std::array<u32, 2>* children = getChildPair(element)) {
-					//	assert(false);	// CANNOT ADOPT A CHILD TO A PAIR CONTAINER
-					//}
-					else if (std::vector<u32>* children = getChildren(element)) {
-						assert(std::find(children->begin(), children->end(), toAdoptChild) == children->end());		// assert that the parent doesnt know the child yet
-						if (position == 0xFFFFFFFF) position = children->size();
+					if (std::vector<u32>* children = getDynamicChildrenIf(element)) {
 						children->insert(children->begin() + position, toAdoptChild);
 					}
 					else {
-						assert(false);	// parent id is not of a parent element!
+						auto [staticChildren, staticChildrenCount] = getStaticChildren(element);
+						assert(position < staticChildrenCount);
+						assert(*(staticChildren + position) == INVALID_ELEMENT_ID);
+						*(staticChildren + position) = toAdoptChild;
 					}
 				},
 				elements[parent]
@@ -157,23 +150,17 @@ namespace gui {
 	{
 		std::visit(
 			[&](auto&& e) {
-				if (u32* child = getChild(e)) {
-					if (*child != INVALID_ELEMENT_ID) {
-						parents[*child] = parent;
-					}
-				}
-				//else if (std::array<u32,2>* children = getChildPair(e)) {
-				//	for (u32 child : *children) {
-				//		if (child != INVALID_ELEMENT_ID) {
-				//			parents[child] = parent;
-				//		}
-				//	}
-				//}
-				else if (std::vector<u32>* children = getChildren(e)) {
+				if (std::vector<u32>* children = getDynamicChildrenIf(e)) {
 					for (u32 child : *children) {
 						if (child != INVALID_ELEMENT_ID) {
 							parents[child] = parent;
 						}
+					}
+				}
+				else {
+					auto [staticChildren, staticChildrenCount] = getStaticChildren(e);
+					for (u32* child = staticChildren; child < staticChildren + staticChildrenCount; child++) {
+						parents[*child] = parent;
 					}
 				}
 			},
@@ -206,28 +193,22 @@ namespace gui {
 
 				std::visit(
 					[&](auto&& element) {
-						if (u32* child = getChild(element)) {
-							if (*child != INVALID_ELEMENT_ID) {
-								destroylist.push_back(*child);
-							}
-						}
-						//else if (std::array<u32, 2>*children = getChildPair(element)) {
-						//	for (u32 child : *children) {
-						//		if (child != INVALID_ELEMENT_ID) {
-						//			destroylist.push_back(child);
-						//		}
-						//	}
-						//}
-						else if (std::vector<u32>* children = getChildren(element)) {
+						if (std::vector<u32>* children = getDynamicChildrenIf(element)) {
 							for (u32 child : *children) {
 								if (child != INVALID_ELEMENT_ID) {
 									destroylist.push_back(child);
 								}
 							}
 						}
+						else {
+							auto [staticChildren, staticChildrenCount] = getStaticChildren(element);
+							for (u32* child = staticChildren; child < staticChildren + staticChildrenCount; child++) {
+								destroylist.push_back(*child);
+							}
+						}
 					},
 					elements[id]
-						);
+				);
 
 				freeElementIndices.push_back(id);
 				elements[id] = std::monostate();
@@ -236,20 +217,20 @@ namespace gui {
 	}
 
 	bool Manager::isHandleValid(const RootHandle& handle) const
-	{   
-		return static_cast<u32>(rootElements.size()) > handle.index &&
+	{
+		return cast<u32>(rootElements.size()) > handle.index &&
 			rootElements[handle.index].containsElement &&
 			rootElements[handle.index].version == handle.version;
 	}
 
-	void Manager::draw(const RenderCoordSys& coordSys, TextureManager* tex, FontManager* fonts, Window& window, float deltaTime)
+	void Manager::draw(const RenderCoordSys& coordSys, Window& window, float deltaTime)
 	{
 		this->window = &window;
 		this->coordSys = coordSys;
-		this->tex = tex;
-		this->fonts = fonts;
 		this->deltaTime = deltaTime;
 		this->mouseEvenetQueue.clear();
+
+		blurTextureHandle = tex->getHandle("blur");
 
 		spritesOfLastDraw.clear();
 
@@ -276,8 +257,6 @@ namespace gui {
 			window.consumeMouseScrollY();
 		}
 
-		this->fonts = nullptr;
-		this->tex = nullptr;
 		this->deltaTime = NAN;
 		this->window = nullptr;
 	}

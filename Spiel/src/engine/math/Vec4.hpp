@@ -1,64 +1,38 @@
 #pragma once
 
+#include "../types/ShortNames.hpp"
+
 #include <iostream>
 
 #include "basic_math.hpp"
 
-class Vec4
+struct Vec4
 {
-public:
-
-    /// this union allows us to access vector elements by either x,y,z or r,g,b,
-    /// but we have to store only three floats.
-    union
-    {
-        /// XYZW coordinates
-        struct
-        {
-            float x; ///< x coordinate
-            float y; ///< y coordinate
-            float z; ///< z coordinate
-            float w; ///< w coordinate
-        };
-
-        /// RGBA color components
-        struct
-        {
-            float r; ///< red component
-            float g; ///< green component
-            float b; ///< blue component
-            float a; ///< alpha component
-        };
-    };
-
-
-public:
-
     constexpr Vec4() : x(0), y(0), z(0), w(0) {}
 
-    constexpr Vec4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    constexpr Vec4(f32 x, f32 y, f32 z, f32 w) : x(x), y(y), z(z), w(w) {}
 
-    constexpr static Vec4 From255(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255)
+    constexpr static Vec4 From255(u8 r, u8 g, u8 b, u8 a = 255)
     {
-        return Vec4{ static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f, static_cast<float>(a) / 255.0f };
+        return Vec4{ static_cast<f32>(r) / 255.0f, static_cast<f32>(g) / 255.0f, static_cast<f32>(b) / 255.0f, static_cast<f32>(a) / 255.0f };
     }
 
     // openGL access func
-    float const* data() const { return &x; }
+    constexpr f32 const* data() const { return &x; }
 
-    float& operator[](unsigned int _i)
+    constexpr f32& operator[](u32 _i)
     {
         assert(_i < 4);
         return (&x)[_i];
     }
 
-    float const operator[](unsigned int _i) const
+    constexpr f32 const operator[](u32 _i) const
     {
         assert(_i < 4);
         return (&x)[_i];
     }
 
-    Vec4& operator*=(float const scalar)
+    Vec4& operator*=(f32 const scalar)
     {
         x *= scalar;
         y *= scalar;
@@ -67,7 +41,7 @@ public:
         return *this;
     }
 
-    Vec4& operator/=(float const scalar)
+    Vec4& operator/=(f32 const scalar)
     {
         x /= scalar;
         y /= scalar;
@@ -118,6 +92,22 @@ public:
         z = 1.0f - z;
         w = 1.0f - w;
     }
+
+    union {
+        struct {
+            f32 x; // x coordinate
+            f32 y; // y coordinate
+            f32 z; // z coordinate
+            f32 w; // w coordinate
+        };
+
+        struct {
+            f32 r; // red component
+            f32 g; // green component
+            f32 b; // blue component
+            f32 a; // alpha component
+        };
+    };
 };
 
 inline bool hasNANS(const Vec4& vec)
@@ -125,12 +115,12 @@ inline bool hasNANS(const Vec4& vec)
     return std::isnan(vec.x) || std::isnan(vec.y) || std::isnan(vec.z) || std::isnan(vec.w);
 }
 
-inline const Vec4 operator-(Vec4 const& vec)
+inline constexpr  Vec4 operator-(Vec4 const& vec)
 {
     return Vec4(-vec.x, -vec.y, -vec.z, -vec.w);
 }
 
-inline const Vec4 operator*(float const scalar, Vec4 const& vec)
+inline constexpr  Vec4 operator*(f32 const scalar, Vec4 const& vec)
 {
     return Vec4(scalar * vec.x,
         scalar * vec.y,
@@ -138,7 +128,7 @@ inline const Vec4 operator*(float const scalar, Vec4 const& vec)
         scalar * vec.w);
 }
 
-inline const Vec4 operator*(Vec4 const& vec, float const scalar)
+inline constexpr  Vec4 operator*(Vec4 const& vec, f32 const scalar)
 {
     return Vec4(scalar * vec.x,
         scalar * vec.y,
@@ -146,7 +136,7 @@ inline const Vec4 operator*(Vec4 const& vec, float const scalar)
         scalar * vec.w);
 }
 
-inline const Vec4 operator*(Vec4 const& vecA, Vec4 const& vecB)
+inline constexpr  Vec4 operator*(Vec4 const& vecA, Vec4 const& vecB)
 {
     return Vec4(vecA.x * vecB.x,
         vecA.y * vecB.y,
@@ -154,7 +144,7 @@ inline const Vec4 operator*(Vec4 const& vecA, Vec4 const& vecB)
         vecA.w * vecB.w);
 }
 
-inline const Vec4 operator/(Vec4 const& vec, float const scalar)
+inline constexpr  Vec4 operator/(Vec4 const& vec, f32 const scalar)
 {
     return Vec4(vec.x / scalar,
         vec.y / scalar,
@@ -162,7 +152,7 @@ inline const Vec4 operator/(Vec4 const& vec, float const scalar)
         vec.w / scalar);
 }
 
-inline const Vec4 operator+(Vec4 const& vecA, Vec4 const& vecB)
+inline constexpr  Vec4 operator+(Vec4 const& vecA, Vec4 const& vecB)
 {
     return Vec4(vecA.x + vecB.x,
         vecA.y + vecB.y,
@@ -170,7 +160,7 @@ inline const Vec4 operator+(Vec4 const& vecA, Vec4 const& vecB)
         vecA.w + vecB.w);
 }
 
-inline const Vec4 operator-(Vec4 const& vecA, Vec4 const& vecB)
+inline constexpr  Vec4 operator-(Vec4 const& vecA, Vec4 const& vecB)
 {
     return Vec4(vecA.x - vecB.x,
         vecA.y - vecB.y,
@@ -178,17 +168,17 @@ inline const Vec4 operator-(Vec4 const& vecA, Vec4 const& vecB)
         vecA.w - vecB.w);
 }
 
-inline float const norm(Vec4 const& vec)
+inline f32 norm(Vec4 const& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
 }
 
-inline float const length(Vec4 const& vec)
+inline f32 length(Vec4 const& vec)
 {
     return sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z + vec.w * vec.w);
 }
 
-inline float const dot(Vec4 const& vecA, Vec4 const& vecB)
+inline f32 dot(Vec4 const& vecA, Vec4 const& vecB)
 {
     return (vecA.x * vecB.x + vecA.y * vecB.y + vecA.z * vecB.z + vecA.w * vecB.w);
 }

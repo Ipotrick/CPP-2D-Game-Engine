@@ -158,12 +158,6 @@ struct Draw {
 	Form form;
 };
 
-struct TextureSection {
-	TextureHandle handle;
-	Vec2 min{ 0,0 };
-	Vec2 max{ 1,1 };
-};
-
 struct LinearEffector {
 	LinearEffector(Vec2 const& mvdr = { 1,0 }, float frc = 0.0f, float accel = 0.0f) :
 		direction{ mvdr },

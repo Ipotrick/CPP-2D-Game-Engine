@@ -5,6 +5,7 @@ layout(location = 50) uniform sampler2D texSampler[32];
 layout (location = 4) uniform uint screenWidth;
 layout (location = 5) uniform uint screenHeight;
 layout (location = 6) uniform float mtsdf_smoothing;
+layout (location = 7) uniform float mtsdfBarrier;
 
 in vec4 v_color;
 in vec2 v_size;
@@ -19,7 +20,6 @@ in vec2 v_clipMax;
 
 layout(location = 0) out vec4 o_color;
 
-const float EDGE_SMOOTHING = 0.05f;
 
 float median(float r, float g, float b) {
     return max(min(r, g), min(max(r, g), b));
@@ -31,10 +31,17 @@ void main()
 	const bool isMSDF = (v_isMSDF & 1) != 0;
 
 	if (isMSDF) {
-		vec4 mtsd = texture(texSampler[v_texSamplerIndex], v_texCoord);
-		const float median_msd = mtsd.a * 0.25f + median(mtsd.r, mtsd.g, mtsd.b) * 0.75f;
+		const vec2 samplingOffsets = vec2(0.25f,0.25f) / textureSize(texSampler[v_texSamplerIndex], 0);
 		const float smoothing = mtsdf_smoothing / v_relative_fragment_size;					
-		color.a = smoothstep(0.5f - smoothing,0.5f + smoothing, median_msd);
+		const vec2[4] offsets = {vec2(-1,-1),vec2(-1,1),vec2(1,-1),vec2(1,1)};
+
+		float value = 0.0f;
+
+		for (int i = 0; i < 4; i++) {
+			vec4 mtsd = texture(texSampler[v_texSamplerIndex], v_texCoord + offsets[i] * samplingOffsets);
+			value = max(value, median(mtsd.r, mtsd.g, mtsd.b));
+		}
+		color.a = smoothstep(0.5f - smoothing - mtsdfBarrier,0.5f + smoothing - mtsdfBarrier, value);
 	}
 	else {
 		if (v_texSamplerIndex >= 0) { color *= texture2D(texSampler[v_texSamplerIndex], v_texCoord); }
@@ -45,7 +52,7 @@ void main()
 			const vec2 inner_size = v_size - rounding_radius;
 			const vec2 clamped_inner_coord = clamp(model_coord, vec2(0,0), inner_size);
 			const float distance_to_inner_rect = length(model_coord - clamped_inner_coord);
-			color.a *= smoothstep(rounding_radius * (1.0f + EDGE_SMOOTHING * 0.5f), rounding_radius * (1.0f - EDGE_SMOOTHING * 0.5f), distance_to_inner_rect);
+			color.a *= 1.0f - step(rounding_radius, distance_to_inner_rect);
 		}
 	}
 

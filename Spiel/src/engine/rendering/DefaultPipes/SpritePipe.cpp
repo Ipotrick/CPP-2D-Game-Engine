@@ -27,7 +27,7 @@ SpritePipe::SpritePipe(TextureManager::Backend* texBackend) : texBackend{ texBac
 
 	blendingStack.push(gl::BlendingFunction{});
 	depthTestStack.push(gl::DepthTest::LessEqual);
-	mtsdfSmoothingStack.push(1.75f);
+	mtsdfSmoothingStack.push(1.25f);
 }
 
 void SpritePipe::init(RenderPipeContext& context)
@@ -140,6 +140,8 @@ size_t SpritePipe::drawBatch(std::vector<Command>& commands, Mat4 const& worldVP
 	spriteShader.setUniform(3, &pixelVPMat);
 	spriteShader.setUniform(4, &width);    
 	spriteShader.setUniform(5, &height);
+	spriteShader.setUniform(7, &sdfBarrier);
+
 
 	spriteShader.bufferInstancedVertices(instances.size(), instances.data());
 	spriteShader.drawInstanced(6, spriteCount, framebuffer);

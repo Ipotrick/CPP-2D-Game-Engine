@@ -54,22 +54,19 @@ namespace gl {
 
 	void Framebuffer::clear()
 	{
-		constexpr GLfloat clearColor[4] = { 0, 0, 0, 0 };
-		constexpr GLfloat clearDepth[1] = { std::numeric_limits<float>::max() };
-		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		glClearBufferfv(GL_COLOR, 0, clearColor);
-		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-		glClearBufferfv(GL_DEPTH, 0, clearDepth);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		clearColor();
+		clearDepth();
 	}
 
+	void Framebuffer::clearColor()
+	{
+		constexpr GLfloat clearColor[4] = { 0, 0, 0, 0 };
+		glClearNamedFramebufferfv(fbo, GL_COLOR, 0, (GLfloat*)&clearColor);
+	}
 	void Framebuffer::clearDepth()
 	{
 		constexpr GLfloat clearDepth[1] = { std::numeric_limits<float>::max() };
-		glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-		glClearBufferfv(GL_DEPTH, 0, clearDepth);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glClearNamedFramebufferfv(fbo, GL_DEPTH, 0, (GLfloat*)&clearDepth);
 	}
 
 	void Framebuffer::reset()

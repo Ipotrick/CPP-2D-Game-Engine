@@ -10,8 +10,8 @@ namespace gui {
 		std::string_view value;
 		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
-		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
+		FontHandle font;
+		TextureHandle fontTexture;
 	};
 	namespace {
 		struct _StaticText : public StaticText {
@@ -25,8 +25,8 @@ namespace gui {
 		ValueOrPtr<std::string> value{ "" };
 		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
-		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
+		FontHandle font;
+		TextureHandle fontTexture;
 	};
 	namespace {
 		struct _Text : public Text {
@@ -43,8 +43,8 @@ namespace gui {
 		YAlign yalign{ YAlign::Top };
 		f32 fontSize{ NAN };
 		Vec4 color{ UNSET_COLOR };
-		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
+		FontHandle font;
+		TextureHandle fontTexture;
 		bool bClearOnEnter{ false };
 	};
 	namespace {
@@ -63,8 +63,8 @@ namespace gui {
 		Vec4 colorFont{ UNSET_COLOR };
 		Vec4 colorFontError{ UNSET_COLOR };
 		Padding textPadding{ NAN,NAN,NAN,NAN };
-		std::pair<FontDescriptor, FontHandle> fontPair;
-		std::pair<TextureLoadInfo, TextureHandle> fontTexPair;
+		FontHandle font;
+		TextureHandle fontTexture;
 	};
 	namespace {
 		struct _TextInputF64 : public TextInputF64 {

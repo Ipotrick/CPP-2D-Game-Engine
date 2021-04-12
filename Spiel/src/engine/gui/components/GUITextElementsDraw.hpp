@@ -10,12 +10,6 @@ namespace gui {
 	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInput& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
-		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
-			self.fontTexPair.second = manager.tex->getHandle(self.fontTexPair.first);
-		}
-		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
-			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
-		}
 		return self.size;
 	}
 	template<> inline void onDraw(Manager& manager, _TextInput& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -83,8 +77,8 @@ namespace gui {
 		textContext.yalign = self.yalign;
 		textContext.fontSize = self.fontSize;
 		textContext.color = Vec4{1,1,1,1};
-		textContext.tex = self.fontTexPair.second;
-		textContext.font = &manager.fonts->get(self.fontPair.second);
+		textContext.tex = self.fontTexture;
+		textContext.font = &manager.fonts->get(self.font);
 		fit(textContext, scaledCompleteSize, centerPlace);
 		auto [charsDrawn, size] = drawFontText(self.str.data(), textContext, out);
 
@@ -96,12 +90,6 @@ namespace gui {
 	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _StaticText& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
-		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
-			self.fontTexPair.second = manager.tex->getHandle(self.fontTexPair.first);
-		}
-		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
-			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
-		}
 		return self.lastDrawMinSize;
 	}
 	template<> inline void onDraw(Manager& manager, _StaticText& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -109,8 +97,8 @@ namespace gui {
 		TextContext textContext{ context };
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.color;
-		textContext.tex = self.fontTexPair.second;
-		textContext.font = &manager.fonts->get(self.fontPair.second);
+		textContext.tex = self.fontTexture;
+		textContext.font = &manager.fonts->get(self.font);
 		auto[charsprocessed, size] = drawFontText(self.value.data(), textContext, out);
 		self.lastDrawMinSize = size;
 	}
@@ -118,12 +106,6 @@ namespace gui {
 	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _Text& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
-		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
-			self.fontTexPair.second = manager.tex->getHandle(self.fontTexPair.first);
-		}
-		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
-			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
-		}
 		return self.lastDrawMinSize;
 	}
 	template<> inline void onDraw(Manager& manager, _Text& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -131,8 +113,8 @@ namespace gui {
 		TextContext textContext{ context };
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.color;
-		textContext.tex = self.fontTexPair.second;
-		textContext.font = &manager.fonts->get(self.fontPair.second);
+		textContext.tex = self.fontTexture;
+		textContext.font = &manager.fonts->get(self.font);
 		auto[charsprocessed, unscaledMinSize] = drawFontText(std::string(self.value).data(), textContext, out);
 		self.lastDrawMinSize = unscaledMinSize;
 	}
@@ -140,12 +122,6 @@ namespace gui {
 	template<> inline Vec2 updateAndGetMinsize(Manager& manager, u32 id, _TextInputF64& self)
 	{
 		if (self.onUpdate) self.onUpdate(self, id);
-		if (!manager.tex->isHandleValid(self.fontTexPair.second)) {
-			self.fontTexPair.second = manager.tex->getHandle(self.fontTexPair.first);
-		}
-		if (!manager.fonts->isHandleValid(self.fontPair.second)) {
-			self.fontPair.second = manager.fonts->makeHandle(self.fontPair.first);
-		}
 		return self.size;
 	}
 	template<> inline void onDraw(Manager& manager, _TextInputF64& self, u32 id, DrawContext const& context, std::vector<Sprite>& out)
@@ -230,8 +206,8 @@ namespace gui {
 		textContext.yalign = YAlign::Center;
 		textContext.fontSize = self.fontSize;
 		textContext.color = self.colorFont;
-		textContext.tex = self.fontTexPair.second;
-		textContext.font = &manager.fonts->get(self.fontPair.second);
+		textContext.tex = self.fontTexture;
+		textContext.font = &manager.fonts->get(self.font);
 		fit(textContext, scaledCompleteSize, centerPlace);
 		fit(textContext, self.textPadding);
 		auto[charsProcessed,size] = drawFontText(self.str.c_str(), textContext, out);
