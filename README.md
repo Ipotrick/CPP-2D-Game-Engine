@@ -10,7 +10,8 @@ It has the following features:
 * retained mode gui library
 * entity component system based on sparse sets and paged arrays
 
-here is an example of the collision and physics system in a 2d world where balls fall down to a drain and are spwed out at the top:
+here is an example of the collision and physics system in a 2d world where balls fall down to a drain and are spewd out at the top:
+Notable is that this sim has very stable stacking of the balls that is achieved my accumulated impulse resolution. Also the speed of the simulation is very good at over 110 fps with 10 000 colliding balls due to good cache and core utalization.
 ![](assets/Balls.png)
 
 and an example where i made an ant simulation where the ants ai would work purely based on two pheromone grids to navigate, where the grid is updated in parallel via the job system:
