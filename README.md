@@ -16,6 +16,8 @@ Notable is that this sim has very stable stacking of the balls that is achieved 
 and an example where i made an ant simulation where the ants ai would work purely based on two pheromone grids to navigate, where the grid is updated in parallel via the job system:
 ![](assets/antsim.png)
 
+The seen GUI in the images above is custom made and integrated into the engine.
+
 
 dependencies:
 the dependencies are all available in vcpkg, there is no integration of the dependencies outside of vcpkg.
