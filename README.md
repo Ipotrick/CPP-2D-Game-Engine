@@ -1,5 +1,4 @@
 # This is a general purpose 2d realtime game/application engine
-# I am currently rewriting this engine under the name DAXAD (got it up as a repo)
 # This is configured to be used for Visual Studio 2019 only. 
 
 It has the following features:
