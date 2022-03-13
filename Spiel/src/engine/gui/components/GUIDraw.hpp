@@ -6,7 +6,7 @@
 
 namespace gui {
 	template<typename T>
-	void onDraw(Manager& manager, T& element, u32 id, DrawContext const& context, std::vector<Sprite>& out) { static_assert(false); }
+	void onDraw(Manager& manager, T& element, u32 id, DrawContext const& context, std::vector<Sprite>& out) { static_assert(sizeof(T) == 0); }
 
 	template<> void onDraw(Manager& manager, std::monostate& self, u32 id, DrawContext const& context, std::vector<Sprite>& out) {}
 	template<> void onDraw(Manager& manager, Box& self, u32 id, DrawContext const& context, std::vector<Sprite>& out);
@@ -34,7 +34,7 @@ namespace gui {
 	 * shoud allways be called on child first and then one should update oneself.
 	 * \return UNSCALED minimum size the element needs.
 	 */
-	Vec2 updateAndGetMinsize(Manager& manager, u32 id, T& element) { static_assert(false); return {}; }
+	Vec2 updateAndGetMinsize(Manager& manager, u32 id, T& element) { static_assert(sizeof(T) == 0); return {}; }
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, std::monostate& self) { return {}; }
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Box& self);
 	template<> Vec2 updateAndGetMinsize(Manager& manager, u32 id, Group& self);

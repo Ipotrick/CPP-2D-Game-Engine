@@ -3,8 +3,9 @@
 layout(location = 50) uniform sampler2D samplerSlot;
 
 in vec2 v_uv;
+out vec4 fragColor;
 
 void main() 
 {
-	gl_FragColor = texture2D(samplerSlot, v_uv);
+	fragColor = texture2D(samplerSlot, v_uv);
 }

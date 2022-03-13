@@ -131,7 +131,7 @@ namespace gui {
 		 * \param newParent the new parent of the child.
 		 * \param newParentPosition position in list of children of the new parent (ignored when parent is single parent), the palceholder value 0xFFFFFFFF means append to the end of the list.
 		 */
-		void changeParent(u32 child, u32 newParent, u32 newParentPosition = 0xFFFFFFFF);
+		void changeParent(u32 child, u32 newParent, u32 newParentPosition = 0);
 
 		/**
 		 * after adding children to an element manually, one has to update the child hierarchie.

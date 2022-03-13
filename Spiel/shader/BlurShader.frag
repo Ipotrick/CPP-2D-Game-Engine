@@ -8,6 +8,7 @@ layout(location = 54) uniform int blurStepSize;
 layout(location = 55) uniform int blurSteps;
 
 in vec2 v_uv;
+out vec4 fragColor;
 
 float getWeight(int index) {
 	return float(blurSteps-index)/float(blurSteps);
@@ -36,5 +37,5 @@ void main()
 	accColor /= accWeights;
 	accColor.a = 1.0f;
 
-	gl_FragColor = accColor;
+	fragColor = accColor;
 }

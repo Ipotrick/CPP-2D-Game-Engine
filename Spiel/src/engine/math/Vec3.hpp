@@ -29,12 +29,12 @@ public:
     constexpr f32 const* data() const { return &x; }
 
     constexpr f32& operator[](u32 index) {
-        assert(i < 3);
+        // assert(i < 3);
         return (&x)[index];
     }
 
     constexpr const f32& operator[](u32 index) const {
-        assert(i < 3);
+        // assert(i < 3);
         return (&x)[index];
     }
 

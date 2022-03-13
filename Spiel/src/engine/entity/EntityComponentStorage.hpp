@@ -72,7 +72,7 @@ private:
 	 */
 	static constexpr void assertNoPolyNoBase()
 	{
-		static_assert(false, "error: dont instantiate ComponentStorageBase, dont call polymorphic on ComponentStorageBase derivates");
+		// static_assert(false, "error: dont instantiate ComponentStorageBase, dont call polymorphic on ComponentStorageBase derivates");
 	}
 };
 

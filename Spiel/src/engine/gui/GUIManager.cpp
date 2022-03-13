@@ -108,8 +108,8 @@ namespace gui {
 					}
 					else {
 						auto [staticChildren, staticChildrenCount] = getStaticChildren(element);
-						assert(position < staticChildrenCount);
-						assert(*(staticChildren + position) != INVALID_ELEMENT_ID);
+						// assert(position < staticChildrenCount);
+						// assert(*(staticChildren + position) != INVALID_ELEMENT_ID);
 						*(staticChildren + toOrphanChild) = INVALID_ELEMENT_ID;
 					}
 				}, 
@@ -120,7 +120,7 @@ namespace gui {
 
 	void Manager::adoptChild(u32 toAdoptChild, u32 parent, u32 position)
 	{
-		assert(parents[toAdoptChild] == INVALID_ELEMENT_ID);		// assert, that child does not have a parent yet
+		// assert(parents[toAdoptChild] == INVALID_ELEMENT_ID);		// assert, that child does not have a parent yet
 		parents[toAdoptChild] = parent;
 		if (parent != INVALID_ELEMENT_ID) {
 			std::visit(
@@ -130,8 +130,8 @@ namespace gui {
 					}
 					else {
 						auto [staticChildren, staticChildrenCount] = getStaticChildren(element);
-						assert(position < staticChildrenCount);
-						assert(*(staticChildren + position) == INVALID_ELEMENT_ID);
+						// assert(position < staticChildrenCount);
+						// assert(*(staticChildren + position) == INVALID_ELEMENT_ID);
 						*(staticChildren + position) = toAdoptChild;
 					}
 				},
@@ -160,6 +160,10 @@ namespace gui {
 				else {
 					auto [staticChildren, staticChildrenCount] = getStaticChildren(e);
 					for (u32* child = staticChildren; child < staticChildren + staticChildrenCount; child++) {
+                        if (*child == -1)
+                            continue;
+                        if (parents.size() < *child)
+                            parents.resize(static_cast<size_t>(*child));
 						parents[*child] = parent;
 					}
 				}

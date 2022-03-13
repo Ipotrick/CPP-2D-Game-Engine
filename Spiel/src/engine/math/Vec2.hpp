@@ -139,7 +139,7 @@ inline f32 length(Vec2 vec)
 
 inline Vec2 normalize(Vec2 vec)
 {
-	assert(vec.x != 0.0f || vec.y != 0.0f);
+	// assert(vec.x != 0.0f || vec.y != 0.0f);
 	f32 invLen = 1.0f / length(vec);
 	return { vec.x * invLen, vec.y * invLen };
 }

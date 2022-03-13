@@ -1,0 +1,13 @@
+{
+    "name": "cpp-2d-game-engine",
+    "version": "0.1.0",
+    "description": "CPP 2D Game Engine",
+    "homepage": "https://github.com/Ipotrick/CPP-2D-Game-Engine",
+    "dependencies": [
+        "glew",
+        "glfw3",
+        "robin-hood-hashing",
+        "boost-container",
+        "yaml-cpp"
+    ]
+}

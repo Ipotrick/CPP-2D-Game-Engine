@@ -6,6 +6,7 @@ layout(location = 11) uniform int stage;
 layout(location = 12) uniform int kernelWidth;
 
 in vec2 v_uv;
+out vec4 fragColor;
 
 float turboGauss(float x) {
 	return 1.0f - min(x*x*16,sqrt(x));
@@ -43,5 +44,5 @@ void main()
 	average /= float(kernelHalfWidth);
 	average *= strength * 1.5;
 
-	gl_FragColor = vec4(average.xyz, 1.0f);
+	fragColor = vec4(average.xyz, 1.0f);
 }

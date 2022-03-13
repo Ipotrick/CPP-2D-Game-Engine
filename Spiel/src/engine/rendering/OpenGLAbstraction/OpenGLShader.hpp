@@ -87,7 +87,9 @@ namespace gl {
 		u32 getNativeHandle() const;
 	protected:
 		template<typename T>
-		void setGLVertexAttrib(u32 stride, u8* offset) { static_assert(false); }
+		void setGLVertexAttrib(u32 stride, u8* offset) {
+            // static_assert(false);
+        }
 
 		template<> void setGLVertexAttrib<int>(u32 stride, u8* offset)
 		{
